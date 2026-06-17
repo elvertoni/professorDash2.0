@@ -16,6 +16,7 @@ nav:
   - Início: index.md
   - Arquitetura: arquitetura.md
   - Deploy: deploy.md
+  - Deploy (Easypanel): deploy-easypanel.md
   - Uso: uso.md
 
 markdown_extensions:

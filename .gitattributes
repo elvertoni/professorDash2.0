@@ -1,0 +1,4 @@
+# Scripts shell DEVEM usar LF, senão o shebang quebra no container Linux.
+*.sh text eol=lf
+docker/entrypoint.sh text eol=lf
+scripts/*.sh text eol=lf

@@ -253,7 +253,17 @@ python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] 
 
 ---
 
-## 8. Guia de Deploy (VPS Ubuntu, do zero)
+## 8. Guia de Deploy
+
+> **Decisão (Sprint 12, override do usuário): produção via Easypanel.** O Easypanel
+> faz reverse proxy + TLS automático e oferece Postgres gerenciado, então o Caddy
+> e o `docker-compose.prod.yml` com binding 80/443 descritos abaixo foram
+> **substituídos** por um `Dockerfile.prod` (Gunicorn) + `docker/entrypoint.sh`,
+> deployados como App service no Easypanel com Postgres gerenciado. Guia completo:
+> `docs/deploy-easypanel.md`. A seção 8.1–8.9 abaixo fica como referência do alvo
+> Compose+Caddy original (não usado no deploy atual).
+
+### 8.0 Guia de Deploy original (VPS Ubuntu, do zero) — referência
 
 Deploy simplificado com **Docker Compose + Caddy** (HTTPS automático). Sem Swarm.
 
@@ -514,11 +524,18 @@ Decisões da Sprint 11:
 - Como as Sprints 9 e 10 seguem fora desta execução, o seed não cria notificações nem relatórios; ele cobre apenas os models já existentes e mantém esses recursos para suas sprints específicas.
 - A documentação usa MkDocs Material com `pymdownx.superfences` para Mermaid. O guia de produção documenta o alvo definido no PRD, mas deixa claro que os artefatos finais de deploy pertencem à Sprint 12.
 
-### Sprint 12 — Deploy em produção
-- [ ] `docker-compose.prod.yml` (app + db + caddy) com healthchecks e volumes.
-- [ ] Entrypoint (`wait_for_db` → migrate → collectstatic --clear → gunicorn).
-- [ ] Caddy com HTTPS automático no domínio.
-- [ ] `scripts/backup.sh` + cron.
+### Sprint 12 — Deploy em produção (via Easypanel)
+> Override do usuário: alvo de deploy é **Easypanel** (App + Postgres gerenciado),
+> não Compose+Caddy. Easypanel faz proxy + TLS; Caddy descartado. Ver
+> `docs/deploy-easypanel.md`.
+
+- [x] `Dockerfile.prod` (Gunicorn) — imagem de produção; dev segue no `Dockerfile` (runserver).
+- [x] Entrypoint (`docker/entrypoint.sh`): wait_for_db → migrate → collectstatic --clear → superuser opcional → gunicorn.
+- [x] TLS automático no domínio — delegado ao Easypanel (substitui Caddy).
+- [x] `scripts/backup.sh` (dump Postgres + tar media); backup também disponível no painel do Easypanel.
+- [x] `.gitattributes` força LF nos `.sh` (evita shebang quebrado no container).
+- [x] Guia de deploy Easypanel documentado (`docs/deploy-easypanel.md`, `docs/deploy.md`).
+- [ ] Executar deploy no Easypanel (criar services App + Postgres, env vars, domínio, volumes).
 - [ ] Importar acervo em produção e validar render das aulas.
 - [ ] Smoke test completo das jornadas (professor e aluno).
 
