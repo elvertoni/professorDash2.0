@@ -167,5 +167,5 @@ def ensure_due_soon_notifications_for_user(user):
             'Prazo próximo',
             f'{atividade.titulo} vence em {prazo}.',
             link=reverse('activities:aluno_entrega', kwargs={'pk': atividade.pk}),
-            dedupe_key=f'prazo:{atividade.pk}:{atividade.prazo.isoformat()}',
+            dedupe_key=f'prazo:{atividade.pk}',
         )

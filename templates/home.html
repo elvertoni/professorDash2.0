@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}ProfessorDash · Portal do Aluno{% endblock %}
+{% block title %}Prof. Toni Coimbra · Portal do Aluno{% endblock %}
 
 {% block content %}
 <section class="hero">
@@ -8,8 +9,8 @@
         <div class="shell-preview">
             <aside class="sidebar">
                 <div class="logo">
-                    <span class="brand-mark"><i data-lucide="graduation-cap"></i></span>
-                    ProfessorDash
+                    <span class="brand-mark"><img src="{% static 'logo.svg' %}" alt="" width="32" height="32"></span>
+                    Prof. Toni Coimbra
                 </div>
                 <div class="nav-group">
                     <div class="nav-label">Ensino</div>
@@ -54,7 +55,7 @@
 
     <div class="hero-copy">
         <span class="badge badge-success"><i data-lucide="check"></i> Fundação em Django 6</span>
-        <h1>ProfessorDash</h1>
+        <h1>Prof. Toni <span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent">Coimbra</span></h1>
         <p>
             Portal educacional para conectar as aulas canônicas do acervo PROF-TONI
             às turmas, atividades, entregas e correções dos alunos.

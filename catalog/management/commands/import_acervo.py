@@ -91,7 +91,12 @@ class Command(BaseCommand):
                 report['skipped'] += 1
                 continue
 
-            parsed = parse_lesson_markdown(canonical_path.read_text(encoding='utf-8'))
+            try:
+                parsed = parse_lesson_markdown(canonical_path.read_text(encoding='utf-8'))
+            except Exception as exc:
+                self.stderr.write(f'Erro ao processar {canonical_path}: {exc}')
+                report['skipped'] += 1
+                continue
             lesson_data = {**raw_lesson, **parsed.frontmatter}
             imported = self.upsert_lesson(canonical_path, lesson_data, parsed.body, parsed.html)
             report[imported] += 1

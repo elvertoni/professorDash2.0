@@ -1,12 +1,12 @@
-# PRD — ProfessorDash (Portal do Aluno)
+# PRD — Prof. Toni Coimbra (Portal do Aluno)
 
-> Documento de Requisitos de Produto. Guia oficial do desenvolvimento do portal educacional ProfessorDash: a ponte entre o acervo de conhecimento do Prof. Toni Coimbra e o aluno.
+> Documento de Requisitos de Produto. Guia oficial do desenvolvimento do portal educacional Prof. Toni Coimbra: a ponte entre o acervo de conhecimento do Prof. Toni Coimbra e o aluno.
 
 ---
 
 ## 1. Visão Geral
 
-**ProfessorDash** é um portal educacional moderno onde o conhecimento construído no acervo PROF-TONI (aulas canônicas) chega ao aluno. O professor publica aulas por turma, cria atividades e corrige entregas; o aluno acessa aulas, faz atividades, entrega materiais e acompanha seu progresso.
+**Prof. Toni Coimbra** é um portal educacional moderno onde o conhecimento construído no acervo PROF-TONI (aulas canônicas) chega ao aluno. O professor publica aulas por turma, cria atividades e corrige entregas; o aluno acessa aulas, faz atividades, entrega materiais e acompanha seu progresso.
 
 Inspiração: melhores portais educacionais do mundo (Google Classroom, Khan Academy, Coursera, Canvas, Notion for Education) — impactante, moderno, fluido, focado na jornada do aluno.
 
@@ -15,10 +15,10 @@ Inspiração: melhores portais educacionais do mundo (Google Classroom, Khan Aca
 Ser a camada de **entrega ao aluno** do pipeline do segundo cérebro:
 
 ```
-lake (bruto) → curadoria (skill prof-toni + rubrica) → warehouse (canonica.md) → SAÍDA: ProfessorDash
+lake (bruto) → curadoria (skill prof-toni + rubrica) → warehouse (canonica.md) → SAÍDA: Prof. Toni Coimbra
 ```
 
-A `canonica.md` é a fonte de verdade. O ProfessorDash **consome** o acervo — não o reescreve.
+A `canonica.md` é a fonte de verdade. O Prof. Toni Coimbra **consome** o acervo — não o reescreve.
 
 ### 1.2 Personas
 
@@ -215,7 +215,7 @@ erDiagram
 
 ## 6. Pipeline de Importação do Acervo
 
-O diferencial do ProfessorDash: ele lê o warehouse do segundo cérebro.
+O diferencial do Prof. Toni Coimbra: ele lê o warehouse do segundo cérebro.
 
 ### 6.1 Estrutura de origem (este repositório PROF-TONI)
 - Índice: `manifesto.json` → `disciplinas[]` e `lessons[]` (disciplina, trilha, ordem, titulo, slug, status).

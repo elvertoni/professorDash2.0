@@ -1,53 +1,72 @@
 <!DOCTYPE html>
-<!-- ProfessorDash · Design System v1 · fonte obrigatória de UI para o portal -->
-<!-- Tokens herdados do template aula-estatica (coerência aluno <-> acervo) -->
+<!-- Prof. Toni Coimbra · Design System v2 · "The Digital Atelier" -->
+<!-- Fonte obrigatória de UI para o portal. Tokens fiéis ao app.css (shell-*). -->
+<!-- Princípios herdados do design editorial antigo: no-line · tonal layering · glass · assimetria · espaço negativo. -->
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="dark light" />
-<title>ProfessorDash · Design System</title>
+<title>Prof. Toni Coimbra · Design System · The Digital Atelier</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 /* ==========================================================================
-   PROFESSORDASH — DESIGN SYSTEM
-   Tokens fiéis ao app (shell-*), tema dark default + light, fonte Geist.
-   Este arquivo é a fonte única de verdade de UI. Não inventar fora daqui.
+   Prof. Toni Coimbra — DESIGN SYSTEM v2 · "THE DIGITAL ATELIER"
+   North Star: um atelier arquitetural, não um LMS genérico.
+   Princípios: (1) No-Line · (2) Tonal Layering · (3) Glass & Gradient
+               (4) Intentional Asymmetry · (5) Negative Space
+   Tokens fiéis ao app.css (shell-*). Este arquivo = fonte única de UI.
+   Não inventar componentes fora daqui.
    ========================================================================== */
 :root{
-  /* superfícies / fundo */
+  /* superfícies / fundo — base obsidian */
   --shell-bg:#040405; --shell-bg-2:#09090b;
   --shell-surface:rgba(17,17,20,.92); --shell-surface-strong:rgba(23,23,28,.96);
   --shell-surface-soft:rgba(14,14,17,.82); --shell-surface-elev:#111114;
-  --shell-border:rgba(255,255,255,.08); --shell-border-strong:rgba(255,255,255,.14);
-  /* texto */
+  /* surface tiers (Digital Atelier — tonal layering) */
+  --shell-surface-low:rgba(12,12,15,.70);      /* recessed / sidebar */
+  --shell-surface-high:rgba(28,28,34,.94);     /* interactive cards */
+  --shell-surface-highest:rgba(40,40,48,.97);  /* floating modals */
+  /* bordas — "ghost borders", sentidas não vistas */
+  --shell-border:rgba(255,255,255,.06); --shell-border-strong:rgba(255,255,255,.12);
+  --shell-ghost:rgba(255,255,255,.04);
+  /* texto — nunca #fff puro (regra Atelier) */
   --shell-text:#ece8e7; --shell-text-muted:#b0adb5; --shell-text-soft:#84808c;
-  /* marca */
+  /* marca — esmeralda primária (wired no app) */
   --shell-primary:#10b981; --shell-primary-200:#6ee7b7; --shell-primary-100:#d1fae5;
   --shell-secondary:#8b5cf6; --shell-secondary-200:#c4b5fd;
   --shell-tertiary:#06b6d4; --shell-tertiary-200:#67e8f9;
   /* semântico */
   --shell-success:#10b981; --shell-warning:#fbbf24; --shell-danger:#f87171; --shell-info:#38bdf8;
-  /* sombras / raios / espaço */
-  --shell-shadow:0 24px 80px rgba(0,0,0,.35); --shell-shadow-soft:0 16px 40px rgba(0,0,0,.22);
-  --radius-xl:1.35rem; --radius-lg:1rem; --radius-md:.75rem; --radius-sm:.5rem;
+  /* sombras — "tinted", nunca preto puro */
+  --shell-shadow:0 24px 80px rgba(0,0,0,.40); --shell-shadow-soft:0 16px 40px rgba(0,0,0,.24);
+  --shell-shadow-tint:0 20px 48px rgba(16,185,129,.16);
+  /* raios — arquitetural, nunca "bubbly" */
+  --radius-xl:1.25rem; --radius-lg:1rem; --radius-md:.625rem; --radius-sm:.375rem; --radius-pill:999px;
   --font-body:'Geist',ui-sans-serif,system-ui,-apple-system,sans-serif;
   --font-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  /* gradientes — "soul" dos CTAs */
   --grad-primary:linear-gradient(135deg,#10b981,#06b6d4);
   --grad-brand:linear-gradient(120deg,#6ee7b7,#8b5cf6 60%,#67e8f9);
+  --grad-cta:linear-gradient(45deg,#10b981,#06b6d4 130%);
   --sidebar-w:264px; --topbar-h:68px;
-  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-8:48px;
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-8:48px;--space-10:64px;--space-12:96px;
 }
 [data-theme="light"]{
-  --shell-bg:#f3f5f9; --shell-bg-2:#e9ecf3;
+  --shell-bg:#f4f5f9; --shell-bg-2:#ebedf3;
   --shell-surface:rgba(255,255,255,.94); --shell-surface-strong:rgba(255,255,255,.98);
   --shell-surface-soft:rgba(250,251,253,.88); --shell-surface-elev:#ffffff;
-  --shell-border:rgba(15,23,42,.08); --shell-border-strong:rgba(15,23,42,.14);
+  --shell-surface-low:rgba(243,244,250,.80);
+  --shell-surface-high:rgba(255,255,255,.96);
+  --shell-surface-highest:#ffffff;
+  --shell-border:rgba(15,23,42,.07); --shell-border-strong:rgba(15,23,42,.12);
+  --shell-ghost:rgba(15,23,42,.04);
   --shell-text:#0f172a; --shell-text-muted:#475569; --shell-text-soft:#64748b;
   --shell-shadow:0 22px 60px rgba(15,23,42,.10); --shell-shadow-soft:0 12px 30px rgba(15,23,42,.06);
+  --shell-shadow-tint:0 16px 40px rgba(16,185,129,.10);
 }
 *{box-sizing:border-box}
 html{background:var(--shell-bg);scroll-behavior:smooth;color-scheme:dark}
@@ -56,106 +75,110 @@ body{
   margin:0;min-height:100vh;font-family:var(--font-body);color:var(--shell-text);
   line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   background:
-    radial-gradient(circle at top left,rgba(16,185,129,.12),transparent 30%),
-    radial-gradient(circle at top right,rgba(6,182,212,.08),transparent 26%),
-    radial-gradient(circle at 50% 0%,rgba(124,58,237,.06),transparent 24%),
+    radial-gradient(circle at top left,rgba(16,185,129,.10),transparent 32%),
+    radial-gradient(circle at top right,rgba(6,182,212,.07),transparent 28%),
+    radial-gradient(circle at 50% 0%,rgba(124,58,237,.05),transparent 26%),
     linear-gradient(180deg,var(--shell-bg) 0%,var(--shell-bg-2) 100%);
   background-attachment:fixed;
 }
 a{color:inherit;text-decoration:none}
-h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 p{margin:0}
-::selection{background:rgba(16,185,129,.3)}
+::selection{background:rgba(16,185,129,.28)}
 .mono{font-family:var(--font-mono)}
+[x-cloak]{display:none!important}
 
-/* ============ DOC NAV (topo fixo) ============ */
+/* ============ DOC NAV (glass flutuante) ============ */
 .ds-nav{
-  position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:var(--space-4);
-  padding:14px 28px;backdrop-filter:blur(18px);background:var(--shell-surface-soft);
+  position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:var(--space-3);
+  padding:14px 28px;backdrop-filter:blur(24px);background:var(--shell-surface-low);
   border-bottom:1px solid var(--shell-border);overflow-x:auto;
 }
 .ds-nav .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em;white-space:nowrap}
-.ds-nav .brand .mark{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--grad-primary);color:#04110b;box-shadow:0 6px 18px rgba(16,185,129,.35)}
+.ds-nav .brand .mark{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:transparent;overflow:hidden}
+.ds-nav .brand .mark img{width:28px;height:28px;display:block}
 .ds-nav a{font-size:13px;color:var(--shell-text-muted);white-space:nowrap;padding:6px 10px;border-radius:8px;transition:.18s}
-.ds-nav a:hover{color:var(--shell-text);background:var(--shell-border)}
+.ds-nav a:hover{color:var(--shell-text);background:var(--shell-ghost)}
 .ds-nav .spacer{flex:1}
-.theme-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--shell-border-strong);background:var(--shell-surface);color:var(--shell-text);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;transition:.18s}
+.theme-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--shell-border-strong);background:transparent;color:var(--shell-text);padding:8px 14px;border-radius:var(--radius-pill);font-size:13px;font-weight:600;transition:.18s}
 .theme-btn:hover{border-color:var(--shell-primary);color:var(--shell-primary)}
 
-/* ============ DOC LAYOUT ============ */
-.ds-wrap{max-width:1180px;margin:0 auto;padding:48px 28px 120px}
-.ds-section{margin-bottom:72px;scroll-margin-top:90px}
-.ds-section>.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--shell-primary);margin-bottom:8px}
-.ds-section>h2{font-size:30px;margin-bottom:8px;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
-.ds-section>.lead{color:var(--shell-text-muted);max-width:62ch;margin-bottom:28px}
-.panel{background:var(--shell-surface);border:1px solid var(--shell-border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shell-shadow-soft)}
-.grid{display:grid;gap:18px}
+/* ============ DOC LAYOUT (assimétrico) ============ */
+.ds-wrap{max-width:1200px;margin:0 auto;padding:var(--space-12) 28px 120px}
+.ds-section{margin-bottom:var(--space-12);scroll-margin-top:90px}
+.ds-lead{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-8);align-items:end;margin-bottom:var(--space-8)}
+.ds-lead .copy{max-width:42ch}
+.ds-section .eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--shell-primary);margin-bottom:10px}
+.ds-section h2{font-size:clamp(28px,3.4vw,40px);max-width:20ch;background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ds-section .lead{color:var(--shell-text-muted);font-size:16px;max-width:60ch}
+.ds-lead .meta{font-family:var(--font-mono);font-size:12px;color:var(--shell-text-soft);text-align:right;line-height:1.8}
+.panel{background:var(--shell-surface);border:1px solid var(--shell-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shell-shadow-soft)}
+.grid{display:grid;gap:var(--space-5)}
 .cols-2{grid-template-columns:repeat(2,1fr)} .cols-3{grid-template-columns:repeat(3,1fr)} .cols-4{grid-template-columns:repeat(4,1fr)}
 .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.label-sm{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--shell-text-soft);font-weight:600;margin-bottom:10px}
+.label-sm{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--shell-text-soft);font-weight:700;margin-bottom:12px}
 
-/* ============ HERO / APP SHELL CLONE ============ */
-.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:560px;border:1px solid var(--shell-border);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shell-shadow);background:var(--shell-bg-2)}
-.sidebar{background:var(--shell-surface-strong);border-right:1px solid var(--shell-border);display:flex;flex-direction:column;padding:20px 14px}
+/* ============ APP SHELL (tonal layering, no-line) ============ */
+.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:580px;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shell-shadow);background:var(--shell-bg)}
+.sidebar{background:var(--shell-surface-low);display:flex;flex-direction:column;padding:20px 14px}
 .sidebar .logo{display:flex;align-items:center;gap:11px;padding:8px 10px 18px;font-weight:800;font-size:17px;letter-spacing:-.03em}
-.sidebar .logo .mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--grad-primary);color:#04110b;box-shadow:0 6px 18px rgba(16,185,129,.35)}
+.sidebar .logo .mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:transparent;overflow:hidden}
+.sidebar .logo .mark img{width:32px;height:32px;display:block}
 .nav-group{margin-top:10px}
-.nav-group .gl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--shell-text-soft);padding:10px 12px 6px;font-weight:700}
+.nav-group .gl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--shell-text-soft);padding:10px 12px 6px;font-weight:700}
 .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-md);color:var(--shell-text-muted);font-size:14px;font-weight:500;cursor:pointer;transition:.16s;position:relative}
 .nav-item svg{width:18px;height:18px}
-.nav-item:hover{background:var(--shell-border);color:var(--shell-text)}
-.nav-item.active{background:linear-gradient(90deg,rgba(16,185,129,.16),transparent);color:var(--shell-primary-200)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--shell-primary)}
-.nav-item .pill{margin-left:auto;font-size:11px;background:var(--shell-primary);color:#04110b;font-weight:700;padding:1px 8px;border-radius:999px}
-.sidebar .foot{margin-top:auto;border-top:1px solid var(--shell-border);padding-top:14px;display:flex;align-items:center;gap:10px}
-.main{display:flex;flex-direction:column;min-width:0}
-.topbar{height:var(--topbar-h);border-bottom:1px solid var(--shell-border);display:flex;align-items:center;gap:16px;padding:0 24px;background:var(--shell-surface-soft);backdrop-filter:blur(10px)}
+.nav-item:hover{background:var(--shell-surface-high);color:var(--shell-text)}
+.nav-item.active{background:linear-gradient(90deg,rgba(16,185,129,.14),transparent);color:var(--shell-primary-200)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius:2px;background:var(--shell-primary)}
+.nav-item .pill{margin-left:auto;font-size:11px;background:var(--shell-primary);color:#04110b;font-weight:700;padding:1px 8px;border-radius:var(--radius-pill)}
+.sidebar .foot{margin-top:auto;padding-top:14px;display:flex;align-items:center;gap:10px}
+.main{display:flex;flex-direction:column;min-width:0;background:var(--shell-bg)}
+.topbar{height:var(--topbar-h);display:flex;align-items:center;gap:16px;padding:0 24px;background:var(--shell-surface-low);backdrop-filter:blur(14px)}
 .topbar .pt{font-size:17px;font-weight:700;letter-spacing:-.02em}
 .topbar .crumb{font-size:12px;color:var(--shell-text-soft)}
-.search{flex:1;max-width:360px;display:flex;align-items:center;gap:9px;background:var(--shell-bg);border:1px solid var(--shell-border);border-radius:999px;padding:9px 16px;color:var(--shell-text-soft);font-size:13px}
+.search{flex:1;max-width:360px;display:flex;align-items:center;gap:9px;background:var(--shell-bg);border:1px solid var(--shell-border);border-radius:var(--radius-pill);padding:9px 16px;color:var(--shell-text-soft);font-size:13px}
 .search svg{width:16px;height:16px}
 .icon-btn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;border:1px solid var(--shell-border);background:var(--shell-surface);color:var(--shell-text-muted);cursor:pointer;transition:.16s;position:relative}
 .icon-btn:hover{color:var(--shell-text);border-color:var(--shell-border-strong)}
 .icon-btn .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--shell-danger);box-shadow:0 0 0 2px var(--shell-surface)}
 .content{padding:26px 24px;overflow:auto}
-
-/* avatar */
-.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#04110b;background:var(--grad-primary);flex:none}
-.avatar.lg{width:46px;height:46px}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#04110b;background:var(--grad-cta);flex:none}
 .avatar.sm{width:28px;height:28px;font-size:11px}
+.avatar.lg{width:46px;height:46px}
 .avatar.v{background:linear-gradient(135deg,#8b5cf6,#c4b5fd);color:#1a0a2e}
 .avatar.c{background:linear-gradient(135deg,#06b6d4,#67e8f9);color:#042027}
 
-/* ============ TIPOGRAFIA ============ */
-.type-row{display:flex;align-items:baseline;justify-content:space-between;gap:20px;padding:16px 0;border-bottom:1px dashed var(--shell-border)}
+/* ============ TIPOGRAFIA (editorial) ============ */
+.type-row{display:flex;align-items:baseline;justify-content:space-between;gap:20px;padding:18px 0;border-bottom:1px solid var(--shell-border)}
 .type-row:last-child{border-bottom:0}
 .type-row .spec{font-family:var(--font-mono);font-size:12px;color:var(--shell-text-soft);white-space:nowrap}
-.t-display{font-size:44px;font-weight:800;letter-spacing:-.03em}
-.t-h1{font-size:32px;font-weight:700;letter-spacing:-.025em}
+.t-display{font-size:46px;font-weight:800;letter-spacing:-.03em}
+.t-h1{font-size:34px;font-weight:700;letter-spacing:-.025em}
 .t-h2{font-size:24px;font-weight:700;letter-spacing:-.02em}
 .t-h3{font-size:19px;font-weight:600}
 .t-body{font-size:15px;color:var(--shell-text-muted)}
 .t-sm{font-size:13px;color:var(--shell-text-muted)}
-.t-cap{font-size:12px;color:var(--shell-text-soft)}
+.t-cap{font-size:12px;letter-spacing:.05em;color:var(--shell-text-soft)}
 
-/* ============ CORES ============ */
+/* ============ CORES & SURFACES ============ */
 .swatch{border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--shell-border)}
-.swatch .chip{height:74px}
+.swatch .chip{height:72px}
 .swatch .meta{padding:10px 12px;background:var(--shell-surface-elev)}
 .swatch .meta b{font-size:13px} .swatch .meta span{display:block;font-family:var(--font-mono);font-size:11px;color:var(--shell-text-soft)}
 
-/* ============ BOTÕES ============ */
+/* ============ BOTÕES (gradient CTA signature) ============ */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:600;font-size:14px;padding:10px 18px;border-radius:var(--radius-md);border:1px solid transparent;cursor:pointer;transition:.18s;white-space:nowrap}
 .btn svg{width:16px;height:16px}
 .btn:active{transform:translateY(1px)}
-.btn-primary{background:var(--grad-primary);color:#04110b;box-shadow:0 8px 22px rgba(16,185,129,.28)}
-.btn-primary:hover{filter:brightness(1.08);box-shadow:0 10px 28px rgba(16,185,129,.4)}
+.btn-primary{background:var(--grad-cta);color:#04110b;box-shadow:var(--shell-shadow-tint)}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 12px 32px rgba(16,185,129,.32)}
 .btn-secondary{background:var(--shell-secondary);color:#fff}
 .btn-secondary:hover{filter:brightness(1.1)}
 .btn-outline{background:transparent;border-color:var(--shell-border-strong);color:var(--shell-text)}
 .btn-outline:hover{border-color:var(--shell-primary);color:var(--shell-primary)}
 .btn-ghost{background:transparent;color:var(--shell-text-muted)}
-.btn-ghost:hover{background:var(--shell-border);color:var(--shell-text)}
+.btn-ghost:hover{background:var(--shell-surface-high);color:var(--shell-text)}
 .btn-danger{background:rgba(248,113,113,.14);color:var(--shell-danger);border-color:rgba(248,113,113,.3)}
 .btn-danger:hover{background:var(--shell-danger);color:#fff}
 .btn:disabled,.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;filter:none;box-shadow:none}
@@ -163,14 +186,14 @@ p{margin:0}
 .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ============ FORM ============ */
+/* ============ FORM (focus sem "box") ============ */
 .field{margin-bottom:16px}
 .field>label{display:block;font-size:13px;font-weight:600;margin-bottom:7px;color:var(--shell-text)}
 .field .hint{font-size:12px;color:var(--shell-text-soft);margin-top:6px}
 .field .err{font-size:12px;color:var(--shell-danger);margin-top:6px}
-.input,.select,.textarea{width:100%;font-family:inherit;font-size:14px;color:var(--shell-text);background:var(--shell-bg);border:1px solid var(--shell-border);border-radius:var(--radius-md);padding:11px 14px;transition:.16s}
+.input,.select,.textarea{width:100%;font-family:inherit;font-size:14px;color:var(--shell-text);background:var(--shell-surface-low);border:1px solid transparent;border-radius:var(--radius-md);padding:11px 14px;transition:.16s}
 .input::placeholder,.textarea::placeholder{color:var(--shell-text-soft)}
-.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--shell-primary);box-shadow:0 0 0 3px rgba(16,185,129,.18)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--shell-primary);box-shadow:0 0 0 3px rgba(16,185,129,.16);background:var(--shell-surface-high)}
 .input.is-error{border-color:var(--shell-danger);box-shadow:0 0 0 3px rgba(248,113,113,.16)}
 .input:disabled{opacity:.5;cursor:not-allowed}
 .textarea{resize:vertical;min-height:96px}
@@ -179,41 +202,42 @@ p{margin:0}
 .check input{width:18px;height:18px;accent-color:var(--shell-primary);cursor:pointer}
 .switch{position:relative;width:42px;height:24px;flex:none}
 .switch input{opacity:0;width:0;height:0}
-.switch .track{position:absolute;inset:0;background:var(--shell-border-strong);border-radius:999px;transition:.2s;cursor:pointer}
+.switch .track{position:absolute;inset:0;background:var(--shell-border-strong);border-radius:var(--radius-pill);transition:.2s;cursor:pointer}
 .switch .track::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
 .switch input:checked+.track{background:var(--shell-primary)}
 .switch input:checked+.track::before{transform:translateX(18px)}
-.dropzone{border:1.5px dashed var(--shell-border-strong);border-radius:var(--radius-md);padding:28px;text-align:center;color:var(--shell-text-soft);transition:.18s;cursor:pointer}
-.dropzone:hover{border-color:var(--shell-primary);color:var(--shell-primary);background:rgba(16,185,129,.04)}
+.dropzone{border:1.5px dashed var(--shell-border-strong);border-radius:var(--radius-md);padding:28px;text-align:center;color:var(--shell-text-soft);transition:.18s;cursor:pointer;background:var(--shell-surface-low)}
+.dropzone:hover{border-color:var(--shell-primary);color:var(--shell-primary);background:rgba(16,185,129,.05)}
 .dropzone svg{width:26px;height:26px;margin-bottom:8px}
 
 /* ============ BADGES ============ */
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;border:1px solid transparent}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 11px;border-radius:var(--radius-pill);border:1px solid transparent}
 .badge svg{width:13px;height:13px}
-.badge-success{background:rgba(16,185,129,.14);color:var(--shell-primary-200);border-color:rgba(16,185,129,.3)}
-.badge-warning{background:rgba(251,191,36,.14);color:var(--shell-warning);border-color:rgba(251,191,36,.3)}
-.badge-danger{background:rgba(248,113,113,.14);color:var(--shell-danger);border-color:rgba(248,113,113,.3)}
-.badge-info{background:rgba(56,189,248,.14);color:var(--shell-info);border-color:rgba(56,189,248,.3)}
-.badge-neutral{background:var(--shell-border);color:var(--shell-text-muted);border-color:var(--shell-border-strong)}
-.badge-violet{background:rgba(139,92,246,.14);color:var(--shell-secondary-200);border-color:rgba(139,92,246,.3)}
+.badge-success{background:rgba(16,185,129,.14);color:var(--shell-primary-200);border-color:rgba(16,185,129,.28)}
+.badge-warning{background:rgba(251,191,36,.14);color:var(--shell-warning);border-color:rgba(251,191,36,.28)}
+.badge-danger{background:rgba(248,113,113,.14);color:var(--shell-danger);border-color:rgba(248,113,113,.28)}
+.badge-info{background:rgba(56,189,248,.14);color:var(--shell-info);border-color:rgba(56,189,248,.28)}
+.badge-neutral{background:var(--shell-surface-high);color:var(--shell-text-muted);border-color:var(--shell-border-strong)}
+.badge-violet{background:rgba(139,92,246,.14);color:var(--shell-secondary-200);border-color:rgba(139,92,246,.28)}
 
-/* ============ CARDS DE DOMÍNIO ============ */
-.card{background:var(--shell-surface);border:1px solid var(--shell-border);border-radius:var(--radius-lg);padding:20px;transition:.2s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-3px);border-color:var(--shell-border-strong);box-shadow:var(--shell-shadow-soft)}
-.card .tag-disc{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--shell-primary)}
-.card h3{font-size:17px;margin:8px 0 6px}
-.card .desc{font-size:13px;color:var(--shell-text-muted);margin-bottom:16px}
-.card .stripe{position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-primary)}
-.card-foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);border-top:1px solid var(--shell-border);padding-top:14px;margin-top:4px}
+/* ============ CARDS (tonal layering, no dividers) ============ */
+.card{background:var(--shell-surface-high);border:1px solid var(--shell-border);border-radius:var(--radius-lg);padding:22px;transition:.2s;position:relative;overflow:hidden}
+.card:hover{background:var(--shell-surface-highest);border-color:rgba(16,185,129,.18)}
+.card .tag-disc{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--shell-primary)}
+.card h3{font-size:18px;margin:8px 0 6px}
+.card .desc{font-size:13px;color:var(--shell-text-muted);margin-bottom:18px}
+.card .stripe{position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad-cta)}
+.card-foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);padding-top:16px;margin-top:6px}
+/* no-line: separe por espaço, não por borda */
 .stack-faces{display:flex}
-.stack-faces .avatar{margin-left:-8px;box-shadow:0 0 0 2px var(--shell-surface)}
+.stack-faces .avatar{margin-left:-8px;box-shadow:0 0 0 2px var(--shell-surface-high)}
 .stack-faces .avatar:first-child{margin-left:0}
-/* progress */
-.progress{height:8px;border-radius:999px;background:var(--shell-border);overflow:hidden}
-.progress>i{display:block;height:100%;border-radius:999px;background:var(--grad-primary)}
-.progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);margin-bottom:7px}
+/* progress: linha fina 2px (regra Atelier) */
+.progress{height:2px;background:var(--shell-border-strong);overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--grad-cta)}
+.progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);margin-bottom:8px}
 /* KPI */
-.kpi{background:var(--shell-surface);border:1px solid var(--shell-border);border-radius:var(--radius-lg);padding:18px 20px}
+.kpi{background:var(--shell-surface-high);border-radius:var(--radius-lg);padding:18px 20px}
 .kpi .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:14px}
 .kpi .ico svg{width:20px;height:20px}
 .kpi .val{font-size:28px;font-weight:800;letter-spacing:-.02em}
@@ -223,11 +247,11 @@ p{margin:0}
 /* ============ TABELA ============ */
 .tbl-wrap{border:1px solid var(--shell-border);border-radius:var(--radius-lg);overflow:hidden}
 table.tbl{width:100%;border-collapse:collapse;font-size:14px}
-.tbl thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--shell-text-soft);font-weight:700;padding:13px 18px;background:var(--shell-surface-strong);border-bottom:1px solid var(--shell-border)}
-.tbl tbody td{padding:13px 18px;border-bottom:1px solid var(--shell-border);color:var(--shell-text-muted)}
-.tbl tbody tr:last-child td{border-bottom:0}
+.tbl thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--shell-text-soft);font-weight:700;padding:13px 18px;background:var(--shell-surface-low)}
+.tbl tbody td{padding:14px 18px;color:var(--shell-text-muted)}
 .tbl tbody tr{transition:.14s}
-.tbl tbody tr:hover{background:var(--shell-border)}
+.tbl tbody tr:hover{background:var(--shell-surface-high)}
+.tbl tbody tr+tr td{border-top:1px solid var(--shell-border)}
 .tbl .name{color:var(--shell-text);font-weight:500;display:flex;align-items:center;gap:10px}
 .tbl-actions{display:flex;gap:6px}
 .empty{text-align:center;padding:48px 20px;color:var(--shell-text-soft)}
@@ -235,7 +259,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 
 /* ============ MODAL / TOAST / TOOLTIP / SKELETON ============ */
 .modal-demo{background:var(--shell-bg);border-radius:var(--radius-lg);padding:24px;display:grid;place-items:center;min-height:240px;position:relative}
-.modal{width:100%;max-width:420px;background:var(--shell-surface-strong);border:1px solid var(--shell-border-strong);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shell-shadow)}
+.modal{width:100%;max-width:420px;background:var(--shell-surface-highest);border:1px solid var(--shell-border-strong);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shell-shadow);backdrop-filter:blur(24px)}
 .modal h3{font-size:18px;margin-bottom:8px}
 .modal p{font-size:14px;color:var(--shell-text-muted);margin-bottom:20px}
 .modal .actions{display:flex;gap:10px;justify-content:flex-end}
@@ -247,43 +271,125 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 .toast.i{border-left-color:var(--shell-info)} .toast.i svg{color:var(--shell-info)}
 .toast b{display:block;margin-bottom:2px} .toast small{color:var(--shell-text-soft)}
 .tooltip{position:relative;display:inline-block;border-bottom:1px dotted var(--shell-text-soft);cursor:help}
-.tooltip .tip{visibility:hidden;opacity:0;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:var(--shell-surface-strong);border:1px solid var(--shell-border-strong);color:var(--shell-text);font-size:12px;padding:6px 10px;border-radius:8px;white-space:nowrap;transition:.16s;box-shadow:var(--shell-shadow-soft)}
+.tooltip .tip{visibility:hidden;opacity:0;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:var(--shell-surface-highest);border:1px solid var(--shell-border-strong);color:var(--shell-text);font-size:12px;padding:6px 10px;border-radius:8px;white-space:nowrap;transition:.16s;box-shadow:var(--shell-shadow-soft)}
 .tooltip:hover .tip{visibility:visible;opacity:1}
-.skel{background:linear-gradient(90deg,var(--shell-border) 25%,var(--shell-surface-elev) 50%,var(--shell-border) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+.skel{background:linear-gradient(90deg,var(--shell-surface-low) 25%,var(--shell-surface-high) 50%,var(--shell-surface-low) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
 @keyframes shimmer{to{background-position:-200% 0}}
 
-/* ============ MOTION GALLERY ============ */
-.motion-card{background:var(--shell-surface);border:1px solid var(--shell-border);border-radius:var(--radius-md);padding:20px;text-align:center;font-size:13px;color:var(--shell-text-muted)}
-.m-lift{transition:.2s} .m-lift:hover{transform:translateY(-6px);box-shadow:var(--shell-shadow-soft)}
+/* ============ MOTION ============ */
+.motion-card{background:var(--shell-surface-high);border:1px solid var(--shell-border);border-radius:var(--radius-md);padding:20px;text-align:center;font-size:13px;color:var(--shell-text-muted)}
+.m-lift{transition:.2s} .m-lift:hover{transform:translateY(-6px);background:var(--shell-surface-highest)}
 .m-glow{transition:.2s} .m-glow:hover{box-shadow:0 0 0 1px var(--shell-primary),0 0 28px rgba(16,185,129,.35)}
 .m-scale{transition:.2s} .m-scale:hover{transform:scale(1.04)}
 
-/* ============ ICONS grid ============ */
+/* ============ ICONS ============ */
 .icogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
-.icocell{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border:1px solid var(--shell-border);border-radius:var(--radius-md);font-size:11px;color:var(--shell-text-soft)}
+.icocell{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--shell-surface-low);border-radius:var(--radius-md);font-size:11px;color:var(--shell-text-soft)}
 .icocell svg{width:22px;height:22px;color:var(--shell-text)}
 
+/* ============ PRINCÍPIOS (manifesto) ============ */
+.principle{background:var(--shell-surface-low);border-radius:var(--radius-lg);padding:24px;position:relative}
+.principle .num{font-family:var(--font-mono);font-size:12px;color:var(--shell-primary);font-weight:700}
+.principle h3{font-size:17px;margin:8px 0 10px;letter-spacing:-.01em}
+.principle p{font-size:13px;color:var(--shell-text-muted);line-height:1.7}
+.principle .rule{display:inline-block;margin-top:14px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--shell-tertiary-200);padding:4px 10px;background:rgba(6,182,212,.12);border-radius:var(--radius-pill)}
+
+/* ============ LESSON READER / ATELIER (assinatura do produto) ============ */
+.atelier{background:var(--shell-bg);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shell-shadow)}
+.atelier-rail{display:grid;grid-template-columns:220px 1fr;min-height:560px}
+.atelier-side{background:var(--shell-surface-low);padding:24px 16px;border-right:1px solid var(--shell-border)}
+.atelier-side .course{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--shell-text-soft);font-weight:700;margin-bottom:6px}
+.atelier-side h4{font-size:15px;letter-spacing:-.01em;margin-bottom:18px}
+.atelier-side .mod{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:var(--radius-md);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--shell-text-muted);cursor:pointer;transition:.16s}
+.atelier-side .mod svg{width:16px;height:16px;flex:none}
+.atelier-side .mod:hover{background:var(--shell-surface-high);color:var(--shell-text)}
+.atelier-side .mod.active{background:var(--shell-surface-high);color:var(--shell-primary-200)}
+.atelier-body{padding:40px 48px 56px;max-width:880px}
+.atelier-meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:28px}
+.atelier-meta .tag{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:var(--radius-pill)}
+.atelier-meta .tag.p{color:var(--shell-primary);background:rgba(16,185,129,.12)}
+.atelier-meta .tag.s{color:var(--shell-tertiary-200);background:rgba(6,182,212,.12)}
+.atelier-meta .date{margin-left:auto;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--shell-text-soft)}
+.atelier h1{font-size:clamp(32px,4.4vw,52px);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin-bottom:18px}
+.atelier h1 em{font-style:normal;color:var(--shell-primary-200)}
+.atelier .dek{font-size:19px;font-weight:300;color:var(--shell-text-muted);max-width:48ch;line-height:1.5}
+.prose{color:var(--shell-text);line-height:1.8;font-size:16px}
+.prose h2{font-size:24px;font-weight:700;margin:36px 0 14px;padding-left:18px;border-left:3px solid var(--shell-primary);letter-spacing:-.02em}
+.prose h3{font-size:19px;font-weight:600;margin:28px 0 10px}
+.prose p{color:var(--shell-text-muted);margin-bottom:16px}
+.prose p strong{color:var(--shell-text)}
+.prose a{color:var(--shell-primary-200);text-decoration:underline;text-underline-offset:.18em}
+.prose code{font-family:var(--font-mono);font-size:.86em;background:var(--shell-surface-high);padding:.12em .4em;border-radius:5px;color:var(--shell-primary-200)}
+.prose pre{overflow-x:auto;border-radius:var(--radius-md);background:var(--shell-surface-low);padding:18px 20px;margin:18px 0;border:1px solid var(--shell-border)}
+.prose pre code{background:none;padding:0;color:var(--shell-text)}
+.prose blockquote{margin:20px 0;padding:14px 18px;background:var(--shell-surface-low);border-left:2px solid var(--shell-tertiary);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--shell-tertiary-200);font-style:italic;font-size:15px}
+/* callouts didáticos :::conceito / :::atencao / :::dica */
+.callout{display:grid;grid-template-columns:32px 1fr;gap:14px;padding:16px 18px;border-radius:var(--radius-md);margin:18px 0;background:var(--shell-surface-low)}
+.callout .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none;margin-top:2px}
+.callout .ic svg{width:18px;height:18px}
+.callout .ct b{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.callout .ct p{font-size:14px;color:var(--shell-text-muted);margin:0;line-height:1.65}
+.callout.conceito{border-left:2px solid var(--shell-info)} .callout.conceito .ic{background:rgba(56,189,248,.16);color:var(--shell-info)} .callout.conceito .ct b{color:var(--shell-info)}
+.callout.atencao{border-left:2px solid var(--shell-warning)} .callout.atencao .ic{background:rgba(251,191,36,.16);color:var(--shell-warning)} .callout.atencao .ct b{color:var(--shell-warning)}
+.callout.dica{border-left:2px solid var(--shell-success)} .callout.dica .ic{background:rgba(16,185,129,.16);color:var(--shell-success)} .callout.dica .ct b{color:var(--shell-success)}
+/* bento assimétrico */
+.bento{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin:22px 0}
+.bento .b{background:var(--shell-surface-low);border-radius:var(--radius-md);padding:22px;transition:.2s}
+.bento .b:hover{background:var(--shell-surface-high)}
+.bento .b svg{width:26px;height:26px;margin-bottom:10px}
+.bento .b h4{font-size:16px;margin-bottom:6px}
+.bento .b p{font-size:13px;color:var(--shell-text-muted);line-height:1.6;margin:0}
+.bento .b.p svg{color:var(--shell-primary)} .bento .b.t svg{color:var(--shell-tertiary)}
+/* exercícios numerados editoriais */
+.exercise{list:none;list-style:none;margin:20px 0;padding:0;display:grid;gap:14px}
+.exercise li{display:flex;gap:14px;align-items:flex-start;font-size:15px;color:var(--shell-text-muted);line-height:1.6}
+.exercise li .n{width:26px;height:26px;border-radius:50%;background:rgba(16,185,129,.16);color:var(--shell-primary);font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;margin-top:2px}
+.exercise li strong{color:var(--shell-text)}
+/* navegação entre aulas */
+.lesson-nav{display:flex;justify-content:space-between;gap:16px;margin-top:40px;padding-top:24px;border-top:1px solid var(--shell-border)}
+.lesson-nav a{display:flex;flex-direction:column}
+.lesson-nav .lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--shell-text-soft);margin-bottom:3px}
+.lesson-nav .ttl{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.lesson-nav .prev .ttl{color:var(--shell-text-muted)} .lesson-nav .next{text-align:right} .lesson-nav .next .ttl{color:var(--shell-primary-200)}
+/* modo apresentação (floating chip) */
+.present{position:sticky;bottom:24px;margin:24px auto 0;width:fit-content;background:var(--shell-surface-highest);border:1px solid rgba(16,185,129,.22);border-radius:var(--radius-pill);padding:10px 18px;box-shadow:var(--shell-shadow);display:flex;align-items:center;gap:12px;backdrop-filter:blur(18px)}
+.present .ic{width:32px;height:32px;border-radius:50%;background:rgba(16,185,129,.18);color:var(--shell-primary);display:grid;place-items:center}
+.present .ic svg{width:18px;height:18px}
+.present b{font-size:13px} .present small{display:block;font-size:11px;color:var(--shell-text-soft)}
+.present button{margin-left:6px;font-size:12px;font-weight:700;color:var(--shell-tertiary-200);background:none;border:none;cursor:pointer}
+.present button:hover{text-decoration:underline}
+
 /* ============ RESPONSIVO ============ */
+@media(max-width:980px){
+  .ds-lead{grid-template-columns:1fr;gap:var(--space-5)}
+  .ds-lead .meta{text-align:left}
+  .atelier-rail{grid-template-columns:1fr}
+  .atelier-side{display:none}
+  .atelier-body{padding:28px 22px 40px}
+  .bento{grid-template-columns:1fr}
+}
 @media(max-width:860px){
   .cols-2,.cols-3,.cols-4{grid-template-columns:1fr}
   .shell{grid-template-columns:1fr} .sidebar{display:none}
   .ds-nav a:not(.brand-link){display:none}
 }
-.note{font-size:12px;color:var(--shell-text-soft);font-style:italic;margin-top:10px}
+.note{font-size:12px;color:var(--shell-text-soft);font-style:italic;margin-top:12px}
 </style>
 </head>
 <body>
 
 <!-- ===== NAV ===== -->
 <nav class="ds-nav">
-  <div class="brand"><span class="mark"><i data-lucide="graduation-cap"></i></span> ProfessorDash</div>
+  <div class="brand"><span class="mark"><img src="data:image/svg+xml;utf8,<svg width='40' height='40' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10298.8 10298.8'><path fill='%2300B4D8' d='M6910.79 8527.19c327.48,-170.98 731.56,-44.11 902.54,283.36 170.98,327.47 44.11,731.56 -283.36,902.54 -362.73,189.57 -750.08,337.25 -1155.64,436.54 -398.1,97.46 -808.57,149.17 -1224.95,149.17 -1421.88,0 -2709.23,-576.4 -3641.12,-1508.28 -931.9,-931.88 -1508.28,-2219.23 -1508.28,-3641.12 0,-1421.88 576.38,-2709.23 1508.28,-3641.12 931.88,-931.9 2219.23,-1508.28 3641.12,-1508.28 416.38,0 826.84,51.71 1224.95,149.17 405.55,99.29 792.91,246.97 1155.64,436.54 327.47,170.98 454.34,575.07 283.36,902.54 -170.98,327.47 -575.06,454.34 -902.54,283.36 -266.08,-139.05 -551.42,-247.69 -851.28,-321.1 -286.06,-70.02 -590.68,-107.19 -910.11,-107.19 -1051.09,0 -2002.64,425.99 -2691.36,1114.72 -688.73,688.72 -1114.72,1640.27 -1114.72,2691.36 0,1051.09 425.99,2002.64 1114.72,2691.36 688.72,688.72 1640.27,1114.72 2691.36,1114.72 319.43,0 624.06,-37.17 910.11,-107.19 299.87,-73.41 585.2,-182.05 851.28,-321.1z'/><path fill='%233A86FF' d='M8898.22 5821.06l-5539.91 0c-370.95,0 -671.66,-300.71 -671.66,-671.66 0,-370.95 300.71,-671.66 671.66,-671.66l5539.91 0c-14.14,-80.85 -30.81,-160.39 -49.94,-238.54 -73.4,-299.86 -182.02,-585.14 -321.09,-851.19 -170.98,-327.48 -44.11,-731.56 283.36,-902.54 327.47,-170.98 731.56,-44.11 902.54,283.36 189.58,362.66 337.25,749.99 436.53,1155.54 97.48,398.14 149.18,808.63 149.18,1225.05 0,416.42 -51.7,826.9 -149.18,1225.05 -99.28,405.54 -246.95,792.88 -436.53,1155.54 -170.98,327.47 -575.07,454.34 -902.54,283.36 -327.47,-170.98 -454.34,-575.06 -283.36,-902.54 139.07,-266.05 247.69,-551.33 321.09,-851.19 19.14,-78.15 35.81,-157.69 49.94,-238.54z'/></svg>" alt="" width="30" height="30"></span> Prof. Toni Coimbra</div>
   <span style="width:1px;height:22px;background:var(--shell-border)"></span>
+  <a href="#principios">Princípios</a>
   <a href="#shell">Shell</a>
   <a href="#type">Tipografia</a>
   <a href="#color">Cores</a>
   <a href="#buttons">Botões</a>
   <a href="#forms">Formulários</a>
   <a href="#cards">Cards</a>
+  <a href="#atelier">Lesson Reader</a>
   <a href="#badges">Status</a>
   <a href="#tables">Tabelas</a>
   <a href="#feedback">Feedback</a>
@@ -296,25 +402,48 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 <div class="ds-wrap">
 
   <!-- HERO -->
-  <header style="margin-bottom:64px">
-    <div class="eyebrow" style="color:var(--shell-primary);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px">Design System · v1</div>
-    <h1 style="font-size:46px;letter-spacing:-.03em;max-width:18ch">A linguagem visual do <span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent">ProfessorDash</span></h1>
-    <p style="color:var(--shell-text-muted);font-size:17px;max-width:60ch;margin-top:16px">Fonte única de verdade de UI para o portal do aluno. Tokens herdados do acervo de aulas (Geist, esmeralda/violeta/ciano, tema escuro e claro) — coerência total entre o que o aluno estuda e onde ele estuda.</p>
-    <div class="row" style="margin-top:24px">
-      <span class="badge badge-success"><i data-lucide="check"></i> Tokens fiéis ao app.css</span>
+  <header style="margin-bottom:var(--space-12)">
+    <div class="eyebrow" style="color:var(--shell-primary);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:14px">Design System · v2 · The Digital Atelier</div>
+    <h1 style="font-size:clamp(40px,5.4vw,64px);letter-spacing:-.035em;max-width:16ch;line-height:1.04">O atelier digital do <span style="background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent">ensino autoral</span></h1>
+    <p style="color:var(--shell-text-muted);font-size:18px;max-width:56ch;margin-top:18px;line-height:1.55">Fonte única de UI do portal. Tokens fiéis ao <span class="mono">app.css</span> (esmeralda · violeta · ciano) elevados pelos princípios do design editorial: sem linhas, profundidade por camadas, vidro e gradiente, assimetria intencional e espaço negativo como ferramenta.</p>
+    <div class="row" style="margin-top:26px">
+      <span class="badge badge-success"><i data-lucide="check"></i> Tokens compatíveis com app.css</span>
       <span class="badge badge-violet"><i data-lucide="palette"></i> Dark + Light</span>
       <span class="badge badge-info"><i data-lucide="smartphone"></i> Mobile-first</span>
-      <span class="badge badge-neutral"><i data-lucide="accessibility"></i> Foco em contraste</span>
+      <span class="badge badge-neutral"><i data-lucide="accessibility"></i> Contraste AA</span>
+      <span class="badge badge-neutral"><i data-lucide="book-open-text"></i> Lesson Reader</span>
     </div>
   </header>
 
-  <!-- 0 · APP SHELL -->
+  <!-- 0 · PRINCÍPIOS -->
+  <section class="ds-section" id="principios">
+    <div class="ds-lead">
+      <div class="copy">
+        <div class="eyebrow">00 · Manifesto</div>
+        <h2>Princípios do Atelier</h2>
+        <p class="lead">Não é um template — é um ambiente curado. Cinco regras que transformam um LMS genérico numa masterclass privada.</p>
+      </div>
+      <div class="meta">North Star:<br><b style="color:var(--shell-text)">The Digital Atelier</b><br>curated · architectural · premium</div>
+    </div>
+    <div class="grid cols-3">
+      <div class="principle"><span class="num">01</span><h3>No-Line Rule</h3><p>Bordas sólidas 1px são proibidas para seccionar. Limites vêm de <b>shifts de superfície</b>: uma camada low contra a base cria uma "soft edge" mais sofisticada que um traço duro.</p><span class="rule">soft edges only</span></div>
+      <div class="principle"><span class="num">02</span><h3>Tonal Layering</h3><p>Profundidade sem sombra web 2.0. Camadas obsidian empilhadas: <b>low → surface → high → highest</b>. Um card high sobre a base "levita"; um low "recede".</p><span class="rule">depth by density</span></div>
+      <div class="principle"><span class="num">03</span><h3>Glass &amp; Gradient</h3><p>Vidro para navegação flutuante e overlays (70% opacidade + blur 24px). Gradiente 45° no CTA primário dá "alma" — evita o visual flat-and-dead.</p><span class="rule">soul, not flat</span></div>
+      <div class="principle"><span class="num">04</span><h3>Intentional Asymmetry</h3><p>Romper a grade 12-col rígida. Blocos de texto <b>offset</b> da imagem, densidades de fundo alternadas. Tensão visual que guia o olhar aos pontos de conversão.</p><span class="rule">break the grid</span></div>
+      <div class="principle"><span class="num">05</span><h3>Negative Space</h3><p>Espaço em branco é o divisor. Se parece vazio, adicione mais espaço — não mais elementos. O aluno respira entre conceitos.</p><span class="rule">space is content</span></div>
+      <div class="principle" style="background:var(--shell-surface-high)"><span class="num" style="color:var(--shell-tertiary-200)">★</span><h3>Tipografia autoritativa</h3><p><b>Geist</b> com tracking apertado (−0.02em) nos títulos. Labels em maiúsculas com 0.05em. Contraste de escala = tensão editorial de alta moda.</p><span class="rule" style="color:var(--shell-secondary-200);background:rgba(139,92,246,.12)">contrast is king</span></div>
+    </div>
+  </section>
+
+  <!-- 1 · APP SHELL -->
   <section class="ds-section" id="shell">
-    <div class="eyebrow">00</div><h2>Application Shell</h2>
-    <p class="lead">Estrutura base de toda tela autenticada: sidebar de navegação + topbar + área de conteúdo. Proporções e componentes oficiais.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">01</div><h2>Application Shell</h2><p class="lead">Estrutura base de toda tela autenticada. Sidebar em <b>surface-low</b> (recede), conteúdo na base, cards em <b>surface-high</b> (levitam) — tonal layering puro, sem bordas de seção.</p></div>
+      <div class="meta">sidebar: <b style="color:var(--shell-text)">264px</b><br>topbar: <b style="color:var(--shell-text)">68px</b><br>mobile: drawer</div>
+    </div>
     <div class="shell">
       <aside class="sidebar">
-        <div class="logo"><span class="mark"><i data-lucide="graduation-cap"></i></span> ProfessorDash</div>
+        <div class="logo"><span class="mark"><img src="data:image/svg+xml;utf8,<svg width='40' height='40' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10298.8 10298.8'><path fill='%2300B4D8' d='M6910.79 8527.19c327.48,-170.98 731.56,-44.11 902.54,283.36 170.98,327.47 44.11,731.56 -283.36,902.54 -362.73,189.57 -750.08,337.25 -1155.64,436.54 -398.1,97.46 -808.57,149.17 -1224.95,149.17 -1421.88,0 -2709.23,-576.4 -3641.12,-1508.28 -931.9,-931.88 -1508.28,-2219.23 -1508.28,-3641.12 0,-1421.88 576.38,-2709.23 1508.28,-3641.12 931.88,-931.9 2219.23,-1508.28 3641.12,-1508.28 416.38,0 826.84,51.71 1224.95,149.17 405.55,99.29 792.91,246.97 1155.64,436.54 327.47,170.98 454.34,575.07 283.36,902.54 -170.98,327.47 -575.06,454.34 -902.54,283.36 -266.08,-139.05 -551.42,-247.69 -851.28,-321.1 -286.06,-70.02 -590.68,-107.19 -910.11,-107.19 -1051.09,0 -2002.64,425.99 -2691.36,1114.72 -688.73,688.72 -1114.72,1640.27 -1114.72,2691.36 0,1051.09 425.99,2002.64 1114.72,2691.36 688.72,688.72 1640.27,1114.72 2691.36,1114.72 319.43,0 624.06,-37.17 910.11,-107.19 299.87,-73.41 585.2,-182.05 851.28,-321.1z'/><path fill='%233A86FF' d='M8898.22 5821.06l-5539.91 0c-370.95,0 -671.66,-300.71 -671.66,-671.66 0,-370.95 300.71,-671.66 671.66,-671.66l5539.91 0c-14.14,-80.85 -30.81,-160.39 -49.94,-238.54 -73.4,-299.86 -182.02,-585.14 -321.09,-851.19 -170.98,-327.48 -44.11,-731.56 283.36,-902.54 327.47,-170.98 731.56,-44.11 902.54,283.36 189.58,362.66 337.25,749.99 436.53,1155.54 97.48,398.14 149.18,808.63 149.18,1225.05 0,416.42 -51.7,826.9 -149.18,1225.05 -99.28,405.54 -246.95,792.88 -436.53,1155.54 -170.98,327.47 -575.07,454.34 -902.54,283.36 -327.47,-170.98 -454.34,-575.06 -283.36,-902.54 139.07,-266.05 247.69,-551.33 321.09,-851.19 19.14,-78.15 35.81,-157.69 49.94,-238.54z'/></svg>" alt="" width="34" height="34"></span> Prof. Toni Coimbra</div>
         <div class="nav-group">
           <div class="gl">Ensino</div>
           <div class="nav-item active"><i data-lucide="layout-dashboard"></i> Início</div>
@@ -350,35 +479,39 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
         </div>
       </div>
     </div>
-    <p class="note">Mobile: sidebar colapsa para drawer (hambúrguer na topbar). Proporção desktop: sidebar 264px / conteúdo fluido.</p>
+    <p class="note">Mobile: sidebar colapsa para drawer (hambúrguer na topbar). Profundidade vem das camadas de superfície — note que o sidebar não tem borda direita dura, apenas um shift tonal.</p>
   </section>
 
-  <!-- 1 · TIPOGRAFIA -->
+  <!-- 2 · TIPOGRAFIA -->
   <section class="ds-section" id="type">
-    <div class="eyebrow">01</div><h2>Tipografia</h2>
-    <p class="lead">Família <b>Geist</b> (texto) e <b>Geist Mono</b> (dados, códigos, notas). Escala compacta e legível, otimizada para leitura longa de aula e para densidade de dados.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">02</div><h2>Tipografia</h2><p class="lead"><b>Geist</b> para texto e títulos, <b>Geist Mono</b> para dados, códigos e notas. Tracking apertado nos display (−0.03em) cria a sensação editorial. Labels sempre maiúsculas com 0.05em.</p></div>
+      <div class="meta">fonte:<br><b style="color:var(--shell-text)">Geist</b> + Geist Mono<br>scale: compacta<br>body line-height: 1.6</div>
+    </div>
     <div class="panel">
-      <div class="type-row"><span class="t-display">Aa Display</span><span class="spec">44px / 800 / -3%</span></div>
-      <div class="type-row"><span class="t-h1">Heading 1 — Título de página</span><span class="spec">32px / 700</span></div>
-      <div class="type-row"><span class="t-h2">Heading 2 — Seção</span><span class="spec">24px / 700</span></div>
+      <div class="type-row"><span class="t-display">Aa Display</span><span class="spec">46px / 800 / −3%</span></div>
+      <div class="type-row"><span class="t-h1">Heading 1 — Título de página</span><span class="spec">34px / 700 / −2.5%</span></div>
+      <div class="type-row"><span class="t-h2">Heading 2 — Seção</span><span class="spec">24px / 700 / −2%</span></div>
       <div class="type-row"><span class="t-h3">Heading 3 — Card</span><span class="spec">19px / 600</span></div>
-      <div class="type-row"><span class="t-body">Body — corpo de aula e descrições. O texto base do portal, pensado para leitura confortável em telas pequenas.</span><span class="spec">15px / 1.6</span></div>
+      <div class="type-row"><span class="t-body">Body — corpo de aula e descrições. O texto base do portal, pensado para leitura confortável em telas pequenas e longa permanência.</span><span class="spec">15px / 1.6</span></div>
       <div class="type-row"><span class="t-sm">Body small — apoio e metadados secundários.</span><span class="spec">13px</span></div>
-      <div class="type-row"><span class="t-cap">Caption / helper — dicas e legendas.</span><span class="spec">12px</span></div>
+      <div class="type-row"><span class="t-cap">Caption / label — dicas e categorias em maiúsculas.</span><span class="spec">12px / +5%</span></div>
       <div class="type-row"><span class="mono" style="font-size:14px">mono · 9.5 · 2026-06-15</span><span class="spec">Geist Mono · notas/datas</span></div>
     </div>
   </section>
 
-  <!-- 2 · CORES -->
+  <!-- 3 · CORES & SURFACES -->
   <section class="ds-section" id="color">
-    <div class="eyebrow">02</div><h2>Cores &amp; Estados</h2>
-    <p class="lead">Marca em esmeralda (primária), violeta (secundária) e ciano (terciária). Estados semânticos guiam o aluno: o que entregou, o que falta, o que atrasou.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">03</div><h2>Cores &amp; Camadas</h2><p class="lead">Marca esmeralda (primária), violeta (secundária), ciano (terciária). Estados semânticos guiam o aluno. As <b>camadas de superfície</b> são a engine do tonal layering.</p></div>
+      <div class="meta">regra:<br><b style="color:var(--shell-text)">nunca #fff puro</b><br>texto: #ece8e7<br>shadows: tinted</div>
+    </div>
     <div class="label-sm">Marca</div>
     <div class="grid cols-4" style="margin-bottom:24px">
-      <div class="swatch"><div class="chip" style="background:var(--shell-primary)"></div><div class="meta"><b>Primary</b><span>#10b981</span></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--shell-secondary)"></div><div class="meta"><b>Secondary</b><span>#8b5cf6</span></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--shell-tertiary)"></div><div class="meta"><b>Tertiary</b><span>#06b6d4</span></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--grad-brand)"></div><div class="meta"><b>Gradiente marca</b><span>brand</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-primary)"></div><div class="meta"><b>Primary</b><span>#10b981 · esmeralda</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-secondary)"></div><div class="meta"><b>Secondary</b><span>#8b5cf6 · violeta</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-tertiary)"></div><div class="meta"><b>Tertiary</b><span>#06b6d4 · ciano</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--grad-cta)"></div><div class="meta"><b>Gradiente CTA</b><span>45° primary→tertiary</span></div></div>
     </div>
     <div class="label-sm">Semântico</div>
     <div class="grid cols-4" style="margin-bottom:24px">
@@ -387,19 +520,21 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
       <div class="swatch"><div class="chip" style="background:var(--shell-danger)"></div><div class="meta"><b>Danger</b><span>atrasado/erro</span></div></div>
       <div class="swatch"><div class="chip" style="background:var(--shell-info)"></div><div class="meta"><b>Info</b><span>informativo</span></div></div>
     </div>
-    <div class="label-sm">Superfícies</div>
+    <div class="label-sm">Camadas obsidian (tonal layering)</div>
     <div class="grid cols-4">
-      <div class="swatch"><div class="chip" style="background:var(--shell-bg)"></div><div class="meta"><b>BG</b><span>--shell-bg</span></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--shell-surface)"></div><div class="meta"><b>Surface</b><span>cards/painéis</span></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--shell-surface-elev)"></div><div class="meta"><b>Elevated</b><span>menus/elevação</span></div></div>
-      <div class="swatch"><div class="chip" style="background:var(--shell-border-strong)"></div><div class="meta"><b>Border</b><span>divisores</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-bg)"></div><div class="meta"><b>Base BG</b><span>recede · canvas</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-surface-low)"></div><div class="meta"><b>Surface low</b><span>sidebar · recessed</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-surface-high)"></div><div class="meta"><b>Surface high</b><span>cards · interativo</span></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--shell-surface-highest)"></div><div class="meta"><b>Surface highest</b><span>modais · flutuante</span></div></div>
     </div>
   </section>
 
-  <!-- 3 · BOTÕES -->
+  <!-- 4 · BOTÕES -->
   <section class="ds-section" id="buttons">
-    <div class="eyebrow">03</div><h2>Botões</h2>
-    <p class="lead">Variantes, tamanhos e estados. Primário reservado para a ação principal de cada tela (publicar, entregar, corrigir).</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">04</div><h2>Botões</h2><p class="lead">O CTA primário usa o <b>gradiente 45°</b> (assinatura do Atelier) com sombra tinted. Primário reservado para a ação principal de cada tela: publicar, entregar, corrigir.</p></div>
+      <div class="meta">radius: 0.625rem<br>peso: 600<br>shadow: tinted<br>disabled: 0.45 opac</div>
+    </div>
     <div class="panel">
       <div class="label-sm">Variantes</div>
       <div class="row" style="margin-bottom:22px">
@@ -420,10 +555,12 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     </div>
   </section>
 
-  <!-- 4 · FORMULÁRIOS -->
+  <!-- 5 · FORMULÁRIOS -->
   <section class="ds-section" id="forms">
-    <div class="eyebrow">04</div><h2>Formulários</h2>
-    <p class="lead">Inputs com foco esmeralda, estados de erro claros, e o dropzone de entrega de atividade. Todos os campos com label visível.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">05</div><h2>Formulários</h2><p class="lead">Inputs com fundo <b>surface-low</b> (sem borda padrão), foco esmeralda com anel suave. Dropzone de entrega. Labels sempre visíveis — nunca placeholder como label.</p></div>
+      <div class="meta">foco: anel 3px<br>erro: danger<br>disabled: 0.5<br>checkbox: accent</div>
+    </div>
     <div class="grid cols-2">
       <div class="panel">
         <div class="field"><label>Nome da turma</label><input class="input" placeholder="Ex.: 3º Ano · Dev. de Sistemas" value="3º DS · Matutino"></div>
@@ -445,22 +582,22 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     </div>
   </section>
 
-  <!-- 5 · CARDS -->
+  <!-- 6 · CARDS -->
   <section class="ds-section" id="cards">
-    <div class="eyebrow">05</div><h2>Cards de Domínio</h2>
-    <p class="lead">Os componentes que o aluno mais vê: turma, aula com progresso e atividade com prazo/status.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">06</div><h2>Cards de Domínio</h2><p class="lead">Cards em <b>surface-high</b>; no hover transicionam para <b>surface-highest</b> com ghost-border esmeralda a 18%. Sem divisores entre itens — o espaço é o divisor. Progresso é linha fina de 2px.</p></div>
+      <div class="meta">hover: highest<br>stripe: 2px gradiente<br>progress: 2px<br>no dividers</div>
+    </div>
     <div class="grid cols-3">
-      <!-- turma -->
       <div class="card"><div class="stripe"></div>
         <div class="tag-disc">Inteligência Artificial</div>
         <h3>3º DS · Matutino</h3>
         <p class="desc">Fundamentos de IA · 25 aulas na trilha</p>
         <div class="card-foot">
-          <div class="stack-faces"><span class="avatar sm">AL</span><span class="avatar sm v">BR</span><span class="avatar sm c">CA</span><span class="avatar sm" style="background:var(--shell-border);color:var(--shell-text-muted)">+29</span></div>
+          <div class="stack-faces"><span class="avatar sm">AL</span><span class="avatar sm v">BR</span><span class="avatar sm c">CA</span><span class="avatar sm" style="background:var(--shell-surface-high);color:var(--shell-text-muted)">+29</span></div>
           <span><i data-lucide="users" style="width:13px;height:13px;vertical-align:-2px"></i> 32 alunos</span>
         </div>
       </div>
-      <!-- aula com progresso -->
       <div class="card">
         <div class="row" style="justify-content:space-between"><span class="badge badge-violet"><i data-lucide="book-open"></i> Aula 14</span><span class="badge badge-success"><i data-lucide="check"></i> Concluída</span></div>
         <h3 style="margin-top:12px">Prompt Engineering</h3>
@@ -468,7 +605,6 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
         <div class="progress-row"><span>Progresso da turma</span><span>86%</span></div>
         <div class="progress"><i style="width:86%"></i></div>
       </div>
-      <!-- atividade -->
       <div class="card">
         <div class="row" style="justify-content:space-between"><span class="badge badge-warning"><i data-lucide="clock"></i> Vence em 2 dias</span><span class="t-cap">15/06</span></div>
         <h3 style="margin-top:12px">Exercício: prompt eficaz</h3>
@@ -478,10 +614,94 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     </div>
   </section>
 
-  <!-- 6 · STATUS -->
+  <!-- 7 · LESSON READER / ATELIER (assinatura) -->
+  <section class="ds-section" id="atelier">
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">07 · Assinatura do produto</div><h2>Lesson Reader — o Atelier</h2><p class="lead">A experiência de leitura de aula é o coração do produto. Layout assimétrico (rail de módulos + corpo offset), tipografia editorial, callouts didáticos (<span class="mono">:::conceito / :::atencao / :::dica</span>), bento de conceitos, exercícios numerados e modo apresentação.</p></div>
+      <div class="meta">rail: 220px<br>body: max 880px<br>line-height: 1.8<br>callouts: 3 tipos</div>
+    </div>
+
+    <div class="atelier">
+      <div class="atelier-rail">
+        <aside class="atelier-side">
+          <div class="course">Editorial Intelligence</div>
+          <h4>Masterclass Portal</h4>
+          <div class="mod"><i data-lucide="book"></i> Visão geral</div>
+          <div class="mod active"><i data-lucide="architecture"></i> Módulo 1 · Fundamentos</div>
+          <div class="mod"><i data-lucide="psychology"></i> Módulo 2 · Sintaxe avançada</div>
+          <div class="mod"><i data-lucide="local-library"></i> Biblioteca</div>
+          <div class="mod"><i data-lucide="group"></i> Entregas</div>
+        </aside>
+        <article class="atelier-body">
+          <div class="atelier-meta">
+            <span class="tag p">Aulas</span>
+            <span class="tag s">Material de apoio</span>
+            <span class="date"><i data-lucide="calendar" style="width:13px;height:13px;vertical-align:-2px"></i> 17 de junho, 2026</span>
+          </div>
+          <h1>A sintaxe do <em>design editorial</em> no século XXI</h1>
+          <p class="dek">Uma exploração profunda sobre como tipografia e espaço negativo definem a autoridade digital em plataformas de conteúdo premium.</p>
+
+          <div class="prose" style="margin-top:36px">
+            <h2>01. O paradigma da legibilidade</h2>
+            <p>Diferente dos layouts tradicionais, o design editorial foca no <strong>ritmo vertical</strong>. A transição entre o que é lido e o que é visualizado deve ser fluida, quase invisível. O uso do Geist permite precisão técnica mantendo o calor humano da tipografia clássica.</p>
+
+            <div class="callout conceito">
+              <div class="ic"><i data-lucide="lightbulb"></i></div>
+              <div class="ct"><b>:::conceito</b><p>Espaço negativo não é vazio — é a pausa que dá sentido ao conteúdo. O silêncio entre as notas define a música.</p></div>
+            </div>
+
+            <blockquote>"O design não é apenas o que parece e o que se sente. Design é como funciona." — Steve Jobs, reinterpretado para a era do Atelier Digital.</blockquote>
+
+            <div class="bento">
+              <div class="b p"><i data-lucide="grid-view"></i><h4>Grades assimétricas</h4><p>Romper a simetria cria tensão visual e guia o olhar do estudante para os pontos de conversão mais importantes.</p></div>
+              <div class="b t"><i data-lucide="sparkles"></i><h4>Micro-interações</h4><p>Pequenos movimentos que validam a ação do usuário, transformando uma aula passiva em uma experiência tátil.</p></div>
+            </div>
+
+            <h3>Estrutura de código exemplar</h3>
+            <pre><code><span style="color:var(--shell-primary)">function</span> <span style="color:var(--shell-tertiary-200)">applyEditorial</span>() {
+  <span style="color:var(--shell-secondary-200)">const</span> spacing = <span style="color:var(--shell-tertiary-200)">"32px"</span>;
+  <span style="color:var(--shell-secondary-200)">return</span> { layout: <span style="color:var(--shell-tertiary-200)">"asymmetric"</span>, depth: <span style="color:var(--shell-tertiary-200)">"tonal"</span> };
+}</code></pre>
+
+            <div class="callout atencao">
+              <div class="ic"><i data-lucide="alert-triangle"></i></div>
+              <div class="ct"><b>:::atencao</b><p>Nunca use sombras pretas puras em cards — elas parecem lodosas. Use camadas de superfície ou sombras tinted (com a cor da marca).</p></div>
+            </div>
+
+            <h2>02. Exercício prático</h2>
+            <ol class="exercise">
+              <li><span class="n">1</span><span>Identifique três áreas da interface onde o <strong>espaço negativo</strong> poderia ser expandido para melhorar a leitura.</span></li>
+              <li><span class="n">2</span><span>Substitua bordas sólidas por <strong>mudanças tonais</strong> entre surface-low e surface-high.</span></li>
+              <li><span class="n">3</span><span>Implemente o modo de apresentação e teste o contraste a 3 metros de distância.</span></li>
+            </ol>
+
+            <div class="callout dica">
+              <div class="ic"><i data-lucide="sparkle"></i></div>
+              <div class="ct"><b>:::dica</b><p>Apresente para um colega e pergunte onde os olhos dele pousam primeiro. Se não for no ponto de conversão, ajuste a assimetria.</p></div>
+            </div>
+          </div>
+
+          <nav class="lesson-nav">
+            <a class="prev"><span class="lab">Anterior</span><span class="ttl">Introdução à estética digital</span></a>
+            <a class="next"><span class="lab">Próxima aula</span><span class="ttl">Psicologia das cores obsidianas</span></a>
+          </nav>
+        </article>
+      </div>
+      <div class="present">
+        <div class="ic"><i data-lucide="tv"></i></div>
+        <div><b>Pronto para projetar</b><small>Otimizado para monitores de 42"</small></div>
+        <button>Ativar</button>
+      </div>
+    </div>
+    <p class="note">Este é o componente que diferencia o Prof. Toni Coimbra de um LMS genérico. Callouts mapeiam 1:1 para os blocos <span class="mono">:::conceito / :::atencao / :::dica</span> do acervo PROF-TONI (ver <span class="mono">catalog/parser.py</span>).</p>
+  </section>
+
+  <!-- 8 · STATUS -->
   <section class="ds-section" id="badges">
-    <div class="eyebrow">06</div><h2>Status &amp; Badges</h2>
-    <p class="lead">Vocabulário visual de estado das entregas e atividades. Use sempre o mesmo par cor+ícone.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">08</div><h2>Status &amp; Badges</h2><p class="lead">Vocabulário visual de estado das entregas e atividades. Use sempre o mesmo par cor+ícone — consistência é autoridade.</p></div>
+      <div class="meta">formato: pill<br>peso: 600<br>ícone: 13px<br>border: ghost</div>
+    </div>
     <div class="panel"><div class="row" style="gap:12px">
       <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
       <span class="badge badge-info"><i data-lucide="circle-check-big"></i> Corrigida</span>
@@ -492,10 +712,12 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     </div></div>
   </section>
 
-  <!-- 7 · TABELAS -->
+  <!-- 9 · TABELAS -->
   <section class="ds-section" id="tables">
-    <div class="eyebrow">07</div><h2>Tabela de Correção</h2>
-    <p class="lead">Onde o professor dá o "check": lista de entregas com status, nota e ações. Inclui hover de linha e empty state.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">09</div><h2>Tabela de Correção</h2><p class="lead">Onde o professor dá o "check": lista de entregas com status, nota e ações. Hover troca a camada de superfície (não adiciona borda).</p></div>
+      <div class="meta">header: surface-low<br>hover: surface-high<br>row sep: 1px ghost<br>empty: state</div>
+    </div>
     <div class="tbl-wrap" style="margin-bottom:22px">
       <table class="tbl">
         <thead><tr><th>Aluno</th><th>Atividade</th><th>Entrega</th><th>Status</th><th>Nota</th><th style="text-align:right">Ações</th></tr></thead>
@@ -509,10 +731,12 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     <div class="tbl-wrap"><div class="empty"><i data-lucide="inbox"></i><div>Nenhuma entrega ainda.</div><small>As entregas dos alunos aparecerão aqui.</small></div></div>
   </section>
 
-  <!-- 8 · FEEDBACK -->
+  <!-- 10 · FEEDBACK -->
   <section class="ds-section" id="feedback">
-    <div class="eyebrow">08</div><h2>Feedback &amp; Overlays</h2>
-    <p class="lead">Modal de confirmação, toasts de notificação (entrega corrigida, prazo), tooltip e skeletons de loading.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">10</div><h2>Feedback &amp; Overlays</h2><p class="lead">Modal em <b>surface-highest</b> com blur 24px (vidro), toasts com borda esquerda semântica, tooltip e skeletons de loading.</p></div>
+      <div class="meta">modal: highest + blur<br>toast: 3px left<br>skeleton: shimmer<br>tooltip: top</div>
+    </div>
     <div class="grid cols-2">
       <div class="modal-demo">
         <div class="modal">
@@ -535,10 +759,12 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     </div>
   </section>
 
-  <!-- 9 · MOTION -->
+  <!-- 11 · MOTION -->
   <section class="ds-section" id="motion">
-    <div class="eyebrow">09</div><h2>Motion &amp; Interação</h2>
-    <p class="lead">Movimento sutil e rápido (160–200ms). Passe o mouse nos cards.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">11</div><h2>Motion &amp; Interação</h2><p class="lead">Movimento sutil e rápido (160–200ms). Hover troca camada de superfície (lift), glow esmeralda para seleção, scale para ações táteis. <b>prefers-reduced-motion</b> sempre respeitado.</p></div>
+      <div class="meta">duração: 160–200ms<br>easing: ease<br>reduced: 0.01ms<br>lift: −6px</div>
+    </div>
     <div class="grid cols-3">
       <div class="motion-card m-lift"><i data-lucide="move-up" style="width:22px"></i><div style="margin-top:8px">Lift — cards de turma/aula</div></div>
       <div class="motion-card m-glow"><i data-lucide="sparkles" style="width:22px"></i><div style="margin-top:8px">Glow — destaque/seleção</div></div>
@@ -546,10 +772,12 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
     </div>
   </section>
 
-  <!-- 10 · ÍCONES -->
+  <!-- 12 · ÍCONES -->
   <section class="ds-section" id="icons">
-    <div class="eyebrow">10</div><h2>Ícones</h2>
-    <p class="lead">Biblioteca <b>Lucide</b> (stroke 2px, herda a cor do texto). Conjunto base do portal.</p>
+    <div class="ds-lead">
+      <div class="copy"><div class="eyebrow">12</div><h2>Ícones</h2><p class="lead">Biblioteca <b>Lucide</b> (stroke 2px, herda a cor do texto). Conjunto base do portal — sempre via <span class="mono">data-lucide</span>.</p></div>
+      <div class="meta">lib: Lucide<br>stroke: 2px<br>herda: color<br>size: 16–22px</div>
+    </div>
     <div class="panel"><div class="icogrid">
       <div class="icocell"><i data-lucide="layout-dashboard"></i>dashboard</div>
       <div class="icocell"><i data-lucide="users"></i>turmas</div>
@@ -563,11 +791,15 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
       <div class="icocell"><i data-lucide="clock"></i>prazo</div>
       <div class="icocell"><i data-lucide="graduation-cap"></i>marca</div>
       <div class="icocell"><i data-lucide="settings"></i>config</div>
+      <div class="icocell"><i data-lucide="lightbulb"></i>conceito</div>
+      <div class="icocell"><i data-lucide="alert-triangle"></i>atenção</div>
+      <div class="icocell"><i data-lucide="sparkle"></i>dica</div>
+      <div class="icocell"><i data-lucide="tv"></i>apresentar</div>
     </div></div>
   </section>
 
   <footer style="text-align:center;color:var(--shell-text-soft);font-size:13px;border-top:1px solid var(--shell-border);padding-top:28px">
-    ProfessorDash Design System · tokens herdados de <span class="mono">static/css/app.css</span> · use como fonte obrigatória em todo prompt de UI. <b>Não invente componentes fora daqui.</b>
+    Prof. Toni Coimbra Design System · v2 · "The Digital Atelier" · tokens fiéis a <span class="mono">static/css/app.css</span> · princípios do design editorial. <b>UI obrigatória — não invente componentes fora daqui.</b>
   </footer>
 </div>
 

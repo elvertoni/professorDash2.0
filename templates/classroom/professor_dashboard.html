@@ -1,85 +1,135 @@
 {% extends 'base.html' %}
 
-{% block title %}Painel do professor · ProfessorDash{% endblock %}
+{% block title %}Painel do professor · Prof. Toni Coimbra{% endblock %}
 
 {% block content %}
 <section class="classroom-page">
-    <div class="section-heading compact">
-        <span class="eyebrow">Professor</span>
-        <h1>Olá, {{ request.user.get_short_name }}</h1>
-        <p>Acompanhe suas turmas e as entregas que aguardam correção.</p>
-    </div>
 
-    <div class="preview-content">
-        <div class="kpi">
-            <div class="kpi-icon green"><i data-lucide="users"></i></div>
-            <div class="kpi-value">{{ total_turmas }}</div>
-            <div class="kpi-label">Turmas</div>
+    <div class="page-hero">
+        <div class="page-hero-copy">
+            <span class="eyebrow">Professor · Painel</span>
+            <h1>Olá, <span class="accent">{{ request.user.get_short_name }}</span></h1>
+            <p class="dek">Acompanhe suas turmas, indicadores e as entregas que aguardam correção.</p>
         </div>
-        <div class="kpi">
-            <div class="kpi-icon violet"><i data-lucide="user-check"></i></div>
-            <div class="kpi-value">{{ total_alunos }}</div>
-            <div class="kpi-label">Alunos ativos</div>
-        </div>
-        <div class="kpi">
-            <div class="kpi-icon yellow"><i data-lucide="clock"></i></div>
-            <div class="kpi-value">{{ total_aguardando }}</div>
-            <div class="kpi-label">A corrigir</div>
+        <div class="page-hero-meta">
+            {% if total_aguardando and total_aguardando > 0 %}
+            <b style="color:var(--shell-warning)">{{ total_aguardando }}</b> a corrigir<br>
+            {% else %}
+            <b style="color:var(--shell-primary)">Tudo em dia</b><br>
+            {% endif %}
+            {{ total_turmas }} turmas ativas<br>
+            {{ total_atividades }} atividades
         </div>
     </div>
 
-    <div class="classroom-actions">
-        <a class="btn btn-outline" href="{% url 'classroom:turma_list' %}">
-            <i data-lucide="users"></i>
-            Minhas turmas
+    <div class="toolbar-atelier">
+        <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_list' %}">
+            <i data-lucide="users"></i> Minhas turmas
         </a>
-        <a class="btn btn-outline" href="{% url 'catalog:aula_list' %}">
-            <i data-lucide="book-open"></i>
-            Acervo de aulas
+        <a class="btn btn-outline btn-sm" href="{% url 'catalog:aula_list' %}">
+            <i data-lucide="book-open"></i> Acervo de aulas
         </a>
+        <span class="spacer"></span>
         <span class="badge badge-neutral"><i data-lucide="clipboard-list"></i> {{ total_atividades }} atividades publicadas</span>
     </div>
 
-    <div class="section-heading compact">
-        <h2>Indicadores por turma</h2>
-        <p>Conclusão de aulas, nota média e volume de entregas.</p>
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-stripe" style="background:var(--grad-cta)"></div>
+            <div class="kpi-top">
+                <div class="kpi-icon green"><i data-lucide="users"></i></div>
+                <span class="kpi-tag">Turmas</span>
+            </div>
+            <div class="kpi-value">{{ total_turmas }}</div>
+            <div class="kpi-label">Turmas ativas</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-stripe" style="background:linear-gradient(90deg,#8b5cf6,#c4b5fd)"></div>
+            <div class="kpi-top">
+                <div class="kpi-icon violet"><i data-lucide="user-check"></i></div>
+                <span class="kpi-tag">Alunos</span>
+            </div>
+            <div class="kpi-value">{{ total_alunos }}</div>
+            <div class="kpi-label">Alunos ativos</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-stripe" style="background:linear-gradient(90deg,#fbbf24,#f59e0b)"></div>
+            <div class="kpi-top">
+                <div class="kpi-icon yellow"><i data-lucide="clock"></i></div>
+                <span class="kpi-tag">Correções</span>
+            </div>
+            <div class="kpi-value">{{ total_aguardando }}</div>
+            <div class="kpi-label">Aguardando check</div>
+            {% if total_aguardando and total_aguardando > 0 %}
+            <div class="kpi-delta" style="color:var(--shell-warning)">
+                <i data-lucide="alert-triangle"></i> fila de correção
+            </div>
+            {% else %}
+            <div class="kpi-delta" style="color:var(--shell-primary)">
+                <i data-lucide="check-circle"></i> tudo corrigido
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section-atelier section-gap">
+        <div class="section-atelier-row">
+            <div>
+                <span class="eyebrow">Indicadores</span>
+                <h2>Desempenho por <span class="accent">turma</span></h2>
+                <p class="lead">Conclusão de aulas, nota média e volume de entregas.</p>
+            </div>
+            <div class="meta">{{ turmas|length }} turmas<br>atualizado agora</div>
+        </div>
     </div>
     {% if turmas %}
         <div class="feature-grid catalog-grid">
             {% for turma in turmas %}
-                <article class="card">
-                    <div class="stripe"></div>
-                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                <article class="card-atelier">
+                    <div class="stripe" style="background:var(--grad-cta)"></div>
+                    <div class="card-head">
+                        <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                        <span class="badge badge-neutral"><i data-lucide="users"></i> {{ turma.stats.alunos|default:0 }}</span>
+                    </div>
                     <h3>{{ turma.nome }}</h3>
-                    <p class="desc">{{ turma.stats.alunos|default:0 }} alunos · {{ turma.stats.entregas|default:0 }} entregas · {{ turma.stats.a_corrigir|default:0 }} a corrigir</p>
+                    <p class="desc">{{ turma.stats.entregas|default:0 }} entregas · {{ turma.stats.a_corrigir|default:0 }} a corrigir</p>
 
-                    <div class="progress-row"><span>Conclusão de aulas</span><span>{{ turma.stats.conclusao_pct|default:0 }}%</span></div>
-                    <div class="progress"><i style="width:{{ turma.stats.conclusao_pct|default:0 }}%"></i></div>
+                    <div class="metric">
+                        <div class="metric-row"><span>Conclusão de aulas</span><b>{{ turma.stats.conclusao_pct|default:0 }}%</b></div>
+                        <div class="progress"><i style="width:{{ turma.stats.conclusao_pct|default:0 }}%"></i></div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-row"><span>Nota média</span><b>{% if turma.stats.media %}{{ turma.stats.media|floatformat:1 }}{% else %}—{% endif %}</b></div>
+                        <div class="progress"><i style="width:{{ turma.stats.media_pct|default:0 }}%"></i></div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-row"><span>Entregas</span><b>{{ turma.stats.entregas|default:0 }}</b></div>
+                        <div class="progress"><i style="width:{{ turma.stats.entregas_pct|default:0 }}%"></i></div>
+                    </div>
 
-                    <div class="progress-row" style="margin-top:10px"><span>Nota média</span><span>{% if turma.stats.media %}{{ turma.stats.media|floatformat:1 }}{% else %}—{% endif %}</span></div>
-                    <div class="progress"><i style="width:{{ turma.stats.media_pct|default:0 }}%"></i></div>
-
-                    <div class="progress-row" style="margin-top:10px"><span>Entregas</span><span>{{ turma.stats.entregas|default:0 }}</span></div>
-                    <div class="progress"><i style="width:{{ turma.stats.entregas_pct|default:0 }}%"></i></div>
-
-                    <div class="card-foot" style="margin-top:14px">
-                        <a href="{% url 'classroom:turma_detail' turma.pk %}">Abrir turma</a>
+                    <div class="card-foot">
+                        <a href="{% url 'classroom:turma_detail' turma.pk %}"><i data-lucide="arrow-right"></i> Abrir turma</a>
                         <a href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}"><i data-lucide="file-down"></i> Relatório</a>
                     </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty-atelier">
             <i data-lucide="inbox"></i>
             <h2>Nenhuma turma</h2>
             <p>Crie uma turma para ver os indicadores aqui.</p>
         </div>
     {% endif %}
 
-    <div class="section-heading compact">
-        <h2>Prazos próximos</h2>
-        <p>Atividades publicadas com prazo nos próximos 7 dias.</p>
+    <div class="section-atelier section-gap">
+        <div class="section-atelier-row">
+            <div>
+                <span class="eyebrow">Calendário</span>
+                <h2>Prazos <span class="accent">próximos</span></h2>
+                <p class="lead">Atividades publicadas com prazo nos próximos 7 dias.</p>
+            </div>
+        </div>
     </div>
     {% if prazos %}
         <div class="tbl-wrap">
@@ -95,7 +145,7 @@
                 <tbody>
                     {% for atividade in prazos %}
                         <tr>
-                            <td>{{ atividade.titulo }}</td>
+                            <td><b style="color:var(--shell-text)">{{ atividade.titulo }}</b></td>
                             <td>{{ atividade.turma.nome }}</td>
                             <td class="mono">{{ atividade.prazo|date:'d/m/Y H:i' }}</td>
                             <td>
@@ -109,15 +159,23 @@
             </table>
         </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty-atelier">
             <i data-lucide="calendar-check"></i>
             <h2>Sem prazos próximos</h2>
             <p>Nenhuma atividade vence nos próximos 7 dias.</p>
         </div>
     {% endif %}
 
-    <div class="section-heading compact">
-        <h2>Aguardando correção</h2>
+    <div class="section-atelier section-gap">
+        <div class="section-atelier-row">
+            <div>
+                <span class="eyebrow">Fila de correção</span>
+                <h2>Aguardando <span class="accent">check</span></h2>
+            </div>
+            {% if aguardando %}
+            <div class="meta">{{ aguardando|length }} entregas<br>pendentes</div>
+            {% endif %}
+        </div>
     </div>
     {% if aguardando %}
         <div class="tbl-wrap">
@@ -162,7 +220,7 @@
             </table>
         </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty-atelier">
             <i data-lucide="party-popper"></i>
             <h2>Nada na fila</h2>
             <p>Todas as entregas foram corrigidas.</p>

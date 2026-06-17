@@ -5,18 +5,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
-    <title>{% block title %}ProfessorDash{% endblock %}</title>
+    <title>{% block title %}Prof. Toni Coimbra{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            var t = localStorage.getItem('professordash-theme');
+            if (t) document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header class="site-header">
-        <a class="brand" href="{% url 'home' %}" aria-label="Página inicial do ProfessorDash">
-            <span class="brand-mark"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
-            <span>ProfessorDash</span>
+        <a class="brand" href="{% url 'home' %}" aria-label="Página inicial do Prof. Toni Coimbra">
+            <span class="brand-mark"><img src="{% static 'logo.svg' %}" alt="" width="34" height="34"></span>
+            <span>Prof. Toni Coimbra</span>
         </a>
         <details class="mobile-nav">
             <summary class="icon-btn" aria-label="Abrir menu de navegação" title="Menu">
@@ -141,7 +147,7 @@
     </main>
 
     <footer class="site-footer">
-        <span>ProfessorDash</span>
+        <span>Prof. Toni Coimbra</span>
         <span class="muted">Portal educacional de instalação única para publicação de aulas, atividades e correções.</span>
     </footer>
 

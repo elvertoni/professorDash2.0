@@ -66,7 +66,7 @@ docker compose up -d   # dev: app + Postgres (docker-compose.yml na raiz)
 
 ## Arquitetura
 
-Portal educacional **single-tenant** (Prof. Toni / SEED-PR). É a camada de **entrega ao aluno** de um pipeline de conhecimento: `canonica.md` (acervo PROF-TONI) → import → catálogo → publicação por turma → aluno. O ProfessorDash **consome** o acervo, nunca o reescreve.
+Portal educacional **single-tenant** (Prof. Toni / SEED-PR). É a camada de **entrega ao aluno** de um pipeline de conhecimento: `canonica.md` (acervo PROF-TONI) → import → catálogo → publicação por turma → aluno. O portal do Prof. Toni Coimbra **consome** o acervo, nunca o reescreve.
 
 **Apps** (todos na raiz, mesmo nível de `manage.py` — proibido `apps/` ou `src/`):
 

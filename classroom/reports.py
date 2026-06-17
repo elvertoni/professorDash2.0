@@ -1,6 +1,7 @@
 import csv
 import io
 
+from django.db.models import Avg, Count
 from django.utils import timezone
 
 from activities.models import Atividade, Entrega
@@ -73,24 +74,71 @@ def aluno_progress(turma, aluno):
 
 
 def turma_report_rows(turma):
-    """Linha por matrícula ativa com progresso e média de notas."""
-    matriculas = (
+    """Linha por matrícula ativa com progresso e média de notas (bulk, sem N+1)."""
+    matriculas = list(
         Matricula.objects.filter(turma=turma, status=Matricula.Status.ATIVA)
         .select_related('aluno')
         .order_by('aluno__nome_completo')
     )
+    if not matriculas:
+        return []
+
+    aluno_ids = [m.aluno_id for m in matriculas]
+
+    atividades = list(
+        Atividade.objects.filter(turma=turma, publicada=True).values_list('id', flat=True)
+    )
+
+    entregas = {
+        (e.aluno_id, e.atividade_id): e
+        for e in Entrega.objects.filter(
+            atividade_id__in=atividades, aluno_id__in=aluno_ids
+        )
+    }
+
+    disponiveis = list(
+        AulaPublicada.objects.available().filter(turma=turma).values_list('id', flat=True)
+    )
+    total_aulas = len(disponiveis)
+
+    progressos = {}
+    if disponiveis and aluno_ids:
+        progressos = dict(
+            ProgressoAula.objects.filter(
+                aluno_id__in=aluno_ids,
+                aula_publicada_id__in=disponiveis,
+                concluido=True,
+            )
+            .values('aluno')
+            .annotate(c=Count('id'))
+            .values_list('aluno', 'c')
+        )
+
+    medias = {}
+    if atividades and aluno_ids:
+        medias_qs = (
+            Entrega.objects.filter(
+                atividade_id__in=atividades,
+                aluno_id__in=aluno_ids,
+                checked=True,
+            )
+            .values('aluno')
+            .annotate(media=Avg('nota'))
+        )
+        medias = {row['aluno']: round(row['media'], 1) for row in medias_qs}
+
     rows = []
     for matricula in matriculas:
         aluno = matricula.aluno
-        _, media = aluno_grade_rows(turma, aluno)
-        concluidas, total, pct = aluno_progress(turma, aluno)
+        concluidas = progressos.get(aluno.id, 0)
+        pct = round(concluidas * 100 / total_aulas) if total_aulas else 0
         rows.append(
             {
                 'aluno': aluno,
                 'data_matricula': matricula.data_matricula,
-                'media': media,
+                'media': medias.get(aluno.id),
                 'concluidas': concluidas,
-                'total_aulas': total,
+                'total_aulas': total_aulas,
                 'progresso_pct': pct,
             }
         )
@@ -173,7 +221,7 @@ def build_boletim_pdf(turma, aluno):
     buffer = io.BytesIO()
     doc = _document(buffer, f'Boletim · {aluno.nome_completo}')
     story = [
-        Paragraph('ProfessorDash · Boletim do aluno', styles['title']),
+        Paragraph('Prof. Toni Coimbra · Boletim do aluno', styles['title']),
         Paragraph(
             f'{aluno.nome_completo} — {turma.nome} · {turma.disciplina.label} · '
             f'{turma.serie} · {turma.ano_letivo}',
@@ -210,7 +258,7 @@ def build_boletim_pdf(turma, aluno):
     story.append(Spacer(1, 16))
     story.append(
         Paragraph(
-            f'Emitido em {_fmt_dt(timezone.now())} · ProfessorDash',
+            f'Emitido em {_fmt_dt(timezone.now())} · Prof. Toni Coimbra · Boletim',
             styles['meta'],
         )
     )
@@ -230,7 +278,7 @@ def build_turma_report_pdf(turma):
     buffer = io.BytesIO()
     doc = _document(buffer, f'Relatório · {turma.nome}')
     story = [
-        Paragraph('ProfessorDash · Relatório de turma', styles['title']),
+        Paragraph('Prof. Toni Coimbra · Relatório de turma', styles['title']),
         Paragraph(
             f'{turma.nome} · {turma.disciplina.label} · {turma.serie} · '
             f'{turma.ano_letivo} · Prof. {turma.professor.get_short_name}',
@@ -265,7 +313,7 @@ def build_turma_report_pdf(turma):
     story.append(Spacer(1, 16))
     story.append(
         Paragraph(
-            f'Emitido em {_fmt_dt(timezone.now())} · ProfessorDash',
+            f'Emitido em {_fmt_dt(timezone.now())} · Prof. Toni Coimbra · Boletim',
             styles['meta'],
         )
     )

@@ -1,7 +1,9 @@
-"""URL configuration for ProfessorDash (core)."""
+"""URL configuration for Prof. Toni Coimbra (core)."""
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from django.conf.urls.static import static
 
 from base.views import HomeView, health
 
@@ -16,3 +18,6 @@ urlpatterns = [
     path('health/', health, name='health'),
     path('', HomeView.as_view(), name='home'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,4 +1,4 @@
-"""Django settings for ProfessorDash (app de configuração: core)."""
+"""Django settings for Prof. Toni Coimbra (app de configuração: core)."""
 
 from pathlib import Path
 

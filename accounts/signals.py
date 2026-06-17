@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from .models import AlunoProfile, ProfessorProfile, User
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=User, dispatch_uid='ensure_role_profile')
 def ensure_role_profile(sender, instance, **kwargs):
     if instance.role == User.Role.PROFESSOR:
         ProfessorProfile.objects.get_or_create(user=instance)

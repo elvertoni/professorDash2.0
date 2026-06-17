@@ -1,24 +1,24 @@
 import csv
+import unicodedata
 from io import StringIO
 
+from django.db import transaction
 from django.utils.dateparse import parse_date
 
 from .forms import StudentEnrollmentForm
 
 
 HEADER_ALIASES = {
-    'nome_completo': {'nome_completo', 'nome completo', 'nome', 'aluno'},
-    'email': {'email', 'e-mail', 'mail'},
+    'nome_completo': {'nome_completo', 'nome_completo', 'nome', 'aluno'},
+    'email': {'email', 'e_mail', 'mail'},
     'school_registration': {
         'matricula_escolar',
-        'matrícula escolar',
         'matricula',
-        'matrícula',
         'ra',
     },
-    'grade': {'serie', 'série', 'grade'},
-    'responsible_name': {'responsavel', 'responsável', 'responsible_name'},
-    'birth_date': {'data_nascimento', 'data de nascimento', 'nascimento'},
+    'grade': {'serie', 'grade'},
+    'responsible_name': {'responsavel', 'responsible_name'},
+    'birth_date': {'data_nascimento', 'nascimento'},
 }
 
 
@@ -47,7 +47,8 @@ def import_students_from_csv(turma, uploaded_file):
 
         form = StudentEnrollmentForm(data=data, turma=turma)
         if form.is_valid():
-            _, created = form.save()
+            with transaction.atomic():
+                _, created = form.save()
             if created:
                 report['created'] += 1
             else:
@@ -80,7 +81,9 @@ def get_value(row, aliases):
 
 
 def normalize_header(header):
-    return (header or '').strip().lower().replace('-', '_')
+    header = (header or '').strip().lower().replace('-', '_')
+    header = unicodedata.normalize('NFKD', header).encode('ascii', 'ignore').decode()
+    return header.replace(' ', '_')
 
 
 def normalize_date(value):

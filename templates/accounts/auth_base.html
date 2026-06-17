@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <section class="auth-page">
     <div class="auth-panel">
         <a class="brand auth-brand" href="{% url 'home' %}">
-            <span class="brand-mark"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
-            <span>ProfessorDash</span>
+            <span class="brand-mark"><img src="{% static 'logo.svg' %}" alt="" width="34" height="34"></span>
+            <span>Prof. Toni Coimbra</span>
         </a>
         {% block auth_content %}{% endblock %}
     </div>

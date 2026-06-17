@@ -1,4 +1,4 @@
-# PROMPT_SPRINTS — executor de sprints do ProfessorDash
+# PROMPT_SPRINTS — executor de sprints do Prof. Toni Coimbra
 
 > Prompt reutilizável para conduzir o agente sprint a sprint. Troque `{N}` pelo número da sprint
 > (0 → 12). Rode **uma sprint por vez**, em ordem, respeitando dependências.

@@ -12,7 +12,7 @@ from materials.models import Material
 
 
 class Command(BaseCommand):
-    help = 'Carrega dados fakes de demonstração para o ProfessorDash.'
+    help = 'Carrega dados fakes de demonstração para o portal do Prof. Toni Coimbra.'
 
     def add_arguments(self, parser):
         parser.add_argument(

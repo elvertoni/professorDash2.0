@@ -1,6 +1,6 @@
-# ProfessorDash
+# Prof. Toni Coimbra
 
-ProfessorDash é o portal educacional que entrega ao aluno o acervo de aulas do Prof. Toni Coimbra. O professor publica aulas por turma, cria atividades, corrige entregas com nota e feedback, e acompanha a evolução da turma.
+Portal educacional do Prof. Toni Coimbra que entrega ao aluno o acervo de aulas. O professor publica aulas por turma, cria atividades, corrige entregas com nota e feedback, e acompanha a evolução da turma.
 
 ## Escopo atual
 

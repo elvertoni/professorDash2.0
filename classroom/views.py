@@ -1,7 +1,18 @@
 from datetime import timedelta
 
 from django.contrib import messages
-from django.db.models import Avg, Count, DecimalField, ExpressionWrapper, F, Prefetch, Q
+from django.db.models import (
+    Avg,
+    Case,
+    Count,
+    DecimalField,
+    ExpressionWrapper,
+    F,
+    Prefetch,
+    Q,
+    Value,
+    When,
+)
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -12,6 +23,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
 from accounts.models import User
+from catalog.parser import sanitize_lesson_html
 
 from .forms import (
     AulaPublicadaEditForm,
@@ -139,8 +151,12 @@ class ProfessorDashboardView(ProfessorRequiredMixin, View):
         for row in concluidas:
             stats[row['aula_publicada__turma']]['concluidas'] = row['total']
 
-        nota_norm = ExpressionWrapper(
-            F('nota') / F('atividade__pontuacao_max'),
+        nota_norm = Case(
+            When(atividade__pontuacao_max=0, then=Value(None)),
+            default=ExpressionWrapper(
+                F('nota') / F('atividade__pontuacao_max'),
+                output_field=DecimalField(max_digits=6, decimal_places=4),
+            ),
             output_field=DecimalField(max_digits=6, decimal_places=4),
         )
         entregas = (
@@ -648,6 +664,7 @@ class AlunoAulaDetailView(AlunoTurmasMixin, View):
             'turma': turma,
             'publicada': publicada,
             'aula': publicada.aula,
+            'lesson_html': sanitize_lesson_html(publicada.aula.conteudo_html),
             'progresso': progresso,
             'previous_aula': previous_aula,
             'next_aula': next_aula,

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ aula.titulo }} · ProfessorDash{% endblock %}
+{% block title %}{{ aula.titulo }} · Prof. Toni Coimbra{% endblock %}
 
 {% block content %}
 <section class="lesson-page">
@@ -38,7 +38,7 @@
         {% endif %}
 
         <div class="lesson-viewer">
-            {{ aula.conteudo_html|safe }}
+            {{ lesson_html|safe }}
         </div>
 
         <div class="status-row">

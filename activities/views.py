@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
@@ -42,6 +43,7 @@ class AtividadeListView(ProfessorTurmaMixin, View):
         turma = self.get_turma(turma_pk)
         atividades = (
             Atividade.objects.filter(turma=turma)
+            .select_related('aula_publicada', 'aula_publicada__aula')
             .prefetch_related('entregas')
             .order_by('-created_at')
         )
@@ -258,9 +260,9 @@ class AlunoAtividadeListView(AlunoAtividadesMixin, View):
             )
         }
         atividades = list(
-            Atividade.objects.filter(turma=turma, publicada=True).order_by(
-                'prazo', '-created_at'
-            )
+            Atividade.objects.filter(turma=turma, publicada=True)
+            .select_related('aula_publicada', 'aula_publicada__aula')
+            .order_by('prazo', '-created_at')
         )
         for atividade in atividades:
             entrega = entregas.get(atividade.id)
@@ -301,13 +303,17 @@ class AlunoEntregaView(AlunoAtividadesMixin, View):
 
         form = EntregaForm(request.POST, request.FILES)
         if form.is_valid():
-            if entrega is None:
-                entrega = Entrega(atividade=atividade, aluno=request.user)
-            entrega.texto_resposta = form.cleaned_data['texto_resposta']
-            entrega.submit()
-            entrega.save()
-            for arquivo in form.cleaned_data['arquivos']:
-                EntregaArquivo.objects.create(entrega=entrega, arquivo=arquivo)
+            arquivos_novos = form.cleaned_data['arquivos']
+            with transaction.atomic():
+                if entrega is None:
+                    entrega = Entrega(atividade=atividade, aluno=request.user)
+                else:
+                    entrega.arquivos.all().delete()
+                entrega.texto_resposta = form.cleaned_data['texto_resposta']
+                entrega.submit()
+                entrega.save()
+                for arquivo in arquivos_novos:
+                    EntregaArquivo.objects.create(entrega=entrega, arquivo=arquivo)
             messages.success(request, 'Entrega registrada com sucesso.')
             return redirect('activities:aluno_entrega', pk=atividade.pk)
 
