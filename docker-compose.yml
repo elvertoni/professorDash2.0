@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: professordash
+      POSTGRES_USER: professordash
+      POSTGRES_PASSWORD: professordash
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U professordash -d professordash']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ['python', 'manage.py', 'runserver', '0.0.0.0:8000']
+    environment:
+      DEBUG: 'True'
+      SECRET_KEY: dev-only-change-me
+      ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      DATABASE_URL: postgres://professordash:professordash@db:5432/professordash
+      EMAIL_HOST: ''
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+      - staticfiles:/app/staticfiles
+      - media:/app/media
+      - protected_media:/app/protected_media
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - from urllib.request import urlopen; urlopen("http://127.0.0.1:8000/health/", timeout=2).read()
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  staticfiles:
+  media:
+  protected_media:

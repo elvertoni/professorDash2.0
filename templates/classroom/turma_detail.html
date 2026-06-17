@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ turma.nome }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <span>{{ turma.nome }}</span>
+    </nav>
+
+    <div class="classroom-header panel">
+        <div>
+            <span class="eyebrow">{{ turma.disciplina.label }}</span>
+            <h1>{{ turma.nome }}</h1>
+            <p>{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
+            <div class="status-row">
+                {% if turma.ativa %}
+                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Ativa</span>
+                {% else %}
+                    <span class="badge badge-neutral"><i data-lucide="archive"></i> Inativa</span>
+                {% endif %}
+                <span class="badge badge-violet"><i data-lucide="users"></i> {{ active_matriculas|length }} alunos ativos</span>
+                <span class="badge badge-neutral"><i data-lucide="user-x"></i> {{ inactive_matriculas|length }} inativos</span>
+            </div>
+        </div>
+        <div class="invite-panel">
+            <span>Código de convite</span>
+            <strong class="mono">{{ turma.codigo_convite }}</strong>
+            <form method="post" action="{% url 'classroom:turma_regenerate_invite' turma.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-outline btn-sm" type="submit">
+                    <i data-lucide="refresh-cw"></i>
+                    Renovar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="classroom-actions">
+        <a class="btn btn-primary" href="{% url 'classroom:turma_aulas' turma.pk %}">
+            <i data-lucide="send"></i>
+            Publicar aulas
+        </a>
+        <a class="btn btn-outline" href="{% url 'activities:atividade_list' turma.pk %}">
+            <i data-lucide="clipboard-list"></i>
+            Atividades
+        </a>
+        <a class="btn btn-outline" href="{% url 'materials:material_list' turma.pk %}">
+            <i data-lucide="folder"></i>
+            Materiais
+        </a>
+        <a class="btn btn-outline" href="{% url 'classroom:matricula_create' turma.pk %}">
+            <i data-lucide="user-plus"></i>
+            Matricular aluno
+        </a>
+        <a class="btn btn-outline" href="{% url 'classroom:matricula_import' turma.pk %}">
+            <i data-lucide="upload"></i>
+            Importar CSV
+        </a>
+        <a class="btn btn-outline" href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}">
+            <i data-lucide="file-down"></i>
+            Relatório PDF
+        </a>
+        <a class="btn btn-outline" href="{% url 'classroom:turma_relatorio_csv' turma.pk %}">
+            <i data-lucide="table"></i>
+            Relatório CSV
+        </a>
+        <a class="btn btn-outline" href="{% url 'classroom:turma_update' turma.pk %}">
+            <i data-lucide="settings"></i>
+            Editar turma
+        </a>
+        <a class="btn btn-danger" href="{% url 'classroom:turma_delete' turma.pk %}">
+            <i data-lucide="trash-2"></i>
+            Excluir
+        </a>
+    </div>
+
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Aluno</th>
+                    <th>Matrícula</th>
+                    <th>Série</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for matricula in turma.matriculas.all %}
+                    <tr>
+                        <td>
+                            <span class="name">
+                                <span class="avatar sm">{{ matricula.aluno.get_short_name|slice:':2'|upper }}</span>
+                                <span>
+                                    {{ matricula.aluno.nome_completo }}
+                                    <small>{{ matricula.aluno.email }}</small>
+                                </span>
+                            </span>
+                        </td>
+                        <td class="mono">{{ matricula.aluno.aluno_profile.school_registration|default:'—' }}</td>
+                        <td>{{ matricula.aluno.aluno_profile.grade|default:'—' }}</td>
+                        <td class="mono">{{ matricula.data_matricula|date:'d/m/Y' }}</td>
+                        <td>
+                            {% if matricula.status == 'ativa' %}
+                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Ativa</span>
+                            {% else %}
+                                <span class="badge badge-neutral"><i data-lucide="archive"></i> Inativa</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="tbl-actions">
+                                <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_boletim_pdf' turma.pk matricula.pk %}">
+                                    <i data-lucide="file-text"></i>
+                                    Boletim
+                                </a>
+                                <a class="btn btn-outline btn-sm" href="{% url 'classroom:matricula_update' turma.pk matricula.pk %}">
+                                    <i data-lucide="edit-3"></i>
+                                    Editar
+                                </a>
+                                {% if matricula.status == 'ativa' %}
+                                    <a class="btn btn-danger btn-sm" href="{% url 'classroom:matricula_delete' turma.pk matricula.pk %}">
+                                        <i data-lucide="user-x"></i>
+                                        Desmatricular
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i data-lucide="inbox"></i>
+                                <strong>Nenhum aluno matriculado</strong>
+                                <span>Matricule manualmente ou importe um CSV de alunos.</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'accounts/profile_base.html' %}
+
+{% block profile_content %}
+<div class="section-heading compact">
+    <span class="eyebrow">Aluno</span>
+    <h2>Perfil do aluno</h2>
+    <p>Dados de identificação usados nas matrículas, entregas e acompanhamento de progresso.</p>
+</div>
+<div class="feature-grid account-grid">
+    <article class="card">
+        <div class="stripe"></div>
+        <span class="tag-disc">Identidade</span>
+        <h3>{{ request.user.nome_completo }}</h3>
+        <p class="desc">{{ request.user.email }}</p>
+        <div class="card-foot"><span>Aluno</span><i data-lucide="user-round"></i></div>
+    </article>
+    <article class="card">
+        <div class="stripe"></div>
+        <span class="tag-disc">Matrícula</span>
+        <h3>{{ profile.school_registration|default:'Matrícula não informada' }}</h3>
+        <p class="desc">{{ profile.grade|default:'Série ainda não informada.' }}</p>
+        <div class="card-foot"><span>{{ profile.responsible_name|default:'Responsável não informado' }}</span><i data-lucide="id-card"></i></div>
+    </article>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <span>{{ title }}</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">Matrículas</span>
+        <h1>{{ title }}</h1>
+        <p>Crie ou atualize a conta de aluno e mantenha a matrícula vinculada à turma.</p>
+    </div>
+
+    <form class="panel account-form" method="post">
+        {% csrf_token %}
+        {% include 'accounts/partials/form_fields.html' %}
+        <div class="form-actions">
+            <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Cancelar</a>
+            <button class="btn btn-primary" type="submit">
+                <i data-lucide="save"></i>
+                {{ submit_label }}
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

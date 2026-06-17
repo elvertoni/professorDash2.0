@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Painel do Professor · ProfessorDash · Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --paper:#F6F3EC; --paper-2:#FCFAF5; --card:#FFFFFF;
+  --ink:#16130F; --ink-2:#4B453C; --ink-3:#8A8174;
+  --line:rgba(22,19,15,.10); --line-soft:rgba(22,19,15,.06);
+  --indigo:#4338CA; --persimmon:#C2410C; --teal:#0F766E; --plum:#86198F;
+  --ok:#15803D;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --sans:'Inter',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,monospace;
+  --r:18px; --rs:12px;
+  --shadow:0 1px 0 rgba(22,19,15,.04), 0 18px 40px -28px rgba(22,19,15,.45);
+  --shadow-hover:0 1px 0 rgba(22,19,15,.04), 0 34px 60px -30px rgba(22,19,15,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:
+    radial-gradient(1200px 700px at 100% -5%, rgba(67,56,202,.05), transparent 60%),
+    radial-gradient(1000px 600px at -8% 8%, rgba(194,65,12,.045), transparent 55%),
+    var(--paper);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  min-height:100vh;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.eyebrow{font-size:.68rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+::selection{background:rgba(67,56,202,.16)}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+  padding:1.1rem clamp(1.25rem,5vw,3.5rem);
+  background:color-mix(in srgb,var(--paper) 80%,transparent);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft);
+}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand .mk{width:34px;height:34px;border-radius:10px;background:var(--ink);color:var(--paper-2);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:1.05rem}
+.brand b{font-family:var(--serif);font-weight:600;font-size:1.12rem;letter-spacing:-.01em}
+.brand small{display:block;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-top:1px}
+.tb-actions{display:flex;align-items:center;gap:.55rem}
+.ic{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--paper-2);display:grid;place-items:center;cursor:pointer;color:var(--ink-2);position:relative;transition:.18s}
+.ic:hover{border-color:var(--ink);color:var(--ink)}
+.ic .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--persimmon);border:2px solid var(--paper-2)}
+.ic svg{width:18px;height:18px}
+.ava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--plum));color:#fff;display:grid;place-items:center;font-weight:700;font-size:.82rem;letter-spacing:.02em}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1200px;margin:0 auto;padding:clamp(2rem,5vw,4rem) clamp(1.25rem,5vw,3.5rem) 5rem}
+
+/* ---------- hero ---------- */
+.hero{margin-bottom:3.5rem}
+.hero .eyebrow{display:flex;align-items:center;gap:.7rem;margin-bottom:1.1rem}
+.hero .eyebrow span{height:1px;width:46px;background:var(--line)}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.6rem,6vw,4.4rem);line-height:.98;letter-spacing:-.025em}
+.hero h1 i{font-style:italic;color:var(--indigo)}
+.hero p{margin-top:1.1rem;max-width:48ch;color:var(--ink-2);font-size:1.02rem;line-height:1.6}
+.hero p b{color:var(--ink);font-weight:600}
+
+.stats{display:flex;flex-wrap:wrap;gap:0;margin-top:2.5rem;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--paper-2)}
+.stat{flex:1;min-width:150px;padding:1.4rem 1.6rem;border-right:1px solid var(--line)}
+.stat:last-child{border-right:none}
+.stat .k{font-family:var(--serif);font-weight:500;font-size:2.5rem;line-height:1;letter-spacing:-.02em}
+.stat .l{margin-top:.55rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.stat.accent .k{color:var(--persimmon)}
+
+/* ---------- section head ---------- */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin:0 .25rem 1.5rem}
+.sec-head h2{font-family:var(--serif);font-weight:500;font-size:1.6rem;letter-spacing:-.01em}
+.sec-head .meta{font-size:.74rem;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;font-weight:600}
+.rule{height:1px;background:var(--line);margin:0 .25rem 1.75rem}
+
+/* ---------- turma grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:1.4rem}
+
+.turma{
+  --ac:var(--indigo);
+  position:relative;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--shadow);padding:1.6rem 1.6rem 1.4rem;
+  overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:block;
+  transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s,border-color .25s;
+}
+.turma::before{content:"";position:absolute;left:0;top:1.6rem;bottom:1.6rem;width:3px;border-radius:0 3px 3px 0;background:var(--ac);transform:scaleY(.0);transform-origin:top;transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.turma:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover);border-color:color-mix(in srgb,var(--ac) 35%,var(--line))}
+.turma:hover::before{transform:scaleY(1)}
+.turma:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+
+.t-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
+.t-id{display:flex;align-items:baseline;gap:.7rem}
+.t-id .idx{font-family:var(--serif);font-weight:500;font-size:2.1rem;line-height:.8;color:var(--ac);letter-spacing:-.03em}
+.t-id .meta-name h3{font-family:var(--serif);font-weight:500;font-size:1.32rem;letter-spacing:-.01em;line-height:1.1}
+.t-id .meta-name .sub{display:flex;align-items:center;gap:.45rem;margin-top:.35rem;font-size:.74rem;color:var(--ink-3);letter-spacing:.04em}
+.t-id .meta-name .sub svg{width:13px;height:13px}
+
+.pill{display:inline-flex;align-items:center;gap:.4rem;padding:.34rem .7rem;border-radius:999px;font-size:.7rem;font-weight:600;letter-spacing:.03em;white-space:nowrap}
+.pill svg{width:13px;height:13px}
+.pill.warn{background:rgba(194,65,12,.10);color:var(--persimmon)}
+.pill.ok{background:rgba(21,128,61,.10);color:var(--ok)}
+
+/* disciplines split */
+.discs{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line-soft);padding-top:1.3rem}
+.disc{padding:0 1.2rem}
+.disc:first-child{padding-left:.1rem;border-right:1px solid var(--line-soft)}
+.disc:last-child{padding-right:.1rem}
+.disc .dh{display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem}
+.disc .dh .d-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.disc .dh b{font-size:.92rem;font-weight:600;letter-spacing:-.005em}
+.disc .frac{font-family:var(--mono);font-size:.74rem;color:var(--ink-3);margin-bottom:.55rem}
+.disc .frac em{font-style:normal;color:var(--ink)}
+.track{height:3px;border-radius:99px;background:var(--line);overflow:hidden}
+.track > i{display:block;height:100%;border-radius:99px}
+.disc .note{margin-top:.6rem;font-size:.7rem;color:var(--ink-3);display:flex;align-items:center;gap:.35rem}
+.disc .note svg{width:12px;height:12px}
+.disc .note.flag{color:var(--persimmon)}
+
+.t-foot{display:flex;align-items:center;justify-content:space-between;margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--line-soft)}
+.t-foot .who{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--ink-2)}
+.t-foot .who svg{width:15px;height:15px;color:var(--ink-3)}
+.t-foot .go{display:inline-flex;align-items:center;gap:.45rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)}
+.t-foot .go svg{width:16px;height:16px;transition:transform .25s}
+.turma:hover .t-foot .go svg{transform:translateX(4px)}
+
+/* add card */
+.add{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.7rem;min-height:240px;border:1.5px dashed var(--line);border-radius:var(--r);background:transparent;cursor:pointer;color:var(--ink-2);transition:.2s;text-decoration:none}
+.add:hover{border-color:var(--indigo);color:var(--indigo);background:var(--paper-2)}
+.add .plus{width:46px;height:46px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center;transition:transform .2s}
+.add:hover .plus{transform:rotate(90deg)}
+.add .plus svg{width:20px;height:20px}
+.add b{font-family:var(--serif);font-weight:500;font-size:1.05rem}
+.add small{font-size:.74rem;color:var(--ink-3);max-width:22ch}
+
+footer{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:.72rem;color:var(--ink-3);letter-spacing:.04em}
+
+@media(max-width:520px){.discs{grid-template-columns:1fr}.disc{padding:0}.disc:first-child{border-right:none;border-bottom:1px solid var(--line-soft);padding-bottom:1rem;margin-bottom:1rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <span class="mk">P</span>
+    <div><b>ProfessorDash</b><small>Edição Professor</small></div>
+  </div>
+  <div class="tb-actions">
+    <button class="ic" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+    <button class="ic" aria-label="Notificações"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    <div class="ava">TO</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow"><span></span> Painel do Professor — Quarta, 16 de junho</div>
+    <h1>Bom dia, <i>Toni</i>.</h1>
+    <p>Seu ateliê está pronto. Hoje há <b>3 turmas ativas</b> e <b>12 entregas</b> aguardando sua correção.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="k num">03</div><div class="l">Turmas ativas</div></div>
+      <div class="stat"><div class="k num">06</div><div class="l">Disciplinas</div></div>
+      <div class="stat"><div class="k num">87</div><div class="l">Alunos</div></div>
+      <div class="stat accent"><div class="k num">12</div><div class="l">A corrigir</div></div>
+    </div>
+  </section>
+
+  <!-- TURMAS -->
+  <div class="sec-head">
+    <h2>Minhas turmas</h2>
+    <div class="meta">3 turmas · 2 disciplinas cada</div>
+  </div>
+  <div class="rule"></div>
+
+  <div class="grid">
+
+    <!-- TURMA 01 -->
+    <a class="turma" href="#" style="--ac:var(--indigo)">
+      <div class="t-top">
+        <div class="t-id">
+          <div class="idx num">01</div>
+          <div class="meta-name">
+            <h3>9º Ano A</h3>
+            <div class="sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg> 32 alunos · Manhã</div>
+          </div>
+        </div>
+        <span class="pill warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> 7 a corrigir</span>
+      </div>
+      <div class="discs">
+        <div class="disc">
+          <div class="dh"><span class="d-dot" style="background:var(--indigo)"></span><b>Ciências</b></div>
+          <div class="frac"><em>8</em>/12 aulas</div>
+          <div class="track"><i style="width:67%;background:var(--indigo)"></i></div>
+          <div class="note flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg> 7 entregas</div>
+        </div>
+        <div class="disc">
+          <div class="dh"><span class="d-dot" style="background:var(--teal)"></span><b>Geografia</b></div>
+          <div class="frac"><em>5</em>/10 aulas</div>
+          <div class="track"><i style="width:50%;background:var(--teal)"></i></div>
+          <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> em dia</div>
+        </div>
+      </div>
+      <div class="t-foot">
+        <span class="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Última aula há 2 dias</span>
+        <span class="go">Abrir subportal <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- TURMA 02 -->
+    <a class="turma" href="#" style="--ac:var(--persimmon)">
+      <div class="t-top">
+        <div class="t-id">
+          <div class="idx num">02</div>
+          <div class="meta-name">
+            <h3>8º Ano B</h3>
+            <div class="sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg> 28 alunos · Tarde</div>
+          </div>
+        </div>
+        <span class="pill warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> 5 a corrigir</span>
+      </div>
+      <div class="discs">
+        <div class="disc">
+          <div class="dh"><span class="d-dot" style="background:var(--persimmon)"></span><b>Física</b></div>
+          <div class="frac"><em>10</em>/14 aulas</div>
+          <div class="track"><i style="width:71%;background:var(--persimmon)"></i></div>
+          <div class="note flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg> 5 entregas</div>
+        </div>
+        <div class="disc">
+          <div class="dh"><span class="d-dot" style="background:var(--plum)"></span><b>Matemática</b></div>
+          <div class="frac"><em>9</em>/12 aulas</div>
+          <div class="track"><i style="width:75%;background:var(--plum)"></i></div>
+          <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> em dia</div>
+        </div>
+      </div>
+      <div class="t-foot">
+        <span class="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Última aula ontem</span>
+        <span class="go">Abrir subportal <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- TURMA 03 -->
+    <a class="turma" href="#" style="--ac:var(--teal)">
+      <div class="t-top">
+        <div class="t-id">
+          <div class="idx num">03</div>
+          <div class="meta-name">
+            <h3>7º Ano A</h3>
+            <div class="sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg> 27 alunos · Manhã</div>
+          </div>
+        </div>
+        <span class="pill ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Em dia</span>
+      </div>
+      <div class="discs">
+        <div class="disc">
+          <div class="dh"><span class="d-dot" style="background:var(--persimmon)"></span><b>História</b></div>
+          <div class="frac"><em>12</em>/12 aulas</div>
+          <div class="track"><i style="width:100%;background:var(--persimmon)"></i></div>
+          <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> concluída</div>
+        </div>
+        <div class="disc">
+          <div class="dh"><span class="d-dot" style="background:var(--indigo)"></span><b>Português</b></div>
+          <div class="frac"><em>6</em>/11 aulas</div>
+          <div class="track"><i style="width:55%;background:var(--indigo)"></i></div>
+          <div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> em dia</div>
+        </div>
+      </div>
+      <div class="t-foot">
+        <span class="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Última aula há 4h</span>
+        <span class="go">Abrir subportal <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- ADD -->
+    <a class="add" href="#">
+      <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+      <b>Nova turma</b>
+      <small>Crie e vincule disciplinas do catálogo</small>
+    </a>
+  </div>
+
+  <footer>
+    <span>ProfessorDash · Prof. Toni · SEED-PR</span>
+    <span class="num">Mockup editorial — dados fictícios</span>
+  </footer>
+</main>
+</body>
+</html>

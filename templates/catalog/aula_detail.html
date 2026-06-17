@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ aula.titulo }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="lesson-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'catalog:aula_list' %}">Catálogo</a>
+        <span>{{ aula.disciplina.label }}</span>
+        <span>{{ aula.trilha.label }}</span>
+    </nav>
+
+    <article class="lesson-shell">
+        <header class="lesson-header">
+            <span class="badge badge-violet"><i data-lucide="book-open"></i> Aula {{ aula.ordem|stringformat:'02d' }}</span>
+            <h1>{{ aula.titulo }}</h1>
+            {% if aula.tema %}
+                <p>{{ aula.tema }}</p>
+            {% endif %}
+            <div class="lesson-meta">
+                <span>{{ aula.disciplina.label }}</span>
+                <span>{{ aula.trilha.label }}</span>
+                {% if aula.versao %}<span>Versão {{ aula.versao }}</span>{% endif %}
+            </div>
+        </header>
+
+        {% if aula.objetivos %}
+            <section class="lesson-summary panel">
+                <h2>Objetivos</h2>
+                <ul>
+                    {% for objetivo in aula.objetivos %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <div class="lesson-viewer">
+            {{ lesson_html|safe }}
+        </div>
+    </article>
+
+    <nav class="lesson-nav" aria-label="Navegação da trilha">
+        {% if previous_aula %}
+            <a class="btn btn-outline" href="{{ previous_aula.get_absolute_url }}">
+                <i data-lucide="arrow-left"></i>
+                Aula anterior
+            </a>
+        {% else %}
+            <span></span>
+        {% endif %}
+        {% if next_aula %}
+            <a class="btn btn-primary" href="{{ next_aula.get_absolute_url }}">
+                Próxima aula
+                <i data-lucide="arrow-right"></i>
+            </a>
+        {% endif %}
+    </nav>
+</section>
+{% endblock %}

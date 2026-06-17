@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Atividades · {{ turma.nome }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+        <a href="{% url 'classroom:aluno_turma_aulas' turma.pk %}">{{ turma.nome }}</a>
+        <span>Atividades</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.disciplina.label }}</span>
+        <h1>Atividades da turma</h1>
+        <p>Veja as atividades liberadas, prazos e o status das suas entregas.</p>
+    </div>
+
+    {% if atividades %}
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Atividade</th>
+                        <th>Prazo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for atividade in atividades %}
+                        <tr>
+                            <td>
+                                <span class="name">
+                                    <span>
+                                        {{ atividade.titulo }}
+                                        {% if atividade.aula_publicada %}<small>{{ atividade.aula_publicada.aula.titulo }}</small>{% endif %}
+                                    </span>
+                                </span>
+                            </td>
+                            <td class="mono">{% if atividade.prazo %}{{ atividade.prazo|date:'d/m/Y H:i' }}{% else %}Sem prazo{% endif %}</td>
+                            <td>
+                                {% if atividade.meu_status == 'corrigida' %}
+                                    <span class="badge badge-info"><i data-lucide="check-check"></i> Corrigida</span>
+                                {% elif atividade.meu_status == 'entregue' %}
+                                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
+                                {% elif atividade.meu_status == 'atrasada' %}
+                                    <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                                {% elif not atividade.aberta_para_entrega %}
+                                    <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Prazo encerrado</span>
+                                {% else %}
+                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed"></i> Pendente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
+                                    <i data-lucide="upload"></i> Abrir
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="clipboard-list"></i>
+            <h2>Nenhuma atividade liberada</h2>
+            <p>Quando o professor publicar atividades, elas aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

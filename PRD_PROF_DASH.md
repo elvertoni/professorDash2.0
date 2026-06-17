@@ -22,11 +22,11 @@ A `canonica.md` é a fonte de verdade. O ProfessorDash **consome** o acervo — 
 
 ### 1.2 Personas
 
-| Persona | Quem é | Faz |
-|---|---|---|
-| **Professor** (Toni) | Dono do conteúdo, SEED-PR | Cria turmas, matricula alunos, publica aulas, cria atividades, dá check/nota/feedback nas entregas |
-| **Aluno** | 14–18 anos, Curso Técnico em Desenvolvimento de Sistemas | Acessa aulas da sua turma, estuda, faz atividades, entrega materiais, vê notas e progresso |
-| **Admin** | Toni (mesmo) | Gestão total via Django Admin |
+| Persona              | Quem é                                                   | Faz                                                                                                |
+| ----------------------| ----------------------------------------------------------| ----------------------------------------------------------------------------------------------------|
+| **Professor** (Toni) | Dono do conteúdo, SEED-PR                                | Cria turmas, matricula alunos, publica aulas, cria atividades, dá check/nota/feedback nas entregas |
+| **Aluno**            | 14–18 anos, Curso Técnico em Desenvolvimento de Sistemas | Acessa aulas da sua turma, estuda, faz atividades, entrega materiais, vê notas e progresso         |
+| **Admin**            | Toni (mesmo)                                             | Gestão total via Django Admin                                                                      |
 
 ### 1.3 Decisões de produto (definidas)
 
@@ -145,10 +145,10 @@ erDiagram
 ## 4. Requisitos Funcionais
 
 ### 4.1 Autenticação e contas
-- [ ] Login por email + senha.
-- [ ] Recuperação de senha por email (nativo Django).
-- [ ] Perfis: professor e aluno com telas e permissões distintas.
-- [ ] Edição de perfil (nome, avatar, senha).
+- [x] Login por email + senha.
+- [x] Recuperação de senha por email (nativo Django).
+- [x] Perfis: professor e aluno com telas e permissões distintas.
+- [x] Edição de perfil (nome, avatar, senha).
 
 ### 4.2 Landing page
 - [ ] Página raiz com apresentação do portal, identidade visual do design system.
@@ -156,13 +156,13 @@ erDiagram
 - [ ] Responsiva e impactante.
 
 ### 4.3 Gestão (professor)
-- [ ] CRUD de **Turmas** (nome, disciplina, série, ano letivo, código de convite).
-- [ ] CRUD de **Alunos** + matrícula em turma. Importação de alunos via CSV.
+- [x] CRUD de **Turmas** (nome, disciplina, série, ano letivo, código de convite).
+- [x] CRUD de **Alunos** + matrícula em turma. Importação de alunos via CSV.
 - [ ] CRUD de **Professores** (caso outros profs usem; admin gerencia).
-- [ ] Matricular/desmatricular aluno em turma.
+- [x] Matricular/desmatricular aluno em turma.
 
 ### 4.4 Catálogo e publicação de aulas
-- [ ] **Importar aulas do acervo** (Django command — ver §6). Catálogo de aulas aprovadas, navegável por disciplina/trilha/ordem.
+- [x] **Importar aulas do acervo** (Django command — ver §6). Catálogo de aulas aprovadas, navegável por disciplina/trilha/ordem.
 - [ ] **Publicar aula em turma**: professor escolhe aulas do catálogo, define data de liberação (`disponivel_em`) e ordem na turma.
 - [ ] Despublicar / reordenar aulas da turma.
 
@@ -173,26 +173,26 @@ erDiagram
 - [ ] **Materiais da aula/turma**: baixar arquivos protegidos, acessar links.
 - [ ] **Fazer e entregar atividade**: texto + upload de arquivos. Respeita prazo (marca atrasada se permitido).
 - [ ] **Ver notas e feedback** das entregas corrigidas.
-- [ ] **Notificações** in-app.
+- [x] **Notificações** in-app.
 
 ### 4.6 Correção (professor)
 - [ ] Listar entregas por atividade/turma, com status (pendente/entregue/atrasada/corrigida).
 - [ ] Abrir entrega: ver texto + baixar arquivos do aluno.
-- [ ] **Dar check**: lançar nota, escrever feedback, marcar como corrigida. Dispara notificação ao aluno.
+- [x] **Dar check**: lançar nota, escrever feedback, marcar como corrigida. Dispara notificação ao aluno.
 - [ ] Visão de "atividades aguardando correção" no dashboard do professor.
 
 ### 4.7 Dashboard do professor
-- [ ] Visão geral: nº de turmas, alunos, atividades, entregas pendentes de correção.
-- [ ] Gráficos: entregas por turma, taxa de conclusão de aulas, notas médias, prazos próximos.
-- [ ] Acesso rápido a turmas e correções.
+- [x] Visão geral: nº de turmas, alunos, atividades, entregas pendentes de correção.
+- [x] Gráficos: entregas por turma, taxa de conclusão de aulas, notas médias, prazos próximos.
+- [x] Acesso rápido a turmas e correções.
 
 ### 4.8 Materiais
 - [ ] Upload de materiais por turma e/ou aula (PDF, slides, links, vídeos).
 - [ ] Download protegido por permissão (somente turma/professor).
 
 ### 4.9 Relatórios
-- [ ] Boletim do aluno (PDF) — notas por atividade/turma.
-- [ ] Relatório de turma (PDF/CSV) — matrículas, progresso, médias.
+- [x] Boletim do aluno (PDF) — notas por atividade/turma.
+- [x] Relatório de turma (PDF/CSV) — matrículas, progresso, médias.
 
 ### 4.10 Admin Django
 - [ ] Gestão de todas as entidades com filtros (turmas, alunos, aulas, atividades, entregas, materiais, notificações).
@@ -227,12 +227,12 @@ O diferencial do ProfessorDash: ele lê o warehouse do segundo cérebro.
 ```
 python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] [--disciplina inteligencia-artificial]
 ```
-- [ ] Lê `manifesto.json` → cria/atualiza `Disciplina` e `Trilha`.
-- [ ] Para cada lesson `status = aprovada`: lê `canonica.md`, faz parse do frontmatter YAML.
-- [ ] Converte o corpo Markdown (incluindo blocos `:::tipo` e diagramas) para `conteudo_html` via parser custom (reaproveitar a lógica de render da skill `aula-estatica`).
-- [ ] Cria/atualiza `Aula` casando por `(disciplina, trilha, ordem, slug)`. **Idempotente**: só atualiza se `versao`/`atualizado_em` mudou.
+- [x] Lê `manifesto.json` → cria/atualiza `Disciplina` e `Trilha`.
+- [x] Para cada lesson `status = aprovada`: lê `canonica.md`, faz parse do frontmatter YAML.
+- [x] Converte o corpo Markdown (incluindo blocos `:::tipo` e diagramas) para `conteudo_html` via parser custom (reaproveitar a lógica de render da skill `aula-estatica`).
+- [x] Cria/atualiza `Aula` casando por `(disciplina, trilha, ordem, slug)`. **Idempotente**: só atualiza se `versao`/`atualizado_em` mudou.
 - [ ] Opcional: importar o HTML standalone como `html_standalone`.
-- [ ] Relatório ao final: criadas / atualizadas / ignoradas.
+- [x] Relatório ao final: criadas / atualizadas / ignoradas.
 
 ### 6.3 Estratégia de integração (origem dos arquivos)
 - **Fase 1 (MVP):** importação por path local (rodar o command apontando para o repo PROF-TONI clonado no servidor).
@@ -354,78 +354,165 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 > Marque `[x]` ao concluir. Ordem lógica: fundação → domínio → aluno → professor → polish → deploy.
 
+Nota de processo: a Sprint 11 foi executada fora da ordem por override explícito do usuário, para liberar seed de demonstração e documentação antes das Sprints 9 e 10. Esse override não altera a ordem padrão do roadmap, não conclui dependências futuras e não autoriza marcar tarefas não implementadas como `[x]`. As Sprints 9 e 10 já foram concluídas posteriormente; resta apenas a Sprint 12 (deploy em produção).
+
 ### Sprint 0 — Fundação do projeto
-- [ ] Criar repositório `professordash` e estrutura Django (`core`, `base`).
-- [ ] `.venv`, `requirements.txt`, `django-environ`, `.env.example`.
-- [ ] `settings.py` único (DEBUG, ALLOWED_HOSTS, CSRF, DATABASE_URL, email, timezone, idioma).
-- [ ] `TimeStampedModel` em `base` + storage protegido de media.
-- [ ] Docker Compose de desenvolvimento (app + Postgres).
-- [ ] Endpoint `/health/`.
-- [ ] Integrar design system (`design_system/design-system.html`) ao base template.
+- [x] Criar repositório `professordash` e estrutura Django (`core`, `base`).
+- [x] `.venv`, `requirements.txt`, `django-environ`, `.env.example`.
+- [x] `settings.py` único (DEBUG, ALLOWED_HOSTS, CSRF, DATABASE_URL, email, timezone, idioma).
+- [x] `TimeStampedModel` em `base` + storage protegido de media.
+- [x] Docker Compose de desenvolvimento (app + Postgres).
+- [x] Endpoint `/health/`.
+- [x] Integrar design system (`design_system/design-system.html`) ao base template.
+
+Nota da Sprint 0: a `.venv` local foi recriada com Python 3.13.13 via `uv`. O Docker Compose de desenvolvimento foi criado, mas a execução local depende de Docker instalado no ambiente.
 
 ### Sprint 1 — Contas e autenticação
-- [ ] App `accounts`: `User` custom com login por email, `role`.
-- [ ] `ProfessorProfile`, `AlunoProfile`.
-- [ ] Telas de login, logout, recuperação de senha (email).
-- [ ] Edição de perfil.
-- [ ] Permissões/mixins por papel (professor vs aluno).
-- [ ] Django Admin de usuários.
+- [x] App `accounts`: `User` custom com login por email, `role`.
+- [x] `ProfessorProfile`, `AlunoProfile`.
+- [x] Telas de login, logout, recuperação de senha (email).
+- [x] Edição de perfil.
+- [x] Permissões/mixins por papel (professor vs aluno).
+- [x] Django Admin de usuários.
+
+Decisões da Sprint 1:
+- O `User` custom remove `username` e usa `email` único como `USERNAME_FIELD`; não há auto-registro público. Contas são criadas pelo admin/professor conforme as próximas sprints.
+- `ProfessorProfile` e `AlunoProfile` são criados automaticamente por signals ao salvar o usuário com `role` correspondente.
+- `AlunoProfile.school_registration` aceita `null`/vazio inicialmente, mantendo `unique=True`, porque o perfil é autocriado antes de o professor/admin preencher a matrícula escolar.
+- Admins (`role=admin` ou superusuários) passam pelos mixins de papel para facilitar suporte e gestão total do portal single-tenant.
 
 ### Sprint 2 — Catálogo e importação do acervo
-- [ ] App `catalog`: models `Disciplina`, `Trilha`, `Aula`.
-- [ ] Parser de frontmatter YAML + Markdown→HTML dos blocos `:::tipo` e diagramas.
-- [ ] Command `import_acervo` (idempotente, `--only-aprovada`).
-- [ ] Tela de catálogo de aulas (navegável por disciplina/trilha/ordem).
-- [ ] Visualizador de aula (render fiel ao design system).
+- [x] App `catalog`: models `Disciplina`, `Trilha`, `Aula`.
+- [x] Parser de frontmatter YAML + Markdown→HTML dos blocos `:::tipo` e diagramas.
+- [x] Command `import_acervo` (idempotente, `--only-aprovada`).
+- [x] Tela de catálogo de aulas (navegável por disciplina/trilha/ordem).
+- [x] Visualizador de aula (render fiel ao design system).
+
+Decisões da Sprint 2:
+- O parser usa `PyYAML` para o frontmatter e `Markdown` com pré-processamento próprio para blocos `:::conceito`, `:::atencao`/`:::atenção` e `:::dica`, renderizados com classes CSS do visualizador de aula.
+- Fences de diagrama são preservadas como figuras com código pré-formatado e classes do design system; renderizadores interativos específicos ficam fora da Sprint 2.
+- O command `import_acervo` importa somente aulas aprovadas nesta fase, mesmo sem informar `--only-aprovada`, porque o PRD define que `Aula` entra no catálogo apenas com `status = aprovada`. A flag foi mantida por compatibilidade de CLI.
+- A idempotência compara a chave `(disciplina, trilha, ordem, slug)` e evita atualizar quando `versao` e `atualizado_em` não mudaram e já existe `conteudo_html`.
+- O campo `html_standalone` foi modelado para compatibilidade futura, mas a importação do arquivo standalone permanece aberta por ser opcional no §6.2.
 
 ### Sprint 3 — Turmas e matrículas
-- [ ] App `classroom`: `Turma`, `Matricula`.
-- [ ] CRUD de turmas (professor).
-- [ ] CRUD de alunos + matrícula; importação CSV de alunos.
-- [ ] Código de convite para turma.
-- [ ] Admin de turmas/matrículas.
+- [x] App `classroom`: `Turma`, `Matricula`.
+- [x] CRUD de turmas (professor).
+- [x] CRUD de alunos + matrícula; importação CSV de alunos.
+- [x] Código de convite para turma.
+- [x] Admin de turmas/matrículas.
+
+Decisões da Sprint 3:
+- A Sprint 3 implementa somente `Turma` e `Matricula`; `AulaPublicada` e `ProgressoAula` continuam fora do escopo e entram na Sprint 4.
+- O código de convite é gerado automaticamente no servidor como string alfanumérica única de 8 caracteres e pode ser renovado pelo professor/admin na tela da turma.
+- A ação de desmatricular não apaga a conta do aluno nem a linha de matrícula; ela muda `Matricula.status` para `inativa`, preservando histórico e permitindo reativação por edição/importação.
+- Alunos criados manualmente ou por CSV recebem conta com e-mail como login e senha inutilizável. O acesso inicial deve usar o fluxo nativo de recuperação/definição de senha, evitando senha padrão compartilhada.
+- A importação CSV aceita cabeçalhos em português comuns (`nome_completo`, `email`, `matricula_escolar`, `serie`, `responsavel`, `data_nascimento`); somente nome e e-mail são obrigatórios.
 
 ### Sprint 4 — Publicação de aulas por turma
-- [ ] `AulaPublicada` (aula do catálogo → turma, com `disponivel_em` e ordem).
-- [ ] Tela do professor para publicar/reordenar/despublicar aulas na turma.
-- [ ] `ProgressoAula` (aluno marca conclusão).
-- [ ] Lista de aulas da turma para o aluno, respeitando data de liberação.
+- [x] `AulaPublicada` (aula do catálogo → turma, com `disponivel_em` e ordem).
+- [x] Tela do professor para publicar/reordenar/despublicar aulas na turma.
+- [x] `ProgressoAula` (aluno marca conclusão).
+- [x] Lista de aulas da turma para o aluno, respeitando data de liberação.
+
+Decisões da Sprint 4:
+- `AulaPublicada.disponivel_em` é `DateTimeField` (não só data), permitindo liberar aula em hora exata; default = `timezone.now` (liberação imediata). UI usa input `datetime-local`.
+- Disponibilidade ao aluno = `publicada=True` **e** `disponivel_em <= agora`, encapsulada no manager `AulaPublicada.objects.available()`. Aula apenas `publicada` com data futura aparece ao professor como "Agendada" e fica oculta ao aluno até a liberação.
+- `ordem_na_turma` não é `unique` (evita conflito em swaps); a reordenação renumera toda a lista da turma 1..N a cada subir/descer.
+- "Despublicar" alterna `publicada` (preserva ordem/progresso); "Remover" apaga a `AulaPublicada`. `Aula` do catálogo usa `PROTECT` para não ser apagada por estar publicada.
+- `ProgressoAula` é criado sob demanda (`get_or_create`) ao aluno abrir a aula; conclusão é toggle (`concluido` + `concluido_em`).
+- Rotas do aluno ficam sob o prefixo `turmas/aluno/...` na mesma app `classroom` (namespace `classroom:aluno_*`), evitando segundo `app_name`/include; o acesso é restrito por `AlunoRequiredMixin` + escopo de matrícula ativa.
 
 ### Sprint 5 — Experiência do aluno
-- [ ] Dashboard do aluno (turmas, próximas aulas, atividades, notas).
-- [ ] Visualizar aula publicada + navegação anterior/próxima.
-- [ ] Marcar conclusão de aula.
-- [ ] Responsividade mobile-first.
+- [x] Dashboard do aluno (turmas, próximas aulas, atividades, notas).
+- [x] Visualizar aula publicada + navegação anterior/próxima.
+- [x] Marcar conclusão de aula.
+- [x] Responsividade mobile-first.
+
+Decisões da Sprint 5:
+- Dashboard do aluno (`classroom:aluno_dashboard`) traz turmas ativas, próximas aulas (disponíveis e ainda não concluídas, até 6) e KPIs de turmas/aulas disponíveis/concluídas. Atividades e notas ainda não existem (Sprints 6–7); seus blocos entram quando os models forem criados, sem antecipar escopo.
+- O visualizador do aluno reaproveita o layout de `catalog/aula_detail` (mesmo `lesson-*` do design system); a navegação anterior/próxima percorre apenas aulas **disponíveis** da turma, na ordem `ordem_na_turma`.
+- Mobile-first é atendido pela reutilização das classes responsivas já existentes no design system (`feature-grid`/`catalog-grid` colapsam em 1 coluna, `tbl-wrap` rola horizontalmente, header empilha) — nenhum CSS novo foi inventado fora de `app.css`.
 
 ### Sprint 6 — Atividades e entregas
-- [ ] App `activities`: `Atividade`, `Entrega`, `EntregaArquivo`.
-- [ ] Professor cria atividade (vinculada a turma/aula, prazo, pontuação).
-- [ ] Aluno entrega (texto + arquivos), respeitando prazo/atraso.
-- [ ] Lista de entregas para o professor (status).
+- [x] App `activities`: `Atividade`, `Entrega`, `EntregaArquivo`.
+- [x] Professor cria atividade (vinculada a turma/aula, prazo, pontuação).
+- [x] Aluno entrega (texto + arquivos), respeitando prazo/atraso.
+- [x] Lista de entregas para o professor (status).
+
+Decisões da Sprint 6:
+- O campo `Atividade.anexos` (M2M `Material`) é adiado para a Sprint 8, quando o app `materials` existir; criá-lo agora violaria "não antecipar sprints".
+- Os campos de correção da `Entrega` (`nota`, `feedback`, `corrigido_por`, `corrigido_em`, `checked`) entram na Sprint 7 com a tela do "check". O enum `Status` já inclui `corrigida` para fechar o ciclo, mas o fluxo da Sprint 6 só produz `pendente`/`entregue`/`atrasada`.
+- `Atividade.prazo` é opcional (`null`): atividade sem prazo nunca marca atraso. Com prazo, a entrega após o prazo vira `atrasada` quando `permite_entrega_atrasada=True`; caso contrário a entrega é bloqueada (`aberta_para_entrega`).
+- `Atividade.publicada` (default `False`) controla visibilidade ao aluno: rascunho fica só com o professor; alunos veem e entregam apenas atividades publicadas.
+- `enunciado` é armazenado como texto e renderizado com o filtro `linebreaks` (sem conversão Markdown→HTML completa por ora, para evitar over-engineering; o parser do catálogo pode ser reaproveitado numa sprint futura se necessário).
+- `EntregaArquivo.arquivo` usa o `protected_storage` (sem URL pública). O **download protegido** das entregas é da Sprint 7/8 (correção/materiais); na Sprint 6 os arquivos são apenas registrados e listados por nome, nunca expostos por link.
+- `Entrega` é única por `(atividade, aluno)`; reenvio atualiza a mesma linha (`update_or_create` via `Entrega.submit()`), recalculando status e data. Entrega já `corrigida` fica travada para o aluno.
+- Upload de múltiplos arquivos via `MultipleFileField`/`MultipleFileInput` (padrão da doc do Django, pois `ClearableFileInput` não aceita `multiple` por padrão).
+- Rotas do aluno sob `atividades/aluno/...` e do professor sob `atividades/...` no mesmo app `activities`; escopo por papel (`ProfessorRequiredMixin`/`AlunoRequiredMixin`) + posse da turma / matrícula ativa.
 
 ### Sprint 7 — Correção (o "check")
-- [ ] Tela de correção: ver entrega, baixar arquivos, lançar nota + feedback, marcar corrigida.
-- [ ] Aluno vê nota e feedback.
-- [ ] Visão de "aguardando correção" no dashboard do professor.
+- [x] Tela de correção: ver entrega, baixar arquivos, lançar nota + feedback, marcar corrigida.
+- [x] Aluno vê nota e feedback.
+- [x] Visão de "aguardando correção" no dashboard do professor.
+
+Decisões da Sprint 7:
+- Os campos de correção entram agora na `Entrega`: `nota` (Decimal), `feedback`, `corrigido_por` (FK professor, `SET_NULL`), `corrigido_em`, `checked`. `Entrega.mark_checked()` grava tudo e move o status para `corrigida`.
+- `nota` é obrigatória no check; validada em `0 <= nota <= atividade.pontuacao_max`.
+- **Download protegido** (RNF de media protegida): `EntregaArquivo` é servido só por `activities:entrega_arquivo_download`, que checa permissão antes do `FileResponse` — autorizado para superuser/admin, professor dono da turma ou o próprio aluno da entrega. Nenhuma URL pública (storage protegido). Isso atende a tarefa "baixar arquivos" da correção; o download de **materiais** continua na Sprint 8.
+- O "dashboard do professor" desta sprint é mínimo e focado em "aguardando correção" (`classroom:professor_dashboard`, em `turmas/painel/`): lista entregas com status `entregue`/`atrasada` e `checked=False`, mais KPIs simples (turmas, alunos ativos, a corrigir). Gráficos/relatórios completos ficam para a Sprint 10.
+- Entrega já `corrigida` pode ser revisada pelo professor (reabre o form como "Atualizar correção"), mas fica travada para reenvio do aluno (decisão já registrada na Sprint 6).
+- Import de `activities` dentro da view do dashboard é feito de forma tardia (dentro do método) para evitar import circular, já que `activities` importa `classroom` no nível do módulo.
 
 ### Sprint 8 — Materiais e media protegida
-- [ ] App `materials`: `Material` (upload por turma/aula, links).
-- [ ] Download protegido por permissão (turma/professor).
-- [ ] Anexar materiais a atividades.
+- [x] App `materials`: `Material` (upload por turma/aula, links).
+- [x] Download protegido por permissão (turma/professor).
+- [x] Anexar materiais a atividades.
+
+Decisões da Sprint 8:
+- `Material` tem `turma` e `aula_publicada` ambos opcionais (como no PRD), mas `clean()` exige ao menos um dos dois e ao menos um entre `arquivo`/`link_externo`. Se só a `aula_publicada` for informada, `save()` deriva a `turma` dela — o escopo de visibilidade single-tenant sempre tem uma turma.
+- `arquivo` usa `protected_storage` (sem URL pública). Download só por `materials:material_download`, que checa permissão antes do `FileResponse`: superuser/admin, professor dono da turma, ou aluno com matrícula **ativa** na turma. Se o material está atrelado a uma `aula_publicada` ainda não liberada (`is_available` falso), o aluno não baixa.
+- Materiais do tipo `link` (sem arquivo) abrem direto pelo `link_externo` (sem passar pelo download protegido).
+- "Anexar materiais a atividades" implementado como `Atividade.anexos` (M2M `materials.Material`, referência por string para evitar import circular), restrito no form aos materiais da mesma turma. Os anexos aparecem ao aluno na tela de entrega, reusando o download protegido.
+- Lista do aluno (`materials:aluno_material_list`) filtra materiais da turma e oculta os vinculados a aulas ainda não liberadas, coerente com a regra de liberação por data.
+- Rotas: professor sob `materiais/turmas/<turma>/...`, download em `materiais/<pk>/baixar/`, aluno em `materiais/aluno/turmas/<turma>/`. `enviado_por` é gravado como o professor autenticado na criação.
 
 ### Sprint 9 — Notificações
-- [ ] App `notifications`: `Notificacao` + sino no header.
-- [ ] Disparos: nova aula publicada, nova atividade, prazo próximo, entrega corrigida.
-- [ ] Marcar como lida.
+- [x] App `notifications`: `Notificacao` + sino no header.
+- [x] Disparos: nova aula publicada, nova atividade, prazo próximo, entrega corrigida.
+- [x] Marcar como lida.
+
+Decisões da Sprint 9:
+- `Notificacao` fica no app `notifications` e herda `TimeStampedModel`; além dos campos do PRD, usa `dedupe_key` técnico para tornar os disparos idempotentes por usuário/evento.
+- O sino do header é alimentado por context processor e mostra apenas notificações não lidas; a central `/notificacoes/` lista histórico e permite marcar uma ou todas como lidas.
+- Disparos imediatos usam signals em `notifications/signals.py` para `AulaPublicada`, `Atividade` e `Entrega`: aula recém-publicada disponível, atividade publicada e entrega corrigida.
+- Como Celery/brokers estão proibidos, `prazo próximo` é gerado de forma preguiçosa e idempotente quando o aluno autenticado carrega páginas: atividades publicadas, ainda não entregues, com prazo nas próximas 24 horas.
+- Aulas agendadas para o futuro não notificam antes da liberação; quando já estão disponíveis, a mesma geração preguiçosa cria a notificação para o aluno sem expor conteúdo antecipadamente.
 
 ### Sprint 10 — Dashboards e relatórios
-- [ ] Dashboard do professor (métricas + gráficos).
-- [ ] Boletim do aluno (PDF, Reportlab).
-- [ ] Relatório de turma (PDF/CSV).
+- [x] Dashboard do professor (métricas + gráficos).
+- [x] Boletim do aluno (PDF, Reportlab).
+- [x] Relatório de turma (PDF/CSV).
+
+Decisões da Sprint 10:
+- **Gráficos sem lib JS**: o design system só oferece barras (`.progress`/`.bar`), nenhum componente de chart e nenhuma lib de gráficos está no stack. Por isso os "gráficos" do dashboard do professor são barras CSS do próprio design system (conclusão de aulas, nota média e volume relativo de entregas por turma), evitando inventar componente fora do DS e over-engineering com Chart.js.
+- O `ProfessorDashboardView` calcula os indicadores com agregações agrupadas por turma (`Count`/`Avg` com `filter=`), uma query por métrica em vez de N+1: alunos ativos, aulas disponíveis, aulas concluídas, entregas/`a_corrigir`/média. A nota média é normalizada por `nota/pontuacao_max` (`ExpressionWrapper`) para a largura da barra, exibindo também a média bruta. O bloco "Prazos próximos" lista atividades publicadas com prazo nos próximos 7 dias.
+- Relatórios em `classroom/reports.py` (builders Reportlab puros, retornam `bytes`/`str`), com views/URLs em `classroom`. Reuso de `aluno_grade_rows`/`aluno_progress` entre boletim e relatório de turma.
+- **Boletim**: por turma+aluno (notas por atividade + média + progresso). Dois pontos de acesso com escopo por papel: o aluno baixa o próprio (`aluno_boletim_pdf`, via `AlunoTurmasMixin`/matrícula ativa) e o professor baixa o de qualquer aluno da turma (`turma_boletim_pdf`, via `TurmaQuerysetMixin`).
+- **Relatório de turma**: PDF e CSV (matrículas ativas, progresso, médias), restrito ao professor dono da turma. O CSV usa `;` + BOM UTF-8 para abrir corretamente no Excel pt-BR.
+- Stack lista "Reportlab + PyPDF"; só `reportlab` foi adicionado às dependências porque a geração é direta (sem merge/manipulação de PDFs). `pypdf` fica para quando houver um caso real de pós-processamento, evitando dependência não usada.
+- `reportlab` puxa `pillow` como dependência transitiva; ambos foram fixados no `requirements.txt`.
 
 ### Sprint 11 — Seed e documentação
-- [ ] Command de carga de dados fakes (turmas, alunos, aulas, atividades, entregas em datas variadas).
-- [ ] `docs/` com MkDocs + mermaid (arquitetura, deploy, uso).
+- [x] Command de carga de dados fakes (turmas, alunos, aulas, atividades, entregas em datas variadas).
+- [x] `docs/` com MkDocs + mermaid (arquitetura, deploy, uso).
+
+Decisões da Sprint 11:
+- A execução desta sprint ocorreu por override explícito do usuário, mesmo com as Sprints 9 e 10 abertas. Isso não fecha notificações, dashboards completos nem relatórios; esses itens continuam nas suas respectivas sprints.
+- O command de seed chama-se `seed_demo` e fica em `base`, porque cria dados transversais de contas, catálogo, turmas, materiais, atividades e entregas. Ele é idempotente por e-mails/slugs/títulos fixos e pode ser reexecutado sem duplicar os principais registros demo.
+- Usuários demo recebem senha configurável por `--password`; usuários já existentes só têm senha redefinida com `--reset-passwords`, evitando sobrescrever credenciais locais por acidente.
+- Como as Sprints 9 e 10 seguem fora desta execução, o seed não cria notificações nem relatórios; ele cobre apenas os models já existentes e mantém esses recursos para suas sprints específicas.
+- A documentação usa MkDocs Material com `pymdownx.superfences` para Mermaid. O guia de produção documenta o alvo definido no PRD, mas deixa claro que os artefatos finais de deploy pertencem à Sprint 12.
 
 ### Sprint 12 — Deploy em produção
 - [ ] `docker-compose.prod.yml` (app + db + caddy) com healthchecks e volumes.

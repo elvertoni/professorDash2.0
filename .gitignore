@@ -9,6 +9,7 @@ __pycache__/
 db.sqlite3
 /staticfiles/
 /media/
+/protected_media/
 local_settings.py
 
 # Env / secrets
@@ -24,3 +25,6 @@ Thumbs.db
 
 # Docs build
 /site/
+
+# Projeto legado (arquivo, contém PII de alunos — fora do repo)
+/professordash-antigo/

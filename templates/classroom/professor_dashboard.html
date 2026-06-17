@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel do professor · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <div class="section-heading compact">
+        <span class="eyebrow">Professor</span>
+        <h1>Olá, {{ request.user.get_short_name }}</h1>
+        <p>Acompanhe suas turmas e as entregas que aguardam correção.</p>
+    </div>
+
+    <div class="preview-content">
+        <div class="kpi">
+            <div class="kpi-icon green"><i data-lucide="users"></i></div>
+            <div class="kpi-value">{{ total_turmas }}</div>
+            <div class="kpi-label">Turmas</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon violet"><i data-lucide="user-check"></i></div>
+            <div class="kpi-value">{{ total_alunos }}</div>
+            <div class="kpi-label">Alunos ativos</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon yellow"><i data-lucide="clock"></i></div>
+            <div class="kpi-value">{{ total_aguardando }}</div>
+            <div class="kpi-label">A corrigir</div>
+        </div>
+    </div>
+
+    <div class="classroom-actions">
+        <a class="btn btn-outline" href="{% url 'classroom:turma_list' %}">
+            <i data-lucide="users"></i>
+            Minhas turmas
+        </a>
+        <a class="btn btn-outline" href="{% url 'catalog:aula_list' %}">
+            <i data-lucide="book-open"></i>
+            Acervo de aulas
+        </a>
+        <span class="badge badge-neutral"><i data-lucide="clipboard-list"></i> {{ total_atividades }} atividades publicadas</span>
+    </div>
+
+    <div class="section-heading compact">
+        <h2>Indicadores por turma</h2>
+        <p>Conclusão de aulas, nota média e volume de entregas.</p>
+    </div>
+    {% if turmas %}
+        <div class="feature-grid catalog-grid">
+            {% for turma in turmas %}
+                <article class="card">
+                    <div class="stripe"></div>
+                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                    <h3>{{ turma.nome }}</h3>
+                    <p class="desc">{{ turma.stats.alunos|default:0 }} alunos · {{ turma.stats.entregas|default:0 }} entregas · {{ turma.stats.a_corrigir|default:0 }} a corrigir</p>
+
+                    <div class="progress-row"><span>Conclusão de aulas</span><span>{{ turma.stats.conclusao_pct|default:0 }}%</span></div>
+                    <div class="progress"><i style="width:{{ turma.stats.conclusao_pct|default:0 }}%"></i></div>
+
+                    <div class="progress-row" style="margin-top:10px"><span>Nota média</span><span>{% if turma.stats.media %}{{ turma.stats.media|floatformat:1 }}{% else %}—{% endif %}</span></div>
+                    <div class="progress"><i style="width:{{ turma.stats.media_pct|default:0 }}%"></i></div>
+
+                    <div class="progress-row" style="margin-top:10px"><span>Entregas</span><span>{{ turma.stats.entregas|default:0 }}</span></div>
+                    <div class="progress"><i style="width:{{ turma.stats.entregas_pct|default:0 }}%"></i></div>
+
+                    <div class="card-foot" style="margin-top:14px">
+                        <a href="{% url 'classroom:turma_detail' turma.pk %}">Abrir turma</a>
+                        <a href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}"><i data-lucide="file-down"></i> Relatório</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="inbox"></i>
+            <h2>Nenhuma turma</h2>
+            <p>Crie uma turma para ver os indicadores aqui.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading compact">
+        <h2>Prazos próximos</h2>
+        <p>Atividades publicadas com prazo nos próximos 7 dias.</p>
+    </div>
+    {% if prazos %}
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Atividade</th>
+                        <th>Turma</th>
+                        <th>Prazo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for atividade in prazos %}
+                        <tr>
+                            <td>{{ atividade.titulo }}</td>
+                            <td>{{ atividade.turma.nome }}</td>
+                            <td class="mono">{{ atividade.prazo|date:'d/m/Y H:i' }}</td>
+                            <td>
+                                <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_entregas' atividade.pk %}">
+                                    <i data-lucide="list-checks"></i> Entregas
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="calendar-check"></i>
+            <h2>Sem prazos próximos</h2>
+            <p>Nenhuma atividade vence nos próximos 7 dias.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading compact">
+        <h2>Aguardando correção</h2>
+    </div>
+    {% if aguardando %}
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Atividade</th>
+                        <th>Turma</th>
+                        <th>Status</th>
+                        <th>Entregue em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entrega in aguardando %}
+                        <tr>
+                            <td>
+                                <span class="name">
+                                    <span class="avatar sm">{{ entrega.aluno.get_short_name|slice:':2'|upper }}</span>
+                                    <span>{{ entrega.aluno.nome_completo }}</span>
+                                </span>
+                            </td>
+                            <td>{{ entrega.atividade.titulo }}</td>
+                            <td>{{ entrega.atividade.turma.nome }}</td>
+                            <td>
+                                {% if entrega.status == 'atrasada' %}
+                                    <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                                {% else %}
+                                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
+                                {% endif %}
+                            </td>
+                            <td class="mono">{{ entrega.data_entrega|date:'d/m/Y H:i' }}</td>
+                            <td>
+                                <a class="btn btn-primary btn-sm" href="{% url 'activities:correcao' entrega.pk %}">
+                                    <i data-lucide="check-check"></i> Corrigir
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="party-popper"></i>
+            <h2>Nada na fila</h2>
+            <p>Todas as entregas foram corrigidas.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

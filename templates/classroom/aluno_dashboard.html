@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu painel · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <div class="section-heading compact">
+        <span class="eyebrow">Aluno</span>
+        <h1>Olá, {{ request.user.get_short_name }}</h1>
+        <p>Acompanhe suas turmas, as próximas aulas liberadas e seu progresso.</p>
+    </div>
+
+    <div class="preview-content">
+        <div class="kpi">
+            <div class="kpi-icon green"><i data-lucide="users"></i></div>
+            <div class="kpi-value">{{ total_turmas }}</div>
+            <div class="kpi-label">Turmas ativas</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon violet"><i data-lucide="book-open"></i></div>
+            <div class="kpi-value">{{ total_disponiveis }}</div>
+            <div class="kpi-label">Aulas disponíveis</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon yellow"><i data-lucide="check-check"></i></div>
+            <div class="kpi-value">{{ total_concluidas }}</div>
+            <div class="kpi-label">Aulas concluídas</div>
+        </div>
+    </div>
+
+    <div class="section-heading compact">
+        <h2>Próximas aulas</h2>
+    </div>
+    {% if proximas %}
+        <div class="feature-grid catalog-grid">
+            {% for publicada in proximas %}
+                <article class="card">
+                    <div class="stripe"></div>
+                    <span class="tag-disc">{{ publicada.turma.nome }}</span>
+                    <h3>{{ publicada.aula.titulo }}</h3>
+                    <p class="desc">{{ publicada.aula.disciplina.label }}</p>
+                    <div class="card-foot">
+                        <span class="badge badge-violet"><i data-lucide="calendar"></i> {{ publicada.disponivel_em|date:'d/m/Y' }}</span>
+                        <a href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">Estudar</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="party-popper"></i>
+            <h2>Tudo em dia</h2>
+            <p>Você concluiu todas as aulas disponíveis no momento.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading compact">
+        <h2>Minhas turmas</h2>
+    </div>
+    {% if turmas %}
+        <div class="feature-grid catalog-grid">
+            {% for turma in turmas %}
+                <article class="card">
+                    <div class="stripe"></div>
+                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                    <h3>{{ turma.nome }}</h3>
+                    <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.get_short_name }}</p>
+                    <div class="card-foot">
+                        <span class="badge badge-neutral"><i data-lucide="book-open"></i> Aulas</span>
+                        <a href="{% url 'classroom:aluno_turma_aulas' turma.pk %}">Ver aulas</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="inbox"></i>
+            <h2>Nenhuma turma ativa</h2>
+            <p>Quando você for matriculado em uma turma, ela aparecerá aqui.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

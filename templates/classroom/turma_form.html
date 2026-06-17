@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar turma{% else %}Nova turma{% endif %} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <span>{% if object %}Editar{% else %}Nova{% endif %}</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">Gestão</span>
+        <h1>{% if object %}Editar turma{% else %}Nova turma{% endif %}</h1>
+        <p>Defina a disciplina, série, ano letivo e status da turma.</p>
+    </div>
+
+    <form class="panel account-form" method="post">
+        {% csrf_token %}
+        {% include 'accounts/partials/form_fields.html' %}
+        <div class="form-actions">
+            <a class="btn btn-outline" href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'classroom:turma_list' %}{% endif %}">Cancelar</a>
+            <button class="btn btn-primary" type="submit">
+                <i data-lucide="save"></i>
+                Salvar turma
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

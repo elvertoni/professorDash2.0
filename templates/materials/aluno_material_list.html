@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Materiais · {{ turma.nome }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+        <a href="{% url 'classroom:aluno_turma_aulas' turma.pk %}">{{ turma.nome }}</a>
+        <span>Materiais</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.disciplina.label }}</span>
+        <h1>Materiais da turma</h1>
+        <p>Baixe arquivos e acesse links compartilhados pelo professor.</p>
+    </div>
+
+    {% if materiais %}
+        <div class="feature-grid catalog-grid">
+            {% for material in materiais %}
+                <article class="card">
+                    <div class="stripe"></div>
+                    <span class="tag-disc">{{ material.get_tipo_display }}</span>
+                    <h3>{{ material.titulo }}</h3>
+                    <p class="desc">{{ material.descricao|default:'Sem descrição.' }}</p>
+                    <div class="card-foot">
+                        {% if material.aula_publicada %}
+                            <span class="badge badge-neutral"><i data-lucide="book-open"></i> {{ material.aula_publicada.aula.titulo|truncatechars:24 }}</span>
+                        {% else %}
+                            <span class="badge badge-neutral"><i data-lucide="folder"></i> Turma</span>
+                        {% endif %}
+                        {% if material.arquivo %}
+                            <a href="{% url 'materials:material_download' material.pk %}">Baixar</a>
+                        {% elif material.link_externo %}
+                            <a href="{{ material.link_externo }}" target="_blank" rel="noopener">Abrir</a>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="folder"></i>
+            <h2>Nenhum material disponível</h2>
+            <p>Quando o professor compartilhar materiais, eles aparecerão aqui.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

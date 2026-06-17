@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar alunos · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <span>Importar CSV</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">Importação</span>
+        <h1>Importar alunos por CSV</h1>
+        <p>Inclua alunos em lote e crie as matrículas ativas nesta turma.</p>
+    </div>
+
+    <div class="panel import-help">
+        <h2>Formato esperado</h2>
+        <p>Use uma linha de cabeçalho com as colunas abaixo. Apenas nome e e-mail são obrigatórios.</p>
+        <code class="mono">nome_completo,email,matricula_escolar,serie,responsavel,data_nascimento</code>
+    </div>
+
+    <form class="panel account-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include 'accounts/partials/form_fields.html' %}
+        <div class="form-actions">
+            <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Cancelar</a>
+            <button class="btn btn-primary" type="submit">
+                <i data-lucide="upload"></i>
+                Importar alunos
+            </button>
+        </div>
+    </form>
+
+    {% if report %}
+        <div class="panel import-report">
+            <h2>Relatório da importação</h2>
+            <div class="status-row">
+                <span class="badge badge-success">{{ report.created }} criados</span>
+                <span class="badge badge-info">{{ report.updated }} atualizados</span>
+                <span class="badge badge-danger">{{ report.errors|length }} erros</span>
+            </div>
+            {% if report.errors %}
+                <ul>
+                    {% for error in report.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,32 @@
+site_name: ProfessorDash
+site_description: Portal educacional do Prof. Toni Coimbra para aulas, atividades e correções.
+site_url: https://prof.tonicoimbra.com/
+repo_name: professordash
+docs_dir: docs
+
+theme:
+  name: material
+  language: pt-BR
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+nav:
+  - Início: index.md
+  - Arquitetura: arquitetura.md
+  - Deploy: deploy.md
+  - Uso: uso.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Atividades · {{ turma.nome }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <span>Atividades</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.disciplina.label }}</span>
+        <h1>Atividades da turma</h1>
+        <p>Crie atividades, defina prazo e pontuação, e acompanhe as entregas dos alunos.</p>
+    </div>
+
+    <div class="classroom-actions">
+        <a class="btn btn-primary" href="{% url 'activities:atividade_create' turma.pk %}">
+            <i data-lucide="plus"></i>
+            Nova atividade
+        </a>
+        <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">
+            <i data-lucide="arrow-left"></i>
+            Voltar à turma
+        </a>
+    </div>
+
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Atividade</th>
+                    <th>Prazo</th>
+                    <th>Pontuação</th>
+                    <th>Entregas</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for atividade in atividades %}
+                    <tr>
+                        <td>
+                            <span class="name">
+                                <span>
+                                    {{ atividade.titulo }}
+                                    {% if atividade.aula_publicada %}<small>{{ atividade.aula_publicada.aula.titulo }}</small>{% endif %}
+                                </span>
+                            </span>
+                        </td>
+                        <td class="mono">{% if atividade.prazo %}{{ atividade.prazo|date:'d/m/Y H:i' }}{% else %}Sem prazo{% endif %}</td>
+                        <td class="mono">{{ atividade.pontuacao_max }}</td>
+                        <td class="mono">{{ atividade.entregas.all|length }}</td>
+                        <td>
+                            {% if atividade.publicada %}
+                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Publicada</span>
+                            {% else %}
+                                <span class="badge badge-neutral"><i data-lucide="eye-off"></i> Rascunho</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="tbl-actions">
+                                <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_entregas' atividade.pk %}">
+                                    <i data-lucide="inbox"></i> Entregas
+                                </a>
+                                <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_update' atividade.pk %}">
+                                    <i data-lucide="edit-3"></i> Editar
+                                </a>
+                                <a class="btn btn-danger btn-sm" href="{% url 'activities:atividade_delete' atividade.pk %}">
+                                    <i data-lucide="trash-2"></i> Excluir
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i data-lucide="clipboard-list"></i>
+                                <strong>Nenhuma atividade criada</strong>
+                                <span>Crie a primeira atividade desta turma.</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

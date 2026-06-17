@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if material %}Editar material{% else %}Novo material{% endif %} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <a href="{% url 'materials:material_list' turma.pk %}">Materiais</a>
+        <span>{% if material %}Editar{% else %}Novo{% endif %}</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">Material</span>
+        <h1>{% if material %}Editar material{% else %}Novo material{% endif %}</h1>
+        <p>Anexe um arquivo (protegido) ou informe um link externo. Opcionalmente vincule a uma aula.</p>
+    </div>
+
+    <form class="panel account-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include 'accounts/partials/form_fields.html' %}
+        <div class="form-actions">
+            <a class="btn btn-outline" href="{% url 'materials:material_list' turma.pk %}">Cancelar</a>
+            <button class="btn btn-primary" type="submit">
+                <i data-lucide="save"></i>
+                Salvar material
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

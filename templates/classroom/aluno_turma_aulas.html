@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ turma.nome }} · Aulas · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+        <span>{{ turma.nome }}</span>
+    </nav>
+
+    <div class="classroom-header panel">
+        <div>
+            <span class="eyebrow">{{ turma.disciplina.label }}</span>
+            <h1>{{ turma.nome }}</h1>
+            <p>{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.get_short_name }}</p>
+            <div class="status-row">
+                <span class="badge badge-violet"><i data-lucide="book-open"></i> {{ total }} aulas disponíveis</span>
+                <span class="badge badge-success"><i data-lucide="check-check"></i> {{ concluidas }} concluídas</span>
+            </div>
+        </div>
+        <div class="invite-panel">
+            <a class="btn btn-outline" href="{% url 'activities:aluno_atividade_list' turma.pk %}">
+                <i data-lucide="clipboard-list"></i>
+                Atividades
+            </a>
+            <a class="btn btn-outline" href="{% url 'materials:aluno_material_list' turma.pk %}">
+                <i data-lucide="folder"></i>
+                Materiais
+            </a>
+            <a class="btn btn-outline" href="{% url 'classroom:aluno_boletim_pdf' turma.pk %}">
+                <i data-lucide="file-text"></i>
+                Meu boletim
+            </a>
+        </div>
+    </div>
+
+    {% if publicadas %}
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Aula</th>
+                        <th>Liberada em</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for publicada in publicadas %}
+                        <tr>
+                            <td>
+                                <span class="name">
+                                    <span>
+                                        {{ publicada.aula.titulo }}
+                                        <small>{{ publicada.aula.trilha.label }}</small>
+                                    </span>
+                                </span>
+                            </td>
+                            <td class="mono">{{ publicada.disponivel_em|date:'d/m/Y' }}</td>
+                            <td>
+                                {% if publicada.concluida %}
+                                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Concluída</span>
+                                {% else %}
+                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed"></i> Pendente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
+                                    <i data-lucide="book-open"></i> Estudar
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="inbox"></i>
+            <h2>Nenhuma aula liberada</h2>
+            <p>O professor ainda não liberou aulas para esta turma.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

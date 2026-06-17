@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-panel">
+        <a class="brand auth-brand" href="{% url 'home' %}">
+            <span class="brand-mark"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
+            <span>ProfessorDash</span>
+        </a>
+        {% block auth_content %}{% endblock %}
+    </div>
+</section>
+{% endblock %}

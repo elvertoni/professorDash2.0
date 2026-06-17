@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Painel do Professor · ProfessorDash · Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: { extend: {
+      colors: {
+        "surface": "#131313",
+        "surface-variant": "#353534",
+        "surface-dim": "#131313",
+        "surface-bright": "#3a3939",
+        "surface-container-lowest": "#0e0e0e",
+        "surface-container-low": "#1c1b1b",
+        "surface-container": "#201f1f",
+        "surface-container-high": "#2a2a2a",
+        "surface-container-highest": "#353534",
+        "on-background": "#e5e2e1",
+        "on-surface": "#e5e2e1",
+        "on-surface-variant": "#cac4d4",
+        "outline": "#948e9d",
+        "outline-variant": "#494552",
+        "primary": "#cebdff",
+        "primary-container": "#a78bfa",
+        "primary-fixed": "#e8ddff",
+        "on-primary": "#381385",
+        "secondary": "#5de6ff",
+        "secondary-fixed": "#a2eeff",
+        "tertiary": "#c6c6c7",
+        "error": "#ffb4ab",
+        "warning": "#fbbf24",
+        "success": "#5de6ff",
+        "background": "#131313"
+      },
+      fontFamily: { headline: ["Inter"], body: ["Inter"], label: ["Inter"] },
+      borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" },
+    }},
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color:#131313; color:#e5e2e1; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .tight-tracking { letter-spacing:-0.02em; }
+  .label-tracking { letter-spacing:0.05em; }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:#131313; }
+  ::-webkit-scrollbar-thumb { background:#353534; }
+  /* texturas de capa (sem imagem externa) */
+  .tex-violet { background:
+      radial-gradient(120% 120% at 0% 0%, rgba(167,139,250,.45), transparent 55%),
+      radial-gradient(120% 120% at 100% 100%, rgba(93,230,255,.20), transparent 55%),
+      #1c1b1b; }
+  .tex-cyan { background:
+      radial-gradient(120% 120% at 0% 0%, rgba(93,230,255,.40), transparent 55%),
+      radial-gradient(120% 120% at 100% 100%, rgba(167,139,250,.22), transparent 55%),
+      #1c1b1b; }
+  .tex-amber { background:
+      radial-gradient(120% 120% at 0% 0%, rgba(251,191,36,.35), transparent 55%),
+      radial-gradient(120% 120% at 100% 100%, rgba(167,139,250,.20), transparent 55%),
+      #1c1b1b; }
+  .grain { background-image:radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px); background-size:4px 4px; }
+</style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+<!-- TOPBAR -->
+<header class="fixed top-0 w-full z-50 h-20 flex justify-between items-center px-8 bg-[#131313]/70 backdrop-blur-md md:pl-72">
+  <div class="flex items-center gap-6 flex-1">
+    <div class="relative w-full max-w-md group">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50 group-focus-within:text-secondary transition-colors">search</span>
+      <input class="w-full bg-surface-container-low border-none h-11 pl-12 pr-4 rounded-lg focus:ring-0 focus:border-b focus:border-secondary text-sm transition-all" placeholder="Buscar turmas, aulas, alunos..." type="text"/>
+    </div>
+  </div>
+  <div class="flex items-center gap-6">
+    <button class="relative text-on-surface-variant hover:text-primary transition-colors duration-300">
+      <span class="material-symbols-outlined">notifications</span>
+      <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2 rounded-full bg-error"></span>
+    </button>
+    <button class="text-on-surface-variant hover:text-primary transition-colors duration-300"><span class="material-symbols-outlined">light_mode</span></button>
+    <div class="h-10 w-10 rounded-full overflow-hidden border border-outline-variant/20 bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary font-black text-sm">TO</div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-64 border-r border-[#E5E2E1]/10 bg-[#1C1B1B] hidden md:flex flex-col z-[60] py-8">
+  <div class="px-8 mb-12">
+    <h1 class="text-lg font-black tracking-tighter text-[#E5E2E1]">ProfessorDash</h1>
+    <p class="uppercase tracking-widest text-[10px] font-medium text-primary/80 mt-0.5">Edição Professor</p>
+  </div>
+  <nav class="flex-1 px-4 space-y-1">
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md bg-[#2A2A2A] text-[#CEBDFF] border-r-2 border-[#5DE6FF] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Painel</span>
+    </a>
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md text-[#E5E2E1]/50 hover:bg-[#2A2A2A]/50 hover:text-[#E5E2E1] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">groups</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Turmas</span>
+    </a>
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md text-[#E5E2E1]/50 hover:bg-[#2A2A2A]/50 hover:text-[#E5E2E1] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">menu_book</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Catálogo</span>
+    </a>
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md text-[#E5E2E1]/50 hover:bg-[#2A2A2A]/50 hover:text-[#E5E2E1] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">folder_open</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Materiais</span>
+    </a>
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md text-[#E5E2E1]/50 hover:bg-[#2A2A2A]/50 hover:text-[#E5E2E1] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">task_alt</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Atividades</span>
+    </a>
+  </nav>
+  <div class="px-6 mb-8">
+    <button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-3 rounded-md text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+      <span class="material-symbols-outlined text-[16px]">add</span> Nova turma
+    </button>
+  </div>
+  <footer class="px-4 space-y-1 border-t border-outline-variant/10 pt-6">
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md text-[#E5E2E1]/50 hover:bg-[#2A2A2A]/50 hover:text-[#E5E2E1] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">person</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Minha conta</span>
+    </a>
+    <a class="flex items-center gap-4 px-4 py-3 rounded-md text-[#E5E2E1]/50 hover:bg-[#2A2A2A]/50 hover:text-[#E5E2E1] transition-all duration-300" href="#">
+      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <span class="uppercase tracking-widest text-[10px] font-medium">Sair</span>
+    </a>
+  </footer>
+</aside>
+
+<!-- MAIN -->
+<main class="md:pl-64 pt-20 min-h-screen">
+  <div class="max-w-[1400px] mx-auto p-8 lg:p-12">
+
+    <!-- HERO -->
+    <section class="mb-16">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div class="max-w-2xl">
+          <span class="text-xs font-bold uppercase tracking-widest text-secondary mb-4 block">Painel do Professor</span>
+          <h2 class="text-5xl md:text-6xl font-extrabold tight-tracking mb-6 text-on-background">Bem-vindo, Professor Toni.</h2>
+          <p class="text-lg text-on-surface-variant/80 leading-relaxed font-light">Seu ateliê está pronto. Hoje você tem <span class="text-primary font-medium">3 turmas ativas</span> e <span class="text-primary font-medium">12 entregas</span> aguardando sua correção.</p>
+        </div>
+        <div class="flex gap-4">
+          <div class="bg-surface-container-low p-6 rounded-xl border-l-2 border-secondary">
+            <div class="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1">A corrigir</div>
+            <div class="text-2xl font-bold tight-tracking">12</div>
+          </div>
+          <div class="bg-surface-container-low p-6 rounded-xl border-l-2 border-primary">
+            <div class="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold mb-1">Alunos ativos</div>
+            <div class="text-2xl font-bold tight-tracking">87</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENTO -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
+
+      <!-- TURMAS -->
+      <div class="md:col-span-8 space-y-8">
+        <div class="flex justify-between items-center px-2">
+          <h3 class="text-xl font-bold tight-tracking">Minhas turmas</h3>
+          <a class="text-xs font-bold uppercase tracking-widest text-secondary hover:underline" href="#">Ver todas</a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+          <!-- TURMA CARD 1 -->
+          <a href="#" class="block bg-surface-container-low group hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden">
+            <div class="h-24 relative tex-violet">
+              <div class="absolute inset-0 grain opacity-60"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+              <div class="absolute top-4 right-4 flex items-center gap-1.5 text-error text-[10px] font-bold uppercase tracking-widest bg-surface/60 backdrop-blur px-2.5 py-1 rounded-full">
+                <span class="h-1.5 w-1.5 rounded-full bg-error"></span> 7 a corrigir
+              </div>
+            </div>
+            <div class="p-6 relative -mt-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="bg-primary/20 text-primary-fixed text-[10px] font-bold px-3 py-1 rounded-full">9º ANO · A</div>
+                <span class="flex items-center gap-1 text-xs text-on-surface-variant/60"><span class="material-symbols-outlined text-sm">person</span>32</span>
+              </div>
+              <h4 class="text-xl font-bold tight-tracking mb-5">9º Ano A · Manhã</h4>
+              <!-- 2 disciplinas -->
+              <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[18px] text-primary">science</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between text-xs mb-1.5"><span class="font-semibold">Ciências</span><span class="text-on-surface-variant/50">8/12</span></div>
+                    <div class="h-[2px] bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-primary" style="width:67%"></div></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[18px] text-secondary">public</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between text-xs mb-1.5"><span class="font-semibold">Geografia</span><span class="text-on-surface-variant/50">5/10</span></div>
+                    <div class="h-[2px] bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-secondary" style="width:50%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 group-hover:text-secondary transition-colors">
+                Abrir subportal <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- TURMA CARD 2 -->
+          <a href="#" class="block bg-surface-container-low group hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden">
+            <div class="h-24 relative tex-cyan">
+              <div class="absolute inset-0 grain opacity-60"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+              <div class="absolute top-4 right-4 flex items-center gap-1.5 text-error text-[10px] font-bold uppercase tracking-widest bg-surface/60 backdrop-blur px-2.5 py-1 rounded-full">
+                <span class="h-1.5 w-1.5 rounded-full bg-error"></span> 5 a corrigir
+              </div>
+            </div>
+            <div class="p-6 relative -mt-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="bg-secondary/20 text-secondary-fixed text-[10px] font-bold px-3 py-1 rounded-full">8º ANO · B</div>
+                <span class="flex items-center gap-1 text-xs text-on-surface-variant/60"><span class="material-symbols-outlined text-sm">person</span>28</span>
+              </div>
+              <h4 class="text-xl font-bold tight-tracking mb-5">8º Ano B · Tarde</h4>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[18px] text-secondary">bolt</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between text-xs mb-1.5"><span class="font-semibold">Física</span><span class="text-on-surface-variant/50">10/14</span></div>
+                    <div class="h-[2px] bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-secondary" style="width:71%"></div></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[18px] text-warning">calculate</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between text-xs mb-1.5"><span class="font-semibold">Matemática</span><span class="text-on-surface-variant/50">9/12</span></div>
+                    <div class="h-[2px] bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-warning" style="width:75%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 group-hover:text-secondary transition-colors">
+                Abrir subportal <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- TURMA CARD 3 -->
+          <a href="#" class="block bg-surface-container-low group hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden">
+            <div class="h-24 relative tex-amber">
+              <div class="absolute inset-0 grain opacity-60"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low to-transparent"></div>
+              <div class="absolute top-4 right-4 flex items-center gap-1.5 text-secondary text-[10px] font-bold uppercase tracking-widest bg-surface/60 backdrop-blur px-2.5 py-1 rounded-full">
+                <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span> Em dia
+              </div>
+            </div>
+            <div class="p-6 relative -mt-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="bg-warning/20 text-warning text-[10px] font-bold px-3 py-1 rounded-full">7º ANO · A</div>
+                <span class="flex items-center gap-1 text-xs text-on-surface-variant/60"><span class="material-symbols-outlined text-sm">person</span>27</span>
+              </div>
+              <h4 class="text-xl font-bold tight-tracking mb-5">7º Ano A · Manhã</h4>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[18px] text-error">history_edu</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between text-xs mb-1.5"><span class="font-semibold">História</span><span class="text-on-surface-variant/50">12/12</span></div>
+                    <div class="h-[2px] bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-error" style="width:100%"></div></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[18px] text-primary">menu_book</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between text-xs mb-1.5"><span class="font-semibold">Português</span><span class="text-on-surface-variant/50">6/11</span></div>
+                    <div class="h-[2px] bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-primary" style="width:55%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-on-surface-variant/50 group-hover:text-secondary transition-colors">
+                Abrir subportal <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- ADD TURMA -->
+          <a href="#" class="flex flex-col items-center justify-center text-center bg-surface-container-high rounded-xl border border-dashed border-outline-variant/30 p-6 group cursor-pointer hover:bg-surface-container-highest transition-colors min-h-[220px]">
+            <div class="h-12 w-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-secondary">add</span>
+            </div>
+            <h5 class="text-sm font-bold">Nova turma</h5>
+            <p class="text-[10px] text-on-surface-variant mt-1">Crie e vincule disciplinas do catálogo</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- SIDE: ATENÇÃO + DIÁRIO -->
+      <div class="md:col-span-4 space-y-8">
+        <div class="bg-surface-container-high p-8 rounded-xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10"><span class="material-symbols-outlined text-7xl">priority_high</span></div>
+          <h3 class="text-lg font-bold tight-tracking mb-6 flex items-center gap-2">Precisa de atenção <span class="flex h-2 w-2 rounded-full bg-error"></span></h3>
+          <div class="space-y-6">
+            <div class="flex gap-4 items-start">
+              <div class="h-10 w-10 shrink-0 rounded-full border border-error/30 bg-error/10 flex items-center justify-center text-error"><span class="material-symbols-outlined text-lg">assignment_late</span></div>
+              <div>
+                <div class="text-sm font-bold">Correções pendentes</div>
+                <p class="text-xs text-on-surface-variant/70 mt-1">"Relatório de Ecossistemas" — 7 entregas no 9º Ano A.</p>
+                <button class="text-[10px] font-bold uppercase tracking-widest text-secondary mt-3 hover:underline">Abrir corretor</button>
+              </div>
+            </div>
+            <div class="flex gap-4 items-start">
+              <div class="h-10 w-10 shrink-0 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-lg">schedule</span></div>
+              <div>
+                <div class="text-sm font-bold">Aula a liberar</div>
+                <p class="text-xs text-on-surface-variant/70 mt-1">"Cinemática" agendada para 8º Ano B amanhã, 08h.</p>
+                <button class="text-[10px] font-bold uppercase tracking-widest text-secondary mt-3 hover:underline">Revisar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-2">Diário recente</h3>
+          <div class="space-y-4">
+            <div class="bg-surface-container-low p-4 rounded-lg flex gap-4 items-center">
+              <div class="h-8 w-8 rounded bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-sm text-secondary">upload_file</span></div>
+              <div class="flex-1 min-w-0"><div class="text-xs font-bold truncate">Lista_Exercicios_03.pdf</div><div class="text-[10px] text-on-surface-variant/50">há 2h • 8º Ano B · Física</div></div>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-lg flex gap-4 items-center">
+              <div class="h-8 w-8 rounded bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-sm text-primary">check_circle</span></div>
+              <div class="flex-1 min-w-0"><div class="text-xs font-bold truncate">3 entregas corrigidas</div><div class="text-[10px] text-on-surface-variant/50">há 5h • 7º Ano A · História</div></div>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-lg flex gap-4 items-center">
+              <div class="h-8 w-8 rounded bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-sm text-on-surface-variant">publish</span></div>
+              <div class="flex-1 min-w-0"><div class="text-xs font-bold truncate">Aula publicada: "Relevo"</div><div class="text-[10px] text-on-surface-variant/50">ontem • 9º Ano A · Geografia</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATERIAIS -->
+    <section class="mb-20">
+      <div class="flex justify-between items-end mb-10">
+        <div>
+          <h3 class="text-3xl font-extrabold tight-tracking text-on-background">Acervo &amp; Materiais</h3>
+          <p class="text-sm text-on-surface-variant mt-2">Materiais de apoio publicados nas suas turmas.</p>
+        </div>
+        <button class="outline outline-1 outline-outline-variant/30 px-6 py-2 rounded text-[10px] font-bold uppercase tracking-widest hover:bg-surface-container-low transition-colors">Gerenciar acervo</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-surface-container-low p-6 rounded-xl border-t-4 border-primary">
+          <div class="flex justify-between items-start mb-6"><span class="material-symbols-outlined text-3xl text-primary/40">article</span><span class="text-[10px] font-bold text-on-surface-variant/40">PDF / 4.2 MB</span></div>
+          <h5 class="text-base font-bold mb-2">Apostila — Ecossistemas</h5>
+          <p class="text-xs text-on-surface-variant leading-relaxed">Material base da trilha de Ciências do 9º ano.</p>
+          <div class="mt-6 flex items-center justify-between"><span class="text-[10px] uppercase font-bold text-primary">Leitura principal</span><button class="material-symbols-outlined text-sm hover:text-secondary">more_vert</button></div>
+        </div>
+        <div class="bg-surface-container-low p-6 rounded-xl border-t-4 border-secondary">
+          <div class="flex justify-between items-start mb-6"><span class="material-symbols-outlined text-3xl text-secondary/40">videocam</span><span class="text-[10px] font-bold text-on-surface-variant/40">Link / Vídeo</span></div>
+          <h5 class="text-base font-bold mb-2">Vídeo — Leis de Newton</h5>
+          <p class="text-xs text-on-surface-variant leading-relaxed">Demonstração prática para a turma de Física.</p>
+          <div class="mt-6 flex items-center justify-between"><span class="text-[10px] uppercase font-bold text-secondary">Complementar</span><button class="material-symbols-outlined text-sm hover:text-secondary">more_vert</button></div>
+        </div>
+        <div class="bg-surface-container-low p-6 rounded-xl border-t-4 border-on-surface-variant/20">
+          <div class="flex justify-between items-start mb-6"><span class="material-symbols-outlined text-3xl text-on-surface-variant/30">folder_zip</span><span class="text-[10px] font-bold text-on-surface-variant/40">ZIP / 15 MB</span></div>
+          <h5 class="text-base font-bold mb-2">Mapas — Relevo do Brasil</h5>
+          <p class="text-xs text-on-surface-variant leading-relaxed">Conjunto de mapas para atividades de Geografia.</p>
+          <div class="mt-6 flex items-center justify-between"><span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Recursos</span><button class="material-symbols-outlined text-sm hover:text-secondary">more_vert</button></div>
+        </div>
+        <div class="bg-surface-container-high p-6 rounded-xl border border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-surface-container-highest transition-colors">
+          <div class="h-12 w-12 rounded-full bg-surface-container-low flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><span class="material-symbols-outlined text-secondary">cloud_upload</span></div>
+          <h5 class="text-sm font-bold">Novo material</h5>
+          <p class="text-[10px] text-on-surface-variant mt-1">Arraste arquivos ou cole um link</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<button class="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-on-primary shadow-2xl flex items-center justify-center hover:scale-105 transition-transform z-50 md:hidden">
+  <span class="material-symbols-outlined">add</span>
+</button>
+</body>
+</html>

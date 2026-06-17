@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ atividade.titulo }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+        <a href="{% url 'activities:aluno_atividade_list' turma.pk %}">Atividades</a>
+        <span>{{ atividade.titulo }}</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.nome }}</span>
+        <h1>{{ atividade.titulo }}</h1>
+        <div class="status-row">
+            {% if atividade.prazo %}
+                <span class="badge badge-violet"><i data-lucide="calendar"></i> Prazo {{ atividade.prazo|date:'d/m/Y H:i' }}</span>
+            {% else %}
+                <span class="badge badge-neutral"><i data-lucide="calendar"></i> Sem prazo</span>
+            {% endif %}
+            <span class="badge badge-neutral"><i data-lucide="award"></i> {{ atividade.pontuacao_max }} pts</span>
+            {% if atividade.is_overdue %}
+                <span class="badge badge-warning"><i data-lucide="clock"></i> Prazo encerrado</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if atividade.enunciado %}
+        <div class="panel lesson-summary">
+            <h2>Enunciado</h2>
+            <div>{{ atividade.enunciado|linebreaks }}</div>
+        </div>
+    {% endif %}
+
+    {% if atividade.anexos.all %}
+        <div class="panel">
+            <div class="section-heading compact">
+                <h2>Materiais de apoio</h2>
+            </div>
+            <ul>
+                {% for material in atividade.anexos.all %}
+                    <li>
+                        {% if material.arquivo %}
+                            <a href="{% url 'materials:material_download' material.pk %}"><i data-lucide="download"></i> {{ material.titulo }}</a>
+                        {% elif material.link_externo %}
+                            <a href="{{ material.link_externo }}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> {{ material.titulo }}</a>
+                        {% else %}
+                            {{ material.titulo }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if entrega and entrega.data_entrega %}
+        <div class="panel">
+            <div class="section-heading compact">
+                <h2>Sua entrega</h2>
+                <p>Enviada em {{ entrega.data_entrega|date:'d/m/Y H:i' }} ·
+                    {% if entrega.status == 'corrigida' %}corrigida{% elif entrega.status == 'atrasada' %}entregue com atraso{% else %}entregue{% endif %}.
+                </p>
+            </div>
+            {% if entrega.texto_resposta %}
+                <p>{{ entrega.texto_resposta|linebreaks }}</p>
+            {% endif %}
+            {% if entrega.arquivos.all %}
+                <ul>
+                    {% for arquivo in entrega.arquivos.all %}
+                        <li>
+                            <a href="{% url 'activities:entrega_arquivo_download' arquivo.pk %}">
+                                <i data-lucide="paperclip"></i> {{ arquivo.nome }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if entrega.checked %}
+        <div class="panel">
+            <div class="section-heading compact">
+                <h2>Correção do professor</h2>
+            </div>
+            <div class="status-row">
+                <span class="badge badge-info"><i data-lucide="award"></i> Nota {{ entrega.nota }} / {{ atividade.pontuacao_max }}</span>
+                {% if entrega.corrigido_em %}
+                    <span class="badge badge-neutral"><i data-lucide="calendar"></i> {{ entrega.corrigido_em|date:'d/m/Y H:i' }}</span>
+                {% endif %}
+            </div>
+            {% if entrega.feedback %}
+                <div>{{ entrega.feedback|linebreaks }}</div>
+            {% else %}
+                <p class="muted">Sem feedback em texto.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if entrega.status == 'corrigida' %}
+        <div class="panel">
+            <p><i data-lucide="lock"></i> Esta entrega já foi corrigida e não pode mais ser alterada.</p>
+        </div>
+    {% elif atividade.aberta_para_entrega %}
+        <form class="panel account-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="section-heading compact">
+                <h2>{% if entrega %}Atualizar entrega{% else %}Enviar entrega{% endif %}</h2>
+            </div>
+            {% include 'accounts/partials/form_fields.html' %}
+            <div class="form-actions">
+                <a class="btn btn-outline" href="{% url 'activities:aluno_atividade_list' turma.pk %}">Voltar</a>
+                <button class="btn btn-primary" type="submit">
+                    <i data-lucide="send"></i>
+                    {% if entrega %}Reenviar entrega{% else %}Enviar entrega{% endif %}
+                </button>
+            </div>
+        </form>
+    {% else %}
+        <div class="panel danger-panel">
+            <span class="badge badge-warning"><i data-lucide="alert-triangle"></i> Prazo encerrado</span>
+            <p>O prazo encerrou e esta atividade não aceita entrega atrasada.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

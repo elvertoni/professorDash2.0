@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Notificações | ProfessorDash{% endblock %}
+
+{% block content %}
+    <section class="classroom-page">
+        <div class="page-heading-row compact">
+            <div class="section-heading">
+                <span class="eyebrow">Central</span>
+                <h1>Notificações</h1>
+                <p>Acompanhe aulas liberadas, atividades, prazos e correções.</p>
+            </div>
+            <form method="post" action="{% url 'notifications:mark_all_read' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline" type="submit">
+                    <i data-lucide="check-check" aria-hidden="true"></i>
+                    Marcar todas como lidas
+                </button>
+            </form>
+        </div>
+
+        {% if notificacoes %}
+            <div class="notification-list">
+                {% for notificacao in notificacoes %}
+                    <article class="notification-item{% if not notificacao.lida %} is-unread{% endif %}">
+                        <div class="notification-meta">
+                            <span class="badge {% if notificacao.tipo == 'aula' %}badge-info{% elif notificacao.tipo == 'atividade' %}badge-violet{% elif notificacao.tipo == 'prazo' %}badge-warning{% else %}badge-success{% endif %}">
+                                <i data-lucide="{% if notificacao.tipo == 'aula' %}book-open{% elif notificacao.tipo == 'atividade' %}clipboard-list{% elif notificacao.tipo == 'prazo' %}clock{% else %}check-circle{% endif %}" aria-hidden="true"></i>
+                                {{ notificacao.get_tipo_display }}
+                            </span>
+                            <time datetime="{{ notificacao.created_at|date:'c' }}">{{ notificacao.created_at|date:'d/m/Y H:i' }}</time>
+                        </div>
+                        <h2>{{ notificacao.titulo }}</h2>
+                        <p>{{ notificacao.mensagem }}</p>
+                        <div class="notification-actions">
+                            {% if notificacao.link %}
+                                <a class="btn btn-primary btn-sm" href="{{ notificacao.link }}">
+                                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                                    Abrir
+                                </a>
+                            {% endif %}
+                            {% if not notificacao.lida %}
+                                <form method="post" action="{% url 'notifications:mark_read' notificacao.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button class="btn btn-ghost btn-sm" type="submit">
+                                        <i data-lucide="check" aria-hidden="true"></i>
+                                        Marcar como lida
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="badge badge-neutral">
+                                    <i data-lucide="check" aria-hidden="true"></i>
+                                    Lida
+                                </span>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {% if is_paginated %}
+                <nav class="pagination" aria-label="Paginação">
+                    {% if page_obj.has_previous %}
+                        <a class="btn btn-outline btn-sm" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                    {% endif %}
+                    <span class="muted">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a class="btn btn-outline btn-sm" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i data-lucide="bell" aria-hidden="true"></i>
+                <p>Nenhuma notificação por enquanto.</p>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

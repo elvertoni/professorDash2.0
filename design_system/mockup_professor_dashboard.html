@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Painel do professor · ProfessorDash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --shell-bg:#040405; --shell-bg-2:#09090b;
+  --shell-surface:rgba(17,17,20,.92); --shell-surface-strong:rgba(23,23,28,.96);
+  --shell-surface-soft:rgba(14,14,17,.82); --shell-surface-elev:#111114;
+  --shell-border:rgba(255,255,255,.08); --shell-border-strong:rgba(255,255,255,.14);
+  --shell-text:#ece8e7; --shell-text-muted:#b0adb5; --shell-text-soft:#84808c;
+  --shell-primary:#10b981; --shell-secondary:#8b5cf6; --shell-tertiary:#06b6d4;
+  --shell-warning:#fbbf24; --shell-danger:#f87171; --shell-info:#38bdf8;
+  --radius-xl:1.35rem; --radius-lg:1rem; --radius-md:.75rem; --radius-sm:.5rem;
+  --font-body:'Geist',ui-sans-serif,system-ui,sans-serif; --font-mono:'Geist Mono',ui-monospace,monospace;
+  --grad-brand:linear-gradient(120deg,#6ee7b7,#8b5cf6 60%,#67e8f9);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--shell-bg);color-scheme:dark}
+body{
+  font-family:var(--font-body);color:var(--shell-text);
+  background:
+    radial-gradient(1200px 600px at 80% -10%,rgba(139,92,246,.10),transparent 60%),
+    radial-gradient(1000px 500px at -10% 10%,rgba(16,185,129,.08),transparent 55%),
+    var(--shell-bg);
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+
+/* ICON SIZING — CSS overrides Lucide's 24px svg attributes; base + per-context */
+svg{width:18px;height:18px;stroke-width:1.9;flex:none;vertical-align:middle}
+.eyebrow svg{width:14px;height:14px}
+.btn svg{width:16px;height:16px}
+.turma-meta svg{width:14px;height:14px}
+.flag svg{width:13px;height:13px}
+.disc-ic svg{width:20px;height:20px}
+.brand-mark svg,.icon-btn svg{width:18px;height:18px}
+.glance .g svg{width:18px;height:18px}
+.open b svg,.open .go svg{width:16px;height:16px}
+
+/* topbar */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem clamp(1rem,4vw,2.5rem);border-bottom:1px solid var(--shell-border);
+  position:sticky;top:0;background:rgba(4,4,5,.72);backdrop-filter:blur(14px);z-index:5;
+}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:700;letter-spacing:-.01em}
+.brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--grad-brand);color:#04130d}
+.topbar-right{display:flex;align-items:center;gap:.75rem}
+.icon-btn{
+  width:38px;height:38px;border-radius:10px;border:1px solid var(--shell-border);
+  background:var(--shell-surface-soft);color:var(--shell-text-muted);
+  display:grid;place-items:center;cursor:pointer;position:relative;
+}
+.icon-btn .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--shell-danger)}
+.who{display:flex;align-items:center;gap:.55rem;padding:.35rem .35rem .35rem .8rem;border:1px solid var(--shell-border);border-radius:99px;background:var(--shell-surface-soft)}
+.who small{color:var(--shell-text-soft);font-size:.72rem;display:block;line-height:1}
+.who b{font-size:.82rem;font-weight:600}
+.who .ava{width:30px;height:30px;border-radius:50%;background:var(--grad-brand);color:#04130d;display:grid;place-items:center;font-weight:700;font-size:.72rem}
+
+/* shell */
+.wrap{max-width:1180px;margin:0 auto;padding:clamp(1.6rem,4vw,2.8rem) clamp(1rem,4vw,2.5rem) 4rem}
+
+.hello{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--shell-primary);display:flex;align-items:center;gap:.45rem}
+.hello h1{font-size:clamp(1.5rem,3.4vw,2.05rem);font-weight:700;letter-spacing:-.02em;margin:.5rem 0 .35rem}
+.hello p{color:var(--shell-text-muted);font-size:.95rem;max-width:46ch}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:inherit;font-weight:600;font-size:.86rem;border-radius:11px;padding:.62rem 1rem;border:1px solid transparent;cursor:pointer;text-decoration:none;color:inherit}
+.btn-primary{background:var(--shell-primary);color:#04130d}
+.btn-outline{background:transparent;border-color:var(--shell-border-strong);color:var(--shell-text)}
+
+/* glance strip */
+.glance{display:flex;gap:1.4rem;flex-wrap:wrap;align-items:center;padding:1rem 1.25rem;border:1px solid var(--shell-border);border-radius:var(--radius-lg);background:var(--shell-surface-soft);margin-bottom:2.2rem}
+.glance .g{display:flex;align-items:center;gap:.7rem}
+.glance .g b{font-size:1.15rem;font-weight:700}
+.glance .g span{color:var(--shell-text-soft);font-size:.8rem}
+.glance .sep{width:1px;height:30px;background:var(--shell-border)}
+.ic-primary{color:var(--shell-primary)} .ic-secondary{color:var(--shell-secondary)} .ic-warning{color:var(--shell-warning)}
+.g.warn b{color:var(--shell-warning)}
+
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:0 .15rem 1.1rem}
+.section-title h2{font-size:1.1rem;font-weight:650;letter-spacing:-.01em}
+.section-title .count{color:var(--shell-text-soft);font-size:.82rem}
+
+/* turma grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.25rem}
+
+.turma{
+  --accent:var(--shell-primary);
+  position:relative;border:1px solid var(--shell-border);border-radius:var(--radius-xl);
+  background:linear-gradient(180deg,var(--shell-surface-strong),var(--shell-surface));
+  padding:1.35rem 1.35rem 1.1rem;overflow:hidden;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+  cursor:pointer;display:flex;flex-direction:column;
+}
+.turma::before{content:"";position:absolute;top:0;bottom:0;left:0;width:3px;background:var(--accent);opacity:.85}
+.turma:hover{transform:translateY(-4px);border-color:var(--shell-border-strong);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.turma:hover .open b{color:var(--shell-text)}
+.turma:hover .open .go svg{transform:translateX(3px)}
+
+.turma-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:1.15rem}
+.turma-name{font-size:1.12rem;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.turma-meta{display:flex;align-items:center;gap:.5rem;margin-top:.45rem;color:var(--shell-text-soft);font-size:.78rem}
+.turma-meta .pill{padding:.15rem .55rem;border:1px solid var(--shell-border);border-radius:99px;font-family:var(--font-mono);font-size:.7rem;color:var(--shell-text-muted)}
+.flag{
+  display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .6rem;border-radius:99px;
+  font-size:.74rem;font-weight:600;white-space:nowrap;
+  background:rgba(248,113,113,.12);color:#fca5a5;border:1px solid rgba(248,113,113,.25);
+}
+.flag.clear{background:rgba(16,185,129,.10);color:var(--shell-primary);border-color:rgba(16,185,129,.22)}
+
+/* discipline rows */
+.disc-list{display:flex;flex-direction:column;gap:.6rem;flex:1}
+.disc{
+  display:flex;align-items:center;gap:.8rem;padding:.7rem .8rem;border-radius:var(--radius-md);
+  border:1px solid var(--shell-border);background:var(--shell-surface-soft);transition:background .15s;
+}
+.turma:hover .disc{background:rgba(255,255,255,.025)}
+.disc-ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--dc) 16%,transparent);color:var(--dc)}
+.disc-body{flex:1;min-width:0}
+.disc-name{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.disc-sub{color:var(--shell-text-soft);font-size:.74rem;margin-top:.15rem}
+.bar{height:5px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:.5rem;overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:99px;background:var(--dc)}
+
+/* footer open */
+.open{display:flex;align-items:center;justify-content:space-between;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--shell-border)}
+.open b{font-size:.86rem;font-weight:600;color:var(--shell-text-muted);transition:color .15s;display:flex;align-items:center;gap:.45rem}
+.open b svg{color:var(--shell-primary)}
+.open .go{display:flex;align-items:center;gap:.3rem;color:var(--shell-text-soft);font-size:.8rem}
+.open .go svg{transition:transform .18s}
+
+footer{text-align:center;color:var(--shell-text-soft);font-size:.78rem;padding:2rem 0 1rem;border-top:1px solid var(--shell-border);margin-top:3rem}
+
+@media(max-width:560px){.who small,.who b{display:none}.who{padding:.35rem}.glance .sep{display:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-mark"><i data-lucide="graduation-cap"></i></span><span>ProfessorDash</span></div>
+  <div class="topbar-right">
+    <button class="icon-btn"><i data-lucide="search"></i></button>
+    <button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
+    <button class="icon-btn"><i data-lucide="sun-moon"></i></button>
+    <div class="who"><div class="txt"><small>Professor</small><b>Toni</b></div><span class="ava">TO</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hello">
+    <div>
+      <span class="eyebrow"><i data-lucide="layout-grid"></i> Painel do professor</span>
+      <h1>Olá, Toni 👋</h1>
+      <p>Escolha uma turma para entrar no seu subportal — aulas, materiais e correções.</p>
+    </div>
+    <a class="btn btn-outline" href="#"><i data-lucide="plus"></i> Nova turma</a>
+  </div>
+
+  <div class="glance">
+    <div class="g"><i data-lucide="users" class="ic-primary"></i><div><b>3</b> <span>turmas ativas</span></div></div>
+    <div class="sep"></div>
+    <div class="g"><i data-lucide="user-check" class="ic-secondary"></i><div><b>87</b> <span>alunos</span></div></div>
+    <div class="sep"></div>
+    <div class="g warn"><i data-lucide="clock" class="ic-warning"></i><div><b>12</b> <span>a corrigir</span></div></div>
+  </div>
+
+  <div class="section-title">
+    <h2>Minhas turmas</h2>
+    <span class="count">3 turmas · 2 disciplinas cada</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- TURMA 1 -->
+    <article class="turma" style="--accent:#10b981" tabindex="0">
+      <div class="turma-head">
+        <div>
+          <div class="turma-name">9º Ano A</div>
+          <div class="turma-meta"><i data-lucide="users"></i> 32 alunos <span class="pill">2026 · Manhã</span></div>
+        </div>
+        <span class="flag"><i data-lucide="alert-circle"></i> 7 a corrigir</span>
+      </div>
+      <div class="disc-list">
+        <div class="disc" style="--dc:#10b981">
+          <div class="disc-ic"><i data-lucide="flask-conical"></i></div>
+          <div class="disc-body">
+            <div class="disc-name">Ciências</div>
+            <div class="disc-sub">8 de 12 aulas publicadas</div>
+            <div class="bar"><i style="width:67%"></i></div>
+          </div>
+        </div>
+        <div class="disc" style="--dc:#8b5cf6">
+          <div class="disc-ic"><i data-lucide="globe-2"></i></div>
+          <div class="disc-body">
+            <div class="disc-name">Geografia</div>
+            <div class="disc-sub">5 de 10 aulas publicadas</div>
+            <div class="bar"><i style="width:50%"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="open">
+        <b><i data-lucide="door-open"></i> Abrir turma</b>
+        <span class="go">Entrar <i data-lucide="arrow-right"></i></span>
+      </div>
+    </article>
+
+    <!-- TURMA 2 -->
+    <article class="turma" style="--accent:#06b6d4" tabindex="0">
+      <div class="turma-head">
+        <div>
+          <div class="turma-name">8º Ano B</div>
+          <div class="turma-meta"><i data-lucide="users"></i> 28 alunos <span class="pill">2026 · Tarde</span></div>
+        </div>
+        <span class="flag"><i data-lucide="alert-circle"></i> 5 a corrigir</span>
+      </div>
+      <div class="disc-list">
+        <div class="disc" style="--dc:#06b6d4">
+          <div class="disc-ic"><i data-lucide="atom"></i></div>
+          <div class="disc-body">
+            <div class="disc-name">Física</div>
+            <div class="disc-sub">10 de 14 aulas publicadas</div>
+            <div class="bar"><i style="width:71%"></i></div>
+          </div>
+        </div>
+        <div class="disc" style="--dc:#fbbf24">
+          <div class="disc-ic"><i data-lucide="calculator"></i></div>
+          <div class="disc-body">
+            <div class="disc-name">Matemática</div>
+            <div class="disc-sub">9 de 12 aulas publicadas</div>
+            <div class="bar"><i style="width:75%"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="open">
+        <b><i data-lucide="door-open"></i> Abrir turma</b>
+        <span class="go">Entrar <i data-lucide="arrow-right"></i></span>
+      </div>
+    </article>
+
+    <!-- TURMA 3 -->
+    <article class="turma" style="--accent:#8b5cf6" tabindex="0">
+      <div class="turma-head">
+        <div>
+          <div class="turma-name">7º Ano A</div>
+          <div class="turma-meta"><i data-lucide="users"></i> 27 alunos <span class="pill">2026 · Manhã</span></div>
+        </div>
+        <span class="flag clear"><i data-lucide="check-circle"></i> Em dia</span>
+      </div>
+      <div class="disc-list">
+        <div class="disc" style="--dc:#f87171">
+          <div class="disc-ic"><i data-lucide="book-open"></i></div>
+          <div class="disc-body">
+            <div class="disc-name">História</div>
+            <div class="disc-sub">12 de 12 aulas publicadas</div>
+            <div class="bar"><i style="width:100%"></i></div>
+          </div>
+        </div>
+        <div class="disc" style="--dc:#38bdf8">
+          <div class="disc-ic"><i data-lucide="languages"></i></div>
+          <div class="disc-body">
+            <div class="disc-name">Português</div>
+            <div class="disc-sub">6 de 11 aulas publicadas</div>
+            <div class="bar"><i style="width:55%"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="open">
+        <b><i data-lucide="door-open"></i> Abrir turma</b>
+        <span class="go">Entrar <i data-lucide="arrow-right"></i></span>
+      </div>
+    </article>
+
+  </div>
+
+  <footer>Mockup de revisão · ProfessorDash · dados fictícios</footer>
+</main>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  // Render icons; if CDN blocked/offline, page still holds layout (containers are CSS-sized).
+  window.addEventListener('DOMContentLoaded', function(){
+    if (window.lucide && lucide.createIcons) lucide.createIcons();
+  });
+</script>
+</body>
+</html>

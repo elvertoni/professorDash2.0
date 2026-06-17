@@ -1,0 +1,152 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <title>{% block title %}ProfessorDash{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{% url 'home' %}" aria-label="Página inicial do ProfessorDash">
+            <span class="brand-mark"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
+            <span>ProfessorDash</span>
+        </a>
+        <details class="mobile-nav">
+            <summary class="icon-btn" aria-label="Abrir menu de navegação" title="Menu">
+                <i data-lucide="menu" aria-hidden="true"></i>
+                <span class="sr-only">Menu</span>
+            </summary>
+            <nav class="mobile-nav-panel" aria-label="Navegação principal mobile">
+                <a href="{% url 'home' %}#jornada">Jornada</a>
+                <a href="{% url 'home' %}#recursos">Recursos</a>
+                {% if user.is_authenticated %}
+                    {% if user.is_aluno %}
+                        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+                    {% endif %}
+                    <a href="{% url 'catalog:aula_list' %}">Catálogo</a>
+                    {% if user.is_professor or user.is_admin_role or user.is_superuser %}
+                        <a href="{% url 'classroom:professor_dashboard' %}">Painel</a>
+                        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+                    {% endif %}
+                    <a href="{% url 'notifications:list' %}">Notificações</a>
+                {% endif %}
+                <a href="{% url 'health' %}">Status</a>
+            </nav>
+        </details>
+        <nav class="site-nav" aria-label="Navegação principal">
+            <a href="{% url 'home' %}#jornada">Jornada</a>
+            <a href="{% url 'home' %}#recursos">Recursos</a>
+            {% if user.is_authenticated %}
+                {% if user.is_aluno %}
+                    <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+                {% endif %}
+                <a href="{% url 'catalog:aula_list' %}">Catálogo</a>
+                {% if user.is_professor or user.is_admin_role or user.is_superuser %}
+                    <a href="{% url 'classroom:professor_dashboard' %}">Painel</a>
+                    <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+                {% endif %}
+                <a href="{% url 'notifications:list' %}">Notificações</a>
+            {% endif %}
+            <a href="{% url 'health' %}">Status</a>
+        </nav>
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+                <details class="notification-menu">
+                    <summary class="icon-btn" aria-label="Abrir notificações" title="Notificações">
+                        <i data-lucide="bell" aria-hidden="true"></i>
+                        {% if notifications_unread_count %}
+                            <span class="dot"></span>
+                        {% endif %}
+                        <span class="sr-only">Notificações</span>
+                    </summary>
+                    <div class="notification-panel">
+                        <div class="notification-panel-head">
+                            <strong>Notificações</strong>
+                            {% if notifications_unread_count %}
+                                <span class="badge badge-danger">{{ notifications_unread_count }}</span>
+                            {% else %}
+                                <span class="badge badge-neutral">0</span>
+                            {% endif %}
+                        </div>
+                        {% if notifications_preview %}
+                            <div class="notification-preview-list">
+                                {% for notificacao in notifications_preview %}
+                                    <a class="notification-preview" href="{{ notificacao.link|default:'#' }}">
+                                        <span class="notification-preview-title">{{ notificacao.titulo }}</span>
+                                        <span>{{ notificacao.mensagem }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                            <form method="post" action="{% url 'notifications:mark_all_read' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button class="btn btn-ghost btn-sm notification-panel-action" type="submit">
+                                    <i data-lucide="check-check" aria-hidden="true"></i>
+                                    Marcar todas como lidas
+                                </button>
+                            </form>
+                        {% else %}
+                            <p class="notification-empty">Nenhuma notificação nova.</p>
+                        {% endif %}
+                        <a class="btn btn-outline btn-sm notification-panel-action" href="{% url 'notifications:list' %}">
+                            Ver todas
+                        </a>
+                    </div>
+                </details>
+            {% endif %}
+            <button class="icon-btn" type="button" data-theme-toggle aria-label="Alternar tema" title="Alternar tema">
+                <i data-lucide="sun-moon" aria-hidden="true"></i>
+            </button>
+            {% if user.is_authenticated %}
+                <a class="btn btn-outline" href="{% url 'accounts:profile' %}">
+                    <i data-lucide="user" aria-hidden="true"></i>
+                    Minha conta
+                </a>
+                <form class="inline-form" method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">
+                        <i data-lucide="log-out" aria-hidden="true"></i>
+                        Sair
+                    </button>
+                </form>
+            {% else %}
+                <a class="btn btn-primary" href="{% url 'accounts:login' %}">
+                    <i data-lucide="log-in" aria-hidden="true"></i>
+                    Entrar
+                </a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="message-stack" aria-live="polite">
+            {% for message in messages %}
+                <div class="toast {% if message.tags == 'success' %}s{% elif message.tags == 'error' %}e{% else %}i{% endif %}">
+                    <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-triangle{% else %}info{% endif %}"></i>
+                    <div>{{ message }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <span>ProfessorDash</span>
+        <span class="muted">Portal educacional de instalação única para publicação de aulas, atividades e correções.</span>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

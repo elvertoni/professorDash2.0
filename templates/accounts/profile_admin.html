@@ -1,0 +1,25 @@
+{% extends 'accounts/profile_base.html' %}
+
+{% block profile_content %}
+<div class="section-heading compact">
+    <span class="eyebrow">Admin</span>
+    <h2>Gestão do portal</h2>
+    <p>Conta administrativa com acesso total ao Django Admin.</p>
+</div>
+<div class="feature-grid account-grid">
+    <article class="card">
+        <div class="stripe"></div>
+        <span class="tag-disc">Conta</span>
+        <h3>{{ request.user.email }}</h3>
+        <p class="desc">Use o admin para criar professores e alunos sem auto-registro público.</p>
+        <div class="card-foot"><span>Admin</span><i data-lucide="shield"></i></div>
+    </article>
+    <article class="card">
+        <div class="stripe"></div>
+        <span class="tag-disc">Ação</span>
+        <h3>Django Admin</h3>
+        <p class="desc">Gerencie usuários, perfis e permissões pela interface administrativa.</p>
+        <div class="card-foot"><a href="/admin/">Abrir admin</a><i data-lucide="external-link"></i></div>
+    </article>
+</div>
+{% endblock %}

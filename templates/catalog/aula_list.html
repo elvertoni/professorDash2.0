@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Aulas · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="catalog-page">
+    <div class="section-heading compact">
+        <span class="eyebrow">Catálogo</span>
+        <h1>Aulas aprovadas do acervo</h1>
+        <p>Consulte as aulas canônicas importadas do PROF-TONI por disciplina, trilha e ordem.</p>
+    </div>
+
+    <form class="catalog-filter panel" method="get">
+        <div class="field">
+            <label for="disciplina">Disciplina</label>
+            <select class="select" id="disciplina" name="disciplina">
+                <option value="">Todas</option>
+                {% for disciplina in disciplinas %}
+                    <option value="{{ disciplina.slug }}" {% if disciplina.slug == selected_disciplina %}selected{% endif %}>{{ disciplina.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="trilha">Trilha</label>
+            <select class="select" id="trilha" name="trilha">
+                <option value="">Todas</option>
+                {% for disciplina in disciplinas %}
+                    {% for trilha in disciplina.trilhas.all %}
+                        <option value="{{ trilha.slug }}" {% if trilha.slug == selected_trilha %}selected{% endif %}>{{ disciplina.label }} · {{ trilha.label }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button class="btn btn-primary" type="submit">
+                <i data-lucide="filter"></i>
+                Filtrar
+            </button>
+            <a class="btn btn-outline" href="{% url 'catalog:aula_list' %}">Limpar</a>
+        </div>
+    </form>
+
+    {% if aulas %}
+        <div class="feature-grid catalog-grid">
+            {% for aula in aulas %}
+                <article class="card">
+                    <div class="stripe"></div>
+                    <span class="tag-disc">{{ aula.disciplina.label }}</span>
+                    <h3>{{ aula.ordem|stringformat:'02d' }} · {{ aula.titulo }}</h3>
+                    <p class="desc">{{ aula.tema|default:aula.trilha.label }}</p>
+                    <div class="card-foot">
+                        <span class="badge badge-violet"><i data-lucide="book-open"></i> {{ aula.trilha.label }}</span>
+                        <a href="{{ aula.get_absolute_url }}">Abrir</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="inbox"></i>
+            <h2>Nenhuma aula encontrada</h2>
+            <p>Importe o acervo ou ajuste os filtros para navegar pelas aulas aprovadas.</p>
+        </div>
+    {% endif %}
+
+    {% if is_paginated %}
+        <nav class="pagination" aria-label="Paginação">
+            {% if page_obj.has_previous %}
+                <a class="btn btn-outline" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            {% endif %}
+            <span class="badge badge-neutral">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a class="btn btn-outline" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

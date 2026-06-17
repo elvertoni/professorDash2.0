@@ -1,0 +1,26 @@
+{% extends 'accounts/profile_base.html' %}
+
+{% block title %}Editar Perfil · ProfessorDash{% endblock %}
+
+{% block profile_content %}
+<div class="section-heading compact">
+    <span class="eyebrow">Conta</span>
+    <h2>Editar perfil</h2>
+    <p>Atualize seus dados pessoais e informações do seu perfil.</p>
+</div>
+<form class="panel account-form" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% include 'accounts/partials/form_fields.html' with form=user_form %}
+    {% if role_form %}
+        <div class="form-divider"></div>
+        {% include 'accounts/partials/form_fields.html' with form=role_form %}
+    {% endif %}
+    <div class="form-actions">
+        <a class="btn btn-outline" href="{% url 'accounts:profile' %}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">
+            <i data-lucide="save"></i>
+            Salvar alterações
+        </button>
+    </div>
+</form>
+{% endblock %}

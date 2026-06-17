@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Painel do Professor · ProfessorDash · Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0612;
+  --txt:#f3efff; --txt-2:#bcb3d6; --txt-3:#857c9e;
+  --glass:rgba(255,255,255,.055);
+  --glass-2:rgba(255,255,255,.08);
+  --stroke:rgba(255,255,255,.12);
+  --stroke-strong:rgba(255,255,255,.22);
+  --violet:#a78bfa; --cyan:#22d3ee; --pink:#f472b6; --lime:#a3e635; --amber:#fbbf24;
+  --disp:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --sans:'Inter',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--txt);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+::selection{background:rgba(167,139,250,.35)}
+
+/* ---------- AURORA BACKGROUND ---------- */
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(120% 120% at 50% 0%, #150a2b 0%, #0a0612 55%, #070410 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;mix-blend-mode:screen;will-change:transform}
+.b1{width:46vw;height:46vw;left:-8vw;top:-10vw;background:radial-gradient(circle, #7c3aed, transparent 70%);animation:drift1 22s ease-in-out infinite}
+.b2{width:42vw;height:42vw;right:-6vw;top:6vw;background:radial-gradient(circle, #0891b2, transparent 70%);animation:drift2 26s ease-in-out infinite}
+.b3{width:40vw;height:40vw;left:18vw;bottom:-14vw;background:radial-gradient(circle, #db2777, transparent 70%);animation:drift3 30s ease-in-out infinite}
+.b4{width:34vw;height:34vw;right:14vw;bottom:-6vw;background:radial-gradient(circle, #4338ca, transparent 70%);animation:drift1 24s ease-in-out infinite reverse}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vw) scale(1.12)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,5vw) scale(1.08)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4vw,-4vw) scale(1.15)}}
+.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- glass primitive ---------- */
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(28px) saturate(140%);
+  -webkit-backdrop-filter:blur(28px) saturate(140%);
+  border:1px solid var(--stroke);
+  border-radius:22px;
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset, 0 30px 60px -30px rgba(0,0,0,.8);
+}
+
+/* ---------- topbar ---------- */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:1.2rem;
+  padding:1rem clamp(1rem,4vw,2.5rem);background:rgba(10,6,18,.45);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.06)}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand .mk{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:grid;place-items:center;color:#0a0612;box-shadow:0 0 24px rgba(167,139,250,.5)}
+.brand .mk svg{width:20px;height:20px}
+.brand b{font-family:var(--disp);font-weight:600;font-size:1.08rem;letter-spacing:-.01em}
+.brand small{display:block;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3)}
+.search{flex:1;max-width:380px;display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-radius:14px;background:var(--glass);border:1px solid var(--stroke);color:var(--txt-3)}
+.search svg{width:17px;height:17px}
+.search input{flex:1;background:none;border:none;outline:none;color:var(--txt);font-family:inherit;font-size:.86rem}
+.search input::placeholder{color:var(--txt-3)}
+.tb-r{display:flex;align-items:center;gap:.6rem}
+.ic{position:relative;width:40px;height:40px;border-radius:12px;background:var(--glass);border:1px solid var(--stroke);display:grid;place-items:center;color:var(--txt-2);cursor:pointer;transition:.18s}
+.ic:hover{border-color:var(--stroke-strong);color:var(--txt);box-shadow:0 0 18px rgba(167,139,250,.3)}
+.ic svg{width:18px;height:18px}
+.ic .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 8px var(--pink)}
+.ava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--violet));display:grid;place-items:center;font-weight:700;font-size:.82rem;color:#0a0612;box-shadow:0 0 20px rgba(244,114,182,.4)}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1240px;margin:0 auto;padding:clamp(2rem,5vw,3.5rem) clamp(1rem,4vw,2.5rem) 5rem}
+
+/* ---------- hero ---------- */
+.hero{margin-bottom:2.6rem}
+.chip{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .9rem;border-radius:999px;background:var(--glass);border:1px solid var(--stroke);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-2);font-weight:600}
+.chip .pulse{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(2.6rem,6.5vw,4.6rem);line-height:1;letter-spacing:-.03em;margin:1.1rem 0 .9rem}
+.hero h1 .grad{background:linear-gradient(110deg,var(--violet),var(--cyan) 55%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--txt-2);font-size:1.05rem;line-height:1.6;max-width:50ch}
+.hero p b{color:var(--txt);font-weight:600}
+
+.stats{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:2rem}
+.spill{flex:1;min-width:150px;display:flex;align-items:center;gap:.9rem;padding:1.1rem 1.3rem;border-radius:18px}
+.spill .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none}
+.spill .ico svg{width:20px;height:20px}
+.spill .k{font-family:var(--disp);font-weight:700;font-size:1.7rem;line-height:1;letter-spacing:-.02em}
+.spill .l{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-3);margin-top:.3rem;font-weight:600}
+.i-violet{background:rgba(167,139,250,.16);color:var(--violet);box-shadow:0 0 20px rgba(167,139,250,.25) inset}
+.i-cyan{background:rgba(34,211,238,.16);color:var(--cyan);box-shadow:0 0 20px rgba(34,211,238,.25) inset}
+.i-pink{background:rgba(244,114,182,.16);color:var(--pink);box-shadow:0 0 20px rgba(244,114,182,.25) inset}
+
+/* ---------- section ---------- */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:0 .25rem 1.3rem}
+.sec-head h2{font-family:var(--disp);font-weight:600;font-size:1.35rem;letter-spacing:-.01em}
+.sec-head a{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);font-weight:700;text-decoration:none}
+.sec-head a:hover{text-shadow:0 0 12px rgba(34,211,238,.6)}
+
+/* ---------- turma grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:1.3rem}
+
+.turma{--ac:var(--violet);position:relative;padding:1.5rem;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:block;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s}
+.turma::after{content:"";position:absolute;inset:0;border-radius:22px;background:radial-gradient(130% 80% at 50% -10%, color-mix(in srgb,var(--ac) 22%,transparent), transparent 60%);opacity:.0;transition:opacity .3s;pointer-events:none}
+.turma:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--ac) 45%,var(--stroke));box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 40px 70px -28px rgba(0,0,0,.85), 0 0 50px -12px color-mix(in srgb,var(--ac) 45%,transparent)}
+.turma:hover::after{opacity:1}
+.turma:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+
+.t-top{display:flex;align-items:center;gap:1.1rem;margin-bottom:1.4rem;position:relative;z-index:1}
+.ring{--p:0;width:66px;height:66px;border-radius:50%;flex:none;display:grid;place-items:center;position:relative;
+  background:conic-gradient(var(--ac) calc(var(--p)*1%), rgba(255,255,255,.10) 0);
+  filter:drop-shadow(0 0 10px color-mix(in srgb,var(--ac) 55%,transparent))}
+.ring::before{content:"";position:absolute;inset:5px;border-radius:50%;background:#0d0820}
+.ring b{position:relative;font-family:var(--disp);font-weight:600;font-size:.82rem}
+.t-name{flex:1;min-width:0}
+.t-name h3{font-family:var(--disp);font-weight:600;font-size:1.35rem;letter-spacing:-.01em;line-height:1.1}
+.t-name .meta{display:flex;align-items:center;gap:.45rem;margin-top:.35rem;font-size:.76rem;color:var(--txt-3)}
+.t-name .meta svg{width:14px;height:14px}
+.t-name .code{display:inline-block;margin-top:.5rem;padding:.18rem .55rem;border-radius:7px;font-family:var(--mono);font-size:.66rem;letter-spacing:.05em;color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,transparent);border:1px solid color-mix(in srgb,var(--ac) 30%,transparent)}
+
+.discs{position:relative;z-index:1;display:flex;flex-direction:column;gap:.85rem}
+.disc{display:flex;align-items:center;gap:.85rem;padding:.75rem .85rem;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);transition:.2s}
+.turma:hover .disc{background:rgba(255,255,255,.06)}
+.d-ic{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;color:var(--dc);background:color-mix(in srgb,var(--dc) 16%,transparent)}
+.d-ic svg{width:18px;height:18px}
+.d-body{flex:1;min-width:0}
+.d-row{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;margin-bottom:.4rem}
+.d-row b{font-size:.9rem;font-weight:600}
+.d-row .frac{font-family:var(--mono);font-size:.72rem;color:var(--txt-3)}
+.bar{height:4px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px;background:var(--dc);box-shadow:0 0 8px var(--dc)}
+
+.t-foot{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-top:1.3rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.07)}
+.status{display:inline-flex;align-items:center;gap:.45rem;font-size:.74rem;font-weight:600}
+.status svg{width:14px;height:14px}
+.status.warn{color:var(--amber)}
+.status.ok{color:var(--lime)}
+.go{display:inline-flex;align-items:center;gap:.45rem;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ac)}
+.go svg{width:16px;height:16px;transition:transform .25s}
+.turma:hover .go svg{transform:translateX(4px)}
+
+/* add card */
+.add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;text-align:center;min-height:250px;border-radius:22px;
+  border:1.5px dashed var(--stroke);background:rgba(255,255,255,.02);cursor:pointer;color:var(--txt-2);text-decoration:none;transition:.25s}
+.add:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(34,211,238,.05);box-shadow:0 0 40px -10px rgba(34,211,238,.4)}
+.add .plus{width:50px;height:50px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center;transition:transform .25s}
+.add:hover .plus{transform:rotate(90deg)}
+.add .plus svg{width:22px;height:22px}
+.add b{font-family:var(--disp);font-weight:600;font-size:1.1rem}
+.add small{font-size:.74rem;color:var(--txt-3);max-width:22ch}
+
+footer{margin-top:3.5rem;display:flex;justify-content:space-between;font-size:.72rem;color:var(--txt-3);letter-spacing:.04em;padding-top:1.4rem;border-top:1px solid rgba(255,255,255,.06)}
+
+@media(max-width:480px){.hero p{font-size:.96rem}}
+@media(prefers-reduced-motion:reduce){.blob{animation:none}*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+<div class="grain"></div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+    <div><b>ProfessorDash</b><small>Edição Professor</small></div>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input placeholder="Buscar turmas, aulas, alunos..."/>
+  </div>
+  <div class="tb-r">
+    <button class="ic" aria-label="Notificações"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    <div class="ava">TO</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="chip"><span class="pulse"></span> 3 turmas ativas · quarta, 16 jun</span>
+    <h1>Olá, <span class="grad">Toni</span> ✨</h1>
+    <p>Seu ateliê brilha hoje. <b>12 entregas</b> aguardam correção e <b>1 aula</b> está pronta pra liberar.</p>
+
+    <div class="stats">
+      <div class="spill glass"><div class="ico i-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div><div><div class="k num">87</div><div class="l">Alunos ativos</div></div></div>
+      <div class="spill glass"><div class="ico i-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div><div class="k num">06</div><div class="l">Disciplinas</div></div></div>
+      <div class="spill glass"><div class="ico i-pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="k num">12</div><div class="l">A corrigir</div></div></div>
+    </div>
+  </section>
+
+  <!-- TURMAS -->
+  <div class="sec-head">
+    <h2>Minhas turmas</h2>
+    <a href="#">Ver todas →</a>
+  </div>
+
+  <div class="grid">
+
+    <!-- TURMA 1 -->
+    <a class="turma glass" href="#" style="--ac:var(--violet)">
+      <div class="t-top">
+        <div class="ring" style="--p:58"><b class="num">58%</b></div>
+        <div class="t-name">
+          <h3>9º Ano A</h3>
+          <div class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg> 32 alunos · Manhã</div>
+          <span class="code">DESIGN · MANHÃ</span>
+        </div>
+      </div>
+      <div class="discs">
+        <div class="disc" style="--dc:var(--violet)">
+          <div class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v8.5a2.5 2.5 0 0 1-5 0V2M7 2h6M5.5 13h13M19 2v8.5a2.5 2.5 0 0 0 5 0V2"/></svg></div>
+          <div class="d-body"><div class="d-row"><b>Ciências</b><span class="frac">8/12</span></div><div class="bar"><i style="width:67%"></i></div></div>
+        </div>
+        <div class="disc" style="--dc:var(--cyan)">
+          <div class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg></div>
+          <div class="d-body"><div class="d-row"><b>Geografia</b><span class="frac">5/10</span></div><div class="bar"><i style="width:50%"></i></div></div>
+        </div>
+      </div>
+      <div class="t-foot">
+        <span class="status warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> 7 a corrigir</span>
+        <span class="go">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- TURMA 2 -->
+    <a class="turma glass" href="#" style="--ac:var(--cyan)">
+      <div class="t-top">
+        <div class="ring" style="--p:73"><b class="num">73%</b></div>
+        <div class="t-name">
+          <h3>8º Ano B</h3>
+          <div class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg> 28 alunos · Tarde</div>
+          <span class="code">EXATAS · TARDE</span>
+        </div>
+      </div>
+      <div class="discs">
+        <div class="disc" style="--dc:var(--cyan)">
+          <div class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
+          <div class="d-body"><div class="d-row"><b>Física</b><span class="frac">10/14</span></div><div class="bar"><i style="width:71%"></i></div></div>
+        </div>
+        <div class="disc" style="--dc:var(--pink)">
+          <div class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/></svg></div>
+          <div class="d-body"><div class="d-row"><b>Matemática</b><span class="frac">9/12</span></div><div class="bar"><i style="width:75%"></i></div></div>
+        </div>
+      </div>
+      <div class="t-foot">
+        <span class="status warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> 5 a corrigir</span>
+        <span class="go">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- TURMA 3 -->
+    <a class="turma glass" href="#" style="--ac:var(--pink)">
+      <div class="t-top">
+        <div class="ring" style="--p:82"><b class="num">82%</b></div>
+        <div class="t-name">
+          <h3>7º Ano A</h3>
+          <div class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg> 27 alunos · Manhã</div>
+          <span class="code">HUMANAS · MANHÃ</span>
+        </div>
+      </div>
+      <div class="discs">
+        <div class="disc" style="--dc:var(--pink)">
+          <div class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div class="d-body"><div class="d-row"><b>História</b><span class="frac">12/12</span></div><div class="bar"><i style="width:100%"></i></div></div>
+        </div>
+        <div class="disc" style="--dc:var(--violet)">
+          <div class="d-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></div>
+          <div class="d-body"><div class="d-row"><b>Português</b><span class="frac">6/11</span></div><div class="bar"><i style="width:55%"></i></div></div>
+        </div>
+      </div>
+      <div class="t-foot">
+        <span class="status ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Em dia</span>
+        <span class="go">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- ADD -->
+    <a class="add" href="#">
+      <span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+      <b>Nova turma</b>
+      <small>Crie e vincule disciplinas do catálogo</small>
+    </a>
+  </div>
+
+  <footer>
+    <span>ProfessorDash · Prof. Toni · SEED-PR</span>
+    <span class="num">Mockup Aurora — dados fictícios</span>
+  </footer>
+</main>
+</body>
+</html>

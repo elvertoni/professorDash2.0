@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Turmas · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <div class="section-heading compact page-heading-row">
+        <div>
+            <span class="eyebrow">Turmas</span>
+            <h1>Minhas turmas</h1>
+            <p>Gerencie turmas, códigos de convite e matrículas dos alunos.</p>
+        </div>
+        <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
+            <i data-lucide="plus"></i>
+            Nova turma
+        </a>
+    </div>
+
+    {% if turmas %}
+        <div class="feature-grid classroom-grid">
+            {% for turma in turmas %}
+                <article class="card">
+                    <div class="stripe"></div>
+                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                    <h3>{{ turma.nome }}</h3>
+                    <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
+                    <div class="status-row">
+                        {% if turma.ativa %}
+                            <span class="badge badge-success"><i data-lucide="check-circle"></i> Ativa</span>
+                        {% else %}
+                            <span class="badge badge-neutral"><i data-lucide="archive"></i> Inativa</span>
+                        {% endif %}
+                        <span class="badge badge-violet"><i data-lucide="users"></i> {{ turma.active_students }} alunos</span>
+                    </div>
+                    <div class="invite-code">
+                        <span>Código</span>
+                        <strong class="mono">{{ turma.codigo_convite }}</strong>
+                    </div>
+                    <div class="card-foot">
+                        <span>{{ turma.professor.nome_completo }}</span>
+                        <a href="{{ turma.get_absolute_url }}">Abrir</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state panel">
+            <i data-lucide="users"></i>
+            <h2>Nenhuma turma cadastrada</h2>
+            <p>Crie a primeira turma para matricular alunos e preparar a publicação de aulas.</p>
+            <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
+                <i data-lucide="plus"></i>
+                Criar turma
+            </a>
+        </div>
+    {% endif %}
+
+    {% if is_paginated %}
+        <nav class="pagination" aria-label="Paginação">
+            {% if page_obj.has_previous %}
+                <a class="btn btn-outline" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            {% endif %}
+            <span class="badge badge-neutral">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a class="btn btn-outline" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

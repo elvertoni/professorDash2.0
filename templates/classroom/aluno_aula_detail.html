@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ aula.titulo }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="lesson-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+        <a href="{% url 'classroom:aluno_turma_aulas' turma.pk %}">{{ turma.nome }}</a>
+        <span>{{ aula.trilha.label }}</span>
+    </nav>
+
+    <article class="lesson-shell">
+        <header class="lesson-header">
+            <span class="badge badge-violet"><i data-lucide="book-open"></i> {{ turma.disciplina.label }}</span>
+            <h1>{{ aula.titulo }}</h1>
+            {% if aula.tema %}
+                <p>{{ aula.tema }}</p>
+            {% endif %}
+            <div class="lesson-meta">
+                <span>{{ turma.nome }}</span>
+                <span>{{ aula.trilha.label }}</span>
+                {% if progresso.concluido %}
+                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Concluída</span>
+                {% endif %}
+            </div>
+        </header>
+
+        {% if aula.objetivos %}
+            <section class="lesson-summary panel">
+                <h2>Objetivos</h2>
+                <ul>
+                    {% for objetivo in aula.objetivos %}
+                        <li>{{ objetivo }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+        <div class="lesson-viewer">
+            {{ aula.conteudo_html|safe }}
+        </div>
+
+        <div class="status-row">
+            <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
+                {% csrf_token %}
+                {% if progresso.concluido %}
+                    <button class="btn btn-outline" type="submit">
+                        <i data-lucide="rotate-ccw"></i>
+                        Marcar como não concluída
+                    </button>
+                {% else %}
+                    <button class="btn btn-primary" type="submit">
+                        <i data-lucide="check-check"></i>
+                        Marcar como concluída
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+    </article>
+
+    <nav class="lesson-nav" aria-label="Navegação da turma">
+        {% if previous_aula %}
+            <a class="btn btn-outline" href="{% url 'classroom:aluno_aula_detail' previous_aula.pk %}">
+                <i data-lucide="arrow-left"></i>
+                Aula anterior
+            </a>
+        {% else %}
+            <span></span>
+        {% endif %}
+        {% if next_aula %}
+            <a class="btn btn-primary" href="{% url 'classroom:aluno_aula_detail' next_aula.pk %}">
+                Próxima aula
+                <i data-lucide="arrow-right"></i>
+            </a>
+        {% endif %}
+    </nav>
+</section>
+{% endblock %}

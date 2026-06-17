@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Materiais · {{ turma.nome }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <span>Materiais</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.disciplina.label }}</span>
+        <h1>Materiais da turma</h1>
+        <p>Compartilhe arquivos (PDF, slides, vídeos) e links com a turma. Arquivos são protegidos por permissão.</p>
+    </div>
+
+    <div class="classroom-actions">
+        <a class="btn btn-primary" href="{% url 'materials:material_create' turma.pk %}">
+            <i data-lucide="plus"></i>
+            Novo material
+        </a>
+        <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">
+            <i data-lucide="arrow-left"></i>
+            Voltar à turma
+        </a>
+    </div>
+
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Material</th>
+                    <th>Tipo</th>
+                    <th>Aula</th>
+                    <th>Conteúdo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for material in materiais %}
+                    <tr>
+                        <td>
+                            <span class="name">
+                                <span>
+                                    {{ material.titulo }}
+                                    {% if material.descricao %}<small>{{ material.descricao|truncatechars:60 }}</small>{% endif %}
+                                </span>
+                            </span>
+                        </td>
+                        <td><span class="badge badge-neutral">{{ material.get_tipo_display }}</span></td>
+                        <td>{% if material.aula_publicada %}{{ material.aula_publicada.aula.titulo }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if material.arquivo %}
+                                <a class="mono" href="{% url 'materials:material_download' material.pk %}"><i data-lucide="download"></i> {{ material.nome_arquivo }}</a>
+                            {% elif material.link_externo %}
+                                <a class="mono" href="{{ material.link_externo }}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Abrir link</a>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="tbl-actions">
+                                <a class="btn btn-outline btn-sm" href="{% url 'materials:material_update' material.pk %}">
+                                    <i data-lucide="edit-3"></i> Editar
+                                </a>
+                                <a class="btn btn-danger btn-sm" href="{% url 'materials:material_delete' material.pk %}">
+                                    <i data-lucide="trash-2"></i> Excluir
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i data-lucide="folder"></i>
+                                <strong>Nenhum material</strong>
+                                <span>Adicione o primeiro material desta turma.</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

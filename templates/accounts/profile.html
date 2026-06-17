@@ -1,0 +1,15 @@
+{% extends 'accounts/profile_base.html' %}
+
+{% block profile_content %}
+<div class="section-heading compact">
+    <span class="eyebrow">Conta</span>
+    <h2>Perfil</h2>
+    <p>Dados principais da sua conta.</p>
+</div>
+<article class="card">
+    <div class="stripe"></div>
+    <span class="tag-disc">Identidade</span>
+    <h3>{{ request.user.nome_completo }}</h3>
+    <p class="desc">{{ request.user.email }}</p>
+</article>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Entregas · {{ atividade.titulo }} · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <a href="{% url 'activities:atividade_list' turma.pk %}">Atividades</a>
+        <span>Entregas</span>
+    </nav>
+
+    <div class="classroom-header panel">
+        <div>
+            <span class="eyebrow">{{ turma.nome }}</span>
+            <h1>{{ atividade.titulo }}</h1>
+            <div class="status-row">
+                {% if atividade.prazo %}
+                    {% if atividade.is_overdue %}
+                        <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Prazo encerrado {{ atividade.prazo|date:'d/m/Y H:i' }}</span>
+                    {% else %}
+                        <span class="badge badge-violet"><i data-lucide="calendar"></i> Prazo {{ atividade.prazo|date:'d/m/Y H:i' }}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-neutral"><i data-lucide="calendar"></i> Sem prazo</span>
+                {% endif %}
+                <span class="badge badge-neutral"><i data-lucide="award"></i> {{ atividade.pontuacao_max }} pts</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Aluno</th>
+                    <th>Status</th>
+                    <th>Entregue em</th>
+                    <th>Anexos</th>
+                    <th>Nota</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for linha in linhas %}
+                    <tr>
+                        <td>
+                            <span class="name">
+                                <span class="avatar sm">{{ linha.aluno.get_short_name|slice:':2'|upper }}</span>
+                                <span>
+                                    {{ linha.aluno.nome_completo }}
+                                    <small>{{ linha.aluno.email }}</small>
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            {% if linha.status == 'corrigida' %}
+                                <span class="badge badge-info"><i data-lucide="check-check"></i> Corrigida</span>
+                            {% elif linha.status == 'entregue' %}
+                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
+                            {% elif linha.status == 'atrasada' %}
+                                <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                            {% else %}
+                                <span class="badge badge-neutral"><i data-lucide="circle-dashed"></i> Pendente</span>
+                            {% endif %}
+                        </td>
+                        <td class="mono">{% if linha.entrega.data_entrega %}{{ linha.entrega.data_entrega|date:'d/m/Y H:i' }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if linha.arquivos %}
+                                {% for arquivo in linha.arquivos %}
+                                    <a class="mono" href="{% url 'activities:entrega_arquivo_download' arquivo.pk %}"><i data-lucide="paperclip"></i> {{ arquivo.nome }}</a><br>
+                                {% endfor %}
+                            {% else %}
+                                <span class="mono">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="mono">{% if linha.entrega.checked %}{{ linha.entrega.nota }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if linha.entrega and linha.entrega.data_entrega %}
+                                <a class="btn btn-primary btn-sm" href="{% url 'activities:correcao' linha.entrega.pk %}">
+                                    <i data-lucide="check-check"></i> {% if linha.entrega.checked %}Revisar{% else %}Corrigir{% endif %}
+                                </a>
+                            {% else %}
+                                <span class="muted">Aguardando entrega</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i data-lucide="users"></i>
+                                <strong>Nenhum aluno ativo</strong>
+                                <span>Matricule alunos na turma para receber entregas.</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

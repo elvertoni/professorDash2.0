@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}ProfessorDash · Portal do Aluno{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-preview" aria-hidden="true">
+        <div class="shell-preview">
+            <aside class="sidebar">
+                <div class="logo">
+                    <span class="brand-mark"><i data-lucide="graduation-cap"></i></span>
+                    ProfessorDash
+                </div>
+                <div class="nav-group">
+                    <div class="nav-label">Ensino</div>
+                    <div class="nav-item active"><i data-lucide="layout-dashboard"></i> Início</div>
+                    <div class="nav-item"><i data-lucide="users"></i> Turmas</div>
+                    <div class="nav-item"><i data-lucide="book-open"></i> Aulas</div>
+                    <div class="nav-item"><i data-lucide="clipboard-list"></i> Atividades</div>
+                    <div class="nav-item"><i data-lucide="check-check"></i> Correções <span class="pill">7</span></div>
+                    <div class="nav-item"><i data-lucide="folder"></i> Materiais</div>
+                </div>
+            </aside>
+            <div class="shell-main">
+                <div class="topbar">
+                    <div>
+                        <div class="crumb">Turmas · 3º DS</div>
+                        <div class="page-title">Painel da Turma</div>
+                    </div>
+                    <div class="search"><i data-lucide="search"></i> Buscar aula, atividade ou aluno</div>
+                    <span class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></span>
+                    <span class="avatar">TC</span>
+                </div>
+                <div class="preview-content">
+                    <div class="kpi">
+                        <div class="kpi-icon green"><i data-lucide="users"></i></div>
+                        <div class="kpi-value">32</div>
+                        <div class="kpi-label">Alunos ativos</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-icon violet"><i data-lucide="book-open"></i></div>
+                        <div class="kpi-value">17</div>
+                        <div class="kpi-label">Aulas publicadas</div>
+                    </div>
+                    <div class="kpi">
+                        <div class="kpi-icon yellow"><i data-lucide="clock"></i></div>
+                        <div class="kpi-value">7</div>
+                        <div class="kpi-label">A corrigir</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-copy">
+        <span class="badge badge-success"><i data-lucide="check"></i> Fundação em Django 6</span>
+        <h1>ProfessorDash</h1>
+        <p>
+            Portal educacional para conectar as aulas canônicas do acervo PROF-TONI
+            às turmas, atividades, entregas e correções dos alunos.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="{% url 'accounts:login' %}">
+                <i data-lucide="log-in"></i>
+                Entrar no portal
+            </a>
+            <a class="btn btn-outline btn-lg" href="#jornada">
+                <i data-lucide="arrow-down"></i>
+                Ver jornada
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="jornada">
+    <div class="section-heading">
+        <span class="eyebrow">Jornada</span>
+        <h2>Da aula canônica à correção do professor</h2>
+        <p>O produto nasce como ponte entre o acervo de conhecimento e a rotina real da turma.</p>
+    </div>
+    <div class="feature-grid">
+        <article class="card">
+            <div class="stripe"></div>
+            <span class="tag-disc">Acervo</span>
+            <h3>Importar aulas</h3>
+            <p class="desc">Aulas aprovadas entram no catálogo a partir de `canonica.md` e ficam prontas para publicação.</p>
+            <div class="card-foot"><span>Catálogo</span><i data-lucide="book-open"></i></div>
+        </article>
+        <article class="card">
+            <div class="stripe"></div>
+            <span class="tag-disc">Turmas</span>
+            <h3>Publicar por turma</h3>
+            <p class="desc">O professor libera aulas, materiais e atividades com ordem, prazo e contexto da disciplina.</p>
+            <div class="card-foot"><span>Professor</span><i data-lucide="send"></i></div>
+        </article>
+        <article class="card">
+            <div class="stripe"></div>
+            <span class="tag-disc">Aluno</span>
+            <h3>Estudar e entregar</h3>
+            <p class="desc">O aluno acessa a aula, marca progresso, envia arquivos e acompanha nota e feedback.</p>
+            <div class="card-foot"><span>Progresso</span><i data-lucide="trending-up"></i></div>
+        </article>
+    </div>
+</section>
+
+<section class="section" id="recursos">
+    <div class="section-heading">
+        <span class="eyebrow">Sprint 0</span>
+        <h2>Base técnica pronta para evoluir</h2>
+        <p>Configuração, healthcheck, media protegida e design system integrados como fundação do portal.</p>
+    </div>
+    <div class="status-panel">
+        <div class="status-row">
+            <span class="badge badge-success"><i data-lucide="shield-check"></i> Mídia protegida</span>
+            <span class="badge badge-info"><i data-lucide="activity"></i> /health/</span>
+            <span class="badge badge-violet"><i data-lucide="palette"></i> Design system</span>
+            <span class="badge badge-neutral"><i data-lucide="database"></i> PostgreSQL</span>
+        </div>
+        <div class="progress-row"><span>Fundação da Sprint 0</span><span>Em validação</span></div>
+        <div class="progress"><i style="width:86%"></i></div>
+    </div>
+</section>
+{% endblock %}

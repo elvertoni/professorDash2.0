@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Minha Conta · ProfessorDash{% endblock %}
+
+{% block content %}
+<section class="account-shell">
+    <aside class="account-sidebar">
+        <div class="avatar lg">{{ request.user.get_short_name|slice:':2'|upper }}</div>
+        <div>
+            <h1>{{ request.user.nome_completo }}</h1>
+            <span class="badge badge-violet">{{ request.user.get_role_display }}</span>
+        </div>
+        <nav class="account-nav" aria-label="Conta">
+            <a class="nav-item active" href="{% url 'accounts:profile' %}">
+                <i data-lucide="user"></i>
+                Perfil
+            </a>
+            <a class="nav-item" href="{% url 'accounts:profile_edit' %}">
+                <i data-lucide="settings"></i>
+                Editar perfil
+            </a>
+            <a class="nav-item" href="{% url 'accounts:password_change' %}">
+                <i data-lucide="key-round"></i>
+                Alterar senha
+            </a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button class="nav-item account-logout" type="submit">
+                    <i data-lucide="log-out"></i>
+                    Sair
+                </button>
+            </form>
+        </nav>
+    </aside>
+    <div class="account-content">
+        {% block profile_content %}{% endblock %}
+    </div>
+</section>
+{% endblock %}
