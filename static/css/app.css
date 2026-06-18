@@ -23,6 +23,7 @@
     --shell-success: #10b981;
     --shell-warning: #fbbf24;
     --shell-danger: #f87171;
+    --shell-danger-hover: #dc2626;
     --shell-info: #38bdf8;
     --shell-shadow: 0 24px 80px rgba(0, 0, 0, .40);
     --shell-shadow-soft: 0 16px 40px rgba(0, 0, 0, .24);
@@ -37,9 +38,6 @@
     --grad-primary: linear-gradient(135deg, #10b981, #06b6d4);
     --grad-cta: linear-gradient(45deg, #10b981, #06b6d4 130%);
     --grad-brand: linear-gradient(120deg, #6ee7b7, #8b5cf6 60%, #67e8f9);
-    --grad-violet: linear-gradient(90deg, #8b5cf6, #c4b5fd);
-    --grad-amber: linear-gradient(90deg, #fbbf24, #f59e0b);
-    --grad-cyan: linear-gradient(90deg, #06b6d4, #67e8f9);
     --sidebar-w: 264px;
     --topbar-h: 68px;
     --space-1: 4px;
@@ -69,6 +67,9 @@
     --shell-text: #0f172a;
     --shell-text-muted: #475569;
     --shell-text-soft: #64748b;
+    --shell-primary: #047857;
+    --shell-success: #047857;
+    --shell-secondary: #7c3aed;
     --shell-primary-100: #d1fae5;
     --shell-primary-200: #047857;
     --shell-secondary-200: #6d28d9;
@@ -399,7 +400,7 @@ button {
     height: 16px;
 }
 
-.btn:active {
+.btn:not(:disabled):not([disabled]):active {
     transform: translateY(1px);
 }
 
@@ -409,9 +410,18 @@ button {
     box-shadow: var(--shell-shadow-tint);
 }
 
-.btn-primary:hover {
+.btn-primary:not(:disabled):not([disabled]):hover {
     filter: brightness(1.08);
     box-shadow: 0 14px 36px rgba(16, 185, 129, .32);
+}
+
+.btn-secondary {
+    color: #fff;
+    background: var(--shell-secondary);
+}
+
+.btn-secondary:not(:disabled):not([disabled]):hover {
+    filter: brightness(1.1);
 }
 
 .btn-outline {
@@ -420,7 +430,7 @@ button {
     background: transparent;
 }
 
-.btn-outline:hover {
+.btn-outline:not(:disabled):not([disabled]):hover {
     color: var(--shell-primary);
     border-color: var(--shell-primary);
 }
@@ -430,7 +440,7 @@ button {
     background: transparent;
 }
 
-.btn-ghost:hover {
+.btn-ghost:not(:disabled):not([disabled]):hover {
     color: var(--shell-text);
     background: var(--shell-surface-high);
 }
@@ -441,9 +451,20 @@ button {
     background: rgba(248, 113, 113, .14);
 }
 
-.btn-danger:hover {
-    color: #04110b;
-    background: var(--shell-danger);
+.btn-danger:not(:disabled):not([disabled]):hover {
+    color: #fff;
+    background: var(--shell-danger-hover);
+}
+
+.btn:disabled,
+.btn[disabled],
+.icon-btn:disabled,
+.icon-btn[disabled] {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+    box-shadow: none;
 }
 
 .btn-sm {
@@ -474,6 +495,12 @@ button {
 .icon-btn:hover {
     color: var(--shell-text);
     border-color: var(--shell-border-strong);
+}
+
+.icon-btn:disabled:hover,
+.icon-btn[disabled]:hover {
+    color: var(--shell-text-muted);
+    border-color: var(--shell-border);
 }
 
 .btn:focus-visible,
@@ -823,7 +850,53 @@ button {
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0;
+}
+
+.eyebrow {
+    letter-spacing: .18em;
+}
+
+.tag-disc {
+    letter-spacing: .1em;
+}
+
+.text-gradient-brand {
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.text-success {
+    color: var(--shell-primary);
+}
+
+.text-warning {
+    color: var(--shell-warning);
+}
+
+.text-info {
+    color: var(--shell-tertiary-200);
+}
+
+.text-strong {
+    color: var(--shell-text);
+}
+
+.stripe-cta {
+    background: var(--grad-cta);
+}
+
+.stripe-violet {
+    background: linear-gradient(90deg, var(--shell-secondary), var(--shell-secondary-200));
+}
+
+.stripe-warning {
+    background: linear-gradient(90deg, var(--shell-warning), #f59e0b);
+}
+
+.stripe-cyan {
+    background: linear-gradient(90deg, var(--shell-tertiary), var(--shell-tertiary-200));
 }
 
 .section h2 {

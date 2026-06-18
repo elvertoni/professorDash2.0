@@ -20,7 +20,7 @@
 
     <div class="kpi-grid">
         <div class="kpi-card">
-            <div class="kpi-stripe" style="background:var(--grad-cta)"></div>
+            <div class="kpi-stripe stripe-cta"></div>
             <div class="kpi-top">
                 <div class="kpi-icon green"><i data-lucide="users"></i></div>
                 <span class="kpi-tag">Turmas</span>
@@ -29,7 +29,7 @@
             <div class="kpi-label">Turmas ativas</div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-stripe" style="background:linear-gradient(90deg,#8b5cf6,#c4b5fd)"></div>
+            <div class="kpi-stripe stripe-violet"></div>
             <div class="kpi-top">
                 <div class="kpi-icon violet"><i data-lucide="book-open"></i></div>
                 <span class="kpi-tag">Aulas</span>
@@ -38,7 +38,7 @@
             <div class="kpi-label">Aulas disponíveis</div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-stripe" style="background:linear-gradient(90deg,#06b6d4,#67e8f9)"></div>
+            <div class="kpi-stripe stripe-cyan"></div>
             <div class="kpi-top">
                 <div class="kpi-icon yellow"><i data-lucide="check-check"></i></div>
                 <span class="kpi-tag">Progresso</span>
@@ -46,11 +46,11 @@
             <div class="kpi-value">{{ total_concluidas }}</div>
             <div class="kpi-label">Aulas concluídas</div>
             {% if total_disponiveis and total_disponiveis > 0 %}
-            <div class="kpi-delta" style="color:var(--shell-tertiary-200)">
+            <div class="kpi-delta text-info">
                 <i data-lucide="trending-up"></i> continue estudando
             </div>
             {% else %}
-            <div class="kpi-delta" style="color:var(--shell-primary)">
+            <div class="kpi-delta text-success">
                 <i data-lucide="check-circle"></i> tudo em dia
             </div>
             {% endif %}
@@ -69,7 +69,7 @@
         <div class="feature-grid catalog-grid">
             {% for publicada in proximas %}
                 <article class="card-atelier">
-                    <div class="stripe" style="background:var(--grad-cta)"></div>
+                    <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ publicada.turma.nome }}</span>
                         <span class="badge badge-violet"><i data-lucide="calendar"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
@@ -105,7 +105,7 @@
         <div class="feature-grid catalog-grid">
             {% for turma in turmas %}
                 <article class="card-atelier">
-                    <div class="stripe" style="background:var(--grad-cta)"></div>
+                    <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ turma.disciplina.label }}</span>
                     </div>
