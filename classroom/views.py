@@ -576,33 +576,111 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
     template_name = 'classroom/aluno_dashboard.html'
 
     def get(self, request):
+        from activities.models import Atividade, Entrega
+
         turmas = list(self.get_active_turmas())
         now = timezone.now()
+        local_now = timezone.localtime(now)
+        today_start = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+
         progressos = {
             progresso.aula_publicada_id: progresso
             for progresso in ProgressoAula.objects.filter(aluno=request.user)
         }
-        disponiveis = (
+        disponiveis = list(
             AulaPublicada.objects.available(now)
             .filter(turma__in=turmas)
             .select_related('aula', 'turma', 'aula__disciplina')
             .order_by('-disponivel_em')
         )
-        total_disponiveis = 0
-        total_concluidas = 0
+
+        total_disponiveis = len(disponiveis)
+        total_concluidas = sum(
+            1 for p in progressos.values() 
+            if p.aula_publicada_id in [d.id for d in disponiveis] and p.concluido
+        )
+
+        # 1. Para fazer hoje & Prazos próximos
+        para_fazer_hoje = []
+        prazos_proximos = []
+
+        # Aulas liberadas hoje e pendentes
+        for publicada in disponiveis:
+            progresso = progressos.get(publicada.id)
+            concluido = bool(progresso and progresso.concluido)
+            if not concluido:
+                local_disp = timezone.localtime(publicada.disponivel_em)
+                if today_start <= local_disp < today_end:
+                    para_fazer_hoje.append({
+                        'tipo': 'aula',
+                        'obj': publicada,
+                        'data': local_disp,
+                        'overdue': False,
+                    })
+
+        # Atividades pendentes
+        atividades_all = Atividade.objects.filter(turma__in=turmas, publicada=True).select_related('turma', 'aula_publicada', 'aula_publicada__aula')
+        entregas_dict = {
+            e.atividade_id: e 
+            for e in Entrega.objects.filter(aluno=request.user, atividade__in=atividades_all)
+        }
+
+        for atividade in atividades_all:
+            entrega = entregas_dict.get(atividade.id)
+            status = entrega.status if entrega else Entrega.Status.PENDENTE
+            atividade.minha_entrega = entrega
+            atividade.meu_status = status
+
+            if status == Entrega.Status.PENDENTE and atividade.aberta_para_entrega:
+                if atividade.prazo:
+                    local_prazo = timezone.localtime(atividade.prazo)
+                    if local_prazo < today_start:
+                        # Vencida mas aceita entrega atrasada
+                        para_fazer_hoje.append({
+                            'tipo': 'atividade',
+                            'obj': atividade,
+                            'data': local_prazo,
+                            'overdue': True,
+                        })
+                    elif today_start <= local_prazo < today_end:
+                        # Vence hoje
+                        para_fazer_hoje.append({
+                            'tipo': 'atividade',
+                            'obj': atividade,
+                            'data': local_prazo,
+                            'overdue': False,
+                        })
+                    elif today_end <= local_prazo < today_end + timedelta(days=7):
+                        # Prazos nos próximos 7 dias
+                        prazos_proximos.append(atividade)
+
+        # Ordenar itens de hoje por data limite/liberação
+        para_fazer_hoje.sort(key=lambda x: x['data'] if x['data'] else now)
+        prazos_proximos.sort(key=lambda x: x.prazo if x.prazo else now)
+
+        # 3. Últimos feedbacks e notas
+        ultimos_feedbacks = (
+            Entrega.objects.filter(aluno=request.user, checked=True)
+            .select_related('atividade', 'atividade__turma')
+            .order_by('-corrigido_em')[:5]
+        )
+
+        # Obter as próximas 6 aulas não concluídas (geral) para manter o bloco existente do dashboard
         proximas = []
         for publicada in disponiveis:
-            total_disponiveis += 1
             progresso = progressos.get(publicada.id)
             concluida = bool(progresso and progresso.concluido)
-            if concluida:
-                total_concluidas += 1
-            elif len(proximas) < 6:
+            if not concluida and len(proximas) < 6:
                 publicada.concluida = False
                 proximas.append(publicada)
+
         context = {
             'turmas': turmas,
             'proximas': proximas,
+            'para_fazer_hoje': para_fazer_hoje,
+            'prazos_proximos': prazos_proximos,
+            'ultimos_feedbacks': ultimos_feedbacks,
             'total_turmas': len(turmas),
             'total_disponiveis': total_disponiveis,
             'total_concluidas': total_concluidas,

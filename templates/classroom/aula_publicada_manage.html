@@ -35,11 +35,11 @@
         <table class="tbl">
             <thead>
                 <tr>
-                    <th>Ordem</th>
-                    <th>Aula</th>
-                    <th>Disponível em</th>
-                    <th>Status</th>
-                    <th>Ações</th>
+                    <th scope="col">Ordem</th>
+                    <th scope="col">Aula</th>
+                    <th scope="col">Disponível em</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -103,10 +103,10 @@
                 {% empty %}
                     <tr>
                         <td colspan="5">
-                            <div class="empty-state">
+                            <div class="empty">
                                 <i data-lucide="inbox"></i>
-                                <strong>Nenhuma aula publicada</strong>
-                                <span>Publique a primeira aula do catálogo para esta turma.</span>
+                                <h2>Nenhuma aula publicada</h2>
+                                <p>Publique a primeira aula do catálogo para esta turma.</p>
                             </div>
                         </td>
                     </tr>

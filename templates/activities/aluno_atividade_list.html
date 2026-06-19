@@ -17,14 +17,15 @@
     </div>
 
     {% if atividades %}
-        <div class="tbl-wrap">
+        <!-- Desktop Layout (Tabela) -->
+        <div class="tbl-wrap desktop-only">
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th>Atividade</th>
-                        <th>Prazo</th>
-                        <th>Status</th>
-                        <th>Ações</th>
+                        <th scope="col">Atividade</th>
+                        <th scope="col">Prazo</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,29 +42,106 @@
                             <td class="mono">{% if atividade.prazo %}{{ atividade.prazo|date:'d/m/Y H:i' }}{% else %}Sem prazo{% endif %}</td>
                             <td>
                                 {% if atividade.meu_status == 'corrigida' %}
-                                    <span class="badge badge-info"><i data-lucide="check-check"></i> Corrigida</span>
-                                {% elif atividade.meu_status == 'entregue' %}
-                                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
-                                {% elif atividade.meu_status == 'atrasada' %}
-                                    <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                                    <span class="badge badge-info"><i data-lucide="check-check" aria-hidden="true"></i> Corrigida</span>
+                                {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
+                                    <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Entregue</span>
                                 {% elif not atividade.aberta_para_entrega %}
-                                    <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Prazo encerrado</span>
+                                    <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Prazo encerrado</span>
                                 {% else %}
-                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed"></i> Pendente</span>
+                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
-                                    <i data-lucide="upload"></i> Abrir
-                                </a>
+                                {% if atividade.meu_status == 'corrigida' %}
+                                    <a class="btn btn-outline btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
+                                        <i data-lucide="message-square" aria-hidden="true"></i> Ver feedback
+                                    </a>
+                                {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
+                                    <a class="btn btn-outline btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
+                                        <i data-lucide="eye" aria-hidden="true"></i> Ver entrega
+                                    </a>
+                                {% elif not atividade.aberta_para_entrega %}
+                                    <a class="btn btn-outline btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
+                                        <i data-lucide="info" aria-hidden="true"></i> Ver atividade
+                                    </a>
+                                {% else %}
+                                    <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
+                                        <i data-lucide="upload" aria-hidden="true"></i>
+                                        {% if atividade.is_overdue and atividade.permite_entrega_atrasada %}
+                                            Enviar com atraso
+                                        {% else %}
+                                            Enviar atividade
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Layout (Cards) -->
+        <div class="feature-grid mobile-only">
+            {% for atividade in atividades %}
+                <article class="card">
+                    {% if atividade.meu_status == 'corrigida' %}
+                        <div class="stripe stripe-cyan"></div>
+                    {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
+                        <div class="stripe stripe-success"></div>
+                    {% elif not atividade.aberta_para_entrega %}
+                        <div class="stripe stripe-warning"></div>
+                    {% else %}
+                        <div class="stripe stripe-cta"></div>
+                    {% endif %}
+                    
+                    <div class="card-head">
+                        <span class="tag-disc">{{ atividade.aula_publicada.aula.titulo|default:"Turma" }}</span>
+                        {% if atividade.meu_status == 'corrigida' %}
+                            <span class="badge badge-info"><i data-lucide="check-check" aria-hidden="true"></i> Corrigida</span>
+                        {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
+                            <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Entregue</span>
+                        {% elif not atividade.aberta_para_entrega %}
+                            <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Prazo encerrado</span>
+                        {% else %}
+                            <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h3>{{ atividade.titulo }}</h3>
+                    <p class="desc">
+                        {% if atividade.prazo %}
+                            <i data-lucide="calendar" aria-hidden="true" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i> Prazo: {{ atividade.prazo|date:'d/m/Y H:i' }}
+                        {% else %}
+                            Sem prazo
+                        {% endif %}
+                        <br>
+                        Valor: {{ atividade.pontuacao_max }} pts
+                    </p>
+                    
+                    <div class="card-foot">
+                        {% if atividade.meu_status == 'corrigida' %}
+                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="message-square" aria-hidden="true"></i> Ver feedback</a>
+                        {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
+                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="eye" aria-hidden="true"></i> Ver entrega</a>
+                        {% elif not atividade.aberta_para_entrega %}
+                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="info" aria-hidden="true"></i> Ver atividade</a>
+                        {% else %}
+                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}" style="color: var(--shell-primary-200); font-weight: 700;">
+                                <i data-lucide="upload" aria-hidden="true"></i>
+                                {% if atividade.is_overdue and atividade.permite_entrega_atrasada %}
+                                    Enviar com atraso
+                                {% else %}
+                                    Enviar atividade
+                                {% endif %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty">
             <i data-lucide="clipboard-list"></i>
             <h2>Nenhuma atividade liberada</h2>
             <p>Quando o professor publicar atividades, elas aparecerão aqui.</p>

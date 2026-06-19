@@ -36,14 +36,15 @@
     </div>
 
     {% if publicadas %}
-        <div class="tbl-wrap">
+        <!-- Desktop Layout (Tabela) -->
+        <div class="tbl-wrap desktop-only">
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th>Aula</th>
-                        <th>Liberada em</th>
-                        <th>Status</th>
-                        <th>Ações</th>
+                        <th scope="col">Aula</th>
+                        <th scope="col">Liberada em</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,14 +61,14 @@
                             <td class="mono">{{ publicada.disponivel_em|date:'d/m/Y' }}</td>
                             <td>
                                 {% if publicada.concluida %}
-                                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Concluída</span>
+                                    <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
                                 {% else %}
-                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed"></i> Pendente</span>
+                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
                                 {% endif %}
                             </td>
                             <td>
                                 <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
-                                    <i data-lucide="book-open"></i> Estudar
+                                    <i data-lucide="book-open" aria-hidden="true"></i> Estudar
                                 </a>
                             </td>
                         </tr>
@@ -75,8 +76,41 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Layout (Cards) -->
+        <div class="feature-grid mobile-only">
+            {% for publicada in publicadas %}
+                <article class="card">
+                    {% if publicada.concluida %}
+                        <div class="stripe stripe-violet"></div>
+                    {% else %}
+                        <div class="stripe stripe-cta"></div>
+                    {% endif %}
+                    
+                    <div class="card-head">
+                        <span class="tag-disc">{{ publicada.aula.trilha.label }}</span>
+                        {% if publicada.concluida %}
+                            <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
+                        {% else %}
+                            <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h3>{{ publicada.aula.titulo }}</h3>
+                    <p class="desc">
+                        <i data-lucide="calendar" aria-hidden="true" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i> Liberada: {{ publicada.disponivel_em|date:'d/m/Y' }}
+                    </p>
+                    
+                    <div class="card-foot">
+                        <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}" style="width: 100%;">
+                            <i data-lucide="book-open" aria-hidden="true"></i> Estudar
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty">
             <i data-lucide="inbox"></i>
             <h2>Nenhuma aula liberada</h2>
             <p>O professor ainda não liberou aulas para esta turma.</p>

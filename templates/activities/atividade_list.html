@@ -31,12 +31,12 @@
         <table class="tbl">
             <thead>
                 <tr>
-                    <th>Atividade</th>
-                    <th>Prazo</th>
-                    <th>Pontuação</th>
-                    <th>Entregas</th>
-                    <th>Status</th>
-                    <th>Ações</th>
+                    <th scope="col">Atividade</th>
+                    <th scope="col">Prazo</th>
+                    <th scope="col">Pontuação</th>
+                    <th scope="col">Entregas</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,10 +77,10 @@
                 {% empty %}
                     <tr>
                         <td colspan="6">
-                            <div class="empty-state">
+                            <div class="empty">
                                 <i data-lucide="clipboard-list"></i>
-                                <strong>Nenhuma atividade criada</strong>
-                                <span>Crie a primeira atividade desta turma.</span>
+                                <h2>Nenhuma atividade criada</h2>
+                                <p>Crie a primeira atividade desta turma.</p>
                             </div>
                         </td>
                     </tr>

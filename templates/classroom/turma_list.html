@@ -44,10 +44,10 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty">
             <i data-lucide="users"></i>
             <h2>Nenhuma turma cadastrada</h2>
-            <p>Crie a primeira turma para matricular alunos e preparar a publicação de aulas.</p>
+            <p style="margin-bottom: var(--space-4);">Crie a primeira turma para matricular alunos e preparar a publicação de aulas.</p>
             <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
                 <i data-lucide="plus"></i>
                 Criar turma

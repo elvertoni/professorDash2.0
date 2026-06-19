@@ -78,6 +78,15 @@ class User(AbstractUser, TimeStampedModel):
     def is_aluno(self):
         return self.role == self.Role.ALUNO
 
+    @property
+    def first_active_turma(self):
+        if self.is_aluno:
+            matricula = self.matriculas.filter(status='ativa').first()
+            return matricula.turma if matricula else None
+        elif self.is_professor:
+            return self.turmas_lecionadas.filter(ativa=True).first()
+        return None
+
 
 class ProfessorProfile(TimeStampedModel):
     user = models.OneToOneField(

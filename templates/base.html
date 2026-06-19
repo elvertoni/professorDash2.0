@@ -30,37 +30,69 @@
                 <span class="sr-only">Menu</span>
             </summary>
             <nav class="mobile-nav-panel" aria-label="Navegação principal mobile">
-                <a href="{% url 'home' %}#jornada">Jornada</a>
-                <a href="{% url 'home' %}#recursos">Recursos</a>
-                {% if user.is_authenticated %}
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'home' %}#jornada" class="{% if '#jornada' in request.path %}active{% endif %}">Jornada</a>
+                    <a href="{% url 'home' %}#recursos" class="{% if '#recursos' in request.path %}active{% endif %}">Recursos</a>
+                    <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
+                {% else %}
                     {% if user.is_aluno %}
-                        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+                        <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Meu painel</a>
+                        {% if user.first_active_turma %}
+                            <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
+                            <a href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}" class="{% if '/materiais/aluno/' in request.path %}active{% endif %}">Materiais</a>
+                        {% endif %}
+                        <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
+                    {% elif user.is_professor %}
+                        <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
+                        <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and not '/turmas/aluno/' in request.path and not '/turmas/painel/' in request.path %}active{% endif %}">Turmas</a>
+                        {% if user.first_active_turma %}
+                            <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and not '/atividades/aluno/' in request.path %}active{% endif %}">Correções</a>
+                        {% endif %}
+                        <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
+                        {% if user.first_active_turma %}
+                            <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}" class="{% if '/turmas/' in request.path and '/relatorio/' in request.path %}active{% endif %}">Relatórios</a>
+                        {% endif %}
                     {% endif %}
-                    <a href="{% url 'catalog:aula_list' %}">Catálogo</a>
-                    {% if user.is_professor or user.is_admin_role or user.is_superuser %}
-                        <a href="{% url 'classroom:professor_dashboard' %}">Painel</a>
-                        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+                    <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
+                    <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
+                    {% if user.is_superuser or user.is_admin_role or user.is_staff %}
+                        <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
+                        <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                     {% endif %}
-                    <a href="{% url 'notifications:list' %}">Notificações</a>
                 {% endif %}
-                <a href="{% url 'health' %}">Status</a>
             </nav>
         </details>
         <nav class="site-nav" aria-label="Navegação principal">
-            <a href="{% url 'home' %}#jornada">Jornada</a>
-            <a href="{% url 'home' %}#recursos">Recursos</a>
-            {% if user.is_authenticated %}
+            {% if not user.is_authenticated %}
+                <a href="{% url 'home' %}#jornada" class="{% if '#jornada' in request.path %}active{% endif %}">Jornada</a>
+                <a href="{% url 'home' %}#recursos" class="{% if '#recursos' in request.path %}active{% endif %}">Recursos</a>
+                <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
+            {% else %}
                 {% if user.is_aluno %}
-                    <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+                    <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Meu painel</a>
+                    {% if user.first_active_turma %}
+                        <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
+                        <a href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}" class="{% if '/materiais/aluno/' in request.path %}active{% endif %}">Materiais</a>
+                    {% endif %}
+                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
+                {% elif user.is_professor %}
+                    <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
+                    <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and not '/turmas/aluno/' in request.path and not '/turmas/painel/' in request.path %}active{% endif %}">Turmas</a>
+                    {% if user.first_active_turma %}
+                        <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and not '/atividades/aluno/' in request.path %}active{% endif %}">Correções</a>
+                    {% endif %}
+                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
+                    {% if user.first_active_turma %}
+                        <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}" class="{% if '/turmas/' in request.path and '/relatorio/' in request.path %}active{% endif %}">Relatórios</a>
+                    {% endif %}
                 {% endif %}
-                <a href="{% url 'catalog:aula_list' %}">Catálogo</a>
-                {% if user.is_professor or user.is_admin_role or user.is_superuser %}
-                    <a href="{% url 'classroom:professor_dashboard' %}">Painel</a>
-                    <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+                <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
+                <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
+                {% if user.is_superuser or user.is_admin_role or user.is_staff %}
+                    <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
+                    <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                 {% endif %}
-                <a href="{% url 'notifications:list' %}">Notificações</a>
             {% endif %}
-            <a href="{% url 'health' %}">Status</a>
         </nav>
         <div class="header-actions">
             {% if user.is_authenticated %}
@@ -84,10 +116,17 @@
                         {% if notifications_preview %}
                             <div class="notification-preview-list">
                                 {% for notificacao in notifications_preview %}
-                                    <a class="notification-preview" href="{{ notificacao.link|default:'#' }}">
-                                        <span class="notification-preview-title">{{ notificacao.titulo }}</span>
-                                        <span>{{ notificacao.mensagem }}</span>
-                                    </a>
+                                    {% if notificacao.link %}
+                                        <a class="notification-preview" href="{{ notificacao.link }}">
+                                            <span class="notification-preview-title">{{ notificacao.titulo }}</span>
+                                            <span>{{ notificacao.mensagem }}</span>
+                                        </a>
+                                    {% else %}
+                                        <div class="notification-preview">
+                                            <span class="notification-preview-title">{{ notificacao.titulo }}</span>
+                                            <span>{{ notificacao.mensagem }}</span>
+                                        </div>
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                             <form method="post" action="{% url 'notifications:mark_all_read' %}">
@@ -135,7 +174,7 @@
         <div class="message-stack" aria-live="polite">
             {% for message in messages %}
                 <div class="toast {% if message.tags == 'success' %}s{% elif message.tags == 'error' %}e{% else %}i{% endif %}">
-                    <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-triangle{% else %}info{% endif %}"></i>
+                    <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-triangle{% else %}info{% endif %}" aria-hidden="true"></i>
                     <div>{{ message }}</div>
                 </div>
             {% endfor %}

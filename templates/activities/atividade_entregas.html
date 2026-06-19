@@ -34,12 +34,12 @@
         <table class="tbl">
             <thead>
                 <tr>
-                    <th>Aluno</th>
-                    <th>Status</th>
-                    <th>Entregue em</th>
-                    <th>Anexos</th>
-                    <th>Nota</th>
-                    <th>Ações</th>
+                    <th scope="col">Aluno</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Entregue em</th>
+                    <th scope="col">Anexos</th>
+                    <th scope="col">Nota</th>
+                    <th scope="col">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,10 +89,10 @@
                 {% empty %}
                     <tr>
                         <td colspan="6">
-                            <div class="empty-state">
+                            <div class="empty">
                                 <i data-lucide="users"></i>
-                                <strong>Nenhum aluno ativo</strong>
-                                <span>Matricule alunos na turma para receber entregas.</span>
+                                <h2>Nenhum aluno ativo</h2>
+                                <p>Matricule alunos na turma para receber entregas.</p>
                             </div>
                         </td>
                     </tr>

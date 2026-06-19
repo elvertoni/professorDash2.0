@@ -21,7 +21,7 @@ class StyledFormMixin:
     )
 
     def apply_design_system_classes(self):
-        for field in self.fields.values():
+        for name, field in self.fields.items():
             widget = field.widget
 
             if isinstance(widget, self.unstyled_widgets):
@@ -35,6 +35,25 @@ class StyledFormMixin:
 
             existing = widget.attrs.get('class', '')
             widget.attrs['class'] = f'{existing} {css_class}'.strip()
+
+            # Associar help_text com aria-describedby
+            if field.help_text:
+                field_id = self.auto_id % name if self.auto_id and '%s' in str(self.auto_id) else name
+                widget.attrs['aria-describedby'] = f'hint_{field_id}'
+
+    def full_clean(self):
+        super().full_clean()
+        for name, field in self.fields.items():
+            if name in self.errors:
+                field.widget.attrs['aria-invalid'] = 'true'
+                field_id = self.auto_id % name if self.auto_id and '%s' in str(self.auto_id) else name
+                err_id = f'error_{field_id}'
+                existing_desc = field.widget.attrs.get('aria-describedby', '')
+                if existing_desc:
+                    if err_id not in existing_desc:
+                        field.widget.attrs['aria-describedby'] = f'{err_id} {existing_desc}'
+                else:
+                    field.widget.attrs['aria-describedby'] = err_id
 
 
 class EmailAuthenticationForm(StyledFormMixin, AuthenticationForm):

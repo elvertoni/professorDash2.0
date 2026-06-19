@@ -18,11 +18,11 @@
 
     <div class="classroom-actions">
         <a class="btn btn-primary" href="{% url 'materials:material_create' turma.pk %}">
-            <i data-lucide="plus"></i>
+            <i data-lucide="plus" aria-hidden="true"></i>
             Novo material
         </a>
         <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">
-            <i data-lucide="arrow-left"></i>
+            <i data-lucide="arrow-left" aria-hidden="true"></i>
             Voltar à turma
         </a>
     </div>
@@ -31,11 +31,11 @@
         <table class="tbl">
             <thead>
                 <tr>
-                    <th>Material</th>
-                    <th>Tipo</th>
-                    <th>Aula</th>
-                    <th>Conteúdo</th>
-                    <th>Ações</th>
+                    <th scope="col">Material</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Aula</th>
+                    <th scope="col">Conteúdo</th>
+                    <th scope="col">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,9 +53,9 @@
                         <td>{% if material.aula_publicada %}{{ material.aula_publicada.aula.titulo }}{% else %}—{% endif %}</td>
                         <td>
                             {% if material.arquivo %}
-                                <a class="mono" href="{% url 'materials:material_download' material.pk %}"><i data-lucide="download"></i> {{ material.nome_arquivo }}</a>
+                                <a class="mono" href="{% url 'materials:material_download' material.pk %}"><i data-lucide="download" aria-hidden="true"></i> Baixar arquivo</a>
                             {% elif material.link_externo %}
-                                <a class="mono" href="{{ material.link_externo }}" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Abrir link</a>
+                                <a class="mono" href="{{ material.link_externo }}" target="_blank" rel="noopener"><i data-lucide="external-link" aria-hidden="true"></i> Abrir link<span class="sr-only"> (abre em nova aba)</span></a>
                             {% else %}
                                 —
                             {% endif %}
@@ -63,10 +63,10 @@
                         <td>
                             <div class="tbl-actions">
                                 <a class="btn btn-outline btn-sm" href="{% url 'materials:material_update' material.pk %}">
-                                    <i data-lucide="edit-3"></i> Editar
+                                    <i data-lucide="edit-3" aria-hidden="true"></i> Editar
                                 </a>
                                 <a class="btn btn-danger btn-sm" href="{% url 'materials:material_delete' material.pk %}">
-                                    <i data-lucide="trash-2"></i> Excluir
+                                    <i data-lucide="trash-2" aria-hidden="true"></i> Excluir
                                 </a>
                             </div>
                         </td>
@@ -74,10 +74,10 @@
                 {% empty %}
                     <tr>
                         <td colspan="5">
-                            <div class="empty-state">
-                                <i data-lucide="folder"></i>
-                                <strong>Nenhum material</strong>
-                                <span>Adicione o primeiro material desta turma.</span>
+                            <div class="empty">
+                                <i data-lucide="folder" aria-hidden="true"></i>
+                                <h2>Nenhum material</h2>
+                                <p>Adicione o primeiro material desta turma.</p>
                             </div>
                         </td>
                     </tr>

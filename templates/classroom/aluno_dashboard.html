@@ -19,46 +19,173 @@
     </div>
 
     <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="kpi-stripe stripe-cta"></div>
-            <div class="kpi-top">
-                <div class="kpi-icon green"><i data-lucide="users"></i></div>
-                <span class="kpi-tag">Turmas</span>
-            </div>
-            <div class="kpi-value">{{ total_turmas }}</div>
-            <div class="kpi-label">Turmas ativas</div>
+        <div class="kpi">
+            <div class="stripe stripe-cta"></div>
+            <div class="ico green"><i data-lucide="users"></i></div>
+            <div class="val">{{ total_turmas }}</div>
+            <div class="lab">Turmas ativas</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-stripe stripe-violet"></div>
-            <div class="kpi-top">
-                <div class="kpi-icon violet"><i data-lucide="book-open"></i></div>
-                <span class="kpi-tag">Aulas</span>
-            </div>
-            <div class="kpi-value">{{ total_disponiveis }}</div>
-            <div class="kpi-label">Aulas disponíveis</div>
+        <div class="kpi">
+            <div class="stripe stripe-violet"></div>
+            <div class="ico violet"><i data-lucide="book-open"></i></div>
+            <div class="val">{{ total_disponiveis }}</div>
+            <div class="lab">Aulas disponíveis</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-stripe stripe-cyan"></div>
-            <div class="kpi-top">
-                <div class="kpi-icon yellow"><i data-lucide="check-check"></i></div>
-                <span class="kpi-tag">Progresso</span>
-            </div>
-            <div class="kpi-value">{{ total_concluidas }}</div>
-            <div class="kpi-label">Aulas concluídas</div>
+        <div class="kpi">
+            <div class="stripe stripe-cyan"></div>
+            <div class="ico yellow"><i data-lucide="check-check"></i></div>
+            <div class="val">{{ total_concluidas }}</div>
+            <div class="lab">Aulas concluídas</div>
             {% if total_disponiveis and total_disponiveis > 0 %}
-            <div class="kpi-delta text-info">
+            <div class="delta text-info">
                 <i data-lucide="trending-up"></i> continue estudando
             </div>
             {% else %}
-            <div class="kpi-delta text-success">
+            <div class="delta text-success">
                 <i data-lucide="check-circle"></i> tudo em dia
             </div>
             {% endif %}
         </div>
     </div>
 
-    <div class="section-atelier section-gap">
-        <div class="section-atelier-row">
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
+            <div>
+                <span class="eyebrow">Hoje</span>
+                <h2>Para fazer <span class="accent">hoje</span></h2>
+            </div>
+        </div>
+    </div>
+    {% if para_fazer_hoje %}
+        <div class="feature-grid catalog-grid">
+            {% for item in para_fazer_hoje %}
+                {% if item.tipo == 'aula' %}
+                    <article class="card">
+                        <div class="stripe stripe-violet"></div>
+                        <div class="card-head">
+                            <span class="tag-disc">{{ item.obj.turma.nome }}</span>
+                            <span class="badge badge-info"><i data-lucide="book-open"></i> Aula de hoje</span>
+                        </div>
+                        <h3>{{ item.obj.aula.titulo }}</h3>
+                        <p class="desc">{{ item.obj.aula.disciplina.label }}</p>
+                        <div class="card-foot">
+                            <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' item.obj.pk %}">
+                                <i data-lucide="play"></i> Estudar agora
+                            </a>
+                        </div>
+                    </article>
+                {% elif item.tipo == 'atividade' %}
+                    <article class="card">
+                        {% if item.overdue %}
+                            <div class="stripe stripe-warning"></div>
+                        {% else %}
+                            <div class="stripe stripe-cta"></div>
+                        {% endif %}
+                        <div class="card-head">
+                            <span class="tag-disc">{{ item.obj.turma.nome }}</span>
+                            {% if item.overdue %}
+                                <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                            {% else %}
+                                <span class="badge badge-warning"><i data-lucide="clock"></i> Hoje {{ item.data|date:'H:i' }}</span>
+                            {% endif %}
+                        </div>
+                        <h3>{{ item.obj.titulo }}</h3>
+                        <p class="desc">Atividade · {{ item.obj.pontuacao_max }} pts</p>
+                        <div class="card-foot">
+                            <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' item.obj.pk %}">
+                                <i data-lucide="upload"></i> {% if item.overdue %}Enviar com atraso{% else %}Enviar atividade{% endif %}
+                            </a>
+                        </div>
+                    </article>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            <i data-lucide="check-check"></i>
+            <h2>Tudo resolvido por hoje!</h2>
+            <p>Você não tem nenhuma aula liberada hoje ou atividade pendente para hoje.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
+            <div>
+                <span class="eyebrow">Prazos</span>
+                <h2>Prazos <span class="accent">próximos</span></h2>
+            </div>
+        </div>
+    </div>
+    {% if prazos_proximos %}
+        <div class="feature-grid catalog-grid">
+            {% for atividade in prazos_proximos %}
+                <article class="card">
+                    <div class="stripe stripe-cta"></div>
+                    <div class="card-head">
+                        <span class="tag-disc">{{ atividade.turma.nome }}</span>
+                        <span class="badge badge-warning"><i data-lucide="calendar"></i> {{ atividade.prazo|date:'d/m (H:i)' }}</span>
+                    </div>
+                    <h3>{{ atividade.titulo }}</h3>
+                    <p class="desc">Atividade · {{ atividade.pontuacao_max }} pts</p>
+                    <div class="card-foot">
+                        <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
+                            <i data-lucide="upload"></i> Enviar atividade
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            <i data-lucide="smile"></i>
+            <h2>Nenhum prazo próximo</h2>
+            <p>Nenhuma atividade com prazo nos próximos 7 dias.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
+            <div>
+                <span class="eyebrow">Retorno</span>
+                <h2>Últimos feedbacks <span class="accent">e notas</span></h2>
+            </div>
+        </div>
+    </div>
+    {% if ultimos_feedbacks %}
+        <div class="feature-grid catalog-grid">
+            {% for entrega in ultimos_feedbacks %}
+                <article class="card">
+                    <div class="stripe stripe-cyan"></div>
+                    <div class="card-head">
+                        <span class="tag-disc">{{ entrega.atividade.turma.nome }}</span>
+                        <span class="badge badge-info"><i data-lucide="award"></i> Nota {{ entrega.nota }} / {{ entrega.atividade.pontuacao_max }}</span>
+                    </div>
+                    <h3>{{ entrega.atividade.titulo }}</h3>
+                    <p class="desc">
+                        {% if entrega.feedback %}
+                            {{ entrega.feedback|truncatechars:70 }}
+                        {% else %}
+                            Sem comentários adicionais.
+                        {% endif %}
+                    </p>
+                    <div class="card-foot">
+                        <a class="btn btn-outline btn-sm" href="{% url 'activities:aluno_entrega' entrega.atividade.pk %}">
+                            <i data-lucide="message-square"></i> Ver feedback
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            <i data-lucide="clipboard"></i>
+            <h2>Nenhuma correção recente</h2>
+            <p>Suas atividades corrigidas aparecerão aqui.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
             <div>
                 <span class="eyebrow">Estudo</span>
                 <h2>Próximas <span class="accent">aulas</span></h2>
@@ -68,7 +195,7 @@
     {% if proximas %}
         <div class="feature-grid catalog-grid">
             {% for publicada in proximas %}
-                <article class="card-atelier">
+                <article class="card">
                     <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ publicada.turma.nome }}</span>
@@ -83,15 +210,15 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-atelier">
+        <div class="empty">
             <i data-lucide="party-popper"></i>
             <h2>Tudo em dia</h2>
             <p>Você concluiu todas as aulas disponíveis no momento.</p>
         </div>
     {% endif %}
 
-    <div class="section-atelier section-gap">
-        <div class="section-atelier-row">
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
             <div>
                 <span class="eyebrow">Turmas</span>
                 <h2>Minhas <span class="accent">turmas</span></h2>
@@ -104,7 +231,7 @@
     {% if turmas %}
         <div class="feature-grid catalog-grid">
             {% for turma in turmas %}
-                <article class="card-atelier">
+                <article class="card">
                     <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ turma.disciplina.label }}</span>
@@ -118,7 +245,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-atelier">
+        <div class="empty">
             <i data-lucide="inbox"></i>
             <h2>Nenhuma turma ativa</h2>
             <p>Quando você for matriculado em uma turma, ela aparecerá aqui.</p>

@@ -20,27 +20,52 @@
         <div class="feature-grid catalog-grid">
             {% for material in materiais %}
                 <article class="card">
-                    <div class="stripe"></div>
-                    <span class="tag-disc">{{ material.get_tipo_display }}</span>
+                    {% if material.arquivo %}
+                        <div class="stripe stripe-cta"></div>
+                    {% else %}
+                        <div class="stripe stripe-cyan"></div>
+                    {% endif %}
+                    
+                    <div class="card-head">
+                        <span class="tag-disc">
+                            <i data-lucide="{% if material.tipo == 'pdf' %}file-text{% elif material.tipo == 'slide' %}presentation{% elif material.tipo == 'link' %}external-link{% elif material.tipo == 'video' %}video{% else %}file{% endif %}" aria-hidden="true" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-top; margin-right: 4px;"></i>
+                            {{ material.get_tipo_display }}
+                        </span>
+                        <span class="badge badge-neutral"><i data-lucide="calendar" aria-hidden="true"></i> {{ material.created_at|date:'d/m/Y' }}</span>
+                    </div>
+                    
                     <h3>{{ material.titulo }}</h3>
                     <p class="desc">{{ material.descricao|default:'Sem descrição.' }}</p>
+                    
+                    {% if material.arquivo %}
+                        <p style="margin-top: var(--space-2); font-size: 12px; font-family: var(--font-mono); color: var(--shell-text-soft);">
+                            <i data-lucide="paperclip" aria-hidden="true" style="width: 12px; height: 12px; display: inline-block; vertical-align: text-top;"></i>
+                            {{ material.nome_arquivo }}
+                        </p>
+                    {% endif %}
+                    
                     <div class="card-foot">
                         {% if material.aula_publicada %}
-                            <span class="badge badge-neutral"><i data-lucide="book-open"></i> {{ material.aula_publicada.aula.titulo|truncatechars:24 }}</span>
+                            <span class="badge badge-neutral" title="Aula: {{ material.aula_publicada.aula.titulo }}"><i data-lucide="book-open" aria-hidden="true"></i> {{ material.aula_publicada.aula.titulo|truncatechars:18 }}</span>
                         {% else %}
-                            <span class="badge badge-neutral"><i data-lucide="folder"></i> Turma</span>
+                            <span class="badge badge-neutral"><i data-lucide="folder" aria-hidden="true"></i> Turma</span>
                         {% endif %}
+                        
                         {% if material.arquivo %}
-                            <a href="{% url 'materials:material_download' material.pk %}">Baixar</a>
+                            <a class="btn btn-primary btn-sm" href="{% url 'materials:material_download' material.pk %}">
+                                <i data-lucide="download" aria-hidden="true"></i> Baixar arquivo
+                            </a>
                         {% elif material.link_externo %}
-                            <a href="{{ material.link_externo }}" target="_blank" rel="noopener">Abrir</a>
+                            <a class="btn btn-outline btn-sm" href="{{ material.link_externo }}" target="_blank" rel="noopener">
+                                <i data-lucide="external-link" aria-hidden="true"></i> Abrir link externo<span class="sr-only"> (abre em nova aba)</span>
+                            </a>
                         {% endif %}
                     </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-state panel">
+        <div class="empty">
             <i data-lucide="folder"></i>
             <h2>Nenhum material disponível</h2>
             <p>Quando o professor compartilhar materiais, eles aparecerão aqui.</p>

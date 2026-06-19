@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="toolbar-atelier">
+    <div class="toolbar">
         <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_list' %}">
             <i data-lucide="users"></i> Minhas turmas
         </a>
@@ -34,46 +34,37 @@
     </div>
 
     <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="kpi-stripe stripe-cta"></div>
-            <div class="kpi-top">
-                <div class="kpi-icon green"><i data-lucide="users"></i></div>
-                <span class="kpi-tag">Turmas</span>
-            </div>
-            <div class="kpi-value">{{ total_turmas }}</div>
-            <div class="kpi-label">Turmas ativas</div>
+        <div class="kpi">
+            <div class="stripe stripe-cta"></div>
+            <div class="ico green"><i data-lucide="users"></i></div>
+            <div class="val">{{ total_turmas }}</div>
+            <div class="lab">Turmas ativas</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-stripe stripe-violet"></div>
-            <div class="kpi-top">
-                <div class="kpi-icon violet"><i data-lucide="user-check"></i></div>
-                <span class="kpi-tag">Alunos</span>
-            </div>
-            <div class="kpi-value">{{ total_alunos }}</div>
-            <div class="kpi-label">Alunos ativos</div>
+        <div class="kpi">
+            <div class="stripe stripe-violet"></div>
+            <div class="ico violet"><i data-lucide="user-check"></i></div>
+            <div class="val">{{ total_alunos }}</div>
+            <div class="lab">Alunos ativos</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-stripe stripe-warning"></div>
-            <div class="kpi-top">
-                <div class="kpi-icon yellow"><i data-lucide="clock"></i></div>
-                <span class="kpi-tag">Correções</span>
-            </div>
-            <div class="kpi-value">{{ total_aguardando }}</div>
-            <div class="kpi-label">Aguardando check</div>
+        <div class="kpi">
+            <div class="stripe stripe-warning"></div>
+            <div class="ico yellow"><i data-lucide="clock"></i></div>
+            <div class="val">{{ total_aguardando }}</div>
+            <div class="lab">Aguardando check</div>
             {% if total_aguardando and total_aguardando > 0 %}
-            <div class="kpi-delta text-warning">
+            <div class="delta text-warning">
                 <i data-lucide="alert-triangle"></i> fila de correção
             </div>
             {% else %}
-            <div class="kpi-delta text-success">
+            <div class="delta text-success">
                 <i data-lucide="check-circle"></i> tudo corrigido
             </div>
             {% endif %}
         </div>
     </div>
 
-    <div class="section-atelier section-gap">
-        <div class="section-atelier-row">
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
             <div>
                 <span class="eyebrow">Indicadores</span>
                 <h2>Desempenho por <span class="accent">turma</span></h2>
@@ -85,7 +76,7 @@
     {% if turmas %}
         <div class="feature-grid catalog-grid">
             {% for turma in turmas %}
-                <article class="card-atelier">
+                <article class="card">
                     <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ turma.disciplina.label }}</span>
@@ -115,15 +106,15 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-atelier">
+        <div class="empty">
             <i data-lucide="inbox"></i>
             <h2>Nenhuma turma</h2>
             <p>Crie uma turma para ver os indicadores aqui.</p>
         </div>
     {% endif %}
 
-    <div class="section-atelier section-gap">
-        <div class="section-atelier-row">
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
             <div>
                 <span class="eyebrow">Calendário</span>
                 <h2>Prazos <span class="accent">próximos</span></h2>
@@ -136,10 +127,10 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th>Atividade</th>
-                        <th>Turma</th>
-                        <th>Prazo</th>
-                        <th>Ações</th>
+                        <th scope="col">Atividade</th>
+                        <th scope="col">Turma</th>
+                        <th scope="col">Prazo</th>
+                        <th scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -159,15 +150,15 @@
             </table>
         </div>
     {% else %}
-        <div class="empty-atelier">
+        <div class="empty">
             <i data-lucide="calendar-check"></i>
             <h2>Sem prazos próximos</h2>
             <p>Nenhuma atividade vence nos próximos 7 dias.</p>
         </div>
     {% endif %}
 
-    <div class="section-atelier section-gap">
-        <div class="section-atelier-row">
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
             <div>
                 <span class="eyebrow">Fila de correção</span>
                 <h2>Aguardando <span class="accent">check</span></h2>
@@ -182,12 +173,12 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th>Aluno</th>
-                        <th>Atividade</th>
-                        <th>Turma</th>
-                        <th>Status</th>
-                        <th>Entregue em</th>
-                        <th>Ações</th>
+                        <th scope="col">Aluno</th>
+                        <th scope="col">Atividade</th>
+                        <th scope="col">Turma</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Entregue em</th>
+                        <th scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -220,7 +211,7 @@
             </table>
         </div>
     {% else %}
-        <div class="empty-atelier">
+        <div class="empty">
             <i data-lucide="party-popper"></i>
             <h2>Nada na fila</h2>
             <p>Todas as entregas foram corrigidas.</p>

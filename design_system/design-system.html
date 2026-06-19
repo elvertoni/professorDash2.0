@@ -232,14 +232,23 @@ p{margin:0}
 .badge-neutral{background:var(--shell-surface-high);color:var(--shell-text-muted);border-color:var(--shell-border-strong)}
 .badge-violet{background:rgba(139,92,246,.14);color:var(--shell-secondary-200);border-color:rgba(139,92,246,.28)}
 
-/* ============ CARDS (tonal layering, no dividers) ============ */
-.card{background:var(--shell-surface-high);border:1px solid var(--shell-border);border-radius:var(--radius-lg);padding:22px;transition:.2s;position:relative;overflow:hidden}
-.card:hover{background:var(--shell-surface-highest);border-color:rgba(16,185,129,.18)}
-.card .tag-disc{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--shell-primary)}
-.card h3{font-size:18px;margin:8px 0 6px}
-.card .desc{font-size:13px;color:var(--shell-text-muted);margin-bottom:18px}
+/* ============ CARDS (tonal layering, no dividers, consolidated) ============ */
+.card{padding:24px;border-radius:var(--radius-lg);background:var(--shell-surface-high);border:1px solid var(--shell-border);transition:background-color .2s,transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-3px);background:var(--shell-surface-highest);border-color:rgba(16,185,129,.18);box-shadow:var(--shell-shadow-soft)}
 .card .stripe{position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad-cta)}
-.card-foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);padding-top:16px;margin-top:6px}
+.card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.card .tag-disc{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--shell-primary)}
+.card h3{font-size:18px;margin:8px 0 6px;font-weight:700;letter-spacing:-.01em}
+.card .desc{font-size:13px;color:var(--shell-text-muted);line-height:1.6;margin:0 0 18px}
+.card .metric{display:grid;gap:6px;margin-bottom:14px}
+.card .metric:last-of-type{margin-bottom:0}
+.card .metric-row{display:flex;justify-content:space-between;font-size:12px;color:var(--shell-text-soft)}
+.card .metric-row b{color:var(--shell-text);font-weight:600}
+.card-foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);padding-top:16px;margin-top:6px;flex-wrap:wrap;gap:8px}
+.card-foot a{color:var(--shell-primary-200);font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:color .16s}
+.card-foot a:hover{color:var(--shell-primary)}
+.card-foot a svg{width:15px;height:15px}
+
 /* no-line: separe por espaço, não por borda */
 .stack-faces{display:flex}
 .stack-faces .avatar{margin-left:-8px;box-shadow:0 0 0 2px var(--shell-surface-high)}
@@ -248,13 +257,38 @@ p{margin:0}
 .progress{height:2px;background:var(--shell-border-strong);overflow:hidden}
 .progress>i{display:block;height:100%;background:var(--grad-cta)}
 .progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);margin-bottom:8px}
-/* KPI */
-.kpi{background:var(--shell-surface-high);border-radius:var(--radius-lg);padding:18px 20px}
-.kpi .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:14px}
+
+/* KPI (Consolidado) */
+.kpi{padding:22px 24px;border-radius:var(--radius-lg);background:var(--shell-surface-high);transition:background-color .2s,transform .2s;position:relative;overflow:hidden}
+.kpi:hover{transform:translateY(-2px);background:var(--shell-surface-highest)}
+.kpi .ico{display:grid;width:40px;height:40px;place-items:center;margin-bottom:14px;border-radius:11px}
 .kpi .ico svg{width:20px;height:20px}
-.kpi .val{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.kpi .lab{font-size:13px;color:var(--shell-text-muted)}
-.kpi .delta{font-size:12px;font-weight:600;margin-top:6px;display:inline-flex;gap:4px;align-items:center}
+.kpi .val{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.kpi .lab{margin-top:6px;font-size:14px;color:var(--shell-text-muted)}
+.kpi .delta{font-size:12px;font-weight:600;margin-top:12px;display:inline-flex;gap:5px;align-items:center}
+.kpi .delta svg{width:13px;height:13px}
+.kpi .stripe{position:absolute;top:0;left:0;right:0;height:2px}
+
+/* ============ PAGE HERO & SECTION HEADING & TOOLBAR ============ */
+.page-hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:var(--space-8);margin-bottom:var(--space-8)}
+.page-hero-copy{max-width:48ch}
+.page-hero .eyebrow{color:var(--shell-primary);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;display:inline-block}
+.page-hero h1{font-size:clamp(32px, 4.2vw, 48px);font-weight:800;letter-spacing:-.035em;line-height:1.05;margin:0}
+.page-hero h1 .accent{background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-hero .dek{margin-top:16px;color:var(--shell-text-muted);font-size:17px;font-weight:300;line-height:1.5;max-width:52ch}
+.page-hero-meta{font-family:var(--font-mono);font-size:12px;color:var(--shell-text-soft);text-align:right;line-height:1.9;white-space:nowrap}
+.page-hero-meta b{color:var(--shell-text);font-weight:600}
+
+.section-heading{margin-bottom:var(--space-6)}
+.section-heading.compact{margin-bottom:22px}
+.section-heading .eyebrow{color:var(--shell-primary);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;display:inline-block}
+.section-heading h2{font-size:clamp(24px, 2.8vw, 32px);font-weight:700;letter-spacing:-.02em;line-height:1.15;margin:0;max-width:24ch}
+.section-heading h2 .accent{background:var(--grad-brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+.section-heading .lead{margin-top:10px;color:var(--shell-text-muted);font-size:15px;max-width:56ch}
+.section-heading .meta{font-family:var(--font-mono);font-size:12px;color:var(--shell-text-soft);text-align:right;line-height:1.8}
+
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;border-radius:var(--radius-lg);background:var(--shell-surface-low);margin-bottom:var(--space-6)}
+.toolbar .spacer{flex:1}
 
 /* ============ TABELA ============ */
 .tbl-wrap{border:1px solid var(--shell-border);border-radius:var(--radius-lg);overflow:hidden}
@@ -266,8 +300,10 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl tbody tr+tr td{border-top:1px solid var(--shell-border)}
 .tbl .name{color:var(--shell-text);font-weight:500;display:flex;align-items:center;gap:10px}
 .tbl-actions{display:flex;gap:6px}
-.empty{text-align:center;padding:48px 20px;color:var(--shell-text-soft)}
-.empty svg{width:40px;height:40px;margin-bottom:12px;opacity:.6}
+.empty{text-align:center;padding:var(--space-12) 24px;border-radius:var(--radius-lg);background:var(--shell-surface-low);color:var(--shell-text-muted)}
+.empty svg,.empty i[data-lucide]{width:44px;height:44px;color:var(--shell-text-soft);opacity:.55;margin-bottom:14px}
+.empty h2{font-size:20px;font-weight:700;color:var(--shell-text);margin:0 0 8px}
+.empty p{font-size:14px;color:var(--shell-text-muted);margin:0}
 
 /* ============ MODAL / TOAST / TOOLTIP / SKELETON ============ */
 .modal-demo{background:var(--shell-bg);border-radius:var(--radius-lg);padding:24px;display:grid;place-items:center;min-height:240px;position:relative}
@@ -491,7 +527,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
         </div>
       </div>
     </div>
-    <p class="note">Mobile: sidebar colapsa para drawer (hambúrguer na topbar). Profundidade vem das camadas de superfície — note que o sidebar não tem borda direita dura, apenas um shift tonal.</p>
+    <p class="note">Mobile: sidebar colapsa para drawer (hambúrguer na topbar). Profundidade vem das camadas de superfície — note que o sidebar não tem borda direita dura, apenas um shift tonal. Layout base: <b>.page-hero</b> fornece o cabeçalho operacional com descrição e metadados. <b>.toolbar</b> organiza filtros e botões de ação rápida.</p>
   </section>
 
   <!-- 2 · TIPOGRAFIA -->
@@ -740,7 +776,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
         </tbody>
       </table>
     </div>
-    <div class="tbl-wrap"><div class="empty"><i data-lucide="inbox"></i><div>Nenhuma entrega ainda.</div><small>As entregas dos alunos aparecerão aqui.</small></div></div>
+    <div class="tbl-wrap"><div class="empty"><i data-lucide="inbox"></i><h2>Nenhuma entrega ainda</h2><p>As entregas dos alunos aparecerão aqui.</p></div></div>
   </section>
 
   <!-- 10 · FEEDBACK -->
