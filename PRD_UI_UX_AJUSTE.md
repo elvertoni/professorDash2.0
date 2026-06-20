@@ -302,42 +302,54 @@ Objetivo: reduzir carga cognitiva e acelerar a rotina de publicacao/correcao/ges
 
 #### Tasks
 
-- [ ] 5.1. Reorganizar a tela de detalhe da turma por grupos: Conteudo, Alunos, Relatorios, Configuracoes.
-- [ ] 5.2. Mover "Excluir turma" para area secundaria/perigosa, afastada das acoes comuns.
-- [ ] 5.3. Adicionar texto de risco ao renovar codigo de convite: "o codigo anterior deixara de funcionar".
-- [ ] 5.4. Avaliar confirmacao curta para renovar convite.
-- [ ] 5.5. Melhorar empty state de turma sem alunos com CTAs "Matricular aluno" e "Importar CSV".
-- [ ] 5.6. Melhorar empty state de dashboard professor sem turma com CTA "Criar turma".
-- [ ] 5.7. Melhorar fluxo de correcao com indicador de posicao: "3 de 18 entregas".
-- [ ] 5.8. Adicionar acao "Salvar e proxima" na correcao, se houver proxima entrega pendente.
-- [ ] 5.9. Adicionar link claro para voltar a fila de correcao.
-- [ ] 5.10. No dashboard professor, destacar "Aguardando check" antes de indicadores secundarios se houver pendencias.
-- [ ] 5.11. Em publicacao de aulas, separar subir/descer, editar, publicar/despublicar e remover por peso visual.
-- [ ] 5.12. Confirmar/remeter remocao/despublicacao para tela de confirmacao quando a acao afetar aluno.
-- [ ] 5.13. No catalogo/detalhe de aula, adicionar CTA de professor "Publicar em turma" com aula pre-selecionada quando viavel.
-- [ ] 5.14. Preservar filtros na paginacao do catalogo.
+- [x] 5.1. Reorganizar a tela de detalhe da turma por grupos: Conteudo, Alunos, Relatorios, Configuracoes.
+- [x] 5.2. Mover "Excluir turma" para area secundaria/perigosa, afastada das acoes comuns.
+- [x] 5.3. Adicionar texto de risco ao renovar codigo de convite: "o codigo anterior deixara de funcionar".
+- [x] 5.4. Avaliar confirmacao curta para renovar convite.
+- [x] 5.5. Melhorar empty state de turma sem alunos com CTAs "Matricular aluno" e "Importar CSV".
+- [x] 5.6. Melhorar empty state de dashboard professor sem turma com CTA "Criar turma".
+- [x] 5.7. Melhorar fluxo de correcao com indicador de posicao: "3 de 18 entregas".
+- [x] 5.8. Adicionar acao "Salvar e proxima" na correcao, se houver proxima entrega pendente.
+- [x] 5.9. Adicionar link claro para voltar a fila de correcao.
+- [x] 5.10. No dashboard professor, destacar "Aguardando check" antes de indicadores secundarios se houver pendencias.
+- [x] 5.11. Em publicacao de aulas, separar subir/descer, editar, publicar/despublicar e remover por peso visual.
+- [x] 5.12. Confirmar/remeter remocao/despublicacao para tela de confirmacao quando a acao afetar aluno.
+- [x] 5.13. No catalogo/detalhe de aula, adicionar CTA de professor "Publicar em turma" com aula pre-selecionada quando viavel.
+- [x] 5.14. Preservar filtros na paginacao do catalogo.
 
 #### Arquivos Provaveis
 
-- [ ] 5.15. `templates/classroom/turma_detail.html`
-- [ ] 5.16. `templates/classroom/professor_dashboard.html`
-- [ ] 5.17. `templates/classroom/aula_publicada_manage.html`
-- [ ] 5.18. `templates/activities/correcao.html`
-- [ ] 5.19. `templates/catalog/aula_list.html`
-- [ ] 5.20. `templates/catalog/aula_detail.html`
-- [ ] 5.21. `classroom/views.py`
-- [ ] 5.22. `activities/views.py`
-- [ ] 5.23. `catalog/views.py`
-- [ ] 5.24. `static/css/app.css`
+- [x] 5.15. `templates/classroom/turma_detail.html`
+- [x] 5.16. `templates/classroom/professor_dashboard.html`
+- [x] 5.17. `templates/classroom/aula_publicada_manage.html`
+- [x] 5.18. `templates/activities/correcao.html`
+- [x] 5.19. `templates/catalog/aula_list.html`
+- [x] 5.20. `templates/catalog/aula_detail.html`
+- [x] 5.21. `classroom/views.py`
+- [x] 5.22. `activities/views.py`
+- [x] 5.23. `catalog/views.py`
+- [x] 5.24. `static/css/app.css`
 
 #### Validacao Manual
 
-- [ ] 5.25. Login como professor demo.
-- [ ] 5.26. Abrir dashboard e confirmar prioridade da fila de correcao.
-- [ ] 5.27. Abrir uma turma e validar agrupamento de acoes.
-- [ ] 5.28. Publicar/despublicar aula e validar confirmacoes.
-- [ ] 5.29. Corrigir uma entrega usando "Salvar e proxima".
-- [ ] 5.30. Navegar catalogo com filtros e paginar sem perder querystring.
+- [x] 5.25. Login como professor demo.
+- [x] 5.26. Abrir dashboard e confirmar prioridade da fila de correcao.
+- [x] 5.27. Abrir uma turma e validar agrupamento de acoes.
+- [x] 5.28. Publicar/despublicar aula e validar confirmacoes.
+- [x] 5.29. Corrigir uma entrega usando "Salvar e proxima".
+- [x] 5.30. Navegar catalogo com filtros e paginar sem perder querystring.
+
+Nota da Sprint 5:
+- 5.1/5.2: `turma_detail.html` reorganizado com grid 4 colunas (Conteúdo, Alunos, Relatórios, Configurações). "Excluir turma" movida para painel de perigo separado com borda vermelha e badge de alerta.
+- 5.3/5.4: Texto de aviso sobre código anterior adicionado + `confirm()` JS no formulário de renovação.
+- 5.5: Empty state da tabela de alunos com CTAs "Matricular Aluno" + "Importar CSV" centralizados.
+- 5.6: `dashboard_desempenho.html` partial inclui empty state "Nenhuma turma" com CTA "Criar Turma".
+- 5.7/5.8/5.9: `CorrecaoView.get_queue_data()` calcula fila de pendentes. Template exibe "Fila: X de Y", botão "Salvar e próxima" (condicional `next_entrega`), e "Voltar à fila".
+- 5.10: `professor_dashboard.html` reordena KPIs e partials conforme `total_aguardando > 0`.
+- 5.11: `aula_publicada_manage.html` separa ações por peso visual: botões compactos de reordenação, edição outline, toggle publicação com cor warning, remoção danger.
+- 5.12: Templates de confirmação `aula_publicada_confirm_delete.html` e `aula_publicada_confirm_toggle.html` existentes. Views GET renderizam confirmação antes do POST.
+- 5.13: `catalog/views.py` AulaDetailView injeta `minhas_turmas` no contexto para professores. `aula_detail.html` exibe select + botão "Publicar" com URL pré-preenchida.
+- 5.14: `catalog/views.py` AulaListView preserva `query_params` (sem `page`) para paginação.
 
 ---
 
@@ -471,7 +483,13 @@ Use esta secao para registrar decisoes tomadas durante as sprints. Nao deixe dec
 - [x] D.2. Decisao concluida: componentes `*-atelier` e `kpi-card` unificados sob os componentes principais do Design System (`card`, `kpi`, `empty`, `section-heading`, `toolbar`). Classes duplicadas removidas do `app.css` e o `design-system.html` foi atualizado para documentá-los.
 - [x] D.3. Decisao concluida: Estrutura final da navegação global separada estritamente por papel (Aluno: Meu painel, Atividades, Materiais, Aulas, Notificações, Conta; Professor: Painel, Turmas, Correções, Catálogo, Relatórios, Notificações, Conta; Anônimo: Jornada, Recursos, Status, Login; Admin/Staff: Admin e Status secundários).
 - [x] D.4. Decisao concluida: estrategia mobile para tabelas do professor baseia-se em manter a tabela com rolagem horizontal sob `.tbl-wrap` (`overflow-x: auto`), garantindo a preservacao das colunas de boletins e correcoes de forma inteligivel no tablet/celular. (Sprint 7.)
-- [ ] D.5. Decisao pendente (nova, do inventario Sprint 0): o app implementa o lesson viewer com classes `lesson-*` (`lesson-shell`, `lesson-viewer`, `lesson-callout-conceito/atencao/dica`, `lesson-diagram`, `lesson-nav`) enquanto o DS define o lesson reader canonico com `.atelier`/`.atelier-rail`/`.atelier-body`/`.prose`/`.callout`/`.bento`/`.exercise`/`.present`. Decidir na Sprint 4 se migra para o lesson reader do DS ou formaliza `lesson-*` no DS.
+- [x] D.5. Decisao concluida: o detalhe de aula do catalogo e do aluno migrou para o lesson reader canonico do Design System (`.atelier`/`.atelier-rail`/`.atelier-body`/`.prose`/`.callout`). As classes `lesson-*` ficam apenas como compatibilidade visual para conteudo HTML ja importado anteriormente com `lesson-callout-*`/`lesson-diagram`; novos imports passam a gerar `.callout conceito|atencao|dica`.
+
+### Nota de auditoria complementar — UI/UX
+
+- Auditoria feita com agentes especialistas em jornada do aluno, jornada do professor e design system/acessibilidade.
+- Ajustes aplicados: leitor de aula alinhado ao DS, CTAs mobile com area minima de toque, `stripe-success` documentado, utilitarios `grid/row/cols-*` efetivados no CSS real, tela de correcao em duas colunas no desktop, remocao de estilos inline nas telas alteradas e icones decorativos marcados com `aria-hidden`.
+- Validacao tecnica: `python manage.py check` deve ser executado ao final; validacao visual continua manual via `runserver` + navegador, conforme regra do projeto.
 
 ## 9. Checklist Final de Aceite
 

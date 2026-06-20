@@ -10,49 +10,76 @@
         <span>{{ aula.trilha.label }}</span>
     </nav>
 
-    <article class="lesson-shell">
-        <header class="lesson-header">
-            <span class="badge badge-violet"><i data-lucide="book-open"></i> Aula {{ aula.ordem|stringformat:'02d' }}</span>
-            <h1>{{ aula.titulo }}</h1>
-            {% if aula.tema %}
-                <p>{{ aula.tema }}</p>
-            {% endif %}
-            <div class="lesson-meta">
-                <span>{{ aula.disciplina.label }}</span>
-                <span>{{ aula.trilha.label }}</span>
-                {% if aula.versao %}<span>Versão {{ aula.versao }}</span>{% endif %}
+    <article class="atelier">
+        <div class="atelier-rail">
+            <aside class="atelier-side">
+                <div class="course">{{ aula.disciplina.label }}</div>
+                <h4>{{ aula.trilha.label }}</h4>
+                <div class="mod active"><i data-lucide="book-open" aria-hidden="true"></i> Aula {{ aula.ordem|stringformat:'02d' }}</div>
+                {% if aula.versao %}
+                    <div class="mod"><i data-lucide="history" aria-hidden="true"></i> Versão {{ aula.versao }}</div>
+                {% endif %}
+            </aside>
+            <div class="atelier-body">
+                <div class="atelier-meta">
+                    <span class="tag p">Aula {{ aula.ordem|stringformat:'02d' }}</span>
+                    <span class="tag s">{{ aula.trilha.label }}</span>
+                </div>
+                <h1>{{ aula.titulo }}</h1>
+                {% if aula.tema %}
+                    <p class="dek">{{ aula.tema }}</p>
+                {% endif %}
+
+                {% if aula.objetivos %}
+                    <section class="lesson-goals">
+                        <span class="eyebrow">Objetivos</span>
+                        <ul>
+                            {% for objetivo in aula.objetivos %}
+                                <li>{{ objetivo }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+
+                <div class="prose">
+                    {{ lesson_html|safe }}
+                </div>
+
+                {% if minhas_turmas %}
+                    <div class="panel lesson-actions-panel">
+                        <div class="label-sm text-primary">Ações do professor</div>
+                        <h3>Publicar esta aula em uma turma</h3>
+                        <div class="lesson-publish-form">
+                            <select class="select lesson-publish-select" id="turma-select" required>
+                                <option value="">Selecione a turma...</option>
+                                {% for t in minhas_turmas %}
+                                    <option value="{% url 'classroom:turma_aulas' t.pk %}?aula={{ aula.pk }}">{{ t.nome }} ({{ t.serie }})</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-primary" type="button" data-selected-url-target="turma-select">
+                                <i data-lucide="send" aria-hidden="true"></i>
+                                Publicar
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
-        </header>
-
-        {% if aula.objetivos %}
-            <section class="lesson-summary panel">
-                <h2>Objetivos</h2>
-                <ul>
-                    {% for objetivo in aula.objetivos %}
-                        <li>{{ objetivo }}</li>
-                    {% endfor %}
-                </ul>
-            </section>
-        {% endif %}
-
-        <div class="lesson-viewer">
-            {{ lesson_html|safe }}
         </div>
     </article>
 
     <nav class="lesson-nav" aria-label="Navegação da trilha">
         {% if previous_aula %}
-            <a class="btn btn-outline" href="{{ previous_aula.get_absolute_url }}">
-                <i data-lucide="arrow-left"></i>
-                Aula anterior
+            <a class="prev" href="{{ previous_aula.get_absolute_url }}">
+                <span class="lab">Anterior</span>
+                <span class="ttl">{{ previous_aula.titulo }}</span>
             </a>
         {% else %}
             <span></span>
         {% endif %}
         {% if next_aula %}
-            <a class="btn btn-primary" href="{{ next_aula.get_absolute_url }}">
-                Próxima aula
-                <i data-lucide="arrow-right"></i>
+            <a class="next" href="{{ next_aula.get_absolute_url }}">
+                <span class="lab">Próxima aula</span>
+                <span class="ttl">{{ next_aula.titulo }}</span>
             </a>
         {% endif %}
     </nav>

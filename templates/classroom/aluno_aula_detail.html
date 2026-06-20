@@ -10,68 +10,79 @@
         <span>{{ aula.trilha.label }}</span>
     </nav>
 
-    <article class="lesson-shell">
-        <header class="lesson-header">
-            <span class="badge badge-violet"><i data-lucide="book-open"></i> {{ turma.disciplina.label }}</span>
-            <h1>{{ aula.titulo }}</h1>
-            {% if aula.tema %}
-                <p>{{ aula.tema }}</p>
-            {% endif %}
-            <div class="lesson-meta">
-                <span>{{ turma.nome }}</span>
-                <span>{{ aula.trilha.label }}</span>
+    <article class="atelier">
+        <div class="atelier-rail">
+            <aside class="atelier-side">
+                <div class="course">{{ turma.disciplina.label }}</div>
+                <h4>{{ turma.nome }}</h4>
+                <div class="mod active"><i data-lucide="book-open" aria-hidden="true"></i> {{ aula.trilha.label }}</div>
                 {% if progresso.concluido %}
-                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Concluída</span>
-                {% endif %}
-            </div>
-        </header>
-
-        {% if aula.objetivos %}
-            <section class="lesson-summary panel">
-                <h2>Objetivos</h2>
-                <ul>
-                    {% for objetivo in aula.objetivos %}
-                        <li>{{ objetivo }}</li>
-                    {% endfor %}
-                </ul>
-            </section>
-        {% endif %}
-
-        <div class="lesson-viewer">
-            {{ lesson_html|safe }}
-        </div>
-
-        <div class="status-row">
-            <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
-                {% csrf_token %}
-                {% if progresso.concluido %}
-                    <button class="btn btn-outline" type="submit">
-                        <i data-lucide="rotate-ccw"></i>
-                        Marcar como não concluída
-                    </button>
+                    <div class="mod"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</div>
                 {% else %}
-                    <button class="btn btn-primary" type="submit">
-                        <i data-lucide="check-check"></i>
-                        Marcar como concluída
-                    </button>
+                    <div class="mod"><i data-lucide="circle-dashed" aria-hidden="true"></i> Em andamento</div>
                 {% endif %}
-            </form>
+            </aside>
+            <div class="atelier-body">
+                <div class="atelier-meta">
+                    <span class="tag p">{{ turma.disciplina.label }}</span>
+                    <span class="tag s">{{ aula.trilha.label }}</span>
+                    {% if progresso.concluido %}
+                        <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
+                    {% endif %}
+                </div>
+                <h1>{{ aula.titulo }}</h1>
+                {% if aula.tema %}
+                    <p class="dek">{{ aula.tema }}</p>
+                {% endif %}
+
+                {% if aula.objetivos %}
+                    <section class="lesson-goals">
+                        <span class="eyebrow">Objetivos</span>
+                        <ul>
+                            {% for objetivo in aula.objetivos %}
+                                <li>{{ objetivo }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+
+                <div class="prose">
+                    {{ lesson_html|safe }}
+                </div>
+
+                <div class="status-row section-gap">
+                    <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
+                        {% csrf_token %}
+                        {% if progresso.concluido %}
+                            <button class="btn btn-outline" type="submit">
+                                <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                                Marcar como não concluída
+                            </button>
+                        {% else %}
+                            <button class="btn btn-primary" type="submit">
+                                <i data-lucide="check-check" aria-hidden="true"></i>
+                                Marcar como concluída
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
         </div>
     </article>
 
     <nav class="lesson-nav" aria-label="Navegação da turma">
         {% if previous_aula %}
-            <a class="btn btn-outline" href="{% url 'classroom:aluno_aula_detail' previous_aula.pk %}">
-                <i data-lucide="arrow-left"></i>
-                Aula anterior
+            <a class="prev" href="{% url 'classroom:aluno_aula_detail' previous_aula.pk %}">
+                <span class="lab">Anterior</span>
+                <span class="ttl">{{ previous_aula.aula.titulo }}</span>
             </a>
         {% else %}
             <span></span>
         {% endif %}
         {% if next_aula %}
-            <a class="btn btn-primary" href="{% url 'classroom:aluno_aula_detail' next_aula.pk %}">
-                Próxima aula
-                <i data-lucide="arrow-right"></i>
+            <a class="next" href="{% url 'classroom:aluno_aula_detail' next_aula.pk %}">
+                <span class="lab">Próxima aula</span>
+                <span class="ttl">{{ next_aula.aula.titulo }}</span>
             </a>
         {% endif %}
     </nav>

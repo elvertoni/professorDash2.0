@@ -160,16 +160,54 @@ class CorrecaoView(ProfessorTurmaMixin, View):
             pk=pk,
         )
 
+    def get_queue_data(self, entrega):
+        pending_deliveries = list(
+            Entrega.objects.filter(
+                atividade=entrega.atividade,
+                checked=False,
+                status__in=[Entrega.Status.ENTREGUE, Entrega.Status.ATRASADA],
+            ).order_by('data_entrega', 'pk')
+        )
+        total_pending = len(pending_deliveries)
+        current_index = -1
+        for i, item in enumerate(pending_deliveries):
+            if item.pk == entrega.pk:
+                current_index = i
+                break
+
+        position = current_index + 1 if current_index != -1 else 0
+        next_entrega = None
+        if current_index != -1 and current_index + 1 < total_pending:
+            next_entrega = pending_deliveries[current_index + 1]
+
+        return {
+            'total_pending': total_pending,
+            'position': position,
+            'next_entrega': next_entrega,
+        }
+
     def get(self, request, pk):
         entrega = self.get_entrega(pk)
         form = CorrecaoForm(instance=entrega, atividade=entrega.atividade)
-        return self.render_page(request, entrega, form)
+        queue_data = self.get_queue_data(entrega)
+        return self.render_page(
+            request,
+            entrega,
+            form,
+            next_entrega=queue_data['next_entrega'],
+            position=queue_data['position'],
+            total_pending=queue_data['total_pending'],
+        )
 
     def post(self, request, pk):
         entrega = self.get_entrega(pk)
         if entrega.data_entrega is None:
             messages.error(request, 'Este aluno ainda não fez a entrega.')
             return redirect('activities:atividade_entregas', pk=entrega.atividade.pk)
+
+        queue_data = self.get_queue_data(entrega)
+        next_entrega = queue_data['next_entrega']
+
         form = CorrecaoForm(request.POST, instance=entrega, atividade=entrega.atividade)
         if form.is_valid():
             entrega.mark_checked(
@@ -178,10 +216,23 @@ class CorrecaoView(ProfessorTurmaMixin, View):
                 form.cleaned_data['feedback'],
             )
             messages.success(request, 'Entrega corrigida com sucesso.')
-            return redirect('activities:atividade_entregas', pk=entrega.atividade.pk)
-        return self.render_page(request, entrega, form)
 
-    def render_page(self, request, entrega, form):
+            action = request.POST.get('action')
+            if action == 'save_next' and next_entrega:
+                return redirect('activities:correcao', pk=next_entrega.pk)
+
+            return redirect('activities:atividade_entregas', pk=entrega.atividade.pk)
+
+        return self.render_page(
+            request,
+            entrega,
+            form,
+            next_entrega=next_entrega,
+            position=queue_data['position'],
+            total_pending=queue_data['total_pending'],
+        )
+
+    def render_page(self, request, entrega, form, next_entrega=None, position=0, total_pending=0):
         return render(
             request,
             self.template_name,
@@ -190,6 +241,9 @@ class CorrecaoView(ProfessorTurmaMixin, View):
                 'atividade': entrega.atividade,
                 'entrega': entrega,
                 'form': form,
+                'next_entrega': next_entrega,
+                'position': position,
+                'total_pending': total_pending,
             },
         )
 

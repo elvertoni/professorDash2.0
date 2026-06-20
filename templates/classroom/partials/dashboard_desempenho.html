@@ -1,0 +1,53 @@
+<div class="section-heading section-gap">
+    <div class="page-heading-row">
+        <div>
+            <span class="eyebrow">Indicadores</span>
+            <h2>Desempenho por <span class="accent">turma</span></h2>
+            <p class="lead">Conclusão de aulas, nota média e volume de entregas.</p>
+        </div>
+        <div class="meta">{{ turmas|length }} turmas<br>atualizado agora</div>
+    </div>
+</div>
+{% if turmas %}
+    <div class="feature-grid catalog-grid">
+        {% for turma in turmas %}
+            <article class="card">
+                <div class="stripe stripe-cta"></div>
+                <div class="card-head">
+                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                    <span class="badge badge-neutral"><i data-lucide="users"></i> {{ turma.stats.alunos|default:0 }}</span>
+                </div>
+                <h3>{{ turma.nome }}</h3>
+                <p class="desc">{{ turma.stats.entregas|default:0 }} entregas · {{ turma.stats.a_corrigir|default:0 }} a corrigir</p>
+
+                <div class="metric">
+                    <div class="metric-row"><span>Conclusão de aulas</span><b>{{ turma.stats.conclusao_pct|default:0 }}%</b></div>
+                    <div class="progress"><i style="width:{{ turma.stats.conclusao_pct|default:0 }}%"></i></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-row"><span>Nota média</span><b>{% if turma.stats.media %}{{ turma.stats.media|floatformat:1 }}{% else %}—{% endif %}</b></div>
+                    <div class="progress"><i style="width:{{ turma.stats.media_pct|default:0 }}%"></i></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-row"><span>Entregas</span><b>{{ turma.stats.entregas|default:0 }}</b></div>
+                    <div class="progress"><i style="width:{{ turma.stats.entregas_pct|default:0 }}%"></i></div>
+                </div>
+
+                <div class="card-foot">
+                    <a href="{% url 'classroom:turma_detail' turma.pk %}"><i data-lucide="arrow-right"></i> Abrir turma</a>
+                    <a href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}"><i data-lucide="file-down"></i> Relatório</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty" style="padding: var(--space-8) 24px;">
+        <i data-lucide="inbox" aria-hidden="true"></i>
+        <h2>Nenhuma turma</h2>
+        <p style="margin-bottom: var(--space-4);">Crie uma turma para ver os indicadores aqui.</p>
+        <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
+            <i data-lucide="plus-circle" aria-hidden="true"></i>
+            Criar Turma
+        </a>
+    </div>
+{% endif %}

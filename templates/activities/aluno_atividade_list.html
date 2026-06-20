@@ -109,9 +109,9 @@
                     </div>
                     
                     <h3>{{ atividade.titulo }}</h3>
-                    <p class="desc">
-                        {% if atividade.prazo %}
-                            <i data-lucide="calendar" aria-hidden="true" style="width: 14px; height: 14px; display: inline; vertical-align: middle;"></i> Prazo: {{ atividade.prazo|date:'d/m/Y H:i' }}
+                        <p class="desc">
+                            {% if atividade.prazo %}
+                            <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> Prazo: {{ atividade.prazo|date:'d/m/Y H:i' }}
                         {% else %}
                             Sem prazo
                         {% endif %}
@@ -121,13 +121,13 @@
                     
                     <div class="card-foot">
                         {% if atividade.meu_status == 'corrigida' %}
-                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="message-square" aria-hidden="true"></i> Ver feedback</a>
+                            <a class="btn btn-outline btn-sm student-card-action" href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="message-square" aria-hidden="true"></i> Ver feedback</a>
                         {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
-                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="eye" aria-hidden="true"></i> Ver entrega</a>
+                            <a class="btn btn-outline btn-sm student-card-action" href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="eye" aria-hidden="true"></i> Ver entrega</a>
                         {% elif not atividade.aberta_para_entrega %}
-                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="info" aria-hidden="true"></i> Ver atividade</a>
+                            <a class="btn btn-outline btn-sm student-card-action" href="{% url 'activities:aluno_entrega' atividade.pk %}"><i data-lucide="info" aria-hidden="true"></i> Ver atividade</a>
                         {% else %}
-                            <a href="{% url 'activities:aluno_entrega' atividade.pk %}" style="color: var(--shell-primary-200); font-weight: 700;">
+                            <a class="btn btn-primary btn-sm student-card-action" href="{% url 'activities:aluno_entrega' atividade.pk %}">
                                 <i data-lucide="upload" aria-hidden="true"></i>
                                 {% if atividade.is_overdue and atividade.permite_entrega_atrasada %}
                                     Enviar com atraso
@@ -142,7 +142,7 @@
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="clipboard-list"></i>
+            <i data-lucide="clipboard-list" aria-hidden="true"></i>
             <h2>Nenhuma atividade liberada</h2>
             <p>Quando o professor publicar atividades, elas aparecerão aqui.</p>
         </div>

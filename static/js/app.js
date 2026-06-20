@@ -14,6 +14,17 @@
         });
     });
 
+    document.querySelectorAll('[data-selected-url-target]').forEach((button) => {
+        const select = document.getElementById(button.dataset.selectedUrlTarget);
+        if (!select) return;
+
+        button.addEventListener('click', () => {
+            if (select.value) {
+                window.location.href = select.value;
+            }
+        });
+    });
+
     if (window.lucide) {
         window.lucide.createIcons();
     }

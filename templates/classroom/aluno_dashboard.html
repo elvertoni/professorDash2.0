@@ -21,28 +21,28 @@
     <div class="kpi-grid">
         <div class="kpi">
             <div class="stripe stripe-cta"></div>
-            <div class="ico green"><i data-lucide="users"></i></div>
+            <div class="ico green"><i data-lucide="users" aria-hidden="true"></i></div>
             <div class="val">{{ total_turmas }}</div>
             <div class="lab">Turmas ativas</div>
         </div>
         <div class="kpi">
             <div class="stripe stripe-violet"></div>
-            <div class="ico violet"><i data-lucide="book-open"></i></div>
+            <div class="ico violet"><i data-lucide="book-open" aria-hidden="true"></i></div>
             <div class="val">{{ total_disponiveis }}</div>
             <div class="lab">Aulas disponíveis</div>
         </div>
         <div class="kpi">
             <div class="stripe stripe-cyan"></div>
-            <div class="ico yellow"><i data-lucide="check-check"></i></div>
+            <div class="ico yellow"><i data-lucide="check-check" aria-hidden="true"></i></div>
             <div class="val">{{ total_concluidas }}</div>
             <div class="lab">Aulas concluídas</div>
             {% if total_disponiveis and total_disponiveis > 0 %}
             <div class="delta text-info">
-                <i data-lucide="trending-up"></i> continue estudando
+                <i data-lucide="trending-up" aria-hidden="true"></i> continue estudando
             </div>
             {% else %}
             <div class="delta text-success">
-                <i data-lucide="check-circle"></i> tudo em dia
+                <i data-lucide="check-circle" aria-hidden="true"></i> tudo em dia
             </div>
             {% endif %}
         </div>
@@ -64,13 +64,13 @@
                         <div class="stripe stripe-violet"></div>
                         <div class="card-head">
                             <span class="tag-disc">{{ item.obj.turma.nome }}</span>
-                            <span class="badge badge-info"><i data-lucide="book-open"></i> Aula de hoje</span>
+                            <span class="badge badge-info"><i data-lucide="book-open" aria-hidden="true"></i> Aula de hoje</span>
                         </div>
                         <h3>{{ item.obj.aula.titulo }}</h3>
                         <p class="desc">{{ item.obj.aula.disciplina.label }}</p>
                         <div class="card-foot">
                             <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' item.obj.pk %}">
-                                <i data-lucide="play"></i> Estudar agora
+                                <i data-lucide="play" aria-hidden="true"></i> Estudar agora
                             </a>
                         </div>
                     </article>
@@ -84,16 +84,16 @@
                         <div class="card-head">
                             <span class="tag-disc">{{ item.obj.turma.nome }}</span>
                             {% if item.overdue %}
-                                <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                                <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Atrasada</span>
                             {% else %}
-                                <span class="badge badge-warning"><i data-lucide="clock"></i> Hoje {{ item.data|date:'H:i' }}</span>
+                                <span class="badge badge-warning"><i data-lucide="clock" aria-hidden="true"></i> Hoje {{ item.data|date:'H:i' }}</span>
                             {% endif %}
                         </div>
                         <h3>{{ item.obj.titulo }}</h3>
                         <p class="desc">Atividade · {{ item.obj.pontuacao_max }} pts</p>
                         <div class="card-foot">
                             <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' item.obj.pk %}">
-                                <i data-lucide="upload"></i> {% if item.overdue %}Enviar com atraso{% else %}Enviar atividade{% endif %}
+                                <i data-lucide="upload" aria-hidden="true"></i> {% if item.overdue %}Enviar com atraso{% else %}Enviar atividade{% endif %}
                             </a>
                         </div>
                     </article>
@@ -102,7 +102,7 @@
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="check-check"></i>
+            <i data-lucide="check-check" aria-hidden="true"></i>
             <h2>Tudo resolvido por hoje!</h2>
             <p>Você não tem nenhuma aula liberada hoje ou atividade pendente para hoje.</p>
         </div>
@@ -123,13 +123,13 @@
                     <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ atividade.turma.nome }}</span>
-                        <span class="badge badge-warning"><i data-lucide="calendar"></i> {{ atividade.prazo|date:'d/m (H:i)' }}</span>
+                        <span class="badge badge-warning"><i data-lucide="calendar" aria-hidden="true"></i> {{ atividade.prazo|date:'d/m (H:i)' }}</span>
                     </div>
                     <h3>{{ atividade.titulo }}</h3>
                     <p class="desc">Atividade · {{ atividade.pontuacao_max }} pts</p>
                     <div class="card-foot">
                         <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
-                            <i data-lucide="upload"></i> Enviar atividade
+                            <i data-lucide="upload" aria-hidden="true"></i> Enviar atividade
                         </a>
                     </div>
                 </article>
@@ -137,7 +137,7 @@
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="smile"></i>
+            <i data-lucide="smile" aria-hidden="true"></i>
             <h2>Nenhum prazo próximo</h2>
             <p>Nenhuma atividade com prazo nos próximos 7 dias.</p>
         </div>
@@ -158,7 +158,7 @@
                     <div class="stripe stripe-cyan"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ entrega.atividade.turma.nome }}</span>
-                        <span class="badge badge-info"><i data-lucide="award"></i> Nota {{ entrega.nota }} / {{ entrega.atividade.pontuacao_max }}</span>
+                        <span class="badge badge-info"><i data-lucide="award" aria-hidden="true"></i> Nota {{ entrega.nota }} / {{ entrega.atividade.pontuacao_max }}</span>
                     </div>
                     <h3>{{ entrega.atividade.titulo }}</h3>
                     <p class="desc">
@@ -170,7 +170,7 @@
                     </p>
                     <div class="card-foot">
                         <a class="btn btn-outline btn-sm" href="{% url 'activities:aluno_entrega' entrega.atividade.pk %}">
-                            <i data-lucide="message-square"></i> Ver feedback
+                            <i data-lucide="message-square" aria-hidden="true"></i> Ver feedback
                         </a>
                     </div>
                 </article>
@@ -178,7 +178,7 @@
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="clipboard"></i>
+            <i data-lucide="clipboard" aria-hidden="true"></i>
             <h2>Nenhuma correção recente</h2>
             <p>Suas atividades corrigidas aparecerão aqui.</p>
         </div>
@@ -199,19 +199,19 @@
                     <div class="stripe stripe-cta"></div>
                     <div class="card-head">
                         <span class="tag-disc">{{ publicada.turma.nome }}</span>
-                        <span class="badge badge-violet"><i data-lucide="calendar"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
+                        <span class="badge badge-violet"><i data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
                     </div>
                     <h3>{{ publicada.aula.titulo }}</h3>
                     <p class="desc">{{ publicada.aula.disciplina.label }}</p>
                     <div class="card-foot">
-                        <a href="{% url 'classroom:aluno_aula_detail' publicada.pk %}"><i data-lucide="book-open"></i> Estudar agora</a>
+                        <a class="btn btn-primary btn-sm student-card-action" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}"><i data-lucide="book-open" aria-hidden="true"></i> Estudar agora</a>
                     </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="party-popper"></i>
+            <i data-lucide="party-popper" aria-hidden="true"></i>
             <h2>Tudo em dia</h2>
             <p>Você concluiu todas as aulas disponíveis no momento.</p>
         </div>
@@ -239,14 +239,14 @@
                     <h3>{{ turma.nome }}</h3>
                     <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · Prof. {{ turma.professor.get_short_name }}</p>
                     <div class="card-foot">
-                        <a href="{% url 'classroom:aluno_turma_aulas' turma.pk %}"><i data-lucide="arrow-right"></i> Ver aulas</a>
+                        <a class="btn btn-outline btn-sm student-card-action" href="{% url 'classroom:aluno_turma_aulas' turma.pk %}"><i data-lucide="arrow-right" aria-hidden="true"></i> Ver aulas</a>
                     </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="inbox"></i>
+            <i data-lucide="inbox" aria-hidden="true"></i>
             <h2>Nenhuma turma ativa</h2>
             <p>Quando você for matriculado em uma turma, ela aparecerá aqui.</p>
         </div>

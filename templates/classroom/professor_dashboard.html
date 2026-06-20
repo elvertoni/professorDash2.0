@@ -34,188 +34,61 @@
     </div>
 
     <div class="kpi-grid">
-        <div class="kpi">
-            <div class="stripe stripe-cta"></div>
-            <div class="ico green"><i data-lucide="users"></i></div>
-            <div class="val">{{ total_turmas }}</div>
-            <div class="lab">Turmas ativas</div>
-        </div>
-        <div class="kpi">
-            <div class="stripe stripe-violet"></div>
-            <div class="ico violet"><i data-lucide="user-check"></i></div>
-            <div class="val">{{ total_alunos }}</div>
-            <div class="lab">Alunos ativos</div>
-        </div>
-        <div class="kpi">
-            <div class="stripe stripe-warning"></div>
-            <div class="ico yellow"><i data-lucide="clock"></i></div>
-            <div class="val">{{ total_aguardando }}</div>
-            <div class="lab">Aguardando check</div>
-            {% if total_aguardando and total_aguardando > 0 %}
-            <div class="delta text-warning">
-                <i data-lucide="alert-triangle"></i> fila de correção
+        {% if total_aguardando and total_aguardando > 0 %}
+            <div class="kpi">
+                <div class="stripe stripe-warning"></div>
+                <div class="ico yellow"><i data-lucide="clock"></i></div>
+                <div class="val">{{ total_aguardando }}</div>
+                <div class="lab">Aguardando check</div>
+                <div class="delta text-warning">
+                    <i data-lucide="alert-triangle"></i> fila de correção
+                </div>
             </div>
-            {% else %}
-            <div class="delta text-success">
-                <i data-lucide="check-circle"></i> tudo corrigido
+            <div class="kpi">
+                <div class="stripe stripe-cta"></div>
+                <div class="ico green"><i data-lucide="users"></i></div>
+                <div class="val">{{ total_turmas }}</div>
+                <div class="lab">Turmas ativas</div>
             </div>
-            {% endif %}
-        </div>
+            <div class="kpi">
+                <div class="stripe stripe-violet"></div>
+                <div class="ico violet"><i data-lucide="user-check"></i></div>
+                <div class="val">{{ total_alunos }}</div>
+                <div class="lab">Alunos ativos</div>
+            </div>
+        {% else %}
+            <div class="kpi">
+                <div class="stripe stripe-cta"></div>
+                <div class="ico green"><i data-lucide="users"></i></div>
+                <div class="val">{{ total_turmas }}</div>
+                <div class="lab">Turmas ativas</div>
+            </div>
+            <div class="kpi">
+                <div class="stripe stripe-violet"></div>
+                <div class="ico violet"><i data-lucide="user-check"></i></div>
+                <div class="val">{{ total_alunos }}</div>
+                <div class="lab">Alunos ativos</div>
+            </div>
+            <div class="kpi">
+                <div class="stripe stripe-warning"></div>
+                <div class="ico yellow"><i data-lucide="clock"></i></div>
+                <div class="val">0</div>
+                <div class="lab">Aguardando check</div>
+                <div class="delta text-success">
+                    <i data-lucide="check-circle"></i> tudo corrigido
+                </div>
+            </div>
+        {% endif %}
     </div>
 
-    <div class="section-heading section-gap">
-        <div class="page-heading-row">
-            <div>
-                <span class="eyebrow">Indicadores</span>
-                <h2>Desempenho por <span class="accent">turma</span></h2>
-                <p class="lead">Conclusão de aulas, nota média e volume de entregas.</p>
-            </div>
-            <div class="meta">{{ turmas|length }} turmas<br>atualizado agora</div>
-        </div>
-    </div>
-    {% if turmas %}
-        <div class="feature-grid catalog-grid">
-            {% for turma in turmas %}
-                <article class="card">
-                    <div class="stripe stripe-cta"></div>
-                    <div class="card-head">
-                        <span class="tag-disc">{{ turma.disciplina.label }}</span>
-                        <span class="badge badge-neutral"><i data-lucide="users"></i> {{ turma.stats.alunos|default:0 }}</span>
-                    </div>
-                    <h3>{{ turma.nome }}</h3>
-                    <p class="desc">{{ turma.stats.entregas|default:0 }} entregas · {{ turma.stats.a_corrigir|default:0 }} a corrigir</p>
-
-                    <div class="metric">
-                        <div class="metric-row"><span>Conclusão de aulas</span><b>{{ turma.stats.conclusao_pct|default:0 }}%</b></div>
-                        <div class="progress"><i style="width:{{ turma.stats.conclusao_pct|default:0 }}%"></i></div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-row"><span>Nota média</span><b>{% if turma.stats.media %}{{ turma.stats.media|floatformat:1 }}{% else %}—{% endif %}</b></div>
-                        <div class="progress"><i style="width:{{ turma.stats.media_pct|default:0 }}%"></i></div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-row"><span>Entregas</span><b>{{ turma.stats.entregas|default:0 }}</b></div>
-                        <div class="progress"><i style="width:{{ turma.stats.entregas_pct|default:0 }}%"></i></div>
-                    </div>
-
-                    <div class="card-foot">
-                        <a href="{% url 'classroom:turma_detail' turma.pk %}"><i data-lucide="arrow-right"></i> Abrir turma</a>
-                        <a href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}"><i data-lucide="file-down"></i> Relatório</a>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
+    {% if total_aguardando and total_aguardando > 0 %}
+        {% include 'classroom/partials/dashboard_fila.html' %}
+        {% include 'classroom/partials/dashboard_desempenho.html' %}
+        {% include 'classroom/partials/dashboard_prazos.html' %}
     {% else %}
-        <div class="empty">
-            <i data-lucide="inbox"></i>
-            <h2>Nenhuma turma</h2>
-            <p>Crie uma turma para ver os indicadores aqui.</p>
-        </div>
-    {% endif %}
-
-    <div class="section-heading section-gap">
-        <div class="page-heading-row">
-            <div>
-                <span class="eyebrow">Calendário</span>
-                <h2>Prazos <span class="accent">próximos</span></h2>
-                <p class="lead">Atividades publicadas com prazo nos próximos 7 dias.</p>
-            </div>
-        </div>
-    </div>
-    {% if prazos %}
-        <div class="tbl-wrap">
-            <table class="tbl">
-                <thead>
-                    <tr>
-                        <th scope="col">Atividade</th>
-                        <th scope="col">Turma</th>
-                        <th scope="col">Prazo</th>
-                        <th scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for atividade in prazos %}
-                        <tr>
-                            <td><b class="text-strong">{{ atividade.titulo }}</b></td>
-                            <td>{{ atividade.turma.nome }}</td>
-                            <td class="mono">{{ atividade.prazo|date:'d/m/Y H:i' }}</td>
-                            <td>
-                                <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_entregas' atividade.pk %}">
-                                    <i data-lucide="list-checks"></i> Entregas
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="empty">
-            <i data-lucide="calendar-check"></i>
-            <h2>Sem prazos próximos</h2>
-            <p>Nenhuma atividade vence nos próximos 7 dias.</p>
-        </div>
-    {% endif %}
-
-    <div class="section-heading section-gap">
-        <div class="page-heading-row">
-            <div>
-                <span class="eyebrow">Fila de correção</span>
-                <h2>Aguardando <span class="accent">check</span></h2>
-            </div>
-            {% if aguardando %}
-            <div class="meta">{{ aguardando|length }} entregas<br>pendentes</div>
-            {% endif %}
-        </div>
-    </div>
-    {% if aguardando %}
-        <div class="tbl-wrap">
-            <table class="tbl">
-                <thead>
-                    <tr>
-                        <th scope="col">Aluno</th>
-                        <th scope="col">Atividade</th>
-                        <th scope="col">Turma</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Entregue em</th>
-                        <th scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entrega in aguardando %}
-                        <tr>
-                            <td>
-                                <span class="name">
-                                    <span class="avatar sm">{{ entrega.aluno.get_short_name|slice:':2'|upper }}</span>
-                                    <span>{{ entrega.aluno.nome_completo }}</span>
-                                </span>
-                            </td>
-                            <td>{{ entrega.atividade.titulo }}</td>
-                            <td>{{ entrega.atividade.turma.nome }}</td>
-                            <td>
-                                {% if entrega.status == 'atrasada' %}
-                                    <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
-                                {% else %}
-                                    <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
-                                {% endif %}
-                            </td>
-                            <td class="mono">{{ entrega.data_entrega|date:'d/m/Y H:i' }}</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="{% url 'activities:correcao' entrega.pk %}">
-                                    <i data-lucide="check-check"></i> Corrigir
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="empty">
-            <i data-lucide="party-popper"></i>
-            <h2>Nada na fila</h2>
-            <p>Todas as entregas foram corrigidas.</p>
-        </div>
+        {% include 'classroom/partials/dashboard_desempenho.html' %}
+        {% include 'classroom/partials/dashboard_prazos.html' %}
+        {% include 'classroom/partials/dashboard_fila.html' %}
     {% endif %}
 </section>
 {% endblock %}

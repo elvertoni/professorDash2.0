@@ -28,7 +28,7 @@
                     
                     <div class="card-head">
                         <span class="tag-disc">
-                            <i data-lucide="{% if material.tipo == 'pdf' %}file-text{% elif material.tipo == 'slide' %}presentation{% elif material.tipo == 'link' %}external-link{% elif material.tipo == 'video' %}video{% else %}file{% endif %}" aria-hidden="true" style="width: 14px; height: 14px; display: inline-block; vertical-align: text-top; margin-right: 4px;"></i>
+                            <i class="icon-inline" data-lucide="{% if material.tipo == 'pdf' %}file-text{% elif material.tipo == 'slide' %}presentation{% elif material.tipo == 'link' %}external-link{% elif material.tipo == 'video' %}video{% else %}file{% endif %}" aria-hidden="true"></i>
                             {{ material.get_tipo_display }}
                         </span>
                         <span class="badge badge-neutral"><i data-lucide="calendar" aria-hidden="true"></i> {{ material.created_at|date:'d/m/Y' }}</span>
@@ -38,35 +38,38 @@
                     <p class="desc">{{ material.descricao|default:'Sem descrição.' }}</p>
                     
                     {% if material.arquivo %}
-                        <p style="margin-top: var(--space-2); font-size: 12px; font-family: var(--font-mono); color: var(--shell-text-soft);">
-                            <i data-lucide="paperclip" aria-hidden="true" style="width: 12px; height: 12px; display: inline-block; vertical-align: text-top;"></i>
+                        <p class="meta-line">
+                            <i class="icon-inline-xs" data-lucide="paperclip" aria-hidden="true"></i>
                             {{ material.nome_arquivo }}
                         </p>
                     {% endif %}
                     
                     <div class="card-foot">
-                        {% if material.aula_publicada %}
-                            <span class="badge badge-neutral" title="Aula: {{ material.aula_publicada.aula.titulo }}"><i data-lucide="book-open" aria-hidden="true"></i> {{ material.aula_publicada.aula.titulo|truncatechars:18 }}</span>
-                        {% else %}
-                            <span class="badge badge-neutral"><i data-lucide="folder" aria-hidden="true"></i> Turma</span>
-                        {% endif %}
-                        
                         {% if material.arquivo %}
-                            <a class="btn btn-primary btn-sm" href="{% url 'materials:material_download' material.pk %}">
+                            <a class="btn btn-primary btn-sm student-card-action" href="{% url 'materials:material_download' material.pk %}">
                                 <i data-lucide="download" aria-hidden="true"></i> Baixar arquivo
                             </a>
                         {% elif material.link_externo %}
-                            <a class="btn btn-outline btn-sm" href="{{ material.link_externo }}" target="_blank" rel="noopener">
+                            <a class="btn btn-outline btn-sm student-card-action" href="{{ material.link_externo }}" target="_blank" rel="noopener">
                                 <i data-lucide="external-link" aria-hidden="true"></i> Abrir link externo<span class="sr-only"> (abre em nova aba)</span>
                             </a>
                         {% endif %}
                     </div>
+                    <p class="meta-line">
+                        {% if material.aula_publicada %}
+                            <i class="icon-inline-xs" data-lucide="book-open" aria-hidden="true"></i>
+                            Aula: {{ material.aula_publicada.aula.titulo }}
+                        {% else %}
+                            <i class="icon-inline-xs" data-lucide="folder" aria-hidden="true"></i>
+                            Material da turma
+                        {% endif %}
+                    </p>
                 </article>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="folder"></i>
+            <i data-lucide="folder" aria-hidden="true"></i>
             <h2>Nenhum material disponível</h2>
             <p>Quando o professor compartilhar materiais, eles aparecerão aqui.</p>
         </div>

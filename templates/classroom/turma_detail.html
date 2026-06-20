@@ -24,10 +24,13 @@
                 <span class="badge badge-neutral"><i data-lucide="user-x" aria-hidden="true"></i> {{ inactive_matriculas|length }} inativos</span>
             </div>
         </div>
-        <div class="invite-panel">
+        <div class="invite-panel" style="text-align: right;">
             <span>Código de convite</span>
-            <strong class="mono">{{ turma.codigo_convite }}</strong>
-            <form method="post" action="{% url 'classroom:turma_regenerate_invite' turma.pk %}">
+            <strong class="mono" style="display: block; font-size: 20px; margin: 4px 0;">{{ turma.codigo_convite }}</strong>
+            <small style="display: block; color: var(--shell-danger); margin-bottom: 8px; max-width: 220px; line-height: 1.2;">
+                Aviso: o código anterior deixará de funcionar imediatamente ao renovar.
+            </small>
+            <form method="post" action="{% url 'classroom:turma_regenerate_invite' turma.pk %}" onsubmit="return confirm('Deseja realmente renovar o código de convite? O código anterior deixará de funcionar imediatamente.');">
                 {% csrf_token %}
                 <button class="btn btn-outline btn-sm" type="submit">
                     <i data-lucide="refresh-cw" aria-hidden="true"></i>
@@ -37,43 +40,74 @@
         </div>
     </div>
 
-    <div class="classroom-actions">
-        <a class="btn btn-primary" href="{% url 'classroom:turma_aulas' turma.pk %}">
-            <i data-lucide="send" aria-hidden="true"></i>
-            Publicar aulas
-        </a>
-        <a class="btn btn-outline" href="{% url 'activities:atividade_list' turma.pk %}">
-            <i data-lucide="clipboard-list" aria-hidden="true"></i>
-            Atividades
-        </a>
-        <a class="btn btn-outline" href="{% url 'materials:material_list' turma.pk %}">
-            <i data-lucide="folder" aria-hidden="true"></i>
-            Materiais
-        </a>
-        <a class="btn btn-outline" href="{% url 'classroom:matricula_create' turma.pk %}">
-            <i data-lucide="user-plus" aria-hidden="true"></i>
-            Matricular aluno
-        </a>
-        <a class="btn btn-outline" href="{% url 'classroom:matricula_import' turma.pk %}">
-            <i data-lucide="upload" aria-hidden="true"></i>
-            Importar CSV
-        </a>
-        <a class="btn btn-outline" href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}">
-            <i data-lucide="file-down" aria-hidden="true"></i>
-            Relatório PDF
-        </a>
-        <a class="btn btn-outline" href="{% url 'classroom:turma_relatorio_csv' turma.pk %}">
-            <i data-lucide="table" aria-hidden="true"></i>
-            Relatório CSV
-        </a>
-        <a class="btn btn-outline" href="{% url 'classroom:turma_update' turma.pk %}">
-            <i data-lucide="settings" aria-hidden="true"></i>
-            Editar turma
-        </a>
-        <a class="btn btn-danger" href="{% url 'classroom:turma_delete' turma.pk %}">
-            <i data-lucide="trash-2" aria-hidden="true"></i>
-            Excluir
-        </a>
+    <div class="grid cols-4" style="margin-bottom: var(--space-6);">
+        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+            <div>
+                <span class="eyebrow" style="color: var(--shell-primary-200);">Conteúdo</span>
+                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Gerenciar aulas, atividades e arquivos.</p>
+            </div>
+            <div class="grid cols-1" style="gap: var(--space-2);">
+                <a class="btn btn-primary" href="{% url 'classroom:turma_aulas' turma.pk %}">
+                    <i data-lucide="send" aria-hidden="true"></i>
+                    Publicar aulas
+                </a>
+                <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_list' turma.pk %}">
+                    <i data-lucide="clipboard-list" aria-hidden="true"></i>
+                    Atividades
+                </a>
+                <a class="btn btn-outline btn-sm" href="{% url 'materials:material_list' turma.pk %}">
+                    <i data-lucide="folder" aria-hidden="true"></i>
+                    Materiais
+                </a>
+            </div>
+        </div>
+
+        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+            <div>
+                <span class="eyebrow" style="color: var(--shell-secondary-200);">Alunos</span>
+                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Matricular novos alunos ou importar via CSV.</p>
+            </div>
+            <div class="grid cols-1" style="gap: var(--space-2);">
+                <a class="btn btn-outline btn-sm" href="{% url 'classroom:matricula_create' turma.pk %}">
+                    <i data-lucide="user-plus" aria-hidden="true"></i>
+                    Matricular aluno
+                </a>
+                <a class="btn btn-outline btn-sm" href="{% url 'classroom:matricula_import' turma.pk %}">
+                    <i data-lucide="upload" aria-hidden="true"></i>
+                    Importar CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+            <div>
+                <span class="eyebrow" style="color: var(--shell-tertiary-200);">Relatórios</span>
+                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Exportar boletins e relatórios consolidados.</p>
+            </div>
+            <div class="grid cols-1" style="gap: var(--space-2);">
+                <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}">
+                    <i data-lucide="file-down" aria-hidden="true"></i>
+                    Relatório PDF
+                </a>
+                <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_relatorio_csv' turma.pk %}">
+                    <i data-lucide="table" aria-hidden="true"></i>
+                    Relatório CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+            <div>
+                <span class="eyebrow">Configurações</span>
+                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Configurações gerais do cadastro da turma.</p>
+            </div>
+            <div class="grid cols-1" style="gap: var(--space-2);">
+                <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_update' turma.pk %}">
+                    <i data-lucide="settings" aria-hidden="true"></i>
+                    Editar turma
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="tbl-wrap">
@@ -132,16 +166,40 @@
                 {% empty %}
                     <tr>
                         <td colspan="6">
-                            <div class="empty">
+                            <div class="empty" style="padding: var(--space-8) 24px;">
                                 <i data-lucide="inbox" aria-hidden="true"></i>
                                 <h2>Nenhum aluno matriculado</h2>
-                                <p>Matricule manualmente ou importe um CSV de alunos.</p>
+                                <p style="margin-bottom: var(--space-4);">Matricule manualmente ou importe um CSV de alunos.</p>
+                                <div class="row" style="justify-content: center; gap: var(--space-3);">
+                                    <a class="btn btn-primary" href="{% url 'classroom:matricula_create' turma.pk %}">
+                                        <i data-lucide="user-plus" aria-hidden="true"></i>
+                                        Matricular Aluno
+                                    </a>
+                                    <a class="btn btn-outline" href="{% url 'classroom:matricula_import' turma.pk %}">
+                                        <i data-lucide="upload" aria-hidden="true"></i>
+                                        Importar CSV
+                                    </a>
+                                </div>
                             </div>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <div class="panel" style="margin-top: var(--space-6); border-color: rgba(248,113,113,.2);">
+        <span class="badge badge-danger" style="margin-bottom: var(--space-2);"><i data-lucide="alert-triangle"></i> Área Perigosa</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;">
+            <div>
+                <h3 style="font-size: 15px; font-weight: 700; color: var(--shell-text);">Excluir esta turma</h3>
+                <p style="font-size: 13px; color: var(--shell-text-muted);">Esta ação removerá permanentemente a turma, suas matrículas e todos os dados associados. Não há como reverter.</p>
+            </div>
+            <a class="btn btn-danger" href="{% url 'classroom:turma_delete' turma.pk %}">
+                <i data-lucide="trash-2" aria-hidden="true"></i>
+                Excluir Turma
+            </a>
+        </div>
     </div>
 </section>
 {% endblock %}

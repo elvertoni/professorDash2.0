@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Despublicar aula · Prof. Toni Coimbra{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <a href="{% url 'classroom:turma_aulas' turma.pk %}">Aulas</a>
+        <span>Despublicar</span>
+    </nav>
+
+    <div class="panel danger-panel" style="border-color: var(--shell-warning);">
+        <span class="badge badge-warning" style="margin-bottom: var(--space-2);"><i data-lucide="eye-off"></i> Ação de Risco</span>
+        <h1>Despublicar aula da turma?</h1>
+        <p style="margin-bottom: var(--space-4);">
+            Você está ocultando a aula <strong>{{ publicada.aula.titulo }}</strong> da turma <strong>{{ turma.nome }}</strong>.
+            Os alunos não conseguirão mais visualizá-la ou registrar progresso até que você a publique novamente.
+        </p>
+        <form class="form-actions" method="post">
+            {% csrf_token %}
+            <a class="btn btn-outline" href="{% url 'classroom:turma_aulas' turma.pk %}">Cancelar</a>
+            <button class="btn btn-primary" style="background: var(--shell-warning); color: #000; border-color: var(--shell-warning);" type="submit">
+                <i data-lucide="eye-off"></i>
+                Confirmar despublicação
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

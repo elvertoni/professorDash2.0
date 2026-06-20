@@ -1,0 +1,60 @@
+<div class="section-heading section-gap">
+    <div class="page-heading-row">
+        <div>
+            <span class="eyebrow">Fila de correção</span>
+            <h2>Aguardando <span class="accent">check</span></h2>
+        </div>
+        {% if aguardando %}
+        <div class="meta">{{ aguardando|length }} entregas<br>pendentes</div>
+        {% endif %}
+    </div>
+</div>
+{% if aguardando %}
+    <div class="tbl-wrap">
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th scope="col">Aluno</th>
+                    <th scope="col">Atividade</th>
+                    <th scope="col">Turma</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Entregue em</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entrega in aguardando %}
+                    <tr>
+                        <td>
+                            <span class="name">
+                                <span class="avatar sm">{{ entrega.aluno.get_short_name|slice:':2'|upper }}</span>
+                                <span>{{ entrega.aluno.nome_completo }}</span>
+                            </span>
+                        </td>
+                        <td>{{ entrega.atividade.titulo }}</td>
+                        <td>{{ entrega.atividade.turma.nome }}</td>
+                        <td>
+                            {% if entrega.status == 'atrasada' %}
+                                <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                            {% else %}
+                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
+                            {% endif %}
+                        </td>
+                        <td class="mono">{{ entrega.data_entrega|date:'d/m/Y H:i' }}</td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="{% url 'activities:correcao' entrega.pk %}">
+                                <i data-lucide="check-check"></i> Corrigir
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty">
+        <i data-lucide="party-popper"></i>
+        <h2>Nada na fila</h2>
+        <p>Todas as entregas foram corrigidas.</p>
+    </div>
+{% endif %}

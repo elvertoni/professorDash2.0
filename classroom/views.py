@@ -445,7 +445,11 @@ class AulaPublicadaManageView(TurmaQuerysetMixin, View):
 
     def get(self, request, turma_pk):
         turma = self.get_turma(turma_pk)
-        return self.render_page(request, turma, AulaPublicadaForm(turma=turma))
+        aula_id = request.GET.get('aula')
+        initial = {}
+        if aula_id:
+            initial['aula'] = aula_id
+        return self.render_page(request, turma, AulaPublicadaForm(turma=turma, initial=initial))
 
     def post(self, request, turma_pk):
         turma = self.get_turma(turma_pk)
@@ -510,6 +514,17 @@ class AulaPublicadaUpdateView(AulaPublicadaActionMixin, View):
 
 
 class AulaPublicadaToggleView(AulaPublicadaActionMixin, View):
+    def get(self, request, turma_pk, pk):
+        turma = self.get_turma(turma_pk)
+        publicada = self.get_publicada(turma, pk)
+        if publicada.publicada:
+            return render(
+                request,
+                'classroom/aula_publicada_confirm_toggle.html',
+                {'turma': turma, 'publicada': publicada},
+            )
+        return redirect('classroom:turma_aulas', turma_pk=turma.pk)
+
     def post(self, request, turma_pk, pk):
         turma = self.get_turma(turma_pk)
         publicada = self.get_publicada(turma, pk)
@@ -523,6 +538,15 @@ class AulaPublicadaToggleView(AulaPublicadaActionMixin, View):
 
 
 class AulaPublicadaDeleteView(AulaPublicadaActionMixin, View):
+    def get(self, request, turma_pk, pk):
+        turma = self.get_turma(turma_pk)
+        publicada = self.get_publicada(turma, pk)
+        return render(
+            request,
+            'classroom/aula_publicada_confirm_delete.html',
+            {'turma': turma, 'publicada': publicada},
+        )
+
     def post(self, request, turma_pk, pk):
         turma = self.get_turma(turma_pk)
         publicada = self.get_publicada(turma, pk)
@@ -597,7 +621,7 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
 
         total_disponiveis = len(disponiveis)
         total_concluidas = sum(
-            1 for p in progressos.values() 
+            1 for p in progressos.values()
             if p.aula_publicada_id in [d.id for d in disponiveis] and p.concluido
         )
 
@@ -622,7 +646,7 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
         # Atividades pendentes
         atividades_all = Atividade.objects.filter(turma__in=turmas, publicada=True).select_related('turma', 'aula_publicada', 'aula_publicada__aula')
         entregas_dict = {
-            e.atividade_id: e 
+            e.atividade_id: e
             for e in Entrega.objects.filter(aluno=request.user, atividade__in=atividades_all)
         }
 

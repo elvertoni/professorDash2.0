@@ -62,6 +62,12 @@ class AulaListView(LoginRequiredMixin, ListView):
         context['disciplinas'] = disciplinas
         context['selected_disciplina'] = self.request.GET.get('disciplina', '')
         context['selected_trilha'] = self.request.GET.get('trilha', '')
+
+        query_params = self.request.GET.copy()
+        if 'page' in query_params:
+            del query_params['page']
+        context['query_params'] = query_params.urlencode()
+
         return context
 
 
@@ -90,4 +96,14 @@ class AulaDetailView(LoginRequiredMixin, DetailView):
         context['next_aula'] = (
             base_queryset.filter(ordem__gt=aula.ordem).order_by('ordem').first()
         )
+
+        if self.request.user.is_authenticated and self.request.user.role in ('admin', 'professor'):
+            from classroom.models import Turma
+            from classroom.views import can_manage_all
+
+            queryset = Turma.objects.filter(ativa=True)
+            if not can_manage_all(self.request.user):
+                queryset = queryset.filter(professor=self.request.user)
+            context['minhas_turmas'] = queryset.order_by('nome')
+
         return context

@@ -66,11 +66,11 @@
     {% if is_paginated %}
         <nav class="pagination" aria-label="Paginação">
             {% if page_obj.has_previous %}
-                <a class="btn btn-outline" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                <a class="btn btn-outline" href="?page={{ page_obj.previous_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">Anterior</a>
             {% endif %}
             <span class="badge badge-neutral">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
-                <a class="btn btn-outline" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                <a class="btn btn-outline" href="?page={{ page_obj.next_page_number }}{% if query_params %}&{{ query_params }}{% endif %}">Próxima</a>
             {% endif %}
         </nav>
     {% endif %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Remover aula da turma · Prof. Toni Coimbra{% endblock %}
+
+{% block content %}
+<section class="classroom-page narrow-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <a href="{% url 'classroom:turma_aulas' turma.pk %}">Aulas</a>
+        <span>Remover aula</span>
+    </nav>
+
+    <div class="panel danger-panel">
+        <span class="badge badge-danger" style="margin-bottom: var(--space-2);"><i data-lucide="alert-triangle"></i> Ação de Risco</span>
+        <h1>Remover aula da turma?</h1>
+        <p style="margin-bottom: var(--space-4);">
+            Você está removendo a aula <strong>{{ publicada.aula.titulo }}</strong> da turma <strong>{{ turma.nome }}</strong>. 
+            Os alunos perderão o acesso a esta aula e qualquer progresso registrado ou atividades entregues associadas a ela podem ser impactados.
+        </p>
+        <form class="form-actions" method="post">
+            {% csrf_token %}
+            <a class="btn btn-outline" href="{% url 'classroom:turma_aulas' turma.pk %}">Cancelar</a>
+            <button class="btn btn-danger" type="submit">
+                <i data-lucide="trash-2"></i>
+                Confirmar remoção
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

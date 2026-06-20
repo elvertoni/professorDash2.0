@@ -26,6 +26,12 @@ CALLOUT_LABELS = {
     'dica': 'Dica',
 }
 
+CALLOUT_ICONS = {
+    'conceito': 'lightbulb',
+    'atencao': 'alert-triangle',
+    'dica': 'sparkle',
+}
+
 ALLOWED_LESSON_TAGS = frozenset(
     {
         'a',
@@ -87,6 +93,7 @@ ALLOWED_LESSON_ATTRIBUTES = {
     '*': ['aria-hidden', 'aria-label', 'class', 'id', 'role', 'title'],
     'a': ['href', 'title'],
     'figure': ['class', 'data-diagram-type'],
+    'i': ['aria-hidden', 'class', 'data-lucide'],
     'img': ['alt', 'decoding', 'height', 'loading', 'src', 'title', 'width'],
     'ol': ['start', 'type'],
     'td': ['align', 'colspan', 'rowspan'],
@@ -170,11 +177,15 @@ def render_custom_blocks(markdown_content):
         kind = match.group('kind').lower()
         normalized_kind = 'atencao' if kind == 'atenção' else kind
         label = CALLOUT_LABELS[kind]
+        icon = CALLOUT_ICONS[normalized_kind]
         body = match.group('body').strip()
         return (
-            f'<section class="lesson-callout lesson-callout-{normalized_kind}" markdown="1">\n'
-            f'<p class="lesson-callout-title">{label}</p>\n\n'
+            f'<section class="callout {normalized_kind}" markdown="1">\n'
+            f'<div class="ic" aria-hidden="true"><i data-lucide="{icon}"></i></div>\n'
+            f'<div class="ct" markdown="1">\n'
+            f'<b>{label}</b>\n\n'
             f'{body}\n'
+            f'</div>\n'
             f'</section>'
         )
 
