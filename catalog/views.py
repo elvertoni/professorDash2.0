@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView
@@ -84,32 +85,52 @@ class AcervoGithubImportView(AdminRequiredMixin, View):
     '''Baixa o acervo PROF-TONI do GitHub e roda o import (admin apenas).'''
 
     def post(self, request, *args, **kwargs):
+        disciplina_slug = (request.POST.get('disciplina') or '').strip()
+        redirect_target = request.POST.get('next') or 'catalog:aula_list'
+
         try:
             with tempfile.TemporaryDirectory(prefix='acervo-') as tmp_dir:
                 root = download_acervo(tmp_dir)
                 out = StringIO()
-                call_command(
-                    'import_acervo',
-                    path=str(root),
-                    only_aprovada=True,
-                    stdout=out,
-                    stderr=out,
-                )
+                command_kwargs = {
+                    'path': str(root),
+                    'only_aprovada': True,
+                    'stdout': out,
+                    'stderr': out,
+                }
+                if disciplina_slug:
+                    command_kwargs['disciplina'] = disciplina_slug
+                call_command('import_acervo', **command_kwargs)
         except AcervoDownloadError as exc:
             messages.error(request, 'Falha ao importar do GitHub: {0}'.format(exc))
-            return redirect('catalog:aula_list')
+            return self._redirect(redirect_target, disciplina_slug)
         except Exception as exc:  # noqa: BLE001 — surface any import failure to the UI
             messages.error(
                 request, 'Erro inesperado na importação: {0}'.format(exc)
             )
-            return redirect('catalog:aula_list')
+            return self._redirect(redirect_target, disciplina_slug)
 
         summary = out.getvalue().strip().splitlines()
+        scope = (
+            'matéria "{0}"'.format(disciplina_slug)
+            if disciplina_slug
+            else 'acervo completo'
+        )
         messages.success(
             request,
-            'Importação concluída. {0}'.format(summary[-1] if summary else ''),
+            'Importação concluída ({0}). {1}'.format(
+                scope, summary[-1] if summary else ''
+            ),
         )
-        return redirect('catalog:aula_list')
+        return self._redirect(redirect_target, disciplina_slug)
+
+    def _redirect(self, target, disciplina_slug):
+        if target == 'catalog:aula_list' and disciplina_slug:
+            url = reverse('catalog:aula_list')
+            return redirect('{0}?disciplina={1}'.format(url, disciplina_slug))
+        if target.startswith('/'):
+            return redirect(target)
+        return redirect(target)
 
 
 class AulaDetailView(LoginRequiredMixin, DetailView):

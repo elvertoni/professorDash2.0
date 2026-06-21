@@ -9,14 +9,27 @@
         <h1>Aulas aprovadas do acervo</h1>
         <p>Consulte as aulas canônicas importadas do PROF-TONI por disciplina, trilha e ordem.</p>
         {% if user.is_superuser or user.is_admin_role %}
-            <form class="acervo-import" method="post" action="{% url 'catalog:acervo_import_github' %}"
-                  onsubmit="return confirm('Importar/atualizar o acervo a partir do GitHub agora?');">
-                {% csrf_token %}
-                <button class="btn btn-outline" type="submit">
-                    <i data-lucide="github" aria-hidden="true"></i>
-                    Importar do GitHub
-                </button>
-            </form>
+            <div class="acervo-import" style="display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4);">
+                <form method="post" action="{% url 'catalog:acervo_import_github' %}"
+                      onsubmit="return confirm('Importar/atualizar TODAS as matérias a partir do GitHub agora?');">
+                    {% csrf_token %}
+                    <button class="btn btn-outline" type="submit">
+                        <i data-lucide="github" aria-hidden="true"></i>
+                        Importar tudo
+                    </button>
+                </form>
+                {% if selected_disciplina %}
+                    <form method="post" action="{% url 'catalog:acervo_import_github' %}"
+                          onsubmit="return confirm('Atualizar só esta matéria a partir do GitHub agora?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="disciplina" value="{{ selected_disciplina }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                            Atualizar esta matéria
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 
