@@ -429,6 +429,7 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
     def post(self, request, turma_pk):
         turma = get_object_or_404(self.get_queryset(), pk=turma_pk)
         disciplina = turma.disciplina
+        import_error = None
 
         try:
             with tempfile.TemporaryDirectory(prefix='acervo-') as tmp_dir:
@@ -443,21 +444,29 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
                     stderr=out,
                 )
         except AcervoDownloadError as exc:
-            messages.error(request, 'Falha ao sincronizar do GitHub: {0}'.format(exc))
-            return redirect('classroom:turma_aulas', turma_pk=turma.pk)
+            import_error = 'Falha ao atualizar do GitHub: {0}'.format(exc)
         except Exception as exc:  # noqa: BLE001 — surfacing import failures to the UI
-            messages.error(
-                request, 'Erro inesperado na sincronização: {0}'.format(exc)
-            )
-            return redirect('classroom:turma_aulas', turma_pk=turma.pk)
+            import_error = 'Erro inesperado ao atualizar do GitHub: {0}'.format(exc)
 
         now = timezone.now()
         aulas = Aula.objects.filter(
             disciplina=disciplina, status=Aula.Status.APROVADA
         )
+        if not aulas.exists():
+            if import_error:
+                messages.error(request, import_error)
+            messages.error(
+                request,
+                'Nenhuma aula aprovada encontrada para {0}.'.format(
+                    disciplina.label
+                ),
+            )
+            return redirect('classroom:turma_aulas', turma_pk=turma.pk)
+
         novas = 0
+        atualizadas = 0
         for aula in aulas:
-            _, created = AulaPublicada.objects.get_or_create(
+            publicada, created = AulaPublicada.objects.get_or_create(
                 turma=turma,
                 aula=aula,
                 defaults={
@@ -468,11 +477,34 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
             )
             if created:
                 novas += 1
+                continue
+
+            fields = []
+            if not publicada.publicada:
+                publicada.publicada = True
+                fields.append('publicada')
+            if publicada.disponivel_em > now:
+                publicada.disponivel_em = now
+                fields.append('disponivel_em')
+            if fields:
+                publicada.save(update_fields=[*fields, 'updated_at'])
+                atualizadas += 1
+
+        if import_error:
+            messages.warning(
+                request,
+                '{0} A publicação usou as aulas já importadas no catálogo.'.format(
+                    import_error
+                ),
+            )
 
         messages.success(
             request,
-            'Aulas sincronizadas: {0} disponíveis na turma ({1} novas).'.format(
-                aulas.count(), novas
+            (
+                'Aulas sincronizadas: {0} disponíveis na turma '
+                '({1} novas, {2} reativadas/agora liberadas).'
+            ).format(
+                aulas.count(), novas, atualizadas
             ),
         )
         return redirect('classroom:turma_aulas', turma_pk=turma.pk)
