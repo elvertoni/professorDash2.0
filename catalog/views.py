@@ -1,11 +1,20 @@
+import tempfile
+from io import StringIO
+
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.management import call_command
+from django.shortcuts import redirect
 from django.utils import timezone
+from django.views import View
 from django.views.generic import DetailView, ListView
 
+from accounts.mixins import AdminRequiredMixin
 from classroom.models import Matricula
 
 from .models import Aula, Disciplina
 from .parser import sanitize_lesson_html
+from .services import AcervoDownloadError, download_acervo
 
 
 def user_can_view_full_catalog(user):
@@ -69,6 +78,38 @@ class AulaListView(LoginRequiredMixin, ListView):
         context['query_params'] = query_params.urlencode()
 
         return context
+
+
+class AcervoGithubImportView(AdminRequiredMixin, View):
+    '''Baixa o acervo PROF-TONI do GitHub e roda o import (admin apenas).'''
+
+    def post(self, request, *args, **kwargs):
+        try:
+            with tempfile.TemporaryDirectory(prefix='acervo-') as tmp_dir:
+                root = download_acervo(tmp_dir)
+                out = StringIO()
+                call_command(
+                    'import_acervo',
+                    path=str(root),
+                    only_aprovada=True,
+                    stdout=out,
+                    stderr=out,
+                )
+        except AcervoDownloadError as exc:
+            messages.error(request, 'Falha ao importar do GitHub: {0}'.format(exc))
+            return redirect('catalog:aula_list')
+        except Exception as exc:  # noqa: BLE001 — surface any import failure to the UI
+            messages.error(
+                request, 'Erro inesperado na importação: {0}'.format(exc)
+            )
+            return redirect('catalog:aula_list')
+
+        summary = out.getvalue().strip().splitlines()
+        messages.success(
+            request,
+            'Importação concluída. {0}'.format(summary[-1] if summary else ''),
+        )
+        return redirect('catalog:aula_list')
 
 
 class AulaDetailView(LoginRequiredMixin, DetailView):

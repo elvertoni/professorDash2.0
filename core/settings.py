@@ -164,6 +164,13 @@ if not EMAIL_HOST:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Acervo PROF-TONI — import remoto via GitHub (botão no catálogo).
+
+ACERVO_GITHUB_REPO = env('ACERVO_GITHUB_REPO', default='elvertoni/head')
+ACERVO_GITHUB_REF = env('ACERVO_GITHUB_REF', default='main')
+ACERVO_GITHUB_TOKEN = env('ACERVO_GITHUB_TOKEN', default='')
+
+
 # Auth — nativa do Django, login por email.
 
 AUTH_USER_MODEL = 'accounts.User'

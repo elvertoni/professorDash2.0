@@ -236,7 +236,8 @@ python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] 
 
 ### 6.3 Estratégia de integração (origem dos arquivos)
 - **Fase 1 (MVP):** importação por path local (rodar o command apontando para o repo PROF-TONI clonado no servidor).
-- **Fase 2 (futuro):** sincronização via Git (pull do repo) ou upload de pacote `.zip` do acervo pelo admin.
+- **Fase 2 (implementada):** importação remota via GitHub direto da UI. Botão **"Importar do GitHub"** no catálogo (`/catalogo/`, admin apenas) → `catalog.views.AcervoGithubImportView` → `catalog.services.download_acervo` baixa o tarball do repo privado via API do GitHub (`/repos/{repo}/tarball/{ref}`, stdlib `urllib`+`tarfile`), extrai em tempdir e chama `import_acervo` no path extraído. Config por env: `ACERVO_GITHUB_REPO` (default `elvertoni/head`), `ACERVO_GITHUB_REF` (default `main`), `ACERVO_GITHUB_TOKEN` (PAT com leitura de conteúdo no repo privado — obrigatório). Síncrono (sem Celery, conforme restrições).
+- **Fase 3 (futuro):** upload de pacote `.zip` do acervo pelo admin.
 
 ### 6.4 Upload manual (complementa o import)
 - [ ] Professor envia materiais extras (PDFs, slides, links) por turma/aula direto na interface — independente do acervo.
