@@ -1,3 +1,7 @@
+[x-cloak] {
+    display: none !important;
+}
+
 :root {
     --shell-bg: #040405;
     --shell-bg-2: #09090b;

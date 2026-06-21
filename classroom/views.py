@@ -715,6 +715,11 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
                 publicada.concluida = False
                 proximas.append(publicada)
 
+        progresso_pct = (
+            round(total_concluidas * 100 / total_disponiveis)
+            if total_disponiveis else 0
+        )
+
         context = {
             'turmas': turmas,
             'proximas': proximas,
@@ -724,6 +729,7 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
             'total_turmas': len(turmas),
             'total_disponiveis': total_disponiveis,
             'total_concluidas': total_concluidas,
+            'progresso_pct': progresso_pct,
         }
         return render(request, self.template_name, context)
 
