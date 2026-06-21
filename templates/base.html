@@ -42,21 +42,17 @@
                             <a href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}" class="{% if '/materiais/aluno/' in request.path %}active{% endif %}">Materiais</a>
                         {% endif %}
                         <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
-                    {% elif user.is_professor %}
+                    {% else %}
                         <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
-                        <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and not '/turmas/aluno/' in request.path and not '/turmas/painel/' in request.path %}active{% endif %}">Turmas</a>
+                        <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
                         {% if user.first_active_turma %}
-                            <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and not '/atividades/aluno/' in request.path %}active{% endif %}">Correções</a>
+                            <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and '/atividades/aluno/' not in request.path %}active{% endif %}">Correções</a>
                         {% endif %}
                         <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
-                        {% if user.first_active_turma %}
-                            <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}#relatorios">Relatórios</a>
-                        {% endif %}
                     {% endif %}
                     <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
                     <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
                     {% if user.is_superuser or user.is_admin_role or user.is_staff %}
-                        <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                         <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
                         <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                     {% endif %}
@@ -76,21 +72,17 @@
                         <a href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}" class="{% if '/materiais/aluno/' in request.path %}active{% endif %}">Materiais</a>
                     {% endif %}
                     <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
-                {% elif user.is_professor %}
+                {% else %}
                     <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
-                    <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and not '/turmas/aluno/' in request.path and not '/turmas/painel/' in request.path %}active{% endif %}">Turmas</a>
+                    <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
                     {% if user.first_active_turma %}
-                        <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and not '/atividades/aluno/' in request.path %}active{% endif %}">Correções</a>
+                        <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and '/atividades/aluno/' not in request.path %}active{% endif %}">Correções</a>
                     {% endif %}
                     <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
-                    {% if user.first_active_turma %}
-                        <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}#relatorios">Relatórios</a>
-                    {% endif %}
                 {% endif %}
                 <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
                 <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
                 {% if user.is_superuser or user.is_admin_role or user.is_staff %}
-                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                     <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                 {% endif %}

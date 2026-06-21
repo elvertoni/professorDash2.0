@@ -19,6 +19,14 @@ class LoginView(DjangoLoginView):
     redirect_authenticated_user = True
     template_name = 'accounts/login.html'
 
+    def get_success_url(self):
+        user = self.request.user
+        if user.is_authenticated and user.is_aluno:
+            from django.urls import reverse
+            return reverse('classroom:aluno_dashboard')
+        from django.urls import reverse
+        return reverse('classroom:professor_dashboard')
+
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'accounts/profile.html'

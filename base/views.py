@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from django.views.generic import TemplateView
 
@@ -10,6 +11,11 @@ def health(request):
 
 
 class HomeView(TemplateView):
-    """Landing provisória (Sprint 0): valida a integração do design system."""
-
     template_name = 'home.html'
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            if hasattr(request.user, 'is_aluno') and request.user.is_aluno:
+                return redirect('classroom:aluno_dashboard')
+            return redirect('classroom:professor_dashboard')
+        return super().get(request, *args, **kwargs)

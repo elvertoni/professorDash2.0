@@ -175,5 +175,5 @@ ACERVO_GITHUB_TOKEN = env('ACERVO_GITHUB_TOKEN', default='')
 
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'accounts:profile'
+LOGIN_REDIRECT_URL = 'classroom:professor_dashboard'
 LOGOUT_REDIRECT_URL = 'home'
