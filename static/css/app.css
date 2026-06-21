@@ -1836,6 +1836,8 @@ table.tbl {
 }
 
 .lesson-diagram {
+    max-width: 100%;
+    min-width: 0;
     padding: 18px;
     border-radius: var(--radius-md);
     background: var(--shell-surface-low);
@@ -1848,6 +1850,106 @@ table.tbl {
     font-weight: 700;
 }
 
+.lesson-steps {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lesson-steps li {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 14px;
+    border: 1px solid var(--shell-border);
+    border-radius: var(--radius-md);
+    background: var(--shell-surface-high);
+}
+
+.lesson-step-index {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 10px;
+    color: #04110b;
+    background: var(--shell-primary);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.lesson-steps strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--shell-text);
+    font-size: 14px;
+}
+
+.lesson-steps p {
+    margin: 0;
+    color: var(--shell-text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.lesson-quiz {
+    margin: 18px 0;
+    padding: 18px;
+    border: 1px solid var(--shell-border);
+    border-radius: var(--radius-md);
+    background: var(--shell-surface-low);
+}
+
+.lesson-quiz-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.lesson-quiz-head strong {
+    color: var(--shell-text);
+    font-size: 15px;
+}
+
+.lesson-quiz-head span {
+    color: var(--shell-text-soft);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.lesson-quiz-list {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding-left: 22px;
+}
+
+.lesson-quiz-question {
+    padding-left: 4px;
+}
+
+.lesson-quiz-question p {
+    margin: 0 0 8px;
+    color: var(--shell-text);
+}
+
+.lesson-quiz-question ol {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 22px;
+    color: var(--shell-text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
 .lesson-nav {
     display: flex;
     justify-content: space-between;
@@ -1856,6 +1958,7 @@ table.tbl {
 }
 
 .atelier {
+    max-width: 100%;
     overflow: hidden;
     border-radius: var(--radius-xl);
     background: var(--shell-bg);
@@ -1864,8 +1967,10 @@ table.tbl {
 
 .atelier-rail {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+    max-width: 100%;
     min-height: 560px;
+    min-width: 0;
 }
 
 .atelier-side {
@@ -1886,7 +1991,7 @@ table.tbl {
 .atelier-side h4 {
     margin-bottom: 18px;
     font-size: 15px;
-    letter-spacing: -.01em;
+    letter-spacing: 0;
 }
 
 .atelier-side .mod {
@@ -1914,7 +2019,9 @@ table.tbl {
 }
 
 .atelier-body {
+    width: 100%;
     max-width: 880px;
+    min-width: 0;
     padding: 40px 48px 56px;
 }
 
@@ -1955,10 +2062,10 @@ table.tbl {
 
 .atelier h1 {
     margin-bottom: 18px;
-    font-size: clamp(32px, 4.4vw, 52px);
+    font-size: 44px;
     font-weight: 800;
     line-height: 1.05;
-    letter-spacing: -.035em;
+    letter-spacing: 0;
 }
 
 .atelier h1 em {
@@ -1975,9 +2082,12 @@ table.tbl {
 }
 
 .prose {
+    max-width: 100%;
+    min-width: 0;
     color: var(--shell-text);
     font-size: 16px;
     line-height: 1.8;
+    overflow-wrap: break-word;
 }
 
 .prose h2 {
@@ -1986,7 +2096,7 @@ table.tbl {
     border-left: 3px solid var(--shell-primary);
     font-size: 24px;
     font-weight: 700;
-    letter-spacing: -.02em;
+    letter-spacing: 0;
 }
 
 .prose h3 {
@@ -2021,6 +2131,7 @@ table.tbl {
 }
 
 .prose pre {
+    max-width: 100%;
     overflow-x: auto;
     margin: 18px 0;
     padding: 18px 20px;
@@ -2033,6 +2144,63 @@ table.tbl {
     padding: 0;
     color: var(--shell-text);
     background: none;
+    white-space: pre;
+}
+
+.prose ul,
+.prose ol {
+    margin: 0 0 16px;
+    padding-left: 24px;
+    color: var(--shell-text-muted);
+}
+
+.prose li + li {
+    margin-top: 6px;
+}
+
+.prose table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin: 18px 0;
+    overflow-x: auto;
+    border-collapse: collapse;
+    border: 1px solid var(--shell-border);
+    border-radius: var(--radius-md);
+}
+
+.prose th,
+.prose td {
+    min-width: 160px;
+    padding: 10px 12px;
+    border: 1px solid var(--shell-border);
+    color: var(--shell-text-muted);
+    text-align: left;
+    vertical-align: top;
+}
+
+.prose th {
+    color: var(--shell-text);
+    background: var(--shell-surface-low);
+    font-weight: 700;
+}
+
+.prose .lesson-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: inherit;
+}
+
+.prose .lesson-quiz-list {
+    margin: 0;
+    padding-left: 22px;
+    color: inherit;
+}
+
+.prose .lesson-quiz-question ol {
+    margin: 0;
+    padding-left: 22px;
 }
 
 .prose blockquote {
@@ -2060,6 +2228,7 @@ table.tbl {
     display: grid;
     grid-template-columns: 32px 1fr;
     gap: 14px;
+    max-width: 100%;
     margin: 18px 0;
     padding: 16px 18px;
     border-radius: var(--radius-md);
@@ -2087,6 +2256,10 @@ table.tbl {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: .12em;
+}
+
+.callout .ct {
+    min-width: 0;
 }
 
 .callout .ct p {
@@ -2143,6 +2316,7 @@ table.tbl {
 }
 
 .lesson-goals {
+    max-width: 100%;
     margin: 32px 0;
     padding: 20px;
     border-radius: var(--radius-md);
@@ -2722,6 +2896,7 @@ table.tbl {
 
     .atelier-body {
         max-width: none;
+        min-width: 0;
         padding: 28px 22px 40px;
     }
 
@@ -2817,6 +2992,35 @@ table.tbl {
     .classroom-page {
         width: auto;
         padding: 32px 18px 56px;
+    }
+
+    .atelier h1 {
+        font-size: 32px;
+        line-height: 1.12;
+    }
+
+    .atelier .dek {
+        font-size: 16px;
+    }
+
+    .prose {
+        font-size: 15px;
+        line-height: 1.72;
+    }
+
+    .prose h2 {
+        margin-top: 30px;
+        font-size: 22px;
+    }
+
+    .callout {
+        grid-template-columns: 28px minmax(0, 1fr);
+        padding: 14px;
+    }
+
+    .callout .ic {
+        width: 28px;
+        height: 28px;
     }
 
     .tbl-wrap {

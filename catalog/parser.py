@@ -9,7 +9,8 @@ from django.utils.html import escape
 
 
 FRONTMATTER_RE = re.compile(r'\A---\s*\n(?P<yaml>.*?)\n---\s*\n(?P<body>.*)\Z', re.S)
-FENCE_RE = re.compile(r'```(?P<kind>diagrama[\w-]*)\n(?P<body>.*?)\n```', re.S)
+DIAGRAM_FENCE_RE = re.compile(r'```(?P<kind>diagrama[\w-]*)\n(?P<body>.*?)\n```', re.S)
+QUIZ_FENCE_RE = re.compile(r'```quiz\n(?P<body>.*?)\n```', re.S)
 TEACHER_NOTE_RE = re.compile(
     r'(?P<block>:::roteiro[^\n]*\n(?P<body>.*?)\n:::\s*)',
     re.S,
@@ -102,7 +103,7 @@ ALLOWED_LESSON_ATTRIBUTES = {
     'figure': ['class', 'data-diagram-type'],
     'i': ['aria-hidden', 'class', 'data-lucide'],
     'img': ['alt', 'decoding', 'height', 'loading', 'src', 'title', 'width'],
-    'ol': ['start', 'type'],
+    'ol': ['class', 'start', 'type'],
     'td': ['align', 'colspan', 'rowspan'],
     'th': ['align', 'colspan', 'rowspan', 'scope'],
 }
@@ -137,6 +138,7 @@ def split_frontmatter(content):
 
 def render_lesson_html(markdown_content):
     prepared = strip_teacher_notes(markdown_content)
+    prepared = render_quiz_fences(prepared)
     prepared = render_diagram_fences(prepared)
     prepared = render_custom_blocks(prepared)
 
@@ -190,8 +192,38 @@ def sanitize_lesson_html(html_content):
 def render_diagram_fences(markdown_content):
     def replace(match):
         kind = escape(match.group('kind'))
-        body = html.escape(match.group('body').strip())
-        label = kind.replace('-', ' ').title()
+        raw_body = match.group('body').strip()
+        data = parse_yaml_block(raw_body)
+        label = escape(
+            data.get('titulo') if isinstance(data, dict) and data.get('titulo')
+            else kind.replace('-', ' ').title()
+        )
+
+        if isinstance(data, dict) and isinstance(data.get('camadas'), list):
+            items = []
+            for index, layer in enumerate(data['camadas'], start=1):
+                if not isinstance(layer, dict):
+                    continue
+                title = escape(str(layer.get('rotulo') or f'Etapa {index}'))
+                content = escape(str(layer.get('conteudo') or ''))
+                items.append(
+                    '<li>'
+                    f'<span class="lesson-step-index">{index}</span>'
+                    '<div>'
+                    f'<strong>{title}</strong>'
+                    f'<p>{content}</p>'
+                    '</div>'
+                    '</li>'
+                )
+            if items:
+                return (
+                    f'<figure class="lesson-diagram lesson-diagram-progressive" data-diagram-type="{kind}">\n'
+                    f'<figcaption>{label}</figcaption>\n'
+                    f'<ol class="lesson-steps">{"".join(items)}</ol>\n'
+                    f'</figure>'
+                )
+
+        body = html.escape(raw_body)
         return (
             f'<figure class="lesson-diagram" data-diagram-type="{kind}">\n'
             f'<figcaption>{label}</figcaption>\n'
@@ -199,7 +231,62 @@ def render_diagram_fences(markdown_content):
             f'</figure>'
         )
 
-    return FENCE_RE.sub(replace, markdown_content)
+    return DIAGRAM_FENCE_RE.sub(replace, markdown_content)
+
+
+def render_quiz_fences(markdown_content):
+    def replace(match):
+        raw_body = match.group('body').strip()
+        data = parse_yaml_block(raw_body)
+        if not isinstance(data, list):
+            return (
+                '<section class="lesson-quiz">\n'
+                '<div class="lesson-quiz-head"><strong>Quiz</strong></div>\n'
+                f'<pre><code>{html.escape(raw_body)}</code></pre>\n'
+                '</section>'
+            )
+
+        questions = []
+        for q_index, question in enumerate(data, start=1):
+            if not isinstance(question, dict):
+                continue
+            prompt = escape(str(question.get('pergunta') or f'Questão {q_index}'))
+            alternatives = []
+            for alt in question.get('alternativas') or []:
+                if not isinstance(alt, dict):
+                    continue
+                text = escape(str(alt.get('texto') or ''))
+                if text:
+                    alternatives.append(f'<li>{text}</li>')
+            alternatives_html = ''.join(alternatives)
+            questions.append(
+                '<li class="lesson-quiz-question">'
+                f'<p><strong>Questão {q_index}.</strong> {prompt}</p>'
+                f'<ol type="A">{alternatives_html}</ol>'
+                '</li>'
+            )
+
+        if not questions:
+            return ''
+
+        return (
+            '<section class="lesson-quiz">\n'
+            '<div class="lesson-quiz-head">\n'
+            '<strong>Quiz</strong>\n'
+            '<span>Avaliação formativa</span>\n'
+            '</div>\n'
+            f'<ol class="lesson-quiz-list">{"".join(questions)}</ol>\n'
+            '</section>'
+        )
+
+    return QUIZ_FENCE_RE.sub(replace, markdown_content)
+
+
+def parse_yaml_block(raw_body):
+    try:
+        return yaml.safe_load(raw_body) or {}
+    except yaml.YAMLError:
+        return None
 
 
 def render_custom_blocks(markdown_content):
@@ -207,7 +294,8 @@ def render_custom_blocks(markdown_content):
         kind = match.group('kind').lower()
         normalized_kind = 'atencao' if kind == 'atenção' else kind
         title = match.group('title').strip()
-        label = escape(title or CALLOUT_LABELS[kind])
+        base_label = CALLOUT_LABELS[kind]
+        label = escape(f'{base_label} · {title}' if title else base_label)
         icon = CALLOUT_ICONS[normalized_kind]
         body = match.group('body').strip()
         return (
