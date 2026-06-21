@@ -73,6 +73,42 @@
     font-size: 0.9375rem;
 }
 
+/* Painel secundário colapsável (Prazos) — fechado por default */
+.dash-collapsible {
+    margin-top: var(--space-6);
+}
+.dash-collapsible > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--shell-surface-elev);
+    border: 1px solid var(--shell-border-strong);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    font-weight: 600;
+    color: var(--shell-text);
+    transition: background 150ms ease-out;
+}
+.dash-collapsible > summary:hover { background: var(--shell-surface-strong); }
+.dash-collapsible > summary::-webkit-details-marker { display: none; }
+.dash-collapsible > summary:focus-visible {
+    outline: 2px solid var(--shell-primary);
+    outline-offset: 2px;
+}
+.dash-collapsible[open] > summary {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.dash-chevron {
+    margin-left: auto;
+    color: var(--shell-text-soft);
+    transition: transform 200ms ease-out;
+}
+.dash-collapsible[open] .dash-chevron { transform: rotate(180deg); }
+
 @media (max-width: 600px) {
     .serie-header-meta span { display: none; }
     .serie-header-title h2 { font-size: 1rem; }
@@ -80,7 +116,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .serie-chevron,
-    .serie-header { transition: none; }
+    .serie-header,
+    .dash-chevron { transition: none; }
 }
 </style>
 {% endblock %}
@@ -215,7 +252,17 @@
     </div>
     {% endif %}
 
-    {% include 'classroom/partials/dashboard_prazos.html' %}
+    <details class="dash-collapsible">
+        <summary>
+            <i data-lucide="calendar" aria-hidden="true"></i>
+            Prazos próximos
+            {% if prazos %}<span class="badge badge-neutral">{{ prazos|length }}</span>{% endif %}
+            <i data-lucide="chevron-down" class="dash-chevron" aria-hidden="true"></i>
+        </summary>
+        <div class="dash-collapsible-body">
+            {% include 'classroom/partials/dashboard_prazos.html' %}
+        </div>
+    </details>
 
 </section>
 {% endblock %}
