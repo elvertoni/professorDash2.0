@@ -2,6 +2,89 @@
 
 {% block title %}Painel do professor · Prof. Toni Coimbra{% endblock %}
 
+{% block extra_head %}
+<style>
+.serie-section { margin-bottom: var(--space-6); }
+
+.serie-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    background: var(--shell-surface-elev);
+    border: 1px solid var(--shell-border-strong);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    user-select: none;
+    transition: background 150ms ease-out, border-color 150ms ease-out;
+}
+.serie-header:hover { background: var(--shell-surface-strong); }
+.serie-header:focus-visible {
+    outline: 2px solid var(--shell-primary);
+    outline-offset: 2px;
+}
+
+.serie-header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+.serie-header-title h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--shell-text);
+}
+
+.serie-header-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    color: var(--shell-text-muted);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.serie-chevron {
+    flex-shrink: 0;
+    transition: transform 200ms ease-out;
+    color: var(--shell-text-soft);
+}
+.serie-chevron.is-collapsed { transform: rotate(-90deg); }
+
+.serie-turmas { padding-top: var(--space-4); }
+
+.urgency-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(251, 191, 36, 0.07);
+    border: 1px solid rgba(251, 191, 36, 0.22);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-6);
+    color: var(--shell-warning);
+}
+.urgency-strip .urgency-msg {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.9375rem;
+}
+
+@media (max-width: 600px) {
+    .serie-header-meta span { display: none; }
+    .serie-header-title h2 { font-size: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .serie-chevron,
+    .serie-header { transition: none; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="classroom-page">
 
@@ -9,86 +92,130 @@
         <div class="page-hero-copy">
             <span class="eyebrow">Professor · Painel</span>
             <h1>Olá, <span class="accent">{{ request.user.get_short_name }}</span></h1>
-            <p class="dek">Acompanhe suas turmas, indicadores e as entregas que aguardam correção.</p>
+            <p class="dek">Suas turmas por série e disciplina. Clique em uma série para expandir ou recolher.</p>
         </div>
         <div class="page-hero-meta">
             {% if total_aguardando and total_aguardando > 0 %}
-            <b class="text-warning">{{ total_aguardando }}</b> a corrigir<br>
+                <b class="text-warning">{{ total_aguardando }}</b> a corrigir<br>
             {% else %}
-            <b class="text-success">Tudo em dia</b><br>
+                <b class="text-success">Tudo em dia</b><br>
             {% endif %}
-            {{ total_turmas }} turmas ativas<br>
-            {{ total_atividades }} atividades
+            {{ total_alunos }} alunos ativos<br>
+            {{ total_turmas }} turma{{ total_turmas|pluralize }} · {{ series_list|length }} série{{ series_list|length|pluralize }}
         </div>
     </div>
 
-    <div class="toolbar">
-        <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_list' %}">
-            <i data-lucide="users" aria-hidden="true"></i> Minhas turmas
+    {% if total_aguardando and total_aguardando > 0 %}
+    <div class="urgency-strip" role="alert">
+        <i data-lucide="clock" aria-hidden="true"></i>
+        <span class="urgency-msg">
+            {{ total_aguardando }} entrega{{ total_aguardando|pluralize }} aguardando correção
+        </span>
+        <a class="btn btn-primary btn-sm" href="#fila-correcao">
+            <i data-lucide="check-check" aria-hidden="true"></i> Ver fila
         </a>
-        <a class="btn btn-outline btn-sm" href="{% url 'catalog:aula_list' %}">
-            <i data-lucide="book-open" aria-hidden="true"></i> Acervo de aulas
-        </a>
-        <span class="spacer"></span>
-        <span class="badge badge-neutral"><i data-lucide="clipboard-list" aria-hidden="true"></i> {{ total_atividades }} atividades publicadas</span>
     </div>
+    {% endif %}
 
-    <div class="kpi-grid">
-        {% if total_aguardando and total_aguardando > 0 %}
-            <div class="kpi">
-                <div class="stripe stripe-warning"></div>
-                <div class="ico yellow"><i data-lucide="clock" aria-hidden="true"></i></div>
-                <div class="val">{{ total_aguardando }}</div>
-                <div class="lab">Aguardando check</div>
-                <div class="delta text-warning">
-                    <i data-lucide="alert-triangle" aria-hidden="true"></i> fila de correção
+    {% if series_list %}
+        {% for serie in series_list %}
+        <div class="serie-section" x-data="{ open: true }">
+            <div class="serie-header"
+                 @click="open = !open"
+                 role="button"
+                 tabindex="0"
+                 @keydown.enter.prevent="open = !open"
+                 @keydown.space.prevent="open = !open"
+                 :aria-expanded="open ? 'true' : 'false'"
+                 aria-controls="serie-{{ serie.nome|slugify }}">
+                <div class="serie-header-title">
+                    <h2>{{ serie.nome }}</h2>
+                    <span class="badge badge-neutral">
+                        {{ serie.turmas|length }} disciplina{{ serie.turmas|length|pluralize }}
+                    </span>
+                </div>
+                <div class="serie-header-meta">
+                    <span>{{ serie.total_alunos }} aluno{{ serie.total_alunos|pluralize }}</span>
+                    <span>{{ serie.total_aulas }} aula{{ serie.total_aulas|pluralize }}</span>
+                    <i data-lucide="chevron-down"
+                       class="serie-chevron"
+                       :class="{ 'is-collapsed': !open }"
+                       aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="kpi">
-                <div class="stripe stripe-cta"></div>
-                <div class="ico green"><i data-lucide="users" aria-hidden="true"></i></div>
-                <div class="val">{{ total_turmas }}</div>
-                <div class="lab">Turmas ativas</div>
-            </div>
-            <div class="kpi">
-                <div class="stripe stripe-violet"></div>
-                <div class="ico violet"><i data-lucide="user-check" aria-hidden="true"></i></div>
-                <div class="val">{{ total_alunos }}</div>
-                <div class="lab">Alunos ativos</div>
-            </div>
-        {% else %}
-            <div class="kpi">
-                <div class="stripe stripe-cta"></div>
-                <div class="ico green"><i data-lucide="users" aria-hidden="true"></i></div>
-                <div class="val">{{ total_turmas }}</div>
-                <div class="lab">Turmas ativas</div>
-            </div>
-            <div class="kpi">
-                <div class="stripe stripe-violet"></div>
-                <div class="ico violet"><i data-lucide="user-check" aria-hidden="true"></i></div>
-                <div class="val">{{ total_alunos }}</div>
-                <div class="lab">Alunos ativos</div>
-            </div>
-            <div class="kpi">
-                <div class="stripe stripe-cta"></div>
-                <div class="ico green"><i data-lucide="check-circle" aria-hidden="true"></i></div>
-                <div class="val">0</div>
-                <div class="lab">Aguardando check</div>
-                <div class="delta text-success">
-                    <i data-lucide="check-circle" aria-hidden="true"></i> tudo corrigido
+
+            <div class="serie-turmas"
+                 id="serie-{{ serie.nome|slugify }}"
+                 x-show="open"
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0">
+                <div class="feature-grid catalog-grid">
+                    {% for turma in serie.turmas %}
+                    <article class="card">
+                        <div class="stripe {% if turma.stats.a_corrigir %}stripe-warning{% else %}stripe-cta{% endif %}"></div>
+                        <div class="card-head">
+                            <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                            <span class="badge badge-neutral">
+                                <i data-lucide="users" aria-hidden="true"></i>
+                                {{ turma.stats.alunos|default:0 }}
+                            </span>
+                        </div>
+                        <h3>{{ turma.nome }}</h3>
+                        {% if turma.stats.a_corrigir %}
+                            <p class="desc text-warning">
+                                <i data-lucide="clock" aria-hidden="true"></i>
+                                {{ turma.stats.a_corrigir }} entrega{{ turma.stats.a_corrigir|pluralize }} a corrigir
+                            </p>
+                        {% else %}
+                            <p class="desc text-success">
+                                <i data-lucide="check-circle" aria-hidden="true"></i>
+                                Correções em dia
+                            </p>
+                        {% endif %}
+                        <div class="metric">
+                            <div class="metric-row">
+                                <span>Conclusão de aulas</span>
+                                <b>{{ turma.stats.conclusao_pct|default:0 }}%</b>
+                            </div>
+                            <div class="progress">
+                                <i style="width: {{ turma.stats.conclusao_pct|default:0 }}%"></i>
+                            </div>
+                        </div>
+                        <div class="card-foot">
+                            <a href="{% url 'classroom:turma_detail' turma.pk %}">
+                                Gerenciar turma <i data-lucide="arrow-right" aria-hidden="true"></i>
+                            </a>
+                            <span class="badge badge-neutral">{{ turma.stats.aulas|default:0 }} aulas</span>
+                        </div>
+                    </article>
+                    {% endfor %}
                 </div>
             </div>
-        {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty">
+        <i data-lucide="inbox" aria-hidden="true"></i>
+        <h2>Nenhuma turma ativa</h2>
+        <p>Crie uma turma para começar a organizar suas aulas por série e disciplina.</p>
+        <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
+            <i data-lucide="plus-circle" aria-hidden="true"></i>
+            Criar primeira turma
+        </a>
     </div>
+    {% endif %}
 
     {% if total_aguardando and total_aguardando > 0 %}
+    <div id="fila-correcao">
         {% include 'classroom/partials/dashboard_fila.html' %}
-        {% include 'classroom/partials/dashboard_desempenho.html' %}
-        {% include 'classroom/partials/dashboard_prazos.html' %}
-    {% else %}
-        {% include 'classroom/partials/dashboard_desempenho.html' %}
-        {% include 'classroom/partials/dashboard_prazos.html' %}
-        {% include 'classroom/partials/dashboard_fila.html' %}
+    </div>
     {% endif %}
+
+    {% include 'classroom/partials/dashboard_prazos.html' %}
+
 </section>
 {% endblock %}

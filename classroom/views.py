@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import timedelta
 
 from django.contrib import messages
@@ -101,8 +102,23 @@ class ProfessorDashboardView(ProfessorRequiredMixin, View):
         for turma in turmas:
             turma.stats = turma_stats.get(turma.pk, {})
 
+        turmas_by_serie = defaultdict(list)
+        for turma in turmas:
+            turmas_by_serie[turma.serie or 'Sem série'].append(turma)
+
+        series_list = [
+            {
+                'nome': serie,
+                'turmas': serie_turmas,
+                'total_alunos': sum(t.stats.get('alunos', 0) for t in serie_turmas),
+                'total_aulas': sum(t.stats.get('aulas', 0) for t in serie_turmas),
+            }
+            for serie, serie_turmas in sorted(turmas_by_serie.items())
+        ]
+
         context = {
             'turmas': turmas,
+            'series_list': series_list,
             'aguardando': aguardando,
             'prazos': prazos,
             'total_turmas': len(turmas),
