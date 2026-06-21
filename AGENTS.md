@@ -56,7 +56,7 @@ Decisão do projeto (PRD proíbe). **NÃO** tente rodar `pytest`, `manage.py tes
 - `catalog` — `Disciplina`, `Trilha`, `Aula` (`conteudo_html`/`conteudo_md`); `import_acervo`, `parser.py`.
 - `classroom` — `Turma`, `Matricula`, `AulaPublicada` (`disponivel_em`), `ProgressoAula`; `services.py`, `reports.py`.
 - `materials` — `Material` (FileField protegido ou link).
-- `activities` — `Atividade`, `Entrega`, `EntregaArquivo`; "check" do professor = `nota`+`feedback`+`checked` na `Entrega`.
+- `activities` — controle do professor (estilo Notion), **não entrega**: `Atividade` (item) + `AtividadeCheck` (`feito`+`observacao` por aluno). Entregas oficiais ficam no Google Classroom; `Entrega`/`EntregaArquivo` removidos.
 - `notifications` — `Notificacao` (sino no header); `signals.py`, `context_processors.notification_summary` registrado em `settings.TEMPLATES`.
 
 URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` `/notificacoes/` `/health/`.

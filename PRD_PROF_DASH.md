@@ -551,6 +551,9 @@ Decisões:
 
 Componentes novos documentados no `DESIGN.md`: `account-menu`, `serie-section`, `dash-collapsible`, `dash-tabs`, `aluno-progress`, `lesson-actionbar`.
 
+- **D.7 — Aulas por turma, sem catálogo:** o `/catalogo/` saiu do nav (o model `Aula` segue como depósito interno do import). Na turma, `TurmaSyncAulasView` ("Sincronizar aulas") importa do head a disciplina da turma e publica tudo como `AulaPublicada` (idempotente, disponível agora). Import por disciplina também disponível.
+- **D.8 — Atividades = controle do professor (não entrega):** `Atividade` virou item simples (`titulo`/`descricao`/`data`) + novo `AtividadeCheck` (`feito`+`observacao` por aluno, grade bulk-save). **Removidos `Entrega`/`EntregaArquivo`** e todo o fluxo de submissão/correção/nota — entregas oficiais ficam no **Google Classroom** (SEED-PR). Aluno só vê aulas + progresso. Migration `activities/0005` (destrutiva, aplicada com 0 entregas reais). Relatórios/boletim passaram de nota para conclusão de aulas + contagem de checks.
+
 ---
 
 ## 10. Fora de Escopo (fases futuras)

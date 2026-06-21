@@ -72,15 +72,16 @@ Portal educacional **single-tenant** (Prof. Toni / SEED-PR). É a camada de **en
 | `catalog` | Taxonomia do acervo (espelha `manifesto.json`) | `Disciplina`, `Trilha`, `Aula` (canônica importada: `conteudo_html`/`conteudo_md`) |
 | `classroom` | Turmas e publicação | `Turma`, `Matricula`, `AulaPublicada` (Aula→Turma com `disponivel_em`), `ProgressoAula` |
 | `materials` | Materiais extras (upload manual) | `Material` (FileField protegido ou link) |
-| `activities` | Atividades e correção | `Atividade`, `Entrega`, `EntregaArquivo`; o "check" do professor = `nota`+`feedback`+`checked` na `Entrega` |
-| `notifications` | Avisos in-app (sino no header) — planejado na Sprint 9 | `Notificacao` |
+| `activities` | Controle de presença/tarefas do professor (estilo Notion) | `Atividade` (item: `titulo`/`descricao`/`data`), `AtividadeCheck` (`feito`+`observacao` por aluno). **Sem entrega/nota/arquivo** — entregas oficiais ficam no Google Classroom |
+| `notifications` | Avisos in-app (sino no header) | `Notificacao` (apenas eventos de aula publicada; entrega/correção foram removidos) |
 
 **Fluxos centrais:**
 
-- **Acervo → aluno**: `import_acervo` lê `manifesto.json` + `aulas/{disciplina}/{trilha}/{NN-slug}/canonica.md` (frontmatter YAML + corpo Markdown com blocos custom `:::conceito`/`:::atencao`/`:::dica` e fences de diagrama) → parser custom converte para `conteudo_html` fiel ao design system → vira `Aula` no catálogo. Professor publica via `AulaPublicada` (define `disponivel_em` e ordem na turma) → aluno vê respeitando data de liberação.
-- **Atividade → check**: professor cria `Atividade` na turma → aluno faz `Entrega` (texto + `EntregaArquivo`, respeita prazo/atraso) → professor dá "check" (nota + feedback). Disparo de `Notificacao` pertence à Sprint 9.
-- **Escopo de visibilidade** (em vez de tenant): aluno só enxerga turmas/aulas/atividades das suas `Matricula`. Toda rota privada exige auth + papel.
-- **Media protegida**: materiais e entregas NUNCA expostos publicamente — servidos via view com checagem de permissão (aluno da turma ou professor).
+- **Acervo → turma → aluno**: `import_acervo` lê `manifesto.json` + `aulas/{disciplina}/{trilha}/{NN-slug}/canonica.md` → parser custom → `Aula` (depósito interno; **catálogo fora do nav**). Na turma, o botão **Sincronizar aulas** (`TurmaSyncAulasView`) importa a disciplina da turma do head e publica todas como `AulaPublicada` (disponível agora, idempotente). Aluno vê respeitando `disponivel_em`.
+- **Atividade → check**: professor cria `Atividade` (item de controle) na turma → grade alunos×checkbox (`AtividadeChecksView`, bulk-save) marca `AtividadeCheck.feito` + observação. Não há entrega do aluno no portal.
+- **Tema por papel**: aluno = `light`, professor/admin = `dark` (server-rendered no `base.html`; toggle localStorage sobrescreve).
+- **Escopo de visibilidade** (em vez de tenant): aluno só enxerga turmas/aulas das suas `Matricula`; atividades são tela do professor. Toda rota privada exige auth + papel.
+- **Media protegida**: materiais NUNCA expostos publicamente — servidos via view com checagem de permissão (aluno da turma ou professor).
 
 ## Convenções de código
 
