@@ -10,7 +10,7 @@
 - Conflito → ordem: **regras invioláveis > design system > PRD > convenção Django**.
 
 ## O produto
-Portal educacional **single-tenant** (SEED-PR, alunos 14–18). Professor publica aulas por turma, cria atividades, corrige entregas (check+nota+feedback). Aluno acessa aula, estuda, entrega, vê progresso. Consome o acervo PROF-TONI, nunca o reescreve.
+Portal educacional **single-tenant** (SEED-PR, alunos 14–18). Professor publica aulas por turma, cria atividades de acompanhamento e marca checks por aluno. Entregas oficiais ficam no Google Classroom. Aluno acessa aula, estuda e vê progresso. Consome o acervo PROF-TONI, nunca o reescreve.
 
 ## Comandos (Windows / PowerShell)
 Ambiente: `.venv` na raiz, Python >3.13, Django 6.0. Use **`uv`** para instalar — a `.venv` não tem `pip`:
@@ -46,7 +46,7 @@ Decisão do projeto (PRD proíbe). **NÃO** tente rodar `pytest`, `manage.py tes
 6. Código em INGLÊS. UI 100% em PORTUGUÊS BRASILEIRO. Timezone `America/Sao_Paulo`.
 7. Aspas simples. PEP8. Class Based Views e recursos nativos do Django sempre que possível.
 8. Signals em `signals.py` da app correspondente.
-9. **Media protegida**: `PROTECTED_MEDIA_ROOT` (raiz/`protected_media`) é separada de `MEDIA_ROOT` e **não tem URL pública**. Materiais/entregas servidos só por view com checagem de permissão (aluno da turma ou professor). Ver `base/storage.py`.
+9. **Media protegida**: `PROTECTED_MEDIA_ROOT` (raiz/`protected_media`) é separada de `MEDIA_ROOT` e **não tem URL pública**. Materiais servidos só por view com checagem de permissão (aluno da turma ou professor). Ver `base/storage.py`.
 10. **SINGLE-TENANT**: sem campos/middleware de tenant. Escopo de visibilidade por `Matricula`/turma.
 
 ## Apps (todos na raiz, mesmo nível de `manage.py`)

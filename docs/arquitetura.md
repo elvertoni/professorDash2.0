@@ -9,9 +9,9 @@ flowchart LR
     catalog --> classroom[Classroom: AulaPublicada]
     classroom --> student[Aluno]
     classroom --> activities[Activities]
-    materials[Materials] --> activities
-    student --> submissions[Entregas]
-    submissions --> correction[Correção do professor]
+    materials[Materials] --> classroom
+    activities --> checks[AtividadeCheck]
+    student --> progress[ProgressoAula]
 ```
 
 ## Apps
@@ -22,12 +22,12 @@ flowchart LR
 | `catalog` | Taxonomia e aulas canônicas importadas do acervo. |
 | `classroom` | Turmas, matrículas, aulas publicadas e progresso. |
 | `materials` | Materiais extras com download protegido. |
-| `activities` | Atividades, entregas, anexos e correção. |
+| `activities` | Atividades de acompanhamento e checks por aluno. |
 | `base` | Model base, storage protegido e comandos transversais. |
 
 ## Regras de segurança
 
-Arquivos de materiais e entregas usam storage protegido fora de `MEDIA_ROOT`. O acesso passa por views com checagem de permissão: professor dono da turma, aluno matriculado ou admin.
+Arquivos de materiais usam storage protegido fora de `MEDIA_ROOT`. O acesso passa por views com checagem de permissão: professor dono da turma, aluno matriculado ou admin.
 
 ## Modelo resumido
 
@@ -39,8 +39,7 @@ erDiagram
     Turma ||--o{ AulaPublicada : publica
     AulaPublicada ||--o{ ProgressoAula : acompanha
     Turma ||--o{ Atividade : tem
-    Atividade ||--o{ Entrega : recebe
-    Entrega ||--o{ EntregaArquivo : anexa
+    Atividade ||--o{ AtividadeCheck : acompanha
+    User ||--o{ AtividadeCheck : aluno
     Turma ||--o{ Material : tem
 ```
-

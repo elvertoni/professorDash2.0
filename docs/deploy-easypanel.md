@@ -95,9 +95,9 @@ python manage.py import_acervo --path /tmp/acervo --only-aprovada
 
 - [ ] `https://prof.tonicoimbra.com/health/` → 200.
 - [ ] Login do admin (`/conta/`) com o superuser.
-- [ ] Jornada professor: criar turma, publicar aula, criar atividade, dar check.
-- [ ] Jornada aluno: matricular, ver aula liberada, entregar, ver feedback.
-- [ ] Upload de material e entrega: download protegido respeita permissão.
+- [ ] Jornada professor: criar turma, sincronizar/publicar aula, criar atividade, dar check por aluno.
+- [ ] Jornada aluno: matricular, ver aula liberada, marcar progresso.
+- [ ] Upload de material: download protegido respeita permissão.
 
 ## 9. Redeploy
 

@@ -8,18 +8,18 @@ product
 
 Single-tenant educational portal for **Prof. Toni Coimbra / SEED-PR**. Two primary roles:
 
-- **Professor**: works in batches — corrects deliveries, manages classes/enrollment, publishes lessons, sends materials, reads reports. Desktop-first, dense screens, needs clear hierarchy and minimal navigation between repetitive tasks.
-- **Aluno (student)**: mobile-first. Opens the portal on a phone to find the next task, deadlines, lesson progress, submit activities, read feedback/grades. Needs scannable cards, visible status, unambiguous CTA.
+- **Professor**: works in batches — manages classes/enrollment, publishes lessons, sends materials, marks activity checks, reads reports. Desktop-first, dense screens, needs clear hierarchy and minimal navigation between repetitive tasks.
+- **Aluno (student)**: mobile-first. Opens the portal on a phone to find available lessons, lesson progress, materials and the next study step. Official submissions stay in Google Classroom. Needs scannable cards, visible status, unambiguous CTA.
 
 Admin/superuser is a thin third role (Admin + Status, secondary).
 
 ## Product Purpose
 
-Student-delivery layer of a knowledge pipeline: `canonica.md` (PROF-TONI acervo) → import → catalog → publication per class → student. The portal **consumes** the acervo, never rewrites it. Success = professor spends less time navigating and more time teaching/correcting; student always knows the next step on a phone.
+Student-delivery layer of a knowledge pipeline: `canonica.md` (PROF-TONI acervo) → import → catalog → publication per class → student. The portal **consumes** the acervo, never rewrites it. Success = professor spends less time navigating and more time teaching; student always knows the next step on a phone.
 
 ## Brand Personality
 
-"The Digital Atelier" (DS v2). Three words: **crafted, focused, editorial**. Obsidian dark surfaces with tonal layering, subtle glass, Geist typography, Lucide icons, emerald→cyan CTA gradient. Voice: operational and precise — buttons say exactly what happens ("Enviar atividade", "Ver feedback", "Publicar aula", "Salvar e próxima"). UI is 100% pt-BR.
+"The Digital Atelier" (DS v2). Three words: **crafted, focused, editorial**. Obsidian dark surfaces with tonal layering, subtle glass, Geist typography, Lucide icons, emerald→cyan CTA gradient. Voice: operational and precise — buttons say exactly what happens ("Sincronizar aulas", "Marcar checks", "Publicar aula", "Salvar"). UI is 100% pt-BR.
 
 ## Anti-references
 
@@ -32,8 +32,8 @@ Student-delivery layer of a knowledge pipeline: `canonica.md` (PROF-TONI acervo)
 
 1. **Atelier digital, não LMS genérico** — keep obsidian, tonal layering, subtle glass, Geist, Lucide, CTA gradient.
 2. **Uma fonte de componentes** — components used 2+ times must live in the design system before broad use.
-3. **Professor trabalha em lote** — professor screens prioritize correction, class management, publication, reports with clear hierarchy.
-4. **Aluno usa celular** — student screens prioritize cards, visible status, clear deadline, unambiguous CTA.
+3. **Professor trabalha em lote** — professor screens prioritize class management, publication, activity checks, reports with clear hierarchy.
+4. **Aluno usa celular** — student screens prioritize cards, visible progress, available lessons, unambiguous CTA.
 5. **Cor tem função** — green = action/progress, yellow = deadline/attention, red = risk, violet/cyan only as support.
 6. **Estados são parte do componente** — every control needs default, hover, active, focus-visible, disabled, loading, empty/error.
 

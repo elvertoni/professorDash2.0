@@ -6,7 +6,7 @@
 
 ## 1. Visão Geral
 
-**Prof. Toni Coimbra** é um portal educacional moderno onde o conhecimento construído no acervo PROF-TONI (aulas canônicas) chega ao aluno. O professor publica aulas por turma, cria atividades e corrige entregas; o aluno acessa aulas, faz atividades, entrega materiais e acompanha seu progresso.
+**Prof. Toni Coimbra** é um portal educacional moderno onde o conhecimento construído no acervo PROF-TONI (aulas canônicas) chega ao aluno. O professor publica aulas por turma, cria atividades de acompanhamento e marca checks por aluno; o aluno acessa aulas, estuda e acompanha seu progresso. Entregas oficiais ficam no Google Classroom da SEED-PR.
 
 Inspiração: melhores portais educacionais do mundo (Google Classroom, Khan Academy, Coursera, Canvas, Notion for Education) — impactante, moderno, fluido, focado na jornada do aluno.
 
@@ -24,8 +24,8 @@ A `canonica.md` é a fonte de verdade. O Prof. Toni Coimbra **consome** o acervo
 
 | Persona              | Quem é                                                   | Faz                                                                                                |
 | ----------------------| ----------------------------------------------------------| ----------------------------------------------------------------------------------------------------|
-| **Professor** (Toni) | Dono do conteúdo, SEED-PR                                | Cria turmas, matricula alunos, publica aulas, cria atividades, dá check/nota/feedback nas entregas |
-| **Aluno**            | 14–18 anos, Curso Técnico em Desenvolvimento de Sistemas | Acessa aulas da sua turma, estuda, faz atividades, entrega materiais, vê notas e progresso         |
+| **Professor** (Toni) | Dono do conteúdo, SEED-PR                                | Cria turmas, matricula alunos, publica aulas, cria atividades e marca checks por aluno              |
+| **Aluno**            | 14–18 anos, Curso Técnico em Desenvolvimento de Sistemas | Acessa aulas da sua turma, estuda, consulta materiais e vê progresso                                |
 | **Admin**            | Toni (mesmo)                                             | Gestão total via Django Admin                                                                      |
 
 ### 1.3 Decisões de produto (definidas)
@@ -59,9 +59,9 @@ A `canonica.md` é a fonte de verdade. O Prof. Toni Coimbra **consome** o acervo
 - Signals (se houver) em `signals.py` da app correspondente.
 - **Reportlab + PyPDF** para relatórios (boletim, relatório de turma) em PDF.
 - Pasta `docs/` com documentação sempre atualizada, servida via **MkDocs** (com suporte a mermaid).
-- Django command de **carga inicial de dados fakes** (seed): turmas, alunos, aulas importadas, atividades, entregas em datas variadas — para demonstração.
+- Django command de **carga inicial de dados fakes** (seed): turmas, alunos, aulas importadas, materiais, atividades e checks — para demonstração.
 - **Design system** referenciado em `design_system/design-system.html`. Todo design (cores, componentes, tipografia) respeita rigorosamente o design system.
-- Proteção de media: arquivos de materiais/entregas servidos **somente** a usuários com permissão (aluno da turma ou professor). Nunca expor media publicamente.
+- Proteção de media: arquivos de materiais servidos **somente** a usuários com permissão (aluno da turma ou professor). Nunca expor media publicamente.
 
 ### 2.1 Stack resumido
 
@@ -112,14 +112,13 @@ Apps Django e principais models:
 ### 3.5 App `materials` (materiais extras)
 - `Material`: `turma` (FK, opcional), `aula_publicada` (FK, opcional), `titulo`, `descricao`, `arquivo` (FileField protegido) ou `link_externo`, `tipo` (pdf | slide | link | video | outro), `enviado_por` (FK professor).
 
-### 3.6 App `activities` (atividades e entregas)
-- `Atividade`: `turma` (FK), `aula_publicada` (FK, opcional), `titulo`, `enunciado` (markdown→html), `anexos` (M2M Material), `prazo` (datetime), `pontuacao_max`, `permite_entrega_atrasada`, `publicada`.
-- `Entrega` (submission): `atividade` (FK), `aluno` (FK), `texto_resposta`, `data_entrega`, `status` (`pendente` | `entregue` | `atrasada` | `corrigida`).
-- `EntregaArquivo`: `entrega` (FK), `arquivo` (FileField protegido).
-- **Correção (o "check" do professor):** na `Entrega` → `nota`, `feedback`, `corrigido_por`, `corrigido_em`, `checked` (bool). Professor dá check/nota/feedback.
+### 3.6 App `activities` (controle de atividades)
+- `Atividade`: `turma` (FK), `titulo`, `descricao`, `data`.
+- `AtividadeCheck`: `atividade` (FK), `aluno` (FK), `feito`, `feito_em`, `observacao`.
+- **Entregas oficiais:** ficam no Google Classroom da SEED-PR. O portal não armazena resposta, nota, feedback ou arquivo de entrega.
 
 ### 3.7 App `notifications`
-- `Notificacao`: `usuario` (FK), `titulo`, `mensagem`, `link`, `lida` (bool), `tipo`. In-app (sino no header). Disparada em: nova aula publicada, nova atividade, prazo próximo, entrega corrigida.
+- `Notificacao`: `usuario` (FK), `titulo`, `mensagem`, `link`, `lida` (bool), `tipo`. In-app (sino no header). Disparada em: nova aula publicada e avisos de atividade.
 
 ### 3.8 Diagrama de relacionamento (resumo)
 
@@ -134,9 +133,8 @@ erDiagram
     Trilha ||--o{ Aula : agrupa
     AulaPublicada ||--o{ ProgressoAula : acompanha
     Turma ||--o{ Atividade : tem
-    Atividade ||--o{ Entrega : recebe
-    User ||--o{ Entrega : "aluno"
-    Entrega ||--o{ EntregaArquivo : anexa
+    Atividade ||--o{ AtividadeCheck : acompanha
+    User ||--o{ AtividadeCheck : "aluno"
     Turma ||--o{ Material : tem
 ```
 
@@ -167,23 +165,21 @@ erDiagram
 - [ ] Despublicar / reordenar aulas da turma.
 
 ### 4.5 Experiência do aluno
-- [ ] **Dashboard do aluno**: minhas turmas, próximas aulas liberadas, atividades pendentes e prazos, últimas notas.
+- [x] **Dashboard do aluno**: minhas turmas, próximas aulas liberadas e progresso.
 - [ ] **Visualizar aula**: render rico da `canonica.md` (blocos `:::conceito`, `:::atencao`, `:::dica`, diagramas) fiel ao design system. Navegação anterior/próxima dentro da trilha da turma.
 - [ ] **Marcar aula como concluída** (progresso).
 - [ ] **Materiais da aula/turma**: baixar arquivos protegidos, acessar links.
-- [ ] **Fazer e entregar atividade**: texto + upload de arquivos. Respeita prazo (marca atrasada se permitido).
-- [ ] **Ver notas e feedback** das entregas corrigidas.
+- [x] **Atividades**: professor acompanha checks por aluno; entregas oficiais ficam no Google Classroom.
 - [x] **Notificações** in-app.
 
-### 4.6 Correção (professor)
-- [ ] Listar entregas por atividade/turma, com status (pendente/entregue/atrasada/corrigida).
-- [ ] Abrir entrega: ver texto + baixar arquivos do aluno.
-- [x] **Dar check**: lançar nota, escrever feedback, marcar como corrigida. Dispara notificação ao aluno.
-- [ ] Visão de "atividades aguardando correção" no dashboard do professor.
+### 4.6 Checks (professor)
+- [x] Listar atividades por turma.
+- [x] Abrir grade de alunos por atividade.
+- [x] **Dar check**: marcar feito/não feito e observação por aluno.
 
 ### 4.7 Dashboard do professor
-- [x] Visão geral: nº de turmas, alunos, atividades, entregas pendentes de correção.
-- [x] Gráficos: entregas por turma, taxa de conclusão de aulas, notas médias, prazos próximos.
+- [x] Visão geral: nº de turmas, alunos, atividades e progresso.
+- [x] Gráficos: taxa de conclusão de aulas e checks por turma.
 - [x] Acesso rápido a turmas e correções.
 
 ### 4.8 Materiais
@@ -191,18 +187,18 @@ erDiagram
 - [ ] Download protegido por permissão (somente turma/professor).
 
 ### 4.9 Relatórios
-- [x] Boletim do aluno (PDF) — notas por atividade/turma.
-- [x] Relatório de turma (PDF/CSV) — matrículas, progresso, médias.
+- [x] Boletim do aluno (PDF) — progresso por turma.
+- [x] Relatório de turma (PDF/CSV) — matrículas, progresso e checks.
 
 ### 4.10 Admin Django
-- [ ] Gestão de todas as entidades com filtros (turmas, alunos, aulas, atividades, entregas, materiais, notificações).
+- [ ] Gestão de todas as entidades com filtros (turmas, alunos, aulas, atividades, checks, materiais, notificações).
 
 ---
 
 ## 5. Requisitos Não Funcionais
 
 - [ ] **Responsivo** em todos os tamanhos de tela (mobile-first — alunos usam celular).
-- [ ] **Seguro**: rotas fechadas por autenticação e papel; aluno só vê suas turmas/aulas/atividades; media protegida (entregas e materiais nunca expostos publicamente).
+- [ ] **Seguro**: rotas fechadas por autenticação e papel; aluno só vê suas turmas/aulas; media protegida (materiais nunca expostos publicamente).
 - [ ] **UI/UX excelente** fiel ao design system; bom contraste; jornadas fluidas. Inspiração nos melhores portais educacionais.
 - [ ] **Performance**: filtros e telas rápidos; paginação; `select_related`/`prefetch_related`; nada bloqueante.
 - [ ] **Acessibilidade** básica (semântica, contraste, navegação por teclado).
@@ -248,9 +244,9 @@ python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] 
 
 - [ ] Seguir rigorosamente `design_system/design-system.html` (cores, tipografia, componentes).
 - [ ] Tema claro/escuro (o acervo já produz HTML com dark/light — manter coerência).
-- [ ] Componentes-chave: card de turma, card de aula (com progresso), card de atividade (com prazo/status), visualizador de aula, área de entrega, sino de notificações, tabela de correção.
+- [ ] Componentes-chave: card de turma, card de aula (com progresso), card de atividade, visualizador de aula, sino de notificações, grade de checks.
 - [ ] Referências de excelência: Google Classroom (simplicidade), Khan Academy (progresso/gamificação leve), Coursera/Canvas (estrutura de curso), Notion (leitura limpa de conteúdo).
-- [ ] Microinterações e feedback visual em ações (entrega enviada, atividade corrigida).
+- [ ] Microinterações e feedback visual em ações (aula concluída, checks salvos).
 
 ---
 
@@ -574,5 +570,5 @@ Componentes novos documentados no `DESIGN.md`: `account-menu`, `serie-section`, 
 | **Acervo / Warehouse** | Repositório PROF-TONI com as `canonica.md` (fonte de verdade) |
 | **Canônica** | Aula impecável em Markdown, fonte única de verdade |
 | **Aula publicada** | Aula do catálogo liberada para uma turma específica |
-| **Check** | Ato do professor de corrigir uma entrega (nota + feedback) |
+| **Check** | Marcação do professor indicando se um aluno concluiu uma atividade de acompanhamento |
 | **Single-tenant** | Uma instalação, um professor/instituição (sem isolamento por escola) |
