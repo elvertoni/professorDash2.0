@@ -1,7 +1,10 @@
+import tempfile
 from collections import defaultdict
 from datetime import timedelta
+from io import StringIO
 
 from django.contrib import messages
+from django.core.management import call_command
 from django.db.models import (
     Avg,
     Case,
@@ -24,7 +27,9 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
 from accounts.models import User
+from catalog.models import Aula
 from catalog.parser import sanitize_lesson_html
+from catalog.services import AcervoDownloadError, download_acervo
 
 from .forms import (
     AulaPublicadaEditForm,
@@ -490,6 +495,61 @@ class AulaPublicadaManageView(TurmaQuerysetMixin, View):
             self.template_name,
             {'turma': turma, 'form': form, 'publicadas': publicadas},
         )
+
+
+class TurmaSyncAulasView(TurmaQuerysetMixin, View):
+    '''Sincroniza as aulas da disciplina da turma com o head e publica todas.'''
+
+    def post(self, request, turma_pk):
+        turma = get_object_or_404(self.get_queryset(), pk=turma_pk)
+        disciplina = turma.disciplina
+
+        try:
+            with tempfile.TemporaryDirectory(prefix='acervo-') as tmp_dir:
+                root = download_acervo(tmp_dir)
+                out = StringIO()
+                call_command(
+                    'import_acervo',
+                    path=str(root),
+                    only_aprovada=True,
+                    disciplina=disciplina.slug,
+                    stdout=out,
+                    stderr=out,
+                )
+        except AcervoDownloadError as exc:
+            messages.error(request, 'Falha ao sincronizar do GitHub: {0}'.format(exc))
+            return redirect('classroom:turma_aulas', turma_pk=turma.pk)
+        except Exception as exc:  # noqa: BLE001 — surfacing import failures to the UI
+            messages.error(
+                request, 'Erro inesperado na sincronização: {0}'.format(exc)
+            )
+            return redirect('classroom:turma_aulas', turma_pk=turma.pk)
+
+        now = timezone.now()
+        aulas = Aula.objects.filter(
+            disciplina=disciplina, status=Aula.Status.APROVADA
+        )
+        novas = 0
+        for aula in aulas:
+            _, created = AulaPublicada.objects.get_or_create(
+                turma=turma,
+                aula=aula,
+                defaults={
+                    'disponivel_em': now,
+                    'ordem_na_turma': aula.ordem,
+                    'publicada': True,
+                },
+            )
+            if created:
+                novas += 1
+
+        messages.success(
+            request,
+            'Aulas sincronizadas: {0} disponíveis na turma ({1} novas).'.format(
+                aulas.count(), novas
+            ),
+        )
+        return redirect('classroom:turma_aulas', turma_pk=turma.pk)
 
 
 class AulaPublicadaActionMixin(TurmaQuerysetMixin):

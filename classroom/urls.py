@@ -24,6 +24,7 @@ from .views import (
     TurmaListView,
     TurmaRelatorioCsvView,
     TurmaRelatorioPdfView,
+    TurmaSyncAulasView,
     TurmaUpdateView,
 )
 
@@ -78,6 +79,11 @@ urlpatterns = [
         '<int:turma_pk>/aulas/',
         AulaPublicadaManageView.as_view(),
         name='turma_aulas',
+    ),
+    path(
+        '<int:turma_pk>/aulas/sincronizar/',
+        TurmaSyncAulasView.as_view(),
+        name='turma_aulas_sync',
     ),
     path(
         '<int:turma_pk>/aulas/<int:pk>/editar/',

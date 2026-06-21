@@ -47,9 +47,17 @@
                 <p class="desc">Gerenciar aulas, atividades e arquivos.</p>
             </div>
             <div class="stack">
-                <a class="btn btn-primary" href="{% url 'classroom:turma_aulas' turma.pk %}">
-                    <i data-lucide="send" aria-hidden="true"></i>
-                    Publicar aulas
+                <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
+                      onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit" style="width:100%;">
+                        <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                        Sincronizar aulas
+                    </button>
+                </form>
+                <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_aulas' turma.pk %}">
+                    <i data-lucide="list" aria-hidden="true"></i>
+                    Gerenciar aulas
                 </a>
                 <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_list' turma.pk %}">
                     <i data-lucide="clipboard-list" aria-hidden="true"></i>
