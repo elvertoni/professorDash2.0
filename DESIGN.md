@@ -42,7 +42,9 @@ Dark-first (`color-scheme: dark`), with a fully-supported light theme (`[data-th
 
 Buttons `.btn` (primary/secondary/outline/ghost/danger + disabled), `.icon-btn`; `.card`, `.kpi`, `.panel`; badges `.badge` + `.tag-disc`; forms `.field/.input/.select/.textarea/.check/.switch/.dropzone`; nav `.nav-item`, `.lesson-nav`; tables `.tbl` (+`.tbl-wrap`); states `.empty/.empty-state`, `.toast`, `.modal`, `.tooltip`, `.skel`; `.avatar`, `.progress`, `.eyebrow`, `.stripe-*`, `.text-*` utilities; lesson reader `.atelier/.atelier-rail/.atelier-body/.prose/.callout (conceito|atencao|dica)/.bento/.exercise/.present`.
 
-App-specific documented wrappers: site chrome (`site-header/site-nav/site-footer/mobile-nav`), page wrappers (`classroom-page/catalog-page/lesson-page/narrow-page`), auth (`auth-*`), account (`account-*`), notifications (`notification-*`). `*-atelier`/`kpi-card` duplicates were unified into core components (decision D.2) — do not reintroduce them.
+App-specific documented wrappers: site chrome (`site-header/site-nav/site-footer/mobile-nav`), header dropdowns (`notification-menu`/`notification-panel` and `account-menu`/`account-panel`/`account-link` — same `details/summary` + glass-panel pattern, avatar-triggered), page wrappers (`classroom-page/catalog-page/lesson-page/narrow-page`), auth (`auth-*`), account page (`account-shell/account-sidebar/account-nav/account-content/account-grid`), notifications (`notification-*`). `*-atelier`/`kpi-card` duplicates were unified into core components (decision D.2) — do not reintroduce them.
+
+**Theme by role** (decision D.5): default `data-theme` is server-rendered per role in `base.html` — aluno = `light`, professor/admin/anônimo = `dark`. The `localStorage` toggle still overrides as a personal preference.
 
 ## Motion
 

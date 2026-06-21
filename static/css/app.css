@@ -389,6 +389,123 @@ button {
     width: 100%;
 }
 
+/* Account menu — mesmo padrão details/summary do notification-menu */
+.account-menu {
+    position: relative;
+}
+
+.account-menu summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.account-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.account-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--shell-border-strong);
+    padding: 3px;
+    transition: border-color .16s;
+}
+
+.account-menu[open] .account-trigger,
+.account-trigger:hover {
+    border-color: var(--shell-primary);
+}
+
+.account-trigger:focus-visible {
+    outline: 2px solid var(--shell-primary);
+    outline-offset: 2px;
+}
+
+.account-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+    display: block;
+}
+
+.account-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 35;
+    display: grid;
+    width: min(280px, calc(100vw - 32px));
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid var(--shell-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--shell-surface-strong);
+    box-shadow: var(--shell-shadow-soft);
+}
+
+.account-panel-head {
+    display: grid;
+    gap: 2px;
+    padding: 4px 8px 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--shell-border);
+}
+
+.account-panel-head strong {
+    color: var(--shell-text);
+    font-size: 14px;
+}
+
+.account-panel-email {
+    color: var(--shell-text-soft);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.account-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--shell-text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    transition: background-color .16s, color .16s;
+}
+
+.account-link i {
+    width: 16px;
+    height: 16px;
+}
+
+.account-link:hover {
+    color: var(--shell-text);
+    background: var(--shell-surface-high);
+}
+
+.account-link:focus-visible {
+    color: var(--shell-text);
+    background: var(--shell-surface-high);
+    outline: 2px solid var(--shell-primary);
+    outline-offset: -2px;
+}
+
+.account-link.active {
+    color: var(--shell-primary);
+    background: var(--shell-surface-high);
+}
+
+.account-logout-btn {
+    width: 100%;
+    margin-top: 6px;
+}
+
 .inline-form {
     margin: 0;
 }

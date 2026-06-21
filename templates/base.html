@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="{% if user.is_authenticated and user.is_aluno %}light{% else %}dark{% endif %}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,28 +34,16 @@
                     <a href="{% url 'home' %}#jornada">Jornada</a>
                     <a href="{% url 'home' %}#recursos">Recursos</a>
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
+                {% elif user.is_aluno %}
+                    <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
+                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
+                    {% if user.first_active_turma %}
+                        <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
+                    {% endif %}
                 {% else %}
-                    {% if user.is_aluno %}
-                        <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Meu painel</a>
-                        {% if user.first_active_turma %}
-                            <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
-                            <a href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}" class="{% if '/materiais/aluno/' in request.path %}active{% endif %}">Materiais</a>
-                        {% endif %}
-                        <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
-                    {% else %}
-                        <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
-                        <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
-                        {% if user.first_active_turma %}
-                            <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and '/atividades/aluno/' not in request.path %}active{% endif %}">Correções</a>
-                        {% endif %}
-                        <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
-                    {% endif %}
-                    <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
-                    <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
-                    {% if user.is_superuser or user.is_admin_role or user.is_staff %}
-                        <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
-                        <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
-                    {% endif %}
+                    <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
+                    <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
+                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                 {% endif %}
             </nav>
         </details>
@@ -64,28 +52,16 @@
                 <a href="{% url 'home' %}#jornada">Jornada</a>
                 <a href="{% url 'home' %}#recursos">Recursos</a>
                 <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
+            {% elif user.is_aluno %}
+                <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
+                <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
+                {% if user.first_active_turma %}
+                    <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
+                {% endif %}
             {% else %}
-                {% if user.is_aluno %}
-                    <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Meu painel</a>
-                    {% if user.first_active_turma %}
-                        <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
-                        <a href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}" class="{% if '/materiais/aluno/' in request.path %}active{% endif %}">Materiais</a>
-                    {% endif %}
-                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Aulas</a>
-                {% else %}
-                    <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
-                    <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
-                    {% if user.first_active_turma %}
-                        <a href="{% url 'activities:atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/' in request.path and '/atividades/aluno/' not in request.path %}active{% endif %}">Correções</a>
-                    {% endif %}
-                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
-                {% endif %}
-                <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
-                <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
-                {% if user.is_superuser or user.is_admin_role or user.is_staff %}
-                    <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
-                    <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
-                {% endif %}
+                <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
+                <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
+                <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
             {% endif %}
         </nav>
         <div class="header-actions">
@@ -144,17 +120,43 @@
                 <i data-lucide="sun-moon" aria-hidden="true"></i>
             </button>
             {% if user.is_authenticated %}
-                <a class="btn btn-outline" href="{% url 'accounts:profile' %}">
-                    <i data-lucide="user" aria-hidden="true"></i>
-                    Minha conta
-                </a>
-                <form class="inline-form" method="post" action="{% url 'accounts:logout' %}">
-                    {% csrf_token %}
-                    <button class="btn btn-primary" type="submit">
-                        <i data-lucide="log-out" aria-hidden="true"></i>
-                        Sair
-                    </button>
-                </form>
+                <details class="account-menu">
+                    <summary class="account-trigger" aria-label="Abrir menu da conta" title="Conta">
+                        {% if user.avatar %}
+                            <img class="account-avatar" src="{{ user.avatar.url }}" alt="">
+                        {% else %}
+                            <span class="avatar sm" aria-hidden="true">{{ user.get_short_name|slice:':2'|upper }}</span>
+                        {% endif %}
+                    </summary>
+                    <div class="account-panel">
+                        <div class="account-panel-head">
+                            <strong>{{ user.get_short_name }}</strong>
+                            <span class="account-panel-email">{{ user.email }}</span>
+                        </div>
+                        <a class="account-link {% if '/conta/perfil/' in request.path %}active{% endif %}" href="{% url 'accounts:profile' %}">
+                            <i data-lucide="user" aria-hidden="true"></i> Minha conta
+                        </a>
+                        {% if user.is_aluno and user.first_active_turma %}
+                            <a class="account-link {% if '/materiais/aluno/' in request.path %}active{% endif %}" href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}">
+                                <i data-lucide="folder" aria-hidden="true"></i> Materiais
+                            </a>
+                        {% endif %}
+                        {% if user.is_superuser or user.is_admin_role or user.is_staff %}
+                            <a class="account-link" href="/admin/">
+                                <i data-lucide="shield" aria-hidden="true"></i> Admin
+                            </a>
+                            <a class="account-link" href="{% url 'health' %}">
+                                <i data-lucide="activity" aria-hidden="true"></i> Status
+                            </a>
+                        {% endif %}
+                        <form method="post" action="{% url 'accounts:logout' %}">
+                            {% csrf_token %}
+                            <button class="btn btn-outline btn-sm account-logout-btn" type="submit">
+                                <i data-lucide="log-out" aria-hidden="true"></i> Sair
+                            </button>
+                        </form>
+                    </div>
+                </details>
             {% else %}
                 <a class="btn btn-primary" href="{% url 'accounts:login' %}">
                     <i data-lucide="log-in" aria-hidden="true"></i>
