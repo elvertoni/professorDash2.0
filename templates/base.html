@@ -37,9 +37,6 @@
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                 {% elif user.is_aluno %}
                     <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
-                    {% if user.first_active_turma %}
-                        <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
-                    {% endif %}
                 {% else %}
                     <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
                     <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
@@ -53,9 +50,6 @@
                 <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
             {% elif user.is_aluno %}
                 <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
-                {% if user.first_active_turma %}
-                    <a href="{% url 'activities:aluno_atividade_list' user.first_active_turma.pk %}" class="{% if '/atividades/aluno/' in request.path %}active{% endif %}">Atividades</a>
-                {% endif %}
             {% else %}
                 <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
                 <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>

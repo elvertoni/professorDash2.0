@@ -22,7 +22,6 @@
 .aluno-progress .progress {
     height: 14px;
 }
-
 .focus-block {
     margin-top: var(--space-6);
 }
@@ -35,54 +34,17 @@
 .focus-block-head h2 {
     font-size: 1.375rem;
 }
-
-.dash-tabs {
-    display: flex;
-    gap: 2px;
-    margin: var(--space-8) 0 var(--space-5);
-    border-bottom: 1px solid var(--shell-border);
-    overflow-x: auto;
-}
-.dash-tab {
-    flex-shrink: 0;
-    padding: 11px 18px;
-    border: 0;
-    background: transparent;
-    color: var(--shell-text-muted);
-    font-family: inherit;
-    font-weight: 600;
-    font-size: 0.9375rem;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: color .15s ease-out, border-color .15s ease-out;
-}
-.dash-tab:hover { color: var(--shell-text); }
-.dash-tab.active {
-    color: var(--shell-primary);
-    border-bottom-color: var(--shell-primary);
-}
-.dash-tab:focus-visible {
-    outline: 2px solid var(--shell-primary);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
-}
-.dash-tab .count {
-    margin-left: 6px;
-    font-size: 0.8125rem;
-    opacity: .7;
-}
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="classroom-page" x-data="{ tab: 'prazos' }">
+<section class="classroom-page">
 
     <div class="page-hero">
         <div class="page-hero-copy">
             <span class="eyebrow">Aluno · Início</span>
             <h1>Olá, <span class="accent">{{ request.user.get_short_name }}</span></h1>
-            <p class="dek">Comece pelo que precisa da sua atenção agora. O resto fica nas abas abaixo.</p>
+            <p class="dek">Suas aulas e seu progresso. Comece pela aula de hoje.</p>
         </div>
     </div>
 
@@ -103,82 +65,17 @@
         {% if para_fazer_hoje %}
             <div class="feature-grid catalog-grid">
                 {% for item in para_fazer_hoje %}
-                    {% if item.tipo == 'aula' %}
-                        <article class="card">
-                            <div class="stripe stripe-violet"></div>
-                            <div class="card-head">
-                                <span class="tag-disc">{{ item.obj.turma.nome }}</span>
-                                <span class="badge badge-info"><i data-lucide="book-open" aria-hidden="true"></i> Aula de hoje</span>
-                            </div>
-                            <h3>{{ item.obj.aula.titulo }}</h3>
-                            <p class="desc">{{ item.obj.aula.disciplina.label }}</p>
-                            <div class="card-foot">
-                                <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' item.obj.pk %}">
-                                    <i data-lucide="play" aria-hidden="true"></i> Estudar agora
-                                </a>
-                            </div>
-                        </article>
-                    {% elif item.tipo == 'atividade' %}
-                        <article class="card">
-                            <div class="stripe {% if item.overdue %}stripe-warning{% else %}stripe-cta{% endif %}"></div>
-                            <div class="card-head">
-                                <span class="tag-disc">{{ item.obj.turma.nome }}</span>
-                                {% if item.overdue %}
-                                    <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Atrasada</span>
-                                {% else %}
-                                    <span class="badge badge-warning"><i data-lucide="clock" aria-hidden="true"></i> Hoje {{ item.data|date:'H:i' }}</span>
-                                {% endif %}
-                            </div>
-                            <h3>{{ item.obj.titulo }}</h3>
-                            <p class="desc">Atividade · {{ item.obj.pontuacao_max }} pts</p>
-                            <div class="card-foot">
-                                <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' item.obj.pk %}">
-                                    <i data-lucide="upload" aria-hidden="true"></i> {% if item.overdue %}Enviar com atraso{% else %}Enviar atividade{% endif %}
-                                </a>
-                            </div>
-                        </article>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty">
-                <i data-lucide="party-popper" aria-hidden="true"></i>
-                <h2>Tudo resolvido por hoje!</h2>
-                <p>Nenhuma aula liberada hoje nem atividade vencendo. Veja os próximos prazos nas abas abaixo.</p>
-            </div>
-        {% endif %}
-    </div>
-
-    <div class="dash-tabs" role="tablist" aria-label="Mais informações">
-        <button class="dash-tab" :class="{ active: tab === 'prazos' }" @click="tab = 'prazos'"
-                role="tab" :aria-selected="tab === 'prazos'" type="button">
-            Prazos{% if prazos_proximos %}<span class="count">{{ prazos_proximos|length }}</span>{% endif %}
-        </button>
-        <button class="dash-tab" :class="{ active: tab === 'aulas' }" @click="tab = 'aulas'"
-                role="tab" :aria-selected="tab === 'aulas'" type="button">
-            Aulas{% if proximas %}<span class="count">{{ proximas|length }}</span>{% endif %}
-        </button>
-        <button class="dash-tab" :class="{ active: tab === 'notas' }" @click="tab = 'notas'"
-                role="tab" :aria-selected="tab === 'notas'" type="button">
-            Notas{% if ultimos_feedbacks %}<span class="count">{{ ultimos_feedbacks|length }}</span>{% endif %}
-        </button>
-    </div>
-
-    <div x-show="tab === 'prazos'" x-cloak role="tabpanel">
-        {% if prazos_proximos %}
-            <div class="feature-grid catalog-grid">
-                {% for atividade in prazos_proximos %}
                     <article class="card">
-                        <div class="stripe stripe-cta"></div>
+                        <div class="stripe stripe-violet"></div>
                         <div class="card-head">
-                            <span class="tag-disc">{{ atividade.turma.nome }}</span>
-                            <span class="badge badge-warning"><i data-lucide="calendar" aria-hidden="true"></i> {{ atividade.prazo|date:'d/m (H:i)' }}</span>
+                            <span class="tag-disc">{{ item.obj.turma.nome }}</span>
+                            <span class="badge badge-info"><i data-lucide="book-open" aria-hidden="true"></i> Aula de hoje</span>
                         </div>
-                        <h3>{{ atividade.titulo }}</h3>
-                        <p class="desc">Atividade · {{ atividade.pontuacao_max }} pts</p>
+                        <h3>{{ item.obj.aula.titulo }}</h3>
+                        <p class="desc">{{ item.obj.aula.disciplina.label }}</p>
                         <div class="card-foot">
-                            <a class="btn btn-primary btn-sm" href="{% url 'activities:aluno_entrega' atividade.pk %}">
-                                <i data-lucide="upload" aria-hidden="true"></i> Enviar atividade
+                            <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' item.obj.pk %}">
+                                <i data-lucide="play" aria-hidden="true"></i> Estudar agora
                             </a>
                         </div>
                     </article>
@@ -186,93 +83,71 @@
             </div>
         {% else %}
             <div class="empty">
-                <i data-lucide="calendar-check" aria-hidden="true"></i>
-                <h2>Nenhum prazo próximo</h2>
-                <p>Nenhuma atividade com prazo nos próximos 7 dias.</p>
-            </div>
-        {% endif %}
-    </div>
-
-    <div x-show="tab === 'aulas'" x-cloak role="tabpanel">
-        {% if proximas %}
-            <div class="feature-grid catalog-grid">
-                {% for publicada in proximas %}
-                    <article class="card">
-                        <div class="stripe stripe-cta"></div>
-                        <div class="card-head">
-                            <span class="tag-disc">{{ publicada.turma.nome }}</span>
-                            <span class="badge badge-violet"><i data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
-                        </div>
-                        <h3>{{ publicada.aula.titulo }}</h3>
-                        <p class="desc">{{ publicada.aula.disciplina.label }}</p>
-                        <div class="card-foot">
-                            <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}"><i data-lucide="book-open" aria-hidden="true"></i> Estudar agora</a>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty">
                 <i data-lucide="party-popper" aria-hidden="true"></i>
-                <h2>Tudo em dia</h2>
-                <p>Você concluiu todas as aulas disponíveis no momento.</p>
-            </div>
-        {% endif %}
-
-        {% if turmas %}
-            <div class="section-heading section-gap">
-                <div class="page-heading-row">
-                    <div><h2>Minhas turmas</h2></div>
-                </div>
-            </div>
-            <div class="feature-grid catalog-grid">
-                {% for turma in turmas %}
-                    <article class="card">
-                        <div class="stripe stripe-cta"></div>
-                        <div class="card-head">
-                            <span class="tag-disc">{{ turma.disciplina.label }}</span>
-                        </div>
-                        <h3>{{ turma.nome }}</h3>
-                        <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · Prof. {{ turma.professor.get_short_name }}</p>
-                        <div class="card-foot">
-                            <a class="btn btn-outline btn-sm" href="{% url 'classroom:aluno_turma_aulas' turma.pk %}"><i data-lucide="arrow-right" aria-hidden="true"></i> Ver aulas</a>
-                        </div>
-                    </article>
-                {% endfor %}
+                <h2>Tudo em dia por hoje!</h2>
+                <p>Nenhuma aula nova liberada hoje. Continue de onde parou nas suas aulas abaixo.</p>
             </div>
         {% endif %}
     </div>
 
-    <div x-show="tab === 'notas'" x-cloak role="tabpanel">
-        {% if ultimos_feedbacks %}
-            <div class="feature-grid catalog-grid">
-                {% for entrega in ultimos_feedbacks %}
-                    <article class="card">
-                        <div class="stripe stripe-cyan"></div>
-                        <div class="card-head">
-                            <span class="tag-disc">{{ entrega.atividade.turma.nome }}</span>
-                            <span class="badge badge-info"><i data-lucide="award" aria-hidden="true"></i> Nota {{ entrega.nota }} / {{ entrega.atividade.pontuacao_max }}</span>
-                        </div>
-                        <h3>{{ entrega.atividade.titulo }}</h3>
-                        <p class="desc">
-                            {% if entrega.feedback %}{{ entrega.feedback|truncatechars:70 }}{% else %}Sem comentários adicionais.{% endif %}
-                        </p>
-                        <div class="card-foot">
-                            <a class="btn btn-outline btn-sm" href="{% url 'activities:aluno_entrega' entrega.atividade.pk %}">
-                                <i data-lucide="message-square" aria-hidden="true"></i> Ver feedback
-                            </a>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty">
-                <i data-lucide="clipboard" aria-hidden="true"></i>
-                <h2>Nenhuma correção recente</h2>
-                <p>Suas atividades corrigidas aparecerão aqui.</p>
-            </div>
-        {% endif %}
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
+            <div><h2>Continuar aulas</h2></div>
+        </div>
     </div>
+    {% if proximas %}
+        <div class="feature-grid catalog-grid">
+            {% for publicada in proximas %}
+                <article class="card">
+                    <div class="stripe stripe-cta"></div>
+                    <div class="card-head">
+                        <span class="tag-disc">{{ publicada.turma.nome }}</span>
+                        <span class="badge badge-violet"><i data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
+                    </div>
+                    <h3>{{ publicada.aula.titulo }}</h3>
+                    <p class="desc">{{ publicada.aula.disciplina.label }}</p>
+                    <div class="card-foot">
+                        <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}"><i data-lucide="book-open" aria-hidden="true"></i> Estudar agora</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            <i data-lucide="party-popper" aria-hidden="true"></i>
+            <h2>Tudo concluído</h2>
+            <p>Você concluiu todas as aulas disponíveis no momento.</p>
+        </div>
+    {% endif %}
+
+    <div class="section-heading section-gap">
+        <div class="page-heading-row">
+            <div><h2>Minhas turmas</h2></div>
+        </div>
+    </div>
+    {% if turmas %}
+        <div class="feature-grid catalog-grid">
+            {% for turma in turmas %}
+                <article class="card">
+                    <div class="stripe stripe-cta"></div>
+                    <div class="card-head">
+                        <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                    </div>
+                    <h3>{{ turma.nome }}</h3>
+                    <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · Prof. {{ turma.professor.get_short_name }}</p>
+                    <div class="card-foot">
+                        <a class="btn btn-outline btn-sm" href="{% url 'classroom:aluno_turma_aulas' turma.pk %}"><i data-lucide="arrow-right" aria-hidden="true"></i> Ver aulas</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            <i data-lucide="inbox" aria-hidden="true"></i>
+            <h2>Nenhuma turma ativa</h2>
+            <p>Quando você for matriculado em uma turma, ela aparecerá aqui.</p>
+        </div>
+    {% endif %}
 
 </section>
 {% endblock %}

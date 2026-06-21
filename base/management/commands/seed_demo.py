@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounts.models import AlunoProfile, ProfessorProfile, User
-from activities.models import Atividade, Entrega
+from activities.models import Atividade, AtividadeCheck
 from catalog.models import Aula, Disciplina, Trilha
 from classroom.models import AulaPublicada, Matricula, ProgressoAula, Turma
 from materials.models import Material
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         materials = self.seed_materials(turmas, publicadas, professor)
         atividades = self.seed_activities(turmas, publicadas, materials)
         self.seed_progress(publicadas, students)
-        self.seed_submissions(atividades, students, professor)
+        self.seed_checks(atividades, students)
 
         self.stdout.write(self.style.SUCCESS('Seed demo concluído.'))
         self.stdout.write(
@@ -339,33 +339,21 @@ class Command(BaseCommand):
     def seed_activities(self, turmas, publicadas, materials):
         atividade_prompt = self.upsert_activity(
             turma=turmas['ai'],
-            aula_publicada=publicadas['ai-2'],
-            titulo='Exercício: prompt eficaz',
-            enunciado=(
-                'Crie um prompt para pedir a uma IA um plano de estudo '
-                'para uma prova técnica. Explique por que ele é claro.'
-            ),
-            prazo=self.now + timezone.timedelta(days=2),
-            pontuacao_max=Decimal('10.00'),
-            anexos=[materials['prompt']],
+            titulo='Caderno: prompt eficaz',
+            descricao='Visto do registro do exercício de prompt no caderno.',
+            data=self.now.date(),
         )
         atividade_mapa = self.upsert_activity(
             turma=turmas['ai'],
-            aula_publicada=publicadas['ai-1'],
-            titulo='Mapa mental: fundamentos de IA',
-            enunciado='Organize os principais conceitos da aula em um mapa mental.',
-            prazo=self.now - timezone.timedelta(days=1),
-            pontuacao_max=Decimal('8.00'),
-            anexos=[],
+            titulo='Mapa mental entregue',
+            descricao='Marcar quem entregou o mapa mental de fundamentos.',
+            data=self.now.date(),
         )
         atividade_portfolio = self.upsert_activity(
             turma=turmas['frontend'],
-            aula_publicada=publicadas['front-1'],
-            titulo='Página de portfólio semântica',
-            enunciado='Monte uma página pessoal usando tags semânticas do HTML.',
-            prazo=self.now + timezone.timedelta(days=5),
-            pontuacao_max=Decimal('10.00'),
-            anexos=[materials['frontend']],
+            titulo='Página de portfólio',
+            descricao='Visto da primeira versão do portfólio semântico.',
+            data=self.now.date(),
         )
         return {
             'prompt': atividade_prompt,
@@ -398,65 +386,15 @@ class Command(BaseCommand):
                     ]
                 )
 
-    def seed_submissions(self, atividades, students, professor):
-        self.upsert_submission(
-            atividades['prompt'],
-            students[0],
-            'Prompt com objetivo, contexto, formato de saída e critérios.',
-            self.now - timezone.timedelta(hours=8),
-            Entrega.Status.CORRIGIDA,
-            nota=Decimal('9.50'),
-            feedback='Resposta clara e bem estruturada.',
-            professor=professor,
-        )
-        self.upsert_submission(
-            atividades['prompt'],
-            students[1],
-            'Meu prompt pede um cronograma de estudos com revisão diária.',
-            self.now - timezone.timedelta(hours=3),
-            Entrega.Status.ENTREGUE,
-        )
-        self.upsert_submission(
-            atividades['prompt'],
-            students[2],
-            'Foquei no formato de tabela e exemplos de exercícios.',
-            self.now - timezone.timedelta(hours=2),
-            Entrega.Status.ENTREGUE,
-        )
-        self.upsert_submission(
-            atividades['mapa'],
-            students[0],
-            'Mapa mental com dados, modelo, treino, inferência e avaliação.',
-            self.now - timezone.timedelta(days=2),
-            Entrega.Status.CORRIGIDA,
-            nota=Decimal('8.00'),
-            feedback='Mapa completo e bem conectado.',
-            professor=professor,
-        )
-        self.upsert_submission(
-            atividades['mapa'],
-            students[3],
-            'Conceitos principais organizados por exemplos práticos.',
-            self.now - timezone.timedelta(hours=5),
-            Entrega.Status.ATRASADA,
-        )
-        self.upsert_submission(
-            atividades['portfolio'],
-            students[0],
-            'Enviei a página com header, main, section e footer.',
-            self.now - timezone.timedelta(days=1),
-            Entrega.Status.CORRIGIDA,
-            nota=Decimal('9.00'),
-            feedback='Boa semântica e boa hierarquia de conteúdo.',
-            professor=professor,
-        )
-        self.upsert_submission(
-            atividades['portfolio'],
-            students[4],
-            'Primeira versão do portfólio com navegação e cards.',
-            self.now - timezone.timedelta(hours=1),
-            Entrega.Status.ENTREGUE,
-        )
+    def seed_checks(self, atividades, students):
+        check_specs = [
+            (atividades['prompt'], students[:5], 'Registro completo no caderno.'),
+            (atividades['mapa'], students[:3], 'Mapa entregue.'),
+            (atividades['portfolio'], students[:4], ''),
+        ]
+        for atividade, selected_students, observacao in check_specs:
+            for student in selected_students:
+                self.upsert_check(atividade, student, observacao)
 
     def upsert_user(self, email, nome_completo, role):
         user, created = User.objects.update_or_create(
@@ -472,60 +410,23 @@ class Command(BaseCommand):
             user.save(update_fields=['password', 'updated_at'])
         return user
 
-    def upsert_activity(
-        self,
-        turma,
-        aula_publicada,
-        titulo,
-        enunciado,
-        prazo,
-        pontuacao_max,
-        anexos,
-    ):
+    def upsert_activity(self, turma, titulo, descricao, data):
         atividade, _ = Atividade.objects.update_or_create(
             turma=turma,
             titulo=titulo,
-            defaults={
-                'aula_publicada': aula_publicada,
-                'enunciado': enunciado,
-                'prazo': prazo,
-                'pontuacao_max': pontuacao_max,
-                'permite_entrega_atrasada': True,
-                'publicada': True,
-            },
+            defaults={'descricao': descricao, 'data': data},
         )
-        atividade.anexos.set(anexos)
         return atividade
 
-    def upsert_submission(
-        self,
-        atividade,
-        aluno,
-        texto_resposta,
-        data_entrega,
-        status,
-        nota=None,
-        feedback='',
-        professor=None,
-    ):
-        defaults = {
-            'texto_resposta': texto_resposta,
-            'data_entrega': data_entrega,
-            'status': status,
-            'checked': status == Entrega.Status.CORRIGIDA,
-            'nota': nota,
-            'feedback': feedback,
-            'corrigido_por': professor if status == Entrega.Status.CORRIGIDA else None,
-            'corrigido_em': (
-                min(self.now, data_entrega + timezone.timedelta(hours=2))
-                if status == Entrega.Status.CORRIGIDA
-                else None
-            ),
-        }
-        Entrega.objects.update_or_create(
+    def upsert_check(self, atividade, aluno, observacao=''):
+        AtividadeCheck.objects.update_or_create(
             atividade=atividade,
             aluno=aluno,
-            defaults=defaults,
+            defaults={
+                'feito': True,
+                'feito_em': self.now,
+                'observacao': observacao,
+            },
         )
 
     def lesson_html(self, title, theme):

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Marcar · {{ atividade.titulo }} · Prof. Toni Coimbra{% endblock %}
+
+{% block content %}
+<section class="classroom-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <a href="{% url 'activities:atividade_list' turma.pk %}">Atividades</a>
+        <span>{{ atividade.titulo }}</span>
+    </nav>
+
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.nome }}</span>
+        <h1>{{ atividade.titulo }}</h1>
+        {% if atividade.descricao %}<p>{{ atividade.descricao }}</p>{% endif %}
+    </div>
+
+    {% if linhas %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="tbl-wrap">
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th scope="col">Aluno</th>
+                            <th scope="col">Feito</th>
+                            <th scope="col">Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for linha in linhas %}
+                            <tr>
+                                <td>
+                                    <span class="name">
+                                        <span class="avatar sm" aria-hidden="true">{{ linha.aluno.get_short_name|slice:':2'|upper }}</span>
+                                        <span>{{ linha.aluno.nome_completo }}</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <input type="checkbox" class="check" name="feito_{{ linha.aluno.id }}"
+                                           aria-label="Feito por {{ linha.aluno.nome_completo }}"
+                                           {% if linha.check.feito %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="text" class="input" name="obs_{{ linha.aluno.id }}" maxlength="280"
+                                           value="{{ linha.check.observacao|default:'' }}"
+                                           placeholder="(opcional)"
+                                           aria-label="Observação para {{ linha.aluno.nome_completo }}">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions">
+                <a class="btn btn-outline" href="{% url 'activities:atividade_list' turma.pk %}">Voltar</a>
+                <button class="btn btn-primary" type="submit">
+                    <i data-lucide="save" aria-hidden="true"></i>
+                    Salvar checks
+                </button>
+            </div>
+        </form>
+    {% else %}
+        <div class="empty">
+            <i data-lucide="users" aria-hidden="true"></i>
+            <h2>Nenhum aluno matriculado</h2>
+            <p style="margin-bottom: var(--space-4);">Matricule alunos na turma para marcar esta atividade.</p>
+            <a class="btn btn-primary" href="{% url 'classroom:matricula_create' turma.pk %}">
+                <i data-lucide="user-plus" aria-hidden="true"></i>
+                Matricular aluno
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -11,17 +11,23 @@
         <span>Excluir</span>
     </nav>
 
+    <div class="section-heading compact">
+        <span class="eyebrow">{{ turma.nome }}</span>
+        <h1>Excluir atividade</h1>
+    </div>
+
     <div class="panel danger-panel">
-        <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Ação permanente</span>
-        <h1>Excluir atividade?</h1>
-        <p>Esta ação remove a atividade &ldquo;{{ atividade.titulo }}&rdquo; e todas as entregas e arquivos vinculados.</p>
-        <form class="form-actions" method="post">
+        <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Ação irreversível</span>
+        <p>Excluir <b>{{ atividade.titulo }}</b> e todos os checks dos alunos? Não há como reverter.</p>
+        <form method="post">
             {% csrf_token %}
-            <a class="btn btn-outline" href="{% url 'activities:atividade_list' turma.pk %}">Cancelar</a>
-            <button class="btn btn-danger" type="submit">
-                <i data-lucide="trash-2" aria-hidden="true"></i>
-                Excluir atividade
-            </button>
+            <div class="form-actions">
+                <a class="btn btn-outline" href="{% url 'activities:atividade_list' turma.pk %}">Cancelar</a>
+                <button class="btn btn-danger" type="submit">
+                    <i data-lucide="trash-2" aria-hidden="true"></i>
+                    Excluir
+                </button>
+            </div>
         </form>
     </div>
 </section>

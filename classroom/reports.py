@@ -1,10 +1,10 @@
 import csv
 import io
 
-from django.db.models import Avg, Count
+from django.db.models import Count
 from django.utils import timezone
 
-from activities.models import Atividade, Entrega
+from activities.models import Atividade, AtividadeCheck
 
 from .models import AulaPublicada, Matricula, ProgressoAula
 
@@ -15,48 +15,38 @@ LINE = '#e5e7eb'
 HEAD_BG = '#f3f0ff'
 
 
-def _fmt_nota(nota):
-    if nota is None:
-        return '—'
-    return f'{nota:.1f}'.replace('.', ',')
-
-
 def _fmt_dt(value):
     if not value:
         return '—'
     return timezone.localtime(value).strftime('%d/%m/%Y %H:%M')
 
 
-def aluno_grade_rows(turma, aluno):
-    """Notas do aluno por atividade publicada da turma, com média simples."""
+def aluno_check_rows(turma, aluno):
+    """Itens de atividade da turma e se o aluno foi marcado como feito."""
     atividades = list(
-        Atividade.objects.filter(turma=turma, publicada=True).order_by(
-            'prazo', 'created_at'
-        )
+        Atividade.objects.filter(turma=turma).order_by('-data', 'created_at')
     )
-    entregas = {
-        entrega.atividade_id: entrega
-        for entrega in Entrega.objects.filter(
+    checks = {
+        check.atividade_id: check
+        for check in AtividadeCheck.objects.filter(
             atividade__turma=turma, aluno=aluno
-        ).select_related('atividade')
+        )
     }
     rows = []
-    notas = []
+    feitos = 0
     for atividade in atividades:
-        entrega = entregas.get(atividade.id)
-        nota = entrega.nota if entrega and entrega.checked else None
-        if nota is not None:
-            notas.append(float(nota))
+        check = checks.get(atividade.id)
+        feito = bool(check and check.feito)
+        if feito:
+            feitos += 1
         rows.append(
             {
                 'atividade': atividade,
-                'entrega': entrega,
-                'nota': nota,
-                'status': entrega.get_status_display() if entrega else 'Pendente',
+                'feito': feito,
+                'observacao': check.observacao if check else '',
             }
         )
-    media = round(sum(notas) / len(notas), 1) if notas else None
-    return rows, media
+    return rows, feitos, len(atividades)
 
 
 def aluno_progress(turma, aluno):
@@ -74,7 +64,7 @@ def aluno_progress(turma, aluno):
 
 
 def turma_report_rows(turma):
-    """Linha por matrícula ativa com progresso e média de notas (bulk, sem N+1)."""
+    """Linha por matrícula ativa: progresso de aulas + checks feitos (bulk)."""
     matriculas = list(
         Matricula.objects.filter(turma=turma, status=Matricula.Status.ATIVA)
         .select_related('aluno')
@@ -84,17 +74,6 @@ def turma_report_rows(turma):
         return []
 
     aluno_ids = [m.aluno_id for m in matriculas]
-
-    atividades = list(
-        Atividade.objects.filter(turma=turma, publicada=True).values_list('id', flat=True)
-    )
-
-    entregas = {
-        (e.aluno_id, e.atividade_id): e
-        for e in Entrega.objects.filter(
-            atividade_id__in=atividades, aluno_id__in=aluno_ids
-        )
-    }
 
     disponiveis = list(
         AulaPublicada.objects.available().filter(turma=turma).values_list('id', flat=True)
@@ -114,18 +93,23 @@ def turma_report_rows(turma):
             .values_list('aluno', 'c')
         )
 
-    medias = {}
-    if atividades and aluno_ids:
-        medias_qs = (
-            Entrega.objects.filter(
-                atividade_id__in=atividades,
+    atividade_ids = list(
+        Atividade.objects.filter(turma=turma).values_list('id', flat=True)
+    )
+    total_atividades = len(atividade_ids)
+
+    checks_feitos = {}
+    if atividade_ids and aluno_ids:
+        checks_feitos = dict(
+            AtividadeCheck.objects.filter(
+                atividade_id__in=atividade_ids,
                 aluno_id__in=aluno_ids,
-                checked=True,
+                feito=True,
             )
             .values('aluno')
-            .annotate(media=Avg('nota'))
+            .annotate(c=Count('id'))
+            .values_list('aluno', 'c')
         )
-        medias = {row['aluno']: round(row['media'], 1) for row in medias_qs}
 
     rows = []
     for matricula in matriculas:
@@ -136,10 +120,11 @@ def turma_report_rows(turma):
             {
                 'aluno': aluno,
                 'data_matricula': matricula.data_matricula,
-                'media': medias.get(aluno.id),
                 'concluidas': concluidas,
                 'total_aulas': total_aulas,
                 'progresso_pct': pct,
+                'checks_feitos': checks_feitos.get(aluno.id, 0),
+                'total_atividades': total_atividades,
             }
         )
     return rows
@@ -153,7 +138,7 @@ def _styles():
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 
     base = getSampleStyleSheet()
-    styles = {
+    return {
         'title': ParagraphStyle(
             'pd_title', parent=base['Title'], fontSize=18, textColor=BRAND,
             spaceAfter=2, alignment=TA_LEFT,
@@ -173,7 +158,6 @@ def _styles():
             'pd_cell', parent=base['Normal'], fontSize=9, textColor=INK,
         ),
     }
-    return styles
 
 
 def _table_style():
@@ -211,11 +195,10 @@ def _document(buffer, title):
 
 
 def build_boletim_pdf(turma, aluno):
-    from reportlab.lib import colors
     from reportlab.platypus import Paragraph, Spacer, Table
 
     styles = _styles()
-    rows, media = aluno_grade_rows(turma, aluno)
+    rows, feitos, total_atividades = aluno_check_rows(turma, aluno)
     concluidas, total_aulas, progresso_pct = aluno_progress(turma, aluno)
 
     buffer = io.BytesIO()
@@ -228,31 +211,30 @@ def build_boletim_pdf(turma, aluno):
             styles['subtitle'],
         ),
         Paragraph(
-            f'Média geral: <b>{_fmt_nota(media)}</b> &nbsp;·&nbsp; '
             f'Progresso de aulas: <b>{progresso_pct}%</b> '
-            f'({concluidas}/{total_aulas})',
+            f'({concluidas}/{total_aulas}) &nbsp;·&nbsp; '
+            f'Atividades feitas: <b>{feitos}/{total_atividades}</b>',
             styles['meta'],
         ),
         Spacer(1, 12),
-        Paragraph('Notas por atividade', styles['h2']),
+        Paragraph('Atividades (controle do professor)', styles['h2']),
     ]
 
-    data = [['Atividade', 'Prazo', 'Status', 'Nota', 'Máx.']]
+    data = [['Atividade', 'Data', 'Feito', 'Observação']]
     for row in rows:
         atividade = row['atividade']
         data.append(
             [
                 Paragraph(atividade.titulo, styles['cell']),
-                _fmt_dt(atividade.prazo),
-                row['status'],
-                _fmt_nota(row['nota']),
-                _fmt_nota(atividade.pontuacao_max),
+                atividade.data.strftime('%d/%m/%Y') if atividade.data else '—',
+                'Sim' if row['feito'] else 'Não',
+                Paragraph(row['observacao'] or '—', styles['cell']),
             ]
         )
     if len(data) == 1:
-        data.append([Paragraph('Nenhuma atividade publicada.', styles['cell']), '', '', '', ''])
+        data.append([Paragraph('Nenhuma atividade cadastrada.', styles['cell']), '', '', ''])
 
-    table = Table(data, colWidths=[210, 95, 75, 45, 45], repeatRows=1)
+    table = Table(data, colWidths=[185, 75, 50, 130], repeatRows=1)
     table.setStyle(_table_style())
     story.append(table)
     story.append(Spacer(1, 16))
@@ -272,8 +254,6 @@ def build_turma_report_pdf(turma):
 
     styles = _styles()
     rows = turma_report_rows(turma)
-    medias = [row['media'] for row in rows if row['media'] is not None]
-    media_turma = round(sum(medias) / len(medias), 1) if medias else None
 
     buffer = io.BytesIO()
     doc = _document(buffer, f'Relatório · {turma.nome}')
@@ -285,15 +265,14 @@ def build_turma_report_pdf(turma):
             styles['subtitle'],
         ),
         Paragraph(
-            f'Alunos ativos: <b>{len(rows)}</b> &nbsp;·&nbsp; '
-            f'Média da turma: <b>{_fmt_nota(media_turma)}</b>',
+            f'Alunos ativos: <b>{len(rows)}</b>',
             styles['meta'],
         ),
         Spacer(1, 12),
-        Paragraph('Desempenho por aluno', styles['h2']),
+        Paragraph('Progresso por aluno', styles['h2']),
     ]
 
-    data = [['Aluno', 'Matrícula', 'Aulas concluídas', 'Progresso', 'Média']]
+    data = [['Aluno', 'Matrícula', 'Aulas concluídas', 'Progresso', 'Atividades feitas']]
     for row in rows:
         data.append(
             [
@@ -301,19 +280,19 @@ def build_turma_report_pdf(turma):
                 row['data_matricula'].strftime('%d/%m/%Y'),
                 f'{row["concluidas"]}/{row["total_aulas"]}',
                 f'{row["progresso_pct"]}%',
-                _fmt_nota(row['media']),
+                f'{row["checks_feitos"]}/{row["total_atividades"]}',
             ]
         )
     if len(rows) == 0:
         data.append([Paragraph('Nenhuma matrícula ativa.', styles['cell']), '', '', '', ''])
 
-    table = Table(data, colWidths=[180, 75, 95, 70, 50], repeatRows=1)
+    table = Table(data, colWidths=[170, 70, 95, 65, 90], repeatRows=1)
     table.setStyle(_table_style())
     story.append(table)
     story.append(Spacer(1, 16))
     story.append(
         Paragraph(
-            f'Emitido em {_fmt_dt(timezone.now())} · Prof. Toni Coimbra · Boletim',
+            f'Emitido em {_fmt_dt(timezone.now())} · Prof. Toni Coimbra · Relatório',
             styles['meta'],
         )
     )
@@ -327,10 +306,12 @@ def build_turma_report_csv(turma):
     buffer = io.StringIO()
     writer = csv.writer(buffer, delimiter=';')
     writer.writerow(
-        ['Aluno', 'Email', 'Data da matricula', 'Aulas concluidas', 'Total de aulas', 'Progresso (%)', 'Media']
+        [
+            'Aluno', 'Email', 'Data da matricula', 'Aulas concluidas',
+            'Total de aulas', 'Progresso (%)', 'Atividades feitas', 'Total atividades',
+        ]
     )
     for row in rows:
-        media = '' if row['media'] is None else f'{row["media"]:.1f}'.replace('.', ',')
         writer.writerow(
             [
                 row['aluno'].nome_completo,
@@ -339,7 +320,8 @@ def build_turma_report_csv(turma):
                 row['concluidas'],
                 row['total_aulas'],
                 row['progresso_pct'],
-                media,
+                row['checks_feitos'],
+                row['total_atividades'],
             ]
         )
     return buffer.getvalue()

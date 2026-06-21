@@ -72,9 +72,6 @@ class ProfessorDashboardView(ProfessorRequiredMixin, View):
     template_name = 'classroom/professor_dashboard.html'
 
     def get(self, request):
-        from activities.models import Atividade, Entrega
-
-        now = timezone.now()
         turmas = list(
             Turma.objects.select_related('disciplina')
             .filter(*([] if can_manage_all(request.user) else [Q(professor=request.user)]))
@@ -82,28 +79,7 @@ class ProfessorDashboardView(ProfessorRequiredMixin, View):
         )
         turma_ids = [turma.pk for turma in turmas]
 
-        aguardando = (
-            Entrega.objects.filter(
-                atividade__turma__in=turma_ids,
-                checked=False,
-                status__in=[Entrega.Status.ENTREGUE, Entrega.Status.ATRASADA],
-            )
-            .select_related('aluno', 'atividade', 'atividade__turma')
-            .order_by('data_entrega')
-        )
-
-        turma_stats = self.build_turma_stats(turma_ids, Atividade, Entrega)
-        prazos = (
-            Atividade.objects.filter(
-                turma__in=turma_ids,
-                publicada=True,
-                prazo__gte=now,
-                prazo__lte=now + timedelta(days=7),
-            )
-            .select_related('turma')
-            .order_by('prazo')[:8]
-        )
-
+        turma_stats = self.build_turma_stats(turma_ids)
         for turma in turmas:
             turma.stats = turma_stats.get(turma.pk, {})
 
@@ -124,20 +100,14 @@ class ProfessorDashboardView(ProfessorRequiredMixin, View):
         context = {
             'turmas': turmas,
             'series_list': series_list,
-            'aguardando': aguardando,
-            'prazos': prazos,
             'total_turmas': len(turmas),
             'total_alunos': Matricula.objects.filter(
                 turma__in=turma_ids, status=Matricula.Status.ATIVA
             ).count(),
-            'total_atividades': Atividade.objects.filter(
-                turma__in=turma_ids, publicada=True
-            ).count(),
-            'total_aguardando': aguardando.count(),
         }
         return render(request, self.template_name, context)
 
-    def build_turma_stats(self, turma_ids, Atividade, Entrega):
+    def build_turma_stats(self, turma_ids):
         if not turma_ids:
             return {}
 
@@ -172,57 +142,13 @@ class ProfessorDashboardView(ProfessorRequiredMixin, View):
         for row in concluidas:
             stats[row['aula_publicada__turma']]['concluidas'] = row['total']
 
-        nota_norm = Case(
-            When(atividade__pontuacao_max=0, then=Value(None)),
-            default=ExpressionWrapper(
-                F('nota') / F('atividade__pontuacao_max'),
-                output_field=DecimalField(max_digits=6, decimal_places=4),
-            ),
-            output_field=DecimalField(max_digits=6, decimal_places=4),
-        )
-        entregas = (
-            Entrega.objects.filter(atividade__turma__in=turma_ids)
-            .values('atividade__turma')
-            .annotate(
-                total=Count('id'),
-                a_corrigir=Count(
-                    'id',
-                    filter=Q(
-                        checked=False,
-                        status__in=[Entrega.Status.ENTREGUE, Entrega.Status.ATRASADA],
-                    ),
-                ),
-                media=Avg('nota', filter=Q(checked=True)),
-                media_norm=Avg(nota_norm, filter=Q(checked=True)),
-            )
-        )
-        for row in entregas:
-            data = stats[row['atividade__turma']]
-            data['entregas'] = row['total']
-            data['a_corrigir'] = row['a_corrigir']
-            data['media'] = row['media']
-            data['media_norm'] = row['media_norm']
-
-        max_entregas = max(
-            (data.get('entregas', 0) for data in stats.values()), default=0
-        )
         for data in stats.values():
             alunos = data.get('alunos', 0) or 0
             aulas_total = data.get('aulas', 0) or 0
-            concluidas = data.get('concluidas', 0) or 0
+            concluidas_n = data.get('concluidas', 0) or 0
             denominador = alunos * aulas_total
             data['conclusao_pct'] = (
-                round(concluidas * 100 / denominador) if denominador else 0
-            )
-            data['media_pct'] = (
-                round(float(data['media_norm']) * 100)
-                if data.get('media_norm') is not None
-                else 0
-            )
-            data['entregas_pct'] = (
-                round(data.get('entregas', 0) * 100 / max_entregas)
-                if max_entregas
-                else 0
+                round(concluidas_n * 100 / denominador) if denominador else 0
             )
 
         return stats
@@ -676,8 +602,6 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
     template_name = 'classroom/aluno_dashboard.html'
 
     def get(self, request):
-        from activities.models import Atividade, Entrega
-
         turmas = list(self.get_active_turmas())
         now = timezone.now()
         local_now = timezone.localtime(now)
@@ -696,84 +620,30 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
         )
 
         total_disponiveis = len(disponiveis)
+        disponivel_ids = {d.id for d in disponiveis}
         total_concluidas = sum(
             1 for p in progressos.values()
-            if p.aula_publicada_id in [d.id for d in disponiveis] and p.concluido
+            if p.aula_publicada_id in disponivel_ids and p.concluido
         )
 
-        # 1. Para fazer hoje & Prazos próximos
         para_fazer_hoje = []
-        prazos_proximos = []
-
-        # Aulas liberadas hoje e pendentes
-        for publicada in disponiveis:
-            progresso = progressos.get(publicada.id)
-            concluido = bool(progresso and progresso.concluido)
-            if not concluido:
-                local_disp = timezone.localtime(publicada.disponivel_em)
-                if today_start <= local_disp < today_end:
-                    para_fazer_hoje.append({
-                        'tipo': 'aula',
-                        'obj': publicada,
-                        'data': local_disp,
-                        'overdue': False,
-                    })
-
-        # Atividades pendentes
-        atividades_all = Atividade.objects.filter(turma__in=turmas, publicada=True).select_related('turma', 'aula_publicada', 'aula_publicada__aula')
-        entregas_dict = {
-            e.atividade_id: e
-            for e in Entrega.objects.filter(aluno=request.user, atividade__in=atividades_all)
-        }
-
-        for atividade in atividades_all:
-            entrega = entregas_dict.get(atividade.id)
-            status = entrega.status if entrega else Entrega.Status.PENDENTE
-            atividade.minha_entrega = entrega
-            atividade.meu_status = status
-
-            if status == Entrega.Status.PENDENTE and atividade.aberta_para_entrega:
-                if atividade.prazo:
-                    local_prazo = timezone.localtime(atividade.prazo)
-                    if local_prazo < today_start:
-                        # Vencida mas aceita entrega atrasada
-                        para_fazer_hoje.append({
-                            'tipo': 'atividade',
-                            'obj': atividade,
-                            'data': local_prazo,
-                            'overdue': True,
-                        })
-                    elif today_start <= local_prazo < today_end:
-                        # Vence hoje
-                        para_fazer_hoje.append({
-                            'tipo': 'atividade',
-                            'obj': atividade,
-                            'data': local_prazo,
-                            'overdue': False,
-                        })
-                    elif today_end <= local_prazo < today_end + timedelta(days=7):
-                        # Prazos nos próximos 7 dias
-                        prazos_proximos.append(atividade)
-
-        # Ordenar itens de hoje por data limite/liberação
-        para_fazer_hoje.sort(key=lambda x: x['data'] if x['data'] else now)
-        prazos_proximos.sort(key=lambda x: x.prazo if x.prazo else now)
-
-        # 3. Últimos feedbacks e notas
-        ultimos_feedbacks = (
-            Entrega.objects.filter(aluno=request.user, checked=True)
-            .select_related('atividade', 'atividade__turma')
-            .order_by('-corrigido_em')[:5]
-        )
-
-        # Obter as próximas 6 aulas não concluídas (geral) para manter o bloco existente do dashboard
         proximas = []
         for publicada in disponiveis:
             progresso = progressos.get(publicada.id)
-            concluida = bool(progresso and progresso.concluido)
-            if not concluida and len(proximas) < 6:
+            if progresso and progresso.concluido:
+                continue
+            local_disp = timezone.localtime(publicada.disponivel_em)
+            if today_start <= local_disp < today_end:
+                para_fazer_hoje.append({
+                    'tipo': 'aula',
+                    'obj': publicada,
+                    'data': local_disp,
+                })
+            if len(proximas) < 6:
                 publicada.concluida = False
                 proximas.append(publicada)
+
+        para_fazer_hoje.sort(key=lambda x: x['data'] if x['data'] else now)
 
         progresso_pct = (
             round(total_concluidas * 100 / total_disponiveis)
@@ -784,8 +654,6 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
             'turmas': turmas,
             'proximas': proximas,
             'para_fazer_hoje': para_fazer_hoje,
-            'prazos_proximos': prazos_proximos,
-            'ultimos_feedbacks': ultimos_feedbacks,
             'total_turmas': len(turmas),
             'total_disponiveis': total_disponiveis,
             'total_concluidas': total_concluidas,
