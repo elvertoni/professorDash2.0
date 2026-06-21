@@ -21,5 +21,12 @@
         <p class="desc">Gerencie usuários, perfis e permissões pela interface administrativa.</p>
         <div class="card-foot"><a href="/admin/" target="_blank" rel="noopener">Abrir admin <span class="sr-only">(abre em nova aba)</span></a><i data-lucide="external-link" aria-hidden="true"></i></div>
     </article>
+    <article class="card">
+        <div class="stripe"></div>
+        <span class="tag-disc">Catálogo</span>
+        <h3>Acervo de Aulas</h3>
+        <p class="desc">Navegue pelas aulas importadas e importe o acervo atualizado do GitHub.</p>
+        <div class="card-foot"><a href="{% url 'catalog:aula_list' %}">Ver catálogo <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
+    </article>
 </div>
 {% endblock %}

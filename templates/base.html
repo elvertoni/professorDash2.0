@@ -56,6 +56,7 @@
                     <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
                     <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
                     {% if user.is_superuser or user.is_admin_role or user.is_staff %}
+                        <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                         <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
                         <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                     {% endif %}
@@ -89,6 +90,7 @@
                 <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
                 <a href="{% url 'accounts:profile' %}" class="{% if '/conta/perfil/' in request.path %}active{% endif %}">Conta</a>
                 {% if user.is_superuser or user.is_admin_role or user.is_staff %}
+                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                     <a href="/admin/" class="{% if '/admin/' in request.path %}active{% endif %}">Admin</a>
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                 {% endif %}

@@ -14,55 +14,49 @@ Antes de cada sprint: releia PRD + design system + código existente. Ordem em c
 
 ## Estado atual
 
-O status oficial fica no checklist da seção 9 do `PRD_PROF_DASH.md`; confira o PRD antes de iniciar qualquer sprint. No estado documentado mais recente, as Sprints 0-11 estão marcadas como concluídas. Resta apenas a Sprint 12 (deploy em produção). A Sprint 11 foi executada fora de ordem por override explícito do usuário; as Sprints 9 e 10 foram concluídas em seguida.
+**Sistema em produção** em https://prof.tonicoimbra.com (Easypanel, projeto `work`, serviço `professordash`).
 
-Apps implementados no código atualmente: `core`, `base`, `accounts`, `catalog`, `classroom`, `activities`, `materials` e `notifications`. Falta apenas o deploy de produção (artefatos da Sprint 12).
-
-A execução do `docker compose` depende de Docker instalado na máquina.
+Sprints 0–12 concluídas. Apps ativos: `core`, `base`, `accounts`, `catalog`, `classroom`, `activities`, `materials`, `notifications`.
 
 ## Fluxo de trabalho (crítico)
 
-- **Sprint-driven**: uma sprint por vez, em ordem (Sprint 0 → 12, §9 do PRD). Implemente *todas* as tarefas da sprint antes de fechá-la.
-- **Definition of done** = marcar `[x]` no checklist do PRD ao concluir cada tarefa.
 - **Git é do humano**: NÃO commitar/push a menos que pedido.
+- **Deploy** = push para GitHub → Easypanel auto-redeploy do serviço `professordash` (branch main).
+- **Validação** = sempre na VPS via MCP Easypanel (`exec_in_container`) ou acessando https://prof.tonicoimbra.com. Nunca assumir que funciona sem checar em produção.
+- **Sem testes automatizados** — validação manual via VPS.
 - Ambiguidade: decida com best practice Django e **documente no PRD** (não em comentário solto).
-- Ao fim da sprint: reporte o que foi feito, decisões e como validar manualmente.
-- **Sem testes automatizados** (decisão do projeto — validação é manual via `runserver`).
+- Ao fim de cada tarefa: reporte o que foi feito, decisões e como validar na VPS.
 
 ## Comandos
 
-Ambiente: `.venv` na raiz, Python >3.13, Django >6.0. Ativar no Windows/PowerShell:
+### VPS (produção — uso principal)
 
-Use `uv` para instalar dependências neste ambiente; não assuma que a `.venv` tem `pip` instalado.
+MCP Easypanel disponível. Padrão para rodar comandos Django em prod:
+
+```
+exec_in_container(projectName='work', serviceName='professordash', command='python manage.py <cmd>')
+```
+
+Exemplos:
+- `python manage.py migrate` — aplicar migrations após deploy
+- `python manage.py shell -c "..."` — debug/consulta rápida
+- `python manage.py import_acervo --only-aprovada` — reimportar acervo
+
+Envs ficam no Easypanel (não há `.env` local em uso). Ver/editar via `get_env_vars`/`set_env_var`.
+
+Deploy manual se necessário: `deploy_service(projectName='work', serviceName='professordash')`.
+
+### Local (desenvolvimento de código)
+
+Ambiente: `.venv` na raiz, Python >3.13, Django >6.0. Usar `uv` (não `pip` diretamente).
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 uv pip install --python .\.venv\Scripts\python.exe -r requirements.txt
+python manage.py makemigrations <app>   # gerar migrations antes do push
 ```
 
-Desenvolvimento (após scaffold):
-
-```powershell
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver          # valida a jornada da sprint manualmente
-python manage.py makemigrations <app>
-```
-
-Pipeline do acervo (diferencial do produto — §6 do PRD):
-
-```powershell
-# Idempotente: casa por (disciplina, trilha, ordem, slug); só atualiza se versao/atualizado_em mudou
-python manage.py import_acervo --path ../PROF-TONI --only-aprovada [--disciplina <slug>]
-```
-
-> Management commands custom existentes: `catalog/import_acervo` e `base/seed_demo`. A documentação MkDocs existe; os artefatos finais de produção (`docker-compose.prod.yml`, entrypoint, Caddyfile e backup) continuam abertos na Sprint 12.
-
-Docker (dev existe; prod é futuro):
-
-```powershell
-docker compose up -d   # dev: app + Postgres (docker-compose.yml na raiz)
-```
+> Management commands custom: `catalog/import_acervo` e `base/seed_demo`.
 
 ## Arquitetura
 

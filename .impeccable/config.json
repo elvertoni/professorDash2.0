@@ -1,0 +1,16 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "templates/base.html"
+    ],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "reason": "Geist is the project design system font, intentional choice",
+        "createdAt": "2026-06-21T13:39:18.844Z"
+      }
+    ]
+  }
+}
