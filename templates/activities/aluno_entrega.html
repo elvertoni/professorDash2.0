@@ -38,7 +38,7 @@
             <div class="section-heading compact">
                 <h2>Materiais de apoio</h2>
             </div>
-            <ul>
+            <ul class="attachment-list">
                 {% for material in atividade.anexos.all %}
                     <li>
                         {% if material.arquivo %}
@@ -66,7 +66,7 @@
                 <p>{{ entrega.texto_resposta|linebreaks }}</p>
             {% endif %}
             {% if entrega.arquivos.all %}
-                <ul>
+                <ul class="attachment-list">
                     {% for arquivo in entrega.arquivos.all %}
                         <li>
                             <a href="{% url 'activities:entrega_arquivo_download' arquivo.pk %}">

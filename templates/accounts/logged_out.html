@@ -4,12 +4,12 @@
 
 {% block auth_content %}
 <div class="auth-heading">
-    <span class="badge badge-success"><i data-lucide="check"></i> Sessão encerrada</span>
+    <span class="badge badge-success"><i data-lucide="check" aria-hidden="true"></i> Sessão encerrada</span>
     <h1>Você saiu do portal</h1>
     <p>Para continuar usando o portal do Prof. Toni Coimbra, entre novamente com seu e-mail e senha.</p>
 </div>
 <a class="btn btn-primary btn-lg auth-submit" href="{% url 'accounts:login' %}">
-    <i data-lucide="log-in"></i>
+    <i data-lucide="log-in" aria-hidden="true"></i>
     Entrar novamente
 </a>
 {% endblock %}

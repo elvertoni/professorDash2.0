@@ -54,19 +54,19 @@
     </div>
 
     <div class="hero-copy">
-        <span class="badge badge-success"><i data-lucide="check"></i> Fundação em Django 6</span>
+        <span class="badge badge-success"><i data-lucide="sparkles" aria-hidden="true"></i> Portal educacional</span>
         <h1>Prof. Toni <span class="text-gradient-brand">Coimbra</span></h1>
         <p>
-            Portal educacional para conectar as aulas canônicas do acervo PROF-TONI
-            às turmas, atividades, entregas e correções dos alunos.
+            Onde a aula vira jornada: o professor publica conteúdo, materiais e
+            atividades por turma, e o aluno estuda, entrega e acompanha nota e feedback.
         </p>
         <div class="hero-actions">
             <a class="btn btn-primary btn-lg" href="{% url 'accounts:login' %}">
-                <i data-lucide="log-in"></i>
+                <i data-lucide="log-in" aria-hidden="true"></i>
                 Entrar no portal
             </a>
             <a class="btn btn-outline btn-lg" href="#jornada">
-                <i data-lucide="arrow-down"></i>
+                <i data-lucide="arrow-down" aria-hidden="true"></i>
                 Ver jornada
             </a>
         </div>
@@ -83,42 +83,24 @@
         <article class="card">
             <div class="stripe"></div>
             <span class="tag-disc">Acervo</span>
-            <h3>Importar aulas</h3>
-            <p class="desc">Aulas aprovadas entram no catálogo a partir de `canonica.md` e ficam prontas para publicação.</p>
-            <div class="card-foot"><span>Catálogo</span><i data-lucide="book-open"></i></div>
+            <h3>Aulas no catálogo</h3>
+            <p class="desc">Conteúdo autoral aprovado entra no catálogo organizado por disciplina e trilha, pronto para publicação.</p>
+            <div class="card-foot"><span>Catálogo</span><i data-lucide="book-open" aria-hidden="true"></i></div>
         </article>
         <article class="card">
             <div class="stripe"></div>
             <span class="tag-disc">Turmas</span>
             <h3>Publicar por turma</h3>
             <p class="desc">O professor libera aulas, materiais e atividades com ordem, prazo e contexto da disciplina.</p>
-            <div class="card-foot"><span>Professor</span><i data-lucide="send"></i></div>
+            <div class="card-foot"><span>Professor</span><i data-lucide="send" aria-hidden="true"></i></div>
         </article>
         <article class="card">
             <div class="stripe"></div>
             <span class="tag-disc">Aluno</span>
             <h3>Estudar e entregar</h3>
             <p class="desc">O aluno acessa a aula, marca progresso, envia arquivos e acompanha nota e feedback.</p>
-            <div class="card-foot"><span>Progresso</span><i data-lucide="trending-up"></i></div>
+            <div class="card-foot"><span>Progresso</span><i data-lucide="trending-up" aria-hidden="true"></i></div>
         </article>
-    </div>
-</section>
-
-<section class="section" id="recursos">
-    <div class="section-heading">
-        <span class="eyebrow">Sprint 0</span>
-        <h2>Base técnica pronta para evoluir</h2>
-        <p>Configuração, healthcheck, media protegida e design system integrados como fundação do portal.</p>
-    </div>
-    <div class="status-panel">
-        <div class="status-row">
-            <span class="badge badge-success"><i data-lucide="shield-check"></i> Mídia protegida</span>
-            <span class="badge badge-info"><i data-lucide="activity"></i> /health/</span>
-            <span class="badge badge-violet"><i data-lucide="palette"></i> Design system</span>
-            <span class="badge badge-neutral"><i data-lucide="database"></i> PostgreSQL</span>
-        </div>
-        <div class="progress-row"><span>Fundação da Sprint 0</span><span>Em validação</span></div>
-        <div class="progress"><i style="width:86%"></i></div>
     </div>
 </section>
 {% endblock %}

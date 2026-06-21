@@ -18,11 +18,11 @@
 
     <div class="classroom-actions">
         <a class="btn btn-primary" href="{% url 'activities:atividade_create' turma.pk %}">
-            <i data-lucide="plus"></i>
+            <i data-lucide="plus" aria-hidden="true"></i>
             Nova atividade
         </a>
         <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">
-            <i data-lucide="arrow-left"></i>
+            <i data-lucide="arrow-left" aria-hidden="true"></i>
             Voltar à turma
         </a>
     </div>
@@ -55,21 +55,21 @@
                         <td class="mono">{{ atividade.entregas.all|length }}</td>
                         <td>
                             {% if atividade.publicada %}
-                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Publicada</span>
+                                <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Publicada</span>
                             {% else %}
-                                <span class="badge badge-neutral"><i data-lucide="eye-off"></i> Rascunho</span>
+                                <span class="badge badge-neutral"><i data-lucide="eye-off" aria-hidden="true"></i> Rascunho</span>
                             {% endif %}
                         </td>
                         <td>
                             <div class="tbl-actions">
                                 <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_entregas' atividade.pk %}">
-                                    <i data-lucide="inbox"></i> Entregas
+                                    <i data-lucide="inbox" aria-hidden="true"></i> Entregas
                                 </a>
                                 <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_update' atividade.pk %}">
-                                    <i data-lucide="edit-3"></i> Editar
+                                    <i data-lucide="edit-3" aria-hidden="true"></i> Editar
                                 </a>
                                 <a class="btn btn-danger btn-sm" href="{% url 'activities:atividade_delete' atividade.pk %}">
-                                    <i data-lucide="trash-2"></i> Excluir
+                                    <i data-lucide="trash-2" aria-hidden="true"></i> Excluir
                                 </a>
                             </div>
                         </td>
@@ -78,7 +78,7 @@
                     <tr>
                         <td colspan="6">
                             <div class="empty">
-                                <i data-lucide="clipboard-list"></i>
+                                <i data-lucide="clipboard-list" aria-hidden="true"></i>
                                 <h2>Nenhuma atividade criada</h2>
                                 <p>Crie a primeira atividade desta turma.</p>
                             </div>

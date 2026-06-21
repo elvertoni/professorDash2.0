@@ -12,14 +12,14 @@
         <span class="tag-disc">Identidade</span>
         <h3>{{ request.user.nome_completo }}</h3>
         <p class="desc">{{ request.user.email }}</p>
-        <div class="card-foot"><span>Professor</span><i data-lucide="graduation-cap"></i></div>
+        <div class="card-foot"><span>Professor</span><i data-lucide="graduation-cap" aria-hidden="true"></i></div>
     </article>
     <article class="card">
         <div class="stripe"></div>
         <span class="tag-disc">SEED</span>
         <h3>{{ profile.seed_registration|default:'Vínculo não informado' }}</h3>
         <p class="desc">{{ profile.disciplines|default:'Disciplinas ainda não informadas.' }}</p>
-        <div class="card-foot"><span>Perfil profissional</span><i data-lucide="book-open"></i></div>
+        <div class="card-foot"><span>Perfil profissional</span><i data-lucide="book-open" aria-hidden="true"></i></div>
     </article>
 </div>
 {% endblock %}

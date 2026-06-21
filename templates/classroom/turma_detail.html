@@ -40,13 +40,13 @@
         </div>
     </div>
 
-    <div class="grid cols-4" style="margin-bottom: var(--space-6);">
-        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+    <div class="grid cols-4 action-grid">
+        <div class="panel action-panel">
             <div>
-                <span class="eyebrow" style="color: var(--shell-primary-200);">Conteúdo</span>
-                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Gerenciar aulas, atividades e arquivos.</p>
+                <span class="eyebrow">Conteúdo</span>
+                <p class="desc">Gerenciar aulas, atividades e arquivos.</p>
             </div>
-            <div class="grid cols-1" style="gap: var(--space-2);">
+            <div class="stack">
                 <a class="btn btn-primary" href="{% url 'classroom:turma_aulas' turma.pk %}">
                     <i data-lucide="send" aria-hidden="true"></i>
                     Publicar aulas
@@ -62,12 +62,12 @@
             </div>
         </div>
 
-        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+        <div class="panel action-panel">
             <div>
-                <span class="eyebrow" style="color: var(--shell-secondary-200);">Alunos</span>
-                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Matricular novos alunos ou importar via CSV.</p>
+                <span class="eyebrow">Alunos</span>
+                <p class="desc">Matricular novos alunos ou importar via CSV.</p>
             </div>
-            <div class="grid cols-1" style="gap: var(--space-2);">
+            <div class="stack">
                 <a class="btn btn-outline btn-sm" href="{% url 'classroom:matricula_create' turma.pk %}">
                     <i data-lucide="user-plus" aria-hidden="true"></i>
                     Matricular aluno
@@ -79,12 +79,12 @@
             </div>
         </div>
 
-        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+        <div class="panel action-panel" id="relatorios">
             <div>
-                <span class="eyebrow" style="color: var(--shell-tertiary-200);">Relatórios</span>
-                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Exportar boletins e relatórios consolidados.</p>
+                <span class="eyebrow">Relatórios</span>
+                <p class="desc">Exportar boletins e relatórios consolidados.</p>
             </div>
-            <div class="grid cols-1" style="gap: var(--space-2);">
+            <div class="stack">
                 <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_relatorio_pdf' turma.pk %}">
                     <i data-lucide="file-down" aria-hidden="true"></i>
                     Relatório PDF
@@ -96,12 +96,12 @@
             </div>
         </div>
 
-        <div class="panel" style="display: flex; flex-direction: column; gap: var(--space-3); justify-content: space-between;">
+        <div class="panel action-panel">
             <div>
                 <span class="eyebrow">Configurações</span>
-                <p style="font-size: 12px; color: var(--shell-text-soft); margin-top: 4px;">Configurações gerais do cadastro da turma.</p>
+                <p class="desc">Configurações gerais do cadastro da turma.</p>
             </div>
-            <div class="grid cols-1" style="gap: var(--space-2);">
+            <div class="stack">
                 <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_update' turma.pk %}">
                     <i data-lucide="settings" aria-hidden="true"></i>
                     Editar turma
@@ -127,7 +127,7 @@
                     <tr>
                         <td>
                             <span class="name">
-                                <span class="avatar sm">{{ matricula.aluno.get_short_name|slice:':2'|upper }}</span>
+                                <span class="avatar sm" aria-hidden="true">{{ matricula.aluno.get_short_name|slice:':2'|upper }}</span>
                                 <span>
                                     {{ matricula.aluno.nome_completo }}
                                     <small>{{ matricula.aluno.email }}</small>
@@ -188,12 +188,12 @@
         </table>
     </div>
 
-    <div class="panel" style="margin-top: var(--space-6); border-color: rgba(248,113,113,.2);">
-        <span class="badge badge-danger" style="margin-bottom: var(--space-2);"><i data-lucide="alert-triangle"></i> Área Perigosa</span>
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;">
+    <div class="panel danger-zone">
+        <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Área perigosa</span>
+        <div class="danger-head">
             <div>
-                <h3 style="font-size: 15px; font-weight: 700; color: var(--shell-text);">Excluir esta turma</h3>
-                <p style="font-size: 13px; color: var(--shell-text-muted);">Esta ação removerá permanentemente a turma, suas matrículas e todos os dados associados. Não há como reverter.</p>
+                <h3>Excluir esta turma</h3>
+                <p>Esta ação removerá permanentemente a turma, suas matrículas e todos os dados associados. Não há como reverter.</p>
             </div>
             <a class="btn btn-danger" href="{% url 'classroom:turma_delete' turma.pk %}">
                 <i data-lucide="trash-2" aria-hidden="true"></i>

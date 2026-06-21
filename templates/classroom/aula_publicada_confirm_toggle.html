@@ -12,7 +12,7 @@
     </nav>
 
     <div class="panel danger-panel" style="border-color: var(--shell-warning);">
-        <span class="badge badge-warning" style="margin-bottom: var(--space-2);"><i data-lucide="eye-off"></i> Ação de Risco</span>
+        <span class="badge badge-warning" style="margin-bottom: var(--space-2);"><i data-lucide="eye-off" aria-hidden="true"></i> Ação de risco</span>
         <h1>Despublicar aula da turma?</h1>
         <p style="margin-bottom: var(--space-4);">
             Você está ocultando a aula <strong>{{ publicada.aula.titulo }}</strong> da turma <strong>{{ turma.nome }}</strong>.
@@ -21,8 +21,8 @@
         <form class="form-actions" method="post">
             {% csrf_token %}
             <a class="btn btn-outline" href="{% url 'classroom:turma_aulas' turma.pk %}">Cancelar</a>
-            <button class="btn btn-primary" style="background: var(--shell-warning); color: #000; border-color: var(--shell-warning);" type="submit">
-                <i data-lucide="eye-off"></i>
+            <button class="btn btn-primary" style="background: var(--shell-warning); color: #1a1206; border-color: var(--shell-warning);" type="submit">
+                <i data-lucide="eye-off" aria-hidden="true"></i>
                 Confirmar despublicação
             </button>
         </form>

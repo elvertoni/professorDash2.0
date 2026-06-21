@@ -4,27 +4,16 @@
 
 {% block auth_content %}
 <div class="auth-heading">
-    <span class="badge badge-success"><i data-lucide="shield-check"></i> Acesso seguro</span>
+    <span class="badge badge-success"><i data-lucide="shield-check" aria-hidden="true"></i> Acesso seguro</span>
     <h1>Entrar no portal</h1>
     <p>Use seu e-mail e senha para acessar suas aulas, atividades e correções.</p>
 </div>
 
 <form class="auth-form" method="post" novalidate>
     {% csrf_token %}
-    {% if form.non_field_errors %}
-        <div class="toast e"><i data-lucide="alert-triangle"></i><div>{{ form.non_field_errors }}</div></div>
-    {% endif %}
-    {% for field in form %}
-        <div class="field">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-                <div class="err">{{ field.errors }}</div>
-            {% endif %}
-        </div>
-    {% endfor %}
+    {% include 'accounts/partials/form_fields.html' with form=form %}
     <button class="btn btn-primary btn-lg auth-submit" type="submit">
-        <i data-lucide="log-in"></i>
+        <i data-lucide="log-in" aria-hidden="true"></i>
         Entrar
     </button>
     <a class="auth-link" href="{% url 'accounts:password_reset' %}">Esqueci minha senha</a>

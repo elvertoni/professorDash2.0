@@ -31,8 +31,8 @@
             </summary>
             <nav class="mobile-nav-panel" aria-label="Navegação principal mobile">
                 {% if not user.is_authenticated %}
-                    <a href="{% url 'home' %}#jornada" class="{% if '#jornada' in request.path %}active{% endif %}">Jornada</a>
-                    <a href="{% url 'home' %}#recursos" class="{% if '#recursos' in request.path %}active{% endif %}">Recursos</a>
+                    <a href="{% url 'home' %}#jornada">Jornada</a>
+                    <a href="{% url 'home' %}#recursos">Recursos</a>
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                 {% else %}
                     {% if user.is_aluno %}
@@ -50,7 +50,7 @@
                         {% endif %}
                         <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                         {% if user.first_active_turma %}
-                            <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}" class="{% if '/turmas/' in request.path and '/relatorio/' in request.path %}active{% endif %}">Relatórios</a>
+                            <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}#relatorios">Relatórios</a>
                         {% endif %}
                     {% endif %}
                     <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>
@@ -64,8 +64,8 @@
         </details>
         <nav class="site-nav" aria-label="Navegação principal">
             {% if not user.is_authenticated %}
-                <a href="{% url 'home' %}#jornada" class="{% if '#jornada' in request.path %}active{% endif %}">Jornada</a>
-                <a href="{% url 'home' %}#recursos" class="{% if '#recursos' in request.path %}active{% endif %}">Recursos</a>
+                <a href="{% url 'home' %}#jornada">Jornada</a>
+                <a href="{% url 'home' %}#recursos">Recursos</a>
                 <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
             {% else %}
                 {% if user.is_aluno %}
@@ -83,7 +83,7 @@
                     {% endif %}
                     <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Catálogo</a>
                     {% if user.first_active_turma %}
-                        <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}" class="{% if '/turmas/' in request.path and '/relatorio/' in request.path %}active{% endif %}">Relatórios</a>
+                        <a href="{% url 'classroom:turma_detail' user.first_active_turma.pk %}#relatorios">Relatórios</a>
                     {% endif %}
                 {% endif %}
                 <a href="{% url 'notifications:list' %}" class="{% if '/notificacoes/' in request.path %}active{% endif %}">Notificações</a>

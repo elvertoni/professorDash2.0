@@ -12,7 +12,7 @@
     </nav>
 
     <div class="panel danger-panel">
-        <span class="badge badge-danger" style="margin-bottom: var(--space-2);"><i data-lucide="alert-triangle"></i> Ação de Risco</span>
+        <span class="badge badge-danger" style="margin-bottom: var(--space-2);"><i data-lucide="alert-triangle" aria-hidden="true"></i> Ação de risco</span>
         <h1>Remover aula da turma?</h1>
         <p style="margin-bottom: var(--space-4);">
             Você está removendo a aula <strong>{{ publicada.aula.titulo }}</strong> da turma <strong>{{ turma.nome }}</strong>. 
@@ -22,7 +22,7 @@
             {% csrf_token %}
             <a class="btn btn-outline" href="{% url 'classroom:turma_aulas' turma.pk %}">Cancelar</a>
             <button class="btn btn-danger" type="submit">
-                <i data-lucide="trash-2"></i>
+                <i data-lucide="trash-2" aria-hidden="true"></i>
                 Confirmar remoção
             </button>
         </form>

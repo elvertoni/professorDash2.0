@@ -24,58 +24,58 @@
 
     <div class="toolbar">
         <a class="btn btn-outline btn-sm" href="{% url 'classroom:turma_list' %}">
-            <i data-lucide="users"></i> Minhas turmas
+            <i data-lucide="users" aria-hidden="true"></i> Minhas turmas
         </a>
         <a class="btn btn-outline btn-sm" href="{% url 'catalog:aula_list' %}">
-            <i data-lucide="book-open"></i> Acervo de aulas
+            <i data-lucide="book-open" aria-hidden="true"></i> Acervo de aulas
         </a>
         <span class="spacer"></span>
-        <span class="badge badge-neutral"><i data-lucide="clipboard-list"></i> {{ total_atividades }} atividades publicadas</span>
+        <span class="badge badge-neutral"><i data-lucide="clipboard-list" aria-hidden="true"></i> {{ total_atividades }} atividades publicadas</span>
     </div>
 
     <div class="kpi-grid">
         {% if total_aguardando and total_aguardando > 0 %}
             <div class="kpi">
                 <div class="stripe stripe-warning"></div>
-                <div class="ico yellow"><i data-lucide="clock"></i></div>
+                <div class="ico yellow"><i data-lucide="clock" aria-hidden="true"></i></div>
                 <div class="val">{{ total_aguardando }}</div>
                 <div class="lab">Aguardando check</div>
                 <div class="delta text-warning">
-                    <i data-lucide="alert-triangle"></i> fila de correção
+                    <i data-lucide="alert-triangle" aria-hidden="true"></i> fila de correção
                 </div>
             </div>
             <div class="kpi">
                 <div class="stripe stripe-cta"></div>
-                <div class="ico green"><i data-lucide="users"></i></div>
+                <div class="ico green"><i data-lucide="users" aria-hidden="true"></i></div>
                 <div class="val">{{ total_turmas }}</div>
                 <div class="lab">Turmas ativas</div>
             </div>
             <div class="kpi">
                 <div class="stripe stripe-violet"></div>
-                <div class="ico violet"><i data-lucide="user-check"></i></div>
+                <div class="ico violet"><i data-lucide="user-check" aria-hidden="true"></i></div>
                 <div class="val">{{ total_alunos }}</div>
                 <div class="lab">Alunos ativos</div>
             </div>
         {% else %}
             <div class="kpi">
                 <div class="stripe stripe-cta"></div>
-                <div class="ico green"><i data-lucide="users"></i></div>
+                <div class="ico green"><i data-lucide="users" aria-hidden="true"></i></div>
                 <div class="val">{{ total_turmas }}</div>
                 <div class="lab">Turmas ativas</div>
             </div>
             <div class="kpi">
                 <div class="stripe stripe-violet"></div>
-                <div class="ico violet"><i data-lucide="user-check"></i></div>
+                <div class="ico violet"><i data-lucide="user-check" aria-hidden="true"></i></div>
                 <div class="val">{{ total_alunos }}</div>
                 <div class="lab">Alunos ativos</div>
             </div>
             <div class="kpi">
-                <div class="stripe stripe-warning"></div>
-                <div class="ico yellow"><i data-lucide="clock"></i></div>
+                <div class="stripe stripe-cta"></div>
+                <div class="ico green"><i data-lucide="check-circle" aria-hidden="true"></i></div>
                 <div class="val">0</div>
                 <div class="lab">Aguardando check</div>
                 <div class="delta text-success">
-                    <i data-lucide="check-circle"></i> tudo corrigido
+                    <i data-lucide="check-circle" aria-hidden="true"></i> tudo corrigido
                 </div>
             </div>
         {% endif %}

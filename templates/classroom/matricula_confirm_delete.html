@@ -11,14 +11,14 @@
     </nav>
 
     <div class="panel danger-panel">
-        <span class="badge badge-warning"><i data-lucide="user-x"></i> Alteração de matrícula</span>
+        <span class="badge badge-warning"><i data-lucide="user-x" aria-hidden="true"></i> Alteração de matrícula</span>
         <h1>Desmatricular {{ matricula.aluno.nome_completo }}?</h1>
         <p>A conta do aluno será preservada, mas a matrícula nesta turma ficará inativa.</p>
         <form class="form-actions" method="post">
             {% csrf_token %}
             <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Cancelar</a>
             <button class="btn btn-danger" type="submit">
-                <i data-lucide="user-x"></i>
+                <i data-lucide="user-x" aria-hidden="true"></i>
                 Desmatricular
             </button>
         </form>

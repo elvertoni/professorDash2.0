@@ -2,7 +2,7 @@
     <div class="page-heading-row">
         <div>
             <span class="eyebrow">Fila de correção</span>
-            <h2>Aguardando <span class="accent">check</span></h2>
+            <h2>Aguardando check</h2>
         </div>
         {% if aguardando %}
         <div class="meta">{{ aguardando|length }} entregas<br>pendentes</div>
@@ -27,7 +27,7 @@
                     <tr>
                         <td>
                             <span class="name">
-                                <span class="avatar sm">{{ entrega.aluno.get_short_name|slice:':2'|upper }}</span>
+                                <span class="avatar sm" aria-hidden="true">{{ entrega.aluno.get_short_name|slice:':2'|upper }}</span>
                                 <span>{{ entrega.aluno.nome_completo }}</span>
                             </span>
                         </td>
@@ -35,15 +35,15 @@
                         <td>{{ entrega.atividade.turma.nome }}</td>
                         <td>
                             {% if entrega.status == 'atrasada' %}
-                                <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Atrasada</span>
+                                <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Atrasada</span>
                             {% else %}
-                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Entregue</span>
+                                <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Entregue</span>
                             {% endif %}
                         </td>
                         <td class="mono">{{ entrega.data_entrega|date:'d/m/Y H:i' }}</td>
                         <td>
                             <a class="btn btn-primary btn-sm" href="{% url 'activities:correcao' entrega.pk %}">
-                                <i data-lucide="check-check"></i> Corrigir
+                                <i data-lucide="check-check" aria-hidden="true"></i> Corrigir
                             </a>
                         </td>
                     </tr>
@@ -53,7 +53,7 @@
     </div>
 {% else %}
     <div class="empty">
-        <i data-lucide="party-popper"></i>
+        <i data-lucide="party-popper" aria-hidden="true"></i>
         <h2>Nada na fila</h2>
         <p>Todas as entregas foram corrigidas.</p>
     </div>

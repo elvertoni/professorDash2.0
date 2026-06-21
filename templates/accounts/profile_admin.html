@@ -12,14 +12,14 @@
         <span class="tag-disc">Conta</span>
         <h3>{{ request.user.email }}</h3>
         <p class="desc">Use o admin para criar professores e alunos sem auto-registro público.</p>
-        <div class="card-foot"><span>Admin</span><i data-lucide="shield"></i></div>
+        <div class="card-foot"><span>Admin</span><i data-lucide="shield" aria-hidden="true"></i></div>
     </article>
     <article class="card">
         <div class="stripe"></div>
         <span class="tag-disc">Ação</span>
         <h3>Django Admin</h3>
         <p class="desc">Gerencie usuários, perfis e permissões pela interface administrativa.</p>
-        <div class="card-foot"><a href="/admin/">Abrir admin</a><i data-lucide="external-link"></i></div>
+        <div class="card-foot"><a href="/admin/" target="_blank" rel="noopener">Abrir admin <span class="sr-only">(abre em nova aba)</span></a><i data-lucide="external-link" aria-hidden="true"></i></div>
     </article>
 </div>
 {% endblock %}

@@ -21,7 +21,7 @@
         <div class="form-actions">
             <a class="btn btn-outline" href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'classroom:turma_list' %}{% endif %}">Cancelar</a>
             <button class="btn btn-primary" type="submit">
-                <i data-lucide="save"></i>
+                <i data-lucide="save" aria-hidden="true"></i>
                 Salvar turma
             </button>
         </div>

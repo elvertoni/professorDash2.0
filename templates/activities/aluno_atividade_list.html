@@ -96,7 +96,7 @@
                     {% endif %}
                     
                     <div class="card-head">
-                        <span class="tag-disc">{{ atividade.aula_publicada.aula.titulo|default:"Turma" }}</span>
+                        <span class="tag-disc">{{ atividade.aula_publicada.aula.titulo|default:'Turma' }}</span>
                         {% if atividade.meu_status == 'corrigida' %}
                             <span class="badge badge-info"><i data-lucide="check-check" aria-hidden="true"></i> Corrigida</span>
                         {% elif atividade.meu_status == 'entregue' or atividade.meu_status == 'atrasada' %}
@@ -109,13 +109,11 @@
                     </div>
                     
                     <h3>{{ atividade.titulo }}</h3>
-                        <p class="desc">
-                            {% if atividade.prazo %}
-                            <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> Prazo: {{ atividade.prazo|date:'d/m/Y H:i' }}
-                        {% else %}
-                            Sem prazo
-                        {% endif %}
+                    <p class="desc">
+                        <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i>
+                        {% if atividade.prazo %}Prazo: {{ atividade.prazo|date:'d/m/Y H:i' }}{% else %}Sem prazo{% endif %}
                         <br>
+                        <i class="icon-inline" data-lucide="award" aria-hidden="true"></i>
                         Valor: {{ atividade.pontuacao_max }} pts
                     </p>
                     

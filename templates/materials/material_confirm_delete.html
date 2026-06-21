@@ -12,14 +12,14 @@
     </nav>
 
     <div class="panel danger-panel">
-        <span class="badge badge-danger"><i data-lucide="alert-triangle"></i> Ação permanente</span>
+        <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Ação permanente</span>
         <h1>Excluir material?</h1>
         <p>Esta ação remove "{{ material.titulo }}" e o arquivo associado.</p>
         <form class="form-actions" method="post">
             {% csrf_token %}
             <a class="btn btn-outline" href="{% url 'materials:material_list' turma.pk %}">Cancelar</a>
             <button class="btn btn-danger" type="submit">
-                <i data-lucide="trash-2"></i>
+                <i data-lucide="trash-2" aria-hidden="true"></i>
                 Excluir material
             </button>
         </form>

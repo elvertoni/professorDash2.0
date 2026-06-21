@@ -16,12 +16,19 @@ local_settings.py
 .env
 .env.*
 !.env.example
+cookies.txt
 
 # OS / IDE
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+
+# Local tooling / scratch
+.claude/
+.codex/
+.cursor/
+/scratch/
 
 # Docs build
 /site/

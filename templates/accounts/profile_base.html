@@ -10,27 +10,29 @@
             <h1>{{ request.user.nome_completo }}</h1>
             <span class="badge badge-violet">{{ request.user.get_role_display }}</span>
         </div>
+        {% with current=request.resolver_match.url_name %}
         <nav class="account-nav" aria-label="Conta">
-            <a class="nav-item active" href="{% url 'accounts:profile' %}">
-                <i data-lucide="user"></i>
+            <a class="nav-item{% if current == 'profile' %} active{% endif %}" href="{% url 'accounts:profile' %}"{% if current == 'profile' %} aria-current="page"{% endif %}>
+                <i data-lucide="user" aria-hidden="true"></i>
                 Perfil
             </a>
-            <a class="nav-item" href="{% url 'accounts:profile_edit' %}">
-                <i data-lucide="settings"></i>
+            <a class="nav-item{% if current == 'profile_edit' %} active{% endif %}" href="{% url 'accounts:profile_edit' %}"{% if current == 'profile_edit' %} aria-current="page"{% endif %}>
+                <i data-lucide="settings" aria-hidden="true"></i>
                 Editar perfil
             </a>
-            <a class="nav-item" href="{% url 'accounts:password_change' %}">
-                <i data-lucide="key-round"></i>
+            <a class="nav-item{% if current == 'password_change' or current == 'password_change_done' %} active{% endif %}" href="{% url 'accounts:password_change' %}"{% if current == 'password_change' or current == 'password_change_done' %} aria-current="page"{% endif %}>
+                <i data-lucide="key-round" aria-hidden="true"></i>
                 Alterar senha
             </a>
             <form method="post" action="{% url 'accounts:logout' %}">
                 {% csrf_token %}
                 <button class="nav-item account-logout" type="submit">
-                    <i data-lucide="log-out"></i>
+                    <i data-lucide="log-out" aria-hidden="true"></i>
                     Sair
                 </button>
             </form>
         </nav>
+        {% endwith %}
     </aside>
     <div class="account-content">
         {% block profile_content %}{% endblock %}

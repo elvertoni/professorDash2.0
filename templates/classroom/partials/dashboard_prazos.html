@@ -2,7 +2,7 @@
     <div class="page-heading-row">
         <div>
             <span class="eyebrow">Calendário</span>
-            <h2>Prazos <span class="accent">próximos</span></h2>
+            <h2>Prazos próximos</h2>
             <p class="lead">Atividades publicadas com prazo nos próximos 7 dias.</p>
         </div>
     </div>
@@ -26,7 +26,7 @@
                         <td class="mono">{{ atividade.prazo|date:'d/m/Y H:i' }}</td>
                         <td>
                             <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_entregas' atividade.pk %}">
-                                <i data-lucide="list-checks"></i> Entregas
+                                <i data-lucide="list-checks" aria-hidden="true"></i> Entregas
                             </a>
                         </td>
                     </tr>
@@ -36,7 +36,7 @@
     </div>
 {% else %}
     <div class="empty">
-        <i data-lucide="calendar-check"></i>
+        <i data-lucide="calendar-check" aria-hidden="true"></i>
         <h2>Sem prazos próximos</h2>
         <p>Nenhuma atividade vence nos próximos 7 dias.</p>
     </div>

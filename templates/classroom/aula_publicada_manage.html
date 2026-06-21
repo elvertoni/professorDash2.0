@@ -25,7 +25,7 @@
         <div class="form-actions">
             <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Voltar à turma</a>
             <button class="btn btn-primary" type="submit">
-                <i data-lucide="send"></i>
+                <i data-lucide="send" aria-hidden="true"></i>
                 Publicar aula
             </button>
         </div>
@@ -77,11 +77,11 @@
                         <td class="mono">{{ publicada.disponivel_em|date:'d/m/Y H:i' }}</td>
                         <td>
                             {% if not publicada.publicada %}
-                                <span class="badge badge-neutral"><i data-lucide="eye-off"></i> Despublicada</span>
+                                <span class="badge badge-neutral"><i data-lucide="eye-off" aria-hidden="true"></i> Despublicada</span>
                             {% elif publicada.is_scheduled %}
-                                <span class="badge badge-warning"><i data-lucide="clock"></i> Agendada</span>
+                                <span class="badge badge-warning"><i data-lucide="clock" aria-hidden="true"></i> Agendada</span>
                             {% else %}
-                                <span class="badge badge-success"><i data-lucide="check-circle"></i> Disponível</span>
+                                <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Disponível</span>
                             {% endif %}
                         </td>
                         <td>
@@ -111,7 +111,7 @@
                     <tr>
                         <td colspan="5">
                             <div class="empty">
-                                <i data-lucide="inbox"></i>
+                                <i data-lucide="inbox" aria-hidden="true"></i>
                                 <h2>Nenhuma aula publicada</h2>
                                 <p>Publique a primeira aula do catálogo para esta turma.</p>
                             </div>

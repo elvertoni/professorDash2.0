@@ -1,22 +1,23 @@
+{% load form_extras %}
 {% if form.non_field_errors %}
-    <div class="toast e" role="alert"><i data-lucide="alert-triangle"></i><div>{{ form.non_field_errors }}</div></div>
+    <div class="toast e" role="alert"><i data-lucide="alert-triangle" aria-hidden="true"></i><div>{{ form.non_field_errors }}</div></div>
 {% endif %}
 {% for field in form %}
     <div class="field">
         {% with input_type=field.field.widget.input_type multiple=field.field.widget.allow_multiple_selected %}
             {% if input_type == 'checkbox' and not multiple %}
                 <label class="check" for="{{ field.id_for_label }}">
-                    {{ field }}
+                    {{ field|aria_field }}
                     <span>{{ field.label }}</span>
                 </label>
             {% elif input_type == 'checkbox' or input_type == 'radio' %}
                 <span class="field-label">{{ field.label }}</span>
                 <div class="choice-group">
-                    {{ field }}
+                    {{ field|aria_field }}
                 </div>
             {% else %}
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
+                {{ field|aria_field }}
             {% endif %}
         {% endwith %}
         {% if field.help_text %}

@@ -11,7 +11,7 @@
             <p>Gerencie turmas, códigos de convite e matrículas dos alunos.</p>
         </div>
         <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
-            <i data-lucide="plus"></i>
+            <i data-lucide="plus" aria-hidden="true"></i>
             Nova turma
         </a>
     </div>
@@ -26,11 +26,11 @@
                     <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
                     <div class="status-row">
                         {% if turma.ativa %}
-                            <span class="badge badge-success"><i data-lucide="check-circle"></i> Ativa</span>
+                            <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Ativa</span>
                         {% else %}
-                            <span class="badge badge-neutral"><i data-lucide="archive"></i> Inativa</span>
+                            <span class="badge badge-neutral"><i data-lucide="archive" aria-hidden="true"></i> Inativa</span>
                         {% endif %}
-                        <span class="badge badge-violet"><i data-lucide="users"></i> {{ turma.active_students }} alunos</span>
+                        <span class="badge badge-violet"><i data-lucide="users" aria-hidden="true"></i> {{ turma.active_students }} alunos</span>
                     </div>
                     <div class="invite-code">
                         <span>Código</span>
@@ -38,18 +38,18 @@
                     </div>
                     <div class="card-foot">
                         <span>{{ turma.professor.nome_completo }}</span>
-                        <a href="{{ turma.get_absolute_url }}">Abrir</a>
+                        <a href="{{ turma.get_absolute_url }}">Abrir<i data-lucide="arrow-right" aria-hidden="true"></i></a>
                     </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty">
-            <i data-lucide="users"></i>
+            <i data-lucide="users" aria-hidden="true"></i>
             <h2>Nenhuma turma cadastrada</h2>
             <p style="margin-bottom: var(--space-4);">Crie a primeira turma para matricular alunos e preparar a publicação de aulas.</p>
             <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
-                <i data-lucide="plus"></i>
+                <i data-lucide="plus" aria-hidden="true"></i>
                 Criar turma
             </a>
         </div>

@@ -50,7 +50,7 @@
                         <div class="label-sm text-primary">Ações do professor</div>
                         <h3>Publicar esta aula em uma turma</h3>
                         <div class="lesson-publish-form">
-                            <select class="select lesson-publish-select" id="turma-select" required>
+                            <select class="select lesson-publish-select" id="turma-select" required aria-label="Selecione a turma para publicar esta aula">
                                 <option value="">Selecione a turma...</option>
                                 {% for t in minhas_turmas %}
                                     <option value="{% url 'classroom:turma_aulas' t.pk %}?aula={{ aula.pk }}">{{ t.nome }} ({{ t.serie }})</option>
