@@ -10,8 +10,15 @@ from django.utils.html import escape
 
 FRONTMATTER_RE = re.compile(r'\A---\s*\n(?P<yaml>.*?)\n---\s*\n(?P<body>.*)\Z', re.S)
 FENCE_RE = re.compile(r'```(?P<kind>diagrama[\w-]*)\n(?P<body>.*?)\n```', re.S)
+TEACHER_NOTE_RE = re.compile(
+    r'(?P<block>:::roteiro[^\n]*\n(?P<body>.*?)\n:::\s*)',
+    re.S,
+)
 BLOCK_RE = re.compile(
-    r':::(?P<kind>conceito|atencao|atenção|dica)\s*\n(?P<body>.*?)\n:::\s*',
+    (
+        r':::(?P<kind>conceito|atencao|atenção|dica)'
+        r'(?P<title>[^\n]*)\n(?P<body>.*?)\n:::\s*'
+    ),
     re.S,
 )
 DANGEROUS_HTML_BLOCK_RE = re.compile(
@@ -129,7 +136,8 @@ def split_frontmatter(content):
 
 
 def render_lesson_html(markdown_content):
-    prepared = render_diagram_fences(markdown_content)
+    prepared = strip_teacher_notes(markdown_content)
+    prepared = render_diagram_fences(prepared)
     prepared = render_custom_blocks(prepared)
 
     rendered = markdown.markdown(
@@ -145,7 +153,29 @@ def render_lesson_html(markdown_content):
     return sanitize_lesson_html(rendered)
 
 
+def strip_teacher_notes(markdown_content):
+    return TEACHER_NOTE_RE.sub('', markdown_content or '')
+
+
+def render_teacher_notes_html(markdown_content):
+    notes = [
+        match.group('body').strip()
+        for match in TEACHER_NOTE_RE.finditer(markdown_content or '')
+        if match.group('body').strip()
+    ]
+    if not notes:
+        return ''
+
+    rendered = markdown.markdown(
+        '\n\n---\n\n'.join(notes),
+        extensions=['extra', 'sane_lists'],
+        output_format='html5',
+    )
+    return sanitize_lesson_html(rendered)
+
+
 def sanitize_lesson_html(html_content):
+    html_content = TEACHER_NOTE_RE.sub('', html_content or '')
     html_content = DANGEROUS_HTML_BLOCK_RE.sub('', html_content or '')
     cleaner = bleach.Cleaner(
         tags=ALLOWED_LESSON_TAGS,
@@ -176,7 +206,8 @@ def render_custom_blocks(markdown_content):
     def replace(match):
         kind = match.group('kind').lower()
         normalized_kind = 'atencao' if kind == 'atenção' else kind
-        label = CALLOUT_LABELS[kind]
+        title = match.group('title').strip()
+        label = escape(title or CALLOUT_LABELS[kind])
         icon = CALLOUT_ICONS[normalized_kind]
         body = match.group('body').strip()
         return (

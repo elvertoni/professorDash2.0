@@ -7,6 +7,7 @@ from .views import (
     AlunoTurmaAulasView,
     AulaPublicadaDeleteView,
     AulaPublicadaManageView,
+    AulaPublicadaPreviewView,
     AulaPublicadaReorderView,
     AulaPublicadaToggleView,
     AulaPublicadaUpdateView,
@@ -89,6 +90,11 @@ urlpatterns = [
         '<int:turma_pk>/aulas/<int:pk>/editar/',
         AulaPublicadaUpdateView.as_view(),
         name='aula_publicada_update',
+    ),
+    path(
+        '<int:turma_pk>/aulas/<int:pk>/visualizar/',
+        AulaPublicadaPreviewView.as_view(),
+        name='aula_publicada_preview',
     ),
     path(
         '<int:turma_pk>/aulas/<int:pk>/publicar/',

@@ -26,20 +26,66 @@
         </form>
     </div>
 
-    <form class="panel account-form" method="post">
-        {% csrf_token %}
+    <div class="grid cols-4 action-grid">
+        <div class="kpi">
+            <div class="ico green"><i data-lucide="eye" aria-hidden="true"></i></div>
+            <div class="val">{{ stats.visiveis }}</div>
+            <div class="lab">Visíveis para alunos</div>
+        </div>
+        <div class="kpi">
+            <div class="ico yellow"><i data-lucide="clock" aria-hidden="true"></i></div>
+            <div class="val">{{ stats.agendadas }}</div>
+            <div class="lab">Agendadas</div>
+        </div>
+        <div class="kpi">
+            <div class="ico violet"><i data-lucide="eye-off" aria-hidden="true"></i></div>
+            <div class="val">{{ stats.ocultas }}</div>
+            <div class="lab">Ocultas</div>
+        </div>
+        <div class="kpi">
+            <div class="ico cyan"><i data-lucide="library" aria-hidden="true"></i></div>
+            <div class="val">{{ stats.total }}</div>
+            <div class="lab">Na turma</div>
+        </div>
+    </div>
+
+    <div class="panel account-form">
         <div class="section-heading compact">
-            <h2>Publicar nova aula</h2>
+            <h2>Publicar aula avulsa</h2>
+            <p class="muted">Use quando quiser escolher uma aula específica. Para liberar a trilha inteira, use Sincronizar aulas.</p>
         </div>
-        {% include 'accounts/partials/form_fields.html' %}
-        <div class="form-actions">
-            <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Voltar à turma</a>
-            <button class="btn btn-primary" type="submit">
-                <i data-lucide="send" aria-hidden="true"></i>
-                Publicar aula
-            </button>
-        </div>
-    </form>
+        {% if stats.catalogo_disponivel %}
+            <form method="post">
+                {% csrf_token %}
+                {% include 'accounts/partials/form_fields.html' %}
+                <div class="form-actions">
+                    <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Voltar à turma</a>
+                    <button class="btn btn-primary" type="submit">
+                        <i data-lucide="send" aria-hidden="true"></i>
+                        Publicar aula
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <div class="empty" style="padding: var(--space-6) 24px;">
+                <i data-lucide="library" aria-hidden="true"></i>
+                <h2>Nenhuma aula avulsa disponível</h2>
+                {% if stats.total %}
+                    <p>Todas as aulas aprovadas de {{ turma.disciplina.label }} já estão nesta turma.</p>
+                {% else %}
+                    <p>Sincronize o acervo para importar e publicar as aulas de {{ turma.disciplina.label }}.</p>
+                    <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
+                          onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">
+                            <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                            Sincronizar aulas
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
 
     <div class="tbl-wrap">
         <table class="tbl">
@@ -96,6 +142,9 @@
                         </td>
                         <td>
                             <div class="tbl-actions" style="display: flex; align-items: center; gap: var(--space-2);">
+                                <a class="btn btn-primary btn-sm" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}">
+                                    <i data-lucide="book-open" aria-hidden="true"></i> Ver aula
+                                </a>
                                 {% if publicada.publicada %}
                                     <a class="btn btn-outline btn-sm" style="border-color: var(--shell-warning); color: var(--shell-warning);" href="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
                                         <i data-lucide="eye-off" aria-hidden="true"></i> Despublicar
@@ -123,7 +172,15 @@
                             <div class="empty">
                                 <i data-lucide="inbox" aria-hidden="true"></i>
                                 <h2>Nenhuma aula publicada</h2>
-                                <p>Publique a primeira aula do catálogo para esta turma.</p>
+                                <p>Sincronize o acervo para liberar as aulas de {{ turma.disciplina.label }} nesta turma.</p>
+                                <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
+                                      onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary" type="submit">
+                                        <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                                        Sincronizar aulas
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

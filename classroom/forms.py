@@ -186,10 +186,13 @@ class AulaPublicadaForm(StyledFormMixin, forms.ModelForm):
             'aula_id', flat=True
         )
         self.fields['aula'].queryset = (
-            Aula.objects.filter(status=Aula.Status.APROVADA)
+            Aula.objects.filter(
+                disciplina=turma.disciplina,
+                status=Aula.Status.APROVADA,
+            )
             .exclude(pk__in=ja_publicadas)
-            .select_related('disciplina', 'trilha')
-            .order_by('disciplina__label', 'trilha__label', 'ordem')
+            .select_related('trilha')
+            .order_by('trilha__label', 'ordem')
         )
         self.apply_design_system_classes()
 

@@ -28,7 +28,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
 from accounts.models import User
 from catalog.models import Aula
-from catalog.parser import sanitize_lesson_html
+from catalog.parser import render_teacher_notes_html, sanitize_lesson_html
 from catalog.services import AcervoDownloadError, download_acervo
 
 from .forms import (
@@ -411,15 +411,36 @@ class AulaPublicadaManageView(TurmaQuerysetMixin, View):
         return get_object_or_404(self.get_queryset(), pk=pk)
 
     def render_page(self, request, turma, form):
-        publicadas = (
+        publicadas = list(
             AulaPublicada.objects.filter(turma=turma)
             .select_related('aula', 'aula__disciplina', 'aula__trilha')
             .order_by('ordem_na_turma', 'aula__ordem')
         )
+        now = timezone.now()
+        stats = {
+            'total': len(publicadas),
+            'visiveis': sum(
+                1
+                for item in publicadas
+                if item.publicada and item.disponivel_em <= now
+            ),
+            'agendadas': sum(
+                1
+                for item in publicadas
+                if item.publicada and item.disponivel_em > now
+            ),
+            'ocultas': sum(1 for item in publicadas if not item.publicada),
+            'catalogo_disponivel': form.fields['aula'].queryset.count(),
+        }
         return render(
             request,
             self.template_name,
-            {'turma': turma, 'form': form, 'publicadas': publicadas},
+            {
+                'turma': turma,
+                'form': form,
+                'publicadas': publicadas,
+                'stats': stats,
+            },
         )
 
 
@@ -516,7 +537,48 @@ class AulaPublicadaActionMixin(TurmaQuerysetMixin):
 
     def get_publicada(self, turma, pk):
         return get_object_or_404(
-            AulaPublicada.objects.select_related('aula'), turma=turma, pk=pk
+            AulaPublicada.objects.select_related(
+                'aula',
+                'aula__disciplina',
+                'aula__trilha',
+                'turma',
+            ),
+            turma=turma,
+            pk=pk,
+        )
+
+
+class AulaPublicadaPreviewView(AulaPublicadaActionMixin, View):
+    template_name = 'classroom/aula_publicada_preview.html'
+
+    def get(self, request, turma_pk, pk):
+        turma = self.get_turma(turma_pk)
+        publicada = self.get_publicada(turma, pk)
+        ordered = list(
+            AulaPublicada.objects.filter(turma=turma)
+            .select_related('aula')
+            .order_by('ordem_na_turma', 'aula__ordem')
+        )
+        index = next((i for i, item in enumerate(ordered) if item.pk == pk), None)
+        previous_aula = ordered[index - 1] if index not in (None, 0) else None
+        next_aula = (
+            ordered[index + 1]
+            if index is not None and index < len(ordered) - 1
+            else None
+        )
+        aula = publicada.aula
+        return render(
+            request,
+            self.template_name,
+            {
+                'turma': turma,
+                'publicada': publicada,
+                'aula': aula,
+                'lesson_html': sanitize_lesson_html(aula.conteudo_html),
+                'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md),
+                'previous_aula': previous_aula,
+                'next_aula': next_aula,
+            },
         )
 
 

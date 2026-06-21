@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Prévia · {{ aula.titulo }} · Prof. Toni Coimbra{% endblock %}
+
+{% block extra_head %}
+<style>
+.teacher-preview-bar {
+    position: sticky;
+    top: calc(var(--topbar-h) + 12px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--shell-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--shell-surface-strong);
+    box-shadow: var(--shell-shadow-soft);
+}
+.teacher-preview-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+.teacher-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+.teacher-notes {
+    margin-top: var(--space-6);
+}
+.teacher-notes .prose {
+    margin-top: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--shell-surface-low);
+}
+@media (max-width: 720px) {
+    .teacher-preview-bar {
+        position: static;
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .teacher-preview-actions .btn,
+    .teacher-preview-actions form {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="lesson-page">
+    <nav class="lesson-breadcrumb" aria-label="Caminho">
+        <a href="{% url 'classroom:turma_list' %}">Turmas</a>
+        <a href="{{ turma.get_absolute_url }}">{{ turma.nome }}</a>
+        <a href="{% url 'classroom:turma_aulas' turma.pk %}">Aulas</a>
+        <span>Prévia</span>
+    </nav>
+
+    <div class="teacher-preview-bar" aria-label="Controles da aula">
+        <div class="teacher-preview-main">
+            <span class="badge badge-violet">
+                <i data-lucide="user-cog" aria-hidden="true"></i>
+                Prévia do professor
+            </span>
+            {% if not publicada.publicada %}
+                <span class="badge badge-neutral"><i data-lucide="eye-off" aria-hidden="true"></i> Oculta dos alunos</span>
+            {% elif publicada.is_scheduled %}
+                <span class="badge badge-warning"><i data-lucide="clock" aria-hidden="true"></i> Liberada em {{ publicada.disponivel_em|date:'d/m/Y H:i' }}</span>
+            {% else %}
+                <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Visível para alunos</span>
+            {% endif %}
+        </div>
+        <div class="teacher-preview-actions">
+            <a class="btn btn-outline btn-sm" href="{% url 'classroom:aula_publicada_update' turma.pk publicada.pk %}">
+                <i data-lucide="settings-2" aria-hidden="true"></i>
+                Ajustar liberação
+            </a>
+            {% if not publicada.publicada %}
+                <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-primary btn-sm" type="submit">
+                        <i data-lucide="eye" aria-hidden="true"></i>
+                        Publicar agora
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <article class="atelier">
+        <div class="atelier-rail">
+            <aside class="atelier-side">
+                <div class="course">{{ turma.disciplina.label }}</div>
+                <h4>{{ turma.nome }}</h4>
+                <div class="mod active"><i data-lucide="book-open" aria-hidden="true"></i> Aula {{ aula.ordem|stringformat:'02d' }}</div>
+                <div class="mod"><i data-lucide="layers" aria-hidden="true"></i> {{ aula.trilha.label }}</div>
+                {% if teacher_notes_html %}
+                    <div class="mod"><i data-lucide="clipboard-list" aria-hidden="true"></i> Roteiro docente</div>
+                {% endif %}
+            </aside>
+            <div class="atelier-body">
+                <div class="atelier-meta">
+                    <span class="tag p">{{ turma.disciplina.label }}</span>
+                    <span class="tag s">{{ aula.trilha.label }}</span>
+                    <span class="date">Ordem {{ publicada.ordem_na_turma }}</span>
+                </div>
+                <h1>{{ aula.titulo }}</h1>
+                {% if aula.tema %}
+                    <p class="dek">{{ aula.tema }}</p>
+                {% endif %}
+
+                {% if aula.objetivos %}
+                    <section class="lesson-goals">
+                        <span class="eyebrow">Objetivos</span>
+                        <ul>
+                            {% for objetivo in aula.objetivos %}
+                                <li>{{ objetivo }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+
+                <div class="prose">
+                    {{ lesson_html|safe }}
+                </div>
+
+                {% if teacher_notes_html %}
+                    <section class="teacher-notes">
+                        <span class="badge badge-info"><i data-lucide="presentation" aria-hidden="true"></i> Roteiro do professor</span>
+                        <div class="prose">
+                            {{ teacher_notes_html|safe }}
+                        </div>
+                    </section>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+
+    <nav class="lesson-nav" aria-label="Navegação da turma">
+        {% if previous_aula %}
+            <a class="prev" href="{% url 'classroom:aula_publicada_preview' turma.pk previous_aula.pk %}">
+                <span class="lab">Anterior</span>
+                <span class="ttl">{{ previous_aula.aula.titulo }}</span>
+            </a>
+        {% else %}
+            <span></span>
+        {% endif %}
+        {% if next_aula %}
+            <a class="next" href="{% url 'classroom:aula_publicada_preview' turma.pk next_aula.pk %}">
+                <span class="lab">Próxima aula</span>
+                <span class="ttl">{{ next_aula.aula.titulo }}</span>
+            </a>
+        {% endif %}
+    </nav>
+</section>
+{% endblock %}
