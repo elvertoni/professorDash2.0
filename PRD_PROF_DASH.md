@@ -536,9 +536,20 @@ Decisões da Sprint 11:
 - [x] `scripts/backup.sh` (dump Postgres + tar media); backup também disponível no painel do Easypanel.
 - [x] `.gitattributes` força LF nos `.sh` (evita shebang quebrado no container).
 - [x] Guia de deploy Easypanel documentado (`docs/deploy-easypanel.md`, `docs/deploy.md`).
-- [ ] Executar deploy no Easypanel (criar services App + Postgres, env vars, domínio, volumes).
-- [ ] Importar acervo em produção e validar render das aulas.
-- [ ] Smoke test completo das jornadas (professor e aluno).
+- [x] Executar deploy no Easypanel (criar services App + Postgres, env vars, domínio, volumes).
+- [x] Importar acervo em produção e validar render das aulas.
+- [x] Smoke test completo das jornadas (professor e aluno).
+
+### Pós-lançamento — Redesign UX foco TDAH (2026-06-21)
+> Motivação: o dono do portal (professor, TDAH) não conseguia entender o próprio sistema. Causa raiz = arquitetura de informação e carga cognitiva (navbar com 8 itens, dashboard do aluno com 6 seções empilhadas, sem "o que fazer agora"). Redesign dentro do design system existente ("Digital Atelier") — **não** migração para tema externo (rejeitado: viola regra inviolável de não inventar DS fora do `design-system.html`).
+
+Decisões:
+- **D.5 — Tema por papel:** `data-theme` renderizado por papel no `base.html` (aluno=`light`, professor/admin/anônimo=`dark`); toggle `localStorage` ainda sobrescreve como preferência pessoal. Usa os dois temas que já existiam.
+- **D.6 — Foco radical (uma decisão por tela):** navbar enxuto (≤3 itens primários + menu de conta com avatar); dashboard do professor = banner de urgência + accordion série→disciplina + Prazos colapsável; dashboard do aluno = "Para fazer agora" + barra de progresso + abas `[Prazos][Aulas][Notas]` (fim do muro de 6 seções).
+- **Correção de stack:** Alpine.js (3.14.1) estava na stack documentada mas **nunca havia sido carregado** no `base.html` — incluído agora (accordion/abas dependem dele); `[x-cloak]` adicionado ao `app.css`.
+- **Deploy:** webhook GitHub→Easypanel é não-confiável; trigger confiável = `deploy_service` (MCP). "Branch not found" = conexão GitHub caiu → reconectar na UI do Easypanel. Detalhe na memória `deploy-vps-easypanel`.
+
+Componentes novos documentados no `DESIGN.md`: `account-menu`, `serie-section`, `dash-collapsible`, `dash-tabs`, `aluno-progress`, `lesson-actionbar`.
 
 ---
 

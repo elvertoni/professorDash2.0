@@ -46,6 +46,8 @@ App-specific documented wrappers: site chrome (`site-header/site-nav/site-footer
 
 **Theme by role** (decision D.5): default `data-theme` is server-rendered per role in `base.html` — aluno = `light`, professor/admin/anônimo = `dark`. The `localStorage` toggle still overrides as a personal preference.
 
+**ADHD-focus patterns** (decision D.6, template-scoped `<style>` in the dashboard/reader templates, tokens `shell-*`): `serie-section`/`serie-header` (professor série→disciplina accordion, Alpine), `dash-collapsible` (native `<details>` secondary panel, closed by default — e.g. Prazos), `dash-tabs`/`dash-tab` (Alpine tab switcher on the aluno dashboard — Prazos/Aulas/Notas), `aluno-progress` (big progress panel), `lesson-actionbar` (sticky single-CTA bar on the lesson reader). Goal: one decision per screen, next action always reachable. **Alpine.js (3.14.1) is loaded in `base.html`** (was missing before; `x-data`/`x-show`/`@click` depend on it); `[x-cloak]{display:none!important}` in `app.css` prevents tab flash.
+
 ## Motion
 
 Intentional only. Ease-out (quart/quint/expo), no bounce/elastic. Every animation needs a `prefers-reduced-motion: reduce` fallback. Don't gate content visibility on class-triggered transitions.

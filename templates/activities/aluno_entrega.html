@@ -5,7 +5,7 @@
 {% block content %}
 <section class="classroom-page narrow-page">
     <nav class="lesson-breadcrumb" aria-label="Caminho">
-        <a href="{% url 'classroom:aluno_dashboard' %}">Meu painel</a>
+        <a href="{% url 'classroom:aluno_dashboard' %}">Início</a>
         <a href="{% url 'activities:aluno_atividade_list' turma.pk %}">Atividades</a>
         <span>{{ atividade.titulo }}</span>
     </nav>
