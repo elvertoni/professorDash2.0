@@ -21,43 +21,79 @@
     </div>
 
     {% if atividades %}
-        <div class="tbl-wrap">
-            <table class="tbl">
-                <thead>
-                    <tr>
-                        <th scope="col">Atividade</th>
-                        <th scope="col">Data</th>
-                        <th scope="col">Feitos</th>
-                        <th scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for atividade in atividades %}
+        <form method="post" x-data="checkGrid()">
+            {% csrf_token %}
+            <div class="tbl-wrap check-grid-wrap">
+                <table class="tbl check-grid">
+                    <thead>
                         <tr>
-                            <td>
-                                <b class="text-strong">{{ atividade.titulo }}</b>
-                                {% if atividade.descricao %}<small>{{ atividade.descricao|truncatechars:60 }}</small>{% endif %}
-                            </td>
-                            <td class="mono">{% if atividade.data %}{{ atividade.data|date:'d/m/Y' }}{% else %}—{% endif %}</td>
-                            <td><span class="badge badge-neutral">{{ atividade.feitos }}/{{ atividade.total_alunos }}</span></td>
-                            <td>
-                                <div class="tbl-actions">
-                                    <a class="btn btn-primary btn-sm" href="{% url 'activities:atividade_checks' atividade.pk %}">
-                                        <i data-lucide="check-square" aria-hidden="true"></i> Marcar
-                                    </a>
-                                    <a class="btn btn-outline btn-sm" href="{% url 'activities:atividade_update' atividade.pk %}">
-                                        <i data-lucide="edit-3" aria-hidden="true"></i> Editar
-                                    </a>
-                                    <a class="btn btn-danger btn-sm" href="{% url 'activities:atividade_delete' atividade.pk %}">
-                                        <i data-lucide="trash-2" aria-hidden="true"></i> Excluir
-                                    </a>
-                                </div>
-                            </td>
+                            <th scope="col" class="check-grid__col-num">#</th>
+                            <th scope="col" class="check-grid__col-name">Aluno</th>
+                            {% for act in atividades %}
+                                <th scope="col" class="check-grid__col-act">
+                                    <div class="check-grid__act-header">
+                                        <span class="check-grid__act-title" title="{{ act.titulo }}">{{ act.titulo }}</span>
+                                        {% if act.data %}
+                                            <span class="check-grid__act-date">{{ act.data|date:'d/m' }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="check-grid__act-actions">
+                                        <a href="{% url 'activities:atividade_update' act.pk %}" title="Editar atividade" class="check-grid__act-btn">
+                                            <i data-lucide="edit-3" aria-hidden="true"></i>
+                                        </a>
+                                        <a href="{% url 'activities:atividade_delete' act.pk %}" title="Excluir atividade" class="check-grid__act-btn check-grid__act-btn--danger">
+                                            <i data-lucide="trash-2" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </th>
+                            {% endfor %}
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        {% for row in grid_rows %}
+                            <tr>
+                                <td class="check-grid__num mono">{{ row.counter }}</td>
+                                <td class="check-grid__name">
+                                    <span class="name">
+                                        <span class="avatar sm" aria-hidden="true">{{ row.aluno.get_short_name|slice:':2'|upper }}</span>
+                                        <span>{{ row.aluno.nome_completo }}</span>
+                                    </span>
+                                </td>
+                                {% for item in row.checks %}
+                                    <td class="check-grid__cell">
+                                        <div class="check-grid__cell-inner">
+                                            <input type="checkbox"
+                                                   class="check"
+                                                   name="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                   id="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                   aria-label="Feito por {{ row.aluno.nome_completo }} em {{ item.atividade.titulo }}"
+                                                   {% if item.check and item.check.feito %}checked{% endif %}>
+                                            <input type="hidden"
+                                                   name="obs_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                   id="obs_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                   value="{{ item.check.observacao|default:'' }}">
+                                            <button type="button"
+                                                    class="check-grid__obs-btn {% if item.check and item.check.observacao %}check-grid__obs-btn--active{% endif %}"
+                                                    title="{% if item.check and item.check.observacao %}{{ item.check.observacao }}{% else %}Adicionar observação{% endif %}"
+                                                    @click="editObs('obs_{{ row.aluno.id }}_{{ item.atividade.id }}', '{{ row.aluno.nome_completo|escapejs }}', '{{ item.atividade.titulo|escapejs }}')">
+                                                <i data-lucide="message-circle" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions">
+                <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Voltar</a>
+                <button class="btn btn-primary" type="submit">
+                    <i data-lucide="save" aria-hidden="true"></i>
+                    Salvar alterações
+                </button>
+            </div>
+        </form>
     {% else %}
         <div class="empty">
             <i data-lucide="clipboard-list" aria-hidden="true"></i>
@@ -70,4 +106,30 @@
         </div>
     {% endif %}
 </section>
+
+<script>
+function checkGrid() {
+    return {
+        editObs(fieldId, alunoName, atividadeTitulo) {
+            const field = document.getElementById(fieldId);
+            const currentVal = field.value || '';
+            const newVal = prompt(
+                `Observação para ${alunoName}\n${atividadeTitulo}`,
+                currentVal
+            );
+            if (newVal !== null) {
+                field.value = newVal.trim().substring(0, 280);
+                const btn = field.nextElementSibling;
+                if (newVal.trim()) {
+                    btn.classList.add('check-grid__obs-btn--active');
+                    btn.title = newVal.trim();
+                } else {
+                    btn.classList.remove('check-grid__obs-btn--active');
+                    btn.title = 'Adicionar observação';
+                }
+            }
+        }
+    };
+}
+</script>
 {% endblock %}
