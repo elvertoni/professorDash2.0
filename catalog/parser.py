@@ -17,7 +17,7 @@ TEACHER_NOTE_RE = re.compile(
 )
 BLOCK_RE = re.compile(
     (
-        r':::(?P<kind>conceito|atencao|atenção|dica)'
+        r':::(?P<kind>conceito|atencao|atenção|dica|exemplo|importante|curiosidade)'
         r'(?P<title>[^\n]*)\n(?P<body>.*?)\n:::\s*'
     ),
     re.S,
@@ -32,12 +32,18 @@ CALLOUT_LABELS = {
     'atencao': 'Atenção',
     'atenção': 'Atenção',
     'dica': 'Dica',
+    'exemplo': 'Exemplo',
+    'importante': 'Importante',
+    'curiosidade': 'Curiosidade',
 }
 
 CALLOUT_ICONS = {
     'conceito': 'lightbulb',
     'atencao': 'alert-triangle',
     'dica': 'sparkle',
+    'exemplo': 'book-open',
+    'importante': 'star',
+    'curiosidade': 'compass',
 }
 
 ALLOWED_LESSON_TAGS = frozenset(

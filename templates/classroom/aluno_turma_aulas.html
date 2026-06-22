@@ -2,6 +2,29 @@
 
 {% block title %}{{ turma.nome }} · Aulas · Prof. Toni Coimbra{% endblock %}
 
+{% block extra_head %}
+<style>
+.lesson-thumb {
+    flex: 0 0 auto;
+    width: 72px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--accent-violet, #7c3aed), var(--accent-cta, #db2777));
+}
+.lesson-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tbl .name { display: flex; align-items: center; gap: var(--space-3); }
+.card-cover {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-3);
+    background: linear-gradient(135deg, var(--accent-violet, #7c3aed), var(--accent-cta, #db2777));
+}
+.card-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="classroom-page">
     <nav class="lesson-breadcrumb" aria-label="Caminho">
@@ -48,6 +71,11 @@
                         <tr>
                             <td>
                                 <span class="name">
+                                    <span class="lesson-thumb">
+                                        {% if publicada.aula.imagem %}
+                                            <img src="{{ publicada.aula.imagem.url }}" alt="" loading="lazy" decoding="async">
+                                        {% endif %}
+                                    </span>
                                     <span>
                                         {{ publicada.aula.titulo }}
                                         <small>{{ publicada.aula.trilha.label }}</small>
@@ -82,7 +110,13 @@
                     {% else %}
                         <div class="stripe stripe-cta"></div>
                     {% endif %}
-                    
+
+                    <div class="card-cover">
+                        {% if publicada.aula.imagem %}
+                            <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">
+                        {% endif %}
+                    </div>
+
                     <div class="card-head">
                         <span class="tag-disc">{{ publicada.aula.trilha.label }}</span>
                         {% if publicada.concluida %}

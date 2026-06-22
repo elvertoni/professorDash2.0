@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
@@ -12,6 +13,8 @@ from catalog.parser import parse_lesson_markdown
 
 class Command(BaseCommand):
     help = 'Importa aulas canônicas do acervo PROF-TONI.'
+
+    COVER_NAMES = ('capa.png', 'capa.jpg', 'capa.jpeg', 'capa.webp')
 
     def add_arguments(self, parser):
         parser.add_argument('--path', required=True, help='Caminho para o repositório PROF-TONI.')
@@ -148,6 +151,9 @@ class Command(BaseCommand):
             and aula.atualizado_em == source_updated
             and aula.conteudo_html
         ):
+            # Conteúdo inalterado: ainda assim faz backfill da capa se faltar.
+            if self.apply_cover_image(aula, canonical_path, data):
+                aula.save(update_fields=['imagem', 'updated_at'])
             return 'skipped'
 
         defaults = {
@@ -167,17 +173,48 @@ class Command(BaseCommand):
         if aula:
             for field, value in defaults.items():
                 setattr(aula, field, value)
+            self.apply_cover_image(aula, canonical_path, data)
             aula.save()
             return 'updated'
 
-        Aula.objects.create(
+        aula = Aula(
             disciplina=disciplina,
             trilha=trilha,
             ordem=ordem,
             slug=slug,
             **defaults,
         )
+        self.apply_cover_image(aula, canonical_path, data)
+        aula.save()
         return 'created'
+
+    def find_cover_path(self, canonical_path, data):
+        lesson_dir = canonical_path.parent
+        declared = self.get_value(data, 'imagem', 'capa', 'cover')
+        if declared:
+            candidate = lesson_dir / declared
+            if candidate.is_file():
+                return candidate
+        for name in self.COVER_NAMES:
+            candidate = lesson_dir / name
+            if candidate.is_file():
+                return candidate
+        return None
+
+    def apply_cover_image(self, aula, canonical_path, data):
+        source = self.find_cover_path(canonical_path, data)
+        if source is None:
+            return False
+        # Idempotente: mesma capa (mesmo tamanho) já presente => não re-salva.
+        if aula.imagem:
+            try:
+                if aula.imagem.size == source.stat().st_size:
+                    return False
+            except (OSError, ValueError):
+                pass
+        target_name = f'{aula.disciplina.slug}-{aula.slug}{source.suffix.lower()}'
+        aula.imagem.save(target_name, ContentFile(source.read_bytes()), save=False)
+        return True
 
     def upsert_trilha(self, disciplina, raw_trilha):
         slug = self.get_value(raw_trilha, 'slug', 'id')

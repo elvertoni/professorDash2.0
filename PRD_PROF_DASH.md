@@ -99,6 +99,7 @@ Apps Django e principais models:
   - `disciplina` (FK), `trilha` (FK), `ordem` (int), `slug`, `titulo`, `tema`.
   - `objetivos` (JSON), `prerequisitos` (JSON), `modo_origem`.
   - `conteudo_html` (TextField — corpo da canônica renderizado), `conteudo_md` (fonte original).
+  - `imagem` (ImageField opcional — capa gerada por IA, ver Decisão capa de aula abaixo).
   - `html_standalone` (FileField opcional — saída da skill `aula-estatica`).
   - `status` (`aprovada` | `planejada` | ...), `versao`, `atualizado_em`, `source_path`.
   - Importadas apenas com `status = aprovada`.
@@ -549,6 +550,7 @@ Componentes novos documentados no `DESIGN.md`: `account-menu`, `serie-section`, 
 
 - **D.7 — Aulas por turma, sem catálogo:** o `/catalogo/` saiu do nav (o model `Aula` segue como depósito interno do import). Na turma, `TurmaSyncAulasView` ("Sincronizar aulas") importa do head a disciplina da turma e publica tudo como `AulaPublicada` (idempotente, disponível agora). Import por disciplina também disponível.
 - **D.8 — Atividades = controle do professor (não entrega):** `Atividade` virou item simples (`titulo`/`descricao`/`data`) + novo `AtividadeCheck` (`feito`+`observacao` por aluno, grade bulk-save). **Removidos `Entrega`/`EntregaArquivo`** e todo o fluxo de submissão/correção/nota — entregas oficiais ficam no **Google Classroom** (SEED-PR). Aluno só vê aulas + progresso. Migration `activities/0005` (destrutiva, aplicada com 0 entregas reais). Relatórios/boletim passaram de nota para conclusão de aulas + contagem de checks.
+- **D.9 — Capa de aula (imagem gerada por IA):** cada aula pode ter uma capa, gerada no pipeline do acervo (prompt da skill), **não** no portal (mantém a regra inviolável de zero IA no portal). Campo `Aula.imagem` (`ImageField`), pertence à aula canônica — gera 1× e serve todas as turmas. **Posição = hero no topo** da aula (decisão de arquitetura: contexto antes do conteúdo, reuso multi-superfície, melhor scan mobile) — descartado "no final" (baixa visibilidade, sem reuso). Aparece em 3 lugares: hero no topo da aula do aluno (`aluno_aula_detail`), thumbnail nos cards/tabela da lista (`aluno_turma_aulas`) e na prévia do professor (`aula_publicada_preview`); sem capa → fallback de gradiente do DS, nunca layout quebrado. **Import (`import_acervo`):** procura a imagem na pasta da `canonica.md` — front-matter `imagem:` (caminho relativo, override) ou, na ausência, nome convencional `capa.{png,jpg,jpeg,webp}`. Idempotente: só re-salva se o tamanho do arquivo mudou; faz backfill mesmo quando o conteúdo não mudou. Capa é mídia **pública** (`MEDIA_ROOT`, não protegida) — não é conteúdo sensível.
 
 ---
 

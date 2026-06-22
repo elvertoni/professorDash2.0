@@ -67,6 +67,12 @@ class Aula(TimeStampedModel):
     slug = models.SlugField('slug', max_length=160)
     titulo = models.CharField('título', max_length=220)
     tema = models.CharField('tema', max_length=220, blank=True)
+    imagem = models.ImageField(
+        'imagem de capa',
+        upload_to='catalog/capas/',
+        blank=True,
+        null=True,
+    )
     objetivos = models.JSONField('objetivos', default=list, blank=True)
     prerequisitos = models.JSONField('pré-requisitos', default=list, blank=True)
     modo_origem = models.CharField('modo de origem', max_length=80, blank=True)
