@@ -2,7 +2,7 @@
 
 ## Professor
 
-1. Acesse `/conta/login/` com o usuário professor.
+1. Acesse `/conta/entrar/` com o usuário professor.
 2. Entre em **Painel** para ver turmas, progresso e atividades.
 3. Use **Turmas** para criar ou abrir uma turma.
 4. Na turma, sincronize/publique aulas, cadastre alunos, crie atividades e envie materiais.
@@ -10,7 +10,7 @@
 
 ## Aluno
 
-1. Acesse `/conta/login/` com um usuário aluno.
+1. Acesse `/conta/entrar/` com um usuário aluno.
 2. Entre em **Meu painel**.
 3. Abra uma turma para estudar aulas liberadas.
 4. Estude as aulas liberadas e marque progresso.

@@ -18,6 +18,16 @@ def health(request):
 @require_GET
 def public_media(request, path):
     """Serve arquivos públicos de MEDIA_ROOT, como capas de aulas."""
+    parts = Path(path).parts
+    is_catalog_cover = (
+        len(parts) >= 3
+        and parts[0] == 'catalog'
+        and parts[1] == 'capas'
+    )
+    is_avatar = len(parts) >= 2 and parts[0] == 'avatars'
+    if not (is_catalog_cover or is_avatar):
+        raise Http404
+
     try:
         full_path = safe_join(settings.MEDIA_ROOT, path)
     except ValueError as exc:

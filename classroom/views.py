@@ -683,6 +683,7 @@ class AlunoTurmasMixin(AlunoRequiredMixin):
             Turma.objects.filter(
                 matriculas__aluno=self.request.user,
                 matriculas__status=Matricula.Status.ATIVA,
+                ativa=True,
             )
             .select_related('disciplina', 'professor')
             .distinct()

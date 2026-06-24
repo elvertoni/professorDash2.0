@@ -81,7 +81,10 @@ class User(AbstractUser, TimeStampedModel):
     @property
     def first_active_turma(self):
         if self.is_aluno:
-            matricula = self.matriculas.filter(status='ativa').first()
+            matricula = self.matriculas.filter(
+                status='ativa',
+                turma__ativa=True,
+            ).first()
             return matricula.turma if matricula else None
         elif self.is_professor:
             return self.turmas_lecionadas.filter(ativa=True).first()

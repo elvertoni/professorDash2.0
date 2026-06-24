@@ -208,7 +208,11 @@ class Command(BaseCommand):
         lesson_dir = canonical_path.parent
         declared = self.get_value(data, 'imagem', 'capa', 'cover')
         if declared:
-            candidate = lesson_dir / declared
+            candidate = (lesson_dir / declared).resolve()
+            try:
+                candidate.relative_to(lesson_dir.resolve())
+            except ValueError:
+                return None
             if candidate.is_file():
                 return candidate
         for name in self.COVER_NAMES:
