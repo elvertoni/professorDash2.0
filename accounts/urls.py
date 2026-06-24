@@ -2,7 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 from django.views.generic import TemplateView
 
-from .forms import StyledPasswordChangeForm
+from .forms import InitialPasswordResetForm, StyledPasswordChangeForm
 from .views import LoginView, ProfileUpdateView, ProfileView
 
 app_name = 'accounts'
@@ -40,6 +40,7 @@ urlpatterns = [
     path(
         'recuperar-senha/',
         auth_views.PasswordResetView.as_view(
+            form_class=InitialPasswordResetForm,
             template_name='accounts/password_reset_form.html',
             email_template_name='accounts/password_reset_email.html',
             subject_template_name='accounts/password_reset_subject.txt',

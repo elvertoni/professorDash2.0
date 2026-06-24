@@ -2,8 +2,10 @@ from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
     PasswordChangeForm,
+    PasswordResetForm,
     UserChangeForm as BaseUserChangeForm,
     UserCreationForm as BaseUserCreationForm,
+    _unicode_ci_compare,
 )
 
 from .models import AlunoProfile, ProfessorProfile, User
@@ -160,3 +162,23 @@ class StyledPasswordChangeForm(StyledFormMixin, PasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
         self.apply_design_system_classes()
+
+
+class InitialPasswordResetForm(StyledFormMixin, PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_design_system_classes()
+
+    def get_users(self, email):
+        email_field_name = User.get_email_field_name()
+        active_users = User._default_manager.filter(
+            **{
+                f'{email_field_name}__iexact': email,
+                'is_active': True,
+            }
+        )
+        return (
+            user
+            for user in active_users
+            if _unicode_ci_compare(email, getattr(user, email_field_name))
+        )
