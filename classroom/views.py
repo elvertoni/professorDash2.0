@@ -460,6 +460,7 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
                     'import_acervo',
                     path=str(root),
                     only_aprovada=True,
+                    force=True,
                     disciplina=disciplina.slug,
                     stdout=out,
                     stderr=out,

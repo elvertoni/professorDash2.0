@@ -95,6 +95,7 @@ class AcervoGithubImportView(AdminRequiredMixin, View):
                 command_kwargs = {
                     'path': str(root),
                     'only_aprovada': True,
+                    'force': True,
                     'stdout': out,
                     'stderr': out,
                 }

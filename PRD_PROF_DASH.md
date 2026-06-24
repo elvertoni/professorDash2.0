@@ -222,18 +222,18 @@ O diferencial do Prof. Toni Coimbra: ele lê o warehouse do segundo cérebro.
 
 ### 6.2 Django command `import_acervo`
 ```
-python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] [--disciplina inteligencia-artificial]
+python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] [--disciplina inteligencia-artificial] [--force]
 ```
 - [x] Lê `manifesto.json` → cria/atualiza `Disciplina` e `Trilha`.
 - [x] Para cada lesson `status = aprovada`: lê `canonica.md`, faz parse do frontmatter YAML.
 - [x] Converte o corpo Markdown (incluindo blocos `:::tipo` e diagramas) para `conteudo_html` via parser custom (reaproveitar a lógica de render da skill `aula-estatica`).
-- [x] Cria/atualiza `Aula` casando por `(disciplina, trilha, ordem, slug)`. **Idempotente**: só atualiza se `versao`/`atualizado_em` mudou.
+- [x] Cria/atualiza `Aula` casando por `(disciplina, trilha, ordem, slug)`. **Idempotente por padrão**: só atualiza se `versao`/`atualizado_em` mudou. Com `--force`, reprocessa e regrava aulas existentes mesmo sem mudança de metadados.
 - [ ] Opcional: importar o HTML standalone como `html_standalone`.
 - [x] Relatório ao final: criadas / atualizadas / ignoradas.
 
 ### 6.3 Estratégia de integração (origem dos arquivos)
 - **Fase 1 (MVP):** importação por path local (rodar o command apontando para o repo PROF-TONI clonado no servidor).
-- **Fase 2 (implementada):** importação remota via GitHub direto da UI. Botão **"Importar do GitHub"** no catálogo (`/catalogo/`, admin apenas) → `catalog.views.AcervoGithubImportView` → `catalog.services.download_acervo` baixa o tarball do repo privado via API do GitHub (`/repos/{repo}/tarball/{ref}`, stdlib `urllib`+`tarfile`), extrai em tempdir e chama `import_acervo` no path extraído. Config por env: `ACERVO_GITHUB_REPO` (default `elvertoni/head`), `ACERVO_GITHUB_REF` (default `main`), `ACERVO_GITHUB_TOKEN` (PAT com leitura de conteúdo no repo privado — obrigatório). Síncrono (sem Celery, conforme restrições).
+- **Fase 2 (implementada):** importação remota via GitHub direto da UI. Botão **"Importar do GitHub"** no catálogo (`/catalogo/`, admin apenas) → `catalog.views.AcervoGithubImportView` → `catalog.services.download_acervo` baixa o tarball do repo privado via API do GitHub (`/repos/{repo}/tarball/{ref}`, stdlib `urllib`+`tarfile`), extrai em tempdir e chama `import_acervo --force` no path extraído. Config por env: `ACERVO_GITHUB_REPO` (default `elvertoni/head`), `ACERVO_GITHUB_REF` (default `main`), `ACERVO_GITHUB_TOKEN` (PAT com leitura de conteúdo no repo privado — obrigatório). Síncrono (sem Celery, conforme restrições).
 - **Fase 3 (futuro):** upload de pacote `.zip` do acervo pelo admin.
 
 ### 6.4 Upload manual (complementa o import)
@@ -400,7 +400,7 @@ Decisões da Sprint 2:
 - O parser usa `PyYAML` para o frontmatter e `Markdown` com pré-processamento próprio para blocos `:::conceito`, `:::atencao`/`:::atenção` e `:::dica`, renderizados com classes CSS do visualizador de aula.
 - Fences de diagrama são preservadas como figuras com código pré-formatado e classes do design system; renderizadores interativos específicos ficam fora da Sprint 2.
 - O command `import_acervo` importa somente aulas aprovadas nesta fase, mesmo sem informar `--only-aprovada`, porque o PRD define que `Aula` entra no catálogo apenas com `status = aprovada`. A flag foi mantida por compatibilidade de CLI.
-- A idempotência compara a chave `(disciplina, trilha, ordem, slug)` e evita atualizar quando `versao` e `atualizado_em` não mudaram e já existe `conteudo_html`.
+- A idempotência compara a chave `(disciplina, trilha, ordem, slug)` e evita atualizar quando `versao` e `atualizado_em` não mudaram e já existe `conteudo_html`; o modo `--force` ignora essa otimização e re-renderiza o conteúdo. Os fluxos de GitHub pela UI usam `--force` para permitir atualização geral do portal a partir do head.
 - O campo `html_standalone` foi modelado para compatibilidade futura, mas a importação do arquivo standalone permanece aberta por ser opcional no §6.2.
 
 ### Sprint 3 — Turmas e matrículas

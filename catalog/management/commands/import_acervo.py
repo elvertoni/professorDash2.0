@@ -27,17 +27,26 @@ class Command(BaseCommand):
             ),
         )
         parser.add_argument('--disciplina', help='Slug da disciplina a importar.')
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help=(
+                'Reprocessa e atualiza aulas existentes mesmo quando versao e '
+                'atualizado_em nao mudaram.'
+            ),
+        )
 
     def handle(self, *args, **options):
         root_path = Path(options['path']).expanduser().resolve()
         disciplina_filter = options.get('disciplina')
+        force = options.get('force', False)
 
         if not root_path.exists():
             raise CommandError(f'Caminho não encontrado: {root_path}')
 
         manifest = self.load_manifest(root_path)
         self.import_disciplines(manifest)
-        report = self.import_lessons(root_path, manifest, disciplina_filter)
+        report = self.import_lessons(root_path, manifest, disciplina_filter, force)
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -75,7 +84,7 @@ class Command(BaseCommand):
                 for raw_trilha in self.as_list(raw_disciplina.get('trilhas')):
                     self.upsert_trilha(disciplina, raw_trilha)
 
-    def import_lessons(self, root_path, manifest, disciplina_filter):
+    def import_lessons(self, root_path, manifest, disciplina_filter, force):
         report = {'created': 0, 'updated': 0, 'skipped': 0}
 
         for raw_lesson in self.as_list(manifest.get('lessons')):
@@ -101,12 +110,18 @@ class Command(BaseCommand):
                 report['skipped'] += 1
                 continue
             lesson_data = {**raw_lesson, **parsed.frontmatter}
-            imported = self.upsert_lesson(canonical_path, lesson_data, parsed.body, parsed.html)
+            imported = self.upsert_lesson(
+                canonical_path,
+                lesson_data,
+                parsed.body,
+                parsed.html,
+                force,
+            )
             report[imported] += 1
 
         return report
 
-    def upsert_lesson(self, canonical_path, data, body, html_content):
+    def upsert_lesson(self, canonical_path, data, body, html_content, force=False):
         disciplina_slug = self.get_value(data, 'disciplina')
         trilha_slug = self.get_value(data, 'trilha')
         slug = self.get_value(data, 'slug') or slugify(self.get_value(data, 'titulo') or '')
@@ -147,6 +162,7 @@ class Command(BaseCommand):
 
         if (
             aula
+            and not force
             and aula.versao == versao
             and aula.atualizado_em == source_updated
             and aula.conteudo_html
