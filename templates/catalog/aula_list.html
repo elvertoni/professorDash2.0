@@ -9,7 +9,7 @@
         <h1>Aulas aprovadas do acervo</h1>
         <p>Consulte as aulas canônicas importadas do PROF-TONI por disciplina, trilha e ordem.</p>
         {% if user.is_superuser or user.is_admin_role %}
-            <div class="acervo-import" style="display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4);">
+            <div class="acervo-import">
                 <form method="post" action="{% url 'catalog:acervo_import_github' %}"
                       onsubmit="return confirm('Importar/atualizar TODAS as matérias a partir do GitHub agora?');">
                     {% csrf_token %}
@@ -66,9 +66,7 @@
     {% if aulas %}
         <div class="feature-grid catalog-grid">
             {% for aula in aulas %}
-                <article class="card">
-                    <div class="stripe"></div>
-                    <span class="tag-disc">{{ aula.disciplina.label }}</span>
+                <article class="card">                    <span class="tag-disc">{{ aula.disciplina.label }}</span>
                     <h3>{{ aula.ordem|stringformat:'02d' }} · {{ aula.titulo }}</h3>
                     <p class="desc">{{ aula.tema|default:aula.trilha.label }}</p>
                     <div class="card-foot">

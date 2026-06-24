@@ -19,9 +19,7 @@
     {% if turmas %}
         <div class="feature-grid classroom-grid">
             {% for turma in turmas %}
-                <article class="card">
-                    <div class="stripe"></div>
-                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                <article class="card">                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
                     <h3>{{ turma.nome }}</h3>
                     <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
                     <div class="status-row">
@@ -47,7 +45,7 @@
         <div class="empty">
             <i data-lucide="users" aria-hidden="true"></i>
             <h2>Nenhuma turma cadastrada</h2>
-            <p style="margin-bottom: var(--space-4);">Crie a primeira turma para matricular alunos e preparar a publicação de aulas.</p>
+            <p>Crie a primeira turma para matricular alunos e preparar a publicação de aulas.</p>
             <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
                 <i data-lucide="plus" aria-hidden="true"></i>
                 Criar turma

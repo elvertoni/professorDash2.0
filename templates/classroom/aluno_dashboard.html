@@ -17,7 +17,7 @@
 .aluno-progress-row b {
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--shell-primary);
+    color: var(--accent);
 }
 .aluno-progress .progress {
     height: 14px;
@@ -65,9 +65,7 @@
         {% if para_fazer_hoje %}
             <div class="feature-grid catalog-grid">
                 {% for item in para_fazer_hoje %}
-                    <article class="card">
-                        <div class="stripe stripe-violet"></div>
-                        <div class="card-head">
+                    <article class="card">                        <div class="card-head">
                             <span class="tag-disc">{{ item.obj.turma.nome }}</span>
                             <span class="badge badge-info"><i data-lucide="book-open" aria-hidden="true"></i> Aula de hoje</span>
                         </div>
@@ -98,9 +96,7 @@
     {% if proximas %}
         <div class="feature-grid catalog-grid">
             {% for publicada in proximas %}
-                <article class="card">
-                    <div class="stripe stripe-cta"></div>
-                    <div class="card-head">
+                <article class="card">                    <div class="card-head">
                         <span class="tag-disc">{{ publicada.turma.nome }}</span>
                         <span class="badge badge-violet"><i data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
                     </div>
@@ -128,9 +124,7 @@
     {% if turmas %}
         <div class="feature-grid catalog-grid">
             {% for turma in turmas %}
-                <article class="card">
-                    <div class="stripe stripe-cta"></div>
-                    <div class="card-head">
+                <article class="card">                    <div class="card-head">
                         <span class="tag-disc">{{ turma.disciplina.label }}</span>
                     </div>
                     <h3>{{ turma.nome }}</h3>

@@ -22,7 +22,7 @@
 <body>
     <header class="site-header">
         <a class="brand" href="{% url 'home' %}" aria-label="Página inicial do Prof. Toni Coimbra">
-            <span class="brand-mark"><img src="{% static 'logo.svg' %}" alt="" width="34" height="34"></span>
+            {% include 'partials/_brand.html' %}
             <span>Prof. Toni Coimbra</span>
         </a>
         <details class="mobile-nav">

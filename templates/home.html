@@ -9,7 +9,7 @@
         <div class="shell-preview">
             <aside class="sidebar">
                 <div class="logo">
-                    <span class="brand-mark"><img src="{% static 'logo.svg' %}" alt="" width="32" height="32"></span>
+                    {% include 'partials/_brand.html' with size=32 %}
                     Prof. Toni Coimbra
                 </div>
                 <div class="nav-group">
@@ -55,7 +55,7 @@
 
     <div class="hero-copy">
         <span class="badge badge-success"><i data-lucide="sparkles" aria-hidden="true"></i> Portal educacional</span>
-        <h1>Prof. Toni <span class="text-gradient-brand">Coimbra</span></h1>
+        <h1>Prof. Toni Coimbra</h1>
         <p>
             Onde a aula vira jornada: o professor publica conteúdo, materiais e
             atividades por turma, e o aluno estuda, marca progresso e segue o próximo passo.
@@ -80,23 +80,17 @@
         <p>O produto nasce como ponte entre o acervo de conhecimento e a rotina real da turma.</p>
     </div>
     <div class="feature-grid">
-        <article class="card">
-            <div class="stripe"></div>
-            <span class="tag-disc">Acervo</span>
+        <article class="card">            <span class="tag-disc">Acervo</span>
             <h3>Aulas no catálogo</h3>
             <p class="desc">Conteúdo autoral aprovado entra no catálogo organizado por disciplina e trilha, pronto para publicação.</p>
             <div class="card-foot"><span>Catálogo</span><i data-lucide="book-open" aria-hidden="true"></i></div>
         </article>
-        <article class="card">
-            <div class="stripe"></div>
-            <span class="tag-disc">Turmas</span>
+        <article class="card">            <span class="tag-disc">Turmas</span>
             <h3>Publicar por turma</h3>
             <p class="desc">O professor libera aulas, materiais e atividades com ordem, data e contexto da disciplina.</p>
             <div class="card-foot"><span>Professor</span><i data-lucide="send" aria-hidden="true"></i></div>
         </article>
-        <article class="card">
-            <div class="stripe"></div>
-            <span class="tag-disc">Aluno</span>
+        <article class="card">            <span class="tag-disc">Aluno</span>
             <h3>Estudar e avançar</h3>
             <p class="desc">O aluno acessa a aula, marca progresso e mantém clareza sobre o que estudar agora.</p>
             <div class="card-foot"><span>Progresso</span><i data-lucide="trending-up" aria-hidden="true"></i></div>

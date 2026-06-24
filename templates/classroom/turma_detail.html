@@ -24,10 +24,10 @@
                 <span class="badge badge-neutral"><i data-lucide="user-x" aria-hidden="true"></i> {{ inactive_matriculas|length }} inativos</span>
             </div>
         </div>
-        <div class="invite-panel" style="text-align: right;">
+        <div class="invite-panel">
             <span>Código de convite</span>
-            <strong class="mono" style="display: block; font-size: 20px; margin: 4px 0;">{{ turma.codigo_convite }}</strong>
-            <small style="display: block; color: var(--shell-danger); margin-bottom: 8px; max-width: 220px; line-height: 1.2;">
+            <strong class="mono invite-code-val">{{ turma.codigo_convite }}</strong>
+            <small class="invite-warn">
                 Aviso: o código anterior deixará de funcionar imediatamente ao renovar.
             </small>
             <form method="post" action="{% url 'classroom:turma_regenerate_invite' turma.pk %}" onsubmit="return confirm('Deseja realmente renovar o código de convite? O código anterior deixará de funcionar imediatamente.');">
@@ -50,7 +50,7 @@
                 <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
                       onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
                     {% csrf_token %}
-                    <button class="btn btn-primary" type="submit" style="width:100%;">
+                    <button class="btn btn-primary btn-block" type="submit">
                         <i data-lucide="refresh-cw" aria-hidden="true"></i>
                         Sincronizar aulas
                     </button>
@@ -174,11 +174,11 @@
                 {% empty %}
                     <tr>
                         <td colspan="6">
-                            <div class="empty" style="padding: var(--space-8) 24px;">
+                            <div class="empty in-table">
                                 <i data-lucide="inbox" aria-hidden="true"></i>
                                 <h2>Nenhum aluno matriculado</h2>
-                                <p style="margin-bottom: var(--space-4);">Matricule manualmente ou importe um CSV de alunos.</p>
-                                <div class="row" style="justify-content: center; gap: var(--space-3);">
+                                <p>Matricule manualmente ou importe um CSV de alunos.</p>
+                                <div class="row is-center">
                                     <a class="btn btn-primary" href="{% url 'classroom:matricula_create' turma.pk %}">
                                         <i data-lucide="user-plus" aria-hidden="true"></i>
                                         Matricular Aluno

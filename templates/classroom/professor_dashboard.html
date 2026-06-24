@@ -12,16 +12,16 @@
     justify-content: space-between;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-5);
-    background: var(--shell-surface-elev);
-    border: 1px solid var(--shell-border-strong);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     cursor: pointer;
     user-select: none;
     transition: background 150ms ease-out, border-color 150ms ease-out;
 }
-.serie-header:hover { background: var(--shell-surface-strong); }
+.serie-header:hover { background: var(--surface-overlay); }
 .serie-header:focus-visible {
-    outline: 2px solid var(--shell-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -35,14 +35,14 @@
     font-size: 1.125rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-    color: var(--shell-text);
+    color: var(--fg);
 }
 
 .serie-header-meta {
     display: flex;
     align-items: center;
     gap: var(--space-4);
-    color: var(--shell-text-muted);
+    color: var(--fg-muted);
     font-size: 0.875rem;
     flex-shrink: 0;
 }
@@ -50,7 +50,7 @@
 .serie-chevron {
     flex-shrink: 0;
     transition: transform 200ms ease-out;
-    color: var(--shell-text-soft);
+    color: var(--fg-subtle);
 }
 .serie-chevron.is-collapsed { transform: rotate(-90deg); }
 
@@ -65,7 +65,7 @@
     border: 1px solid rgba(251, 191, 36, 0.22);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-6);
-    color: var(--shell-warning);
+    color: var(--c-warning);
 }
 .urgency-strip .urgency-msg {
     flex: 1;
@@ -82,20 +82,20 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-4) var(--space-5);
-    background: var(--shell-surface-elev);
-    border: 1px solid var(--shell-border-strong);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     cursor: pointer;
     user-select: none;
     list-style: none;
     font-weight: 600;
-    color: var(--shell-text);
+    color: var(--fg);
     transition: background 150ms ease-out;
 }
-.dash-collapsible > summary:hover { background: var(--shell-surface-strong); }
+.dash-collapsible > summary:hover { background: var(--surface-overlay); }
 .dash-collapsible > summary::-webkit-details-marker { display: none; }
 .dash-collapsible > summary:focus-visible {
-    outline: 2px solid var(--shell-primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 .dash-collapsible[open] > summary {
@@ -104,7 +104,7 @@
 }
 .dash-chevron {
     margin-left: auto;
-    color: var(--shell-text-soft);
+    color: var(--fg-subtle);
     transition: transform 200ms ease-out;
 }
 .dash-collapsible[open] .dash-chevron { transform: rotate(180deg); }
@@ -175,9 +175,7 @@
                  x-transition:leave-end="opacity-0">
                 <div class="feature-grid catalog-grid">
                     {% for turma in serie.turmas %}
-                    <article class="card">
-                        <div class="stripe stripe-cta"></div>
-                        <div class="card-head">
+                    <article class="card">                        <div class="card-head">
                             <span class="tag-disc">{{ turma.disciplina.label }}</span>
                             <span class="badge badge-neutral">
                                 <i data-lucide="users" aria-hidden="true"></i>

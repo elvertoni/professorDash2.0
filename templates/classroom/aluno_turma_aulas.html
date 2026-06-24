@@ -10,7 +10,7 @@
     height: 48px;
     border-radius: var(--radius-sm);
     overflow: hidden;
-    background: linear-gradient(135deg, var(--accent-violet, #7c3aed), var(--accent-cta, #db2777));
+    background: var(--surface-base);
 }
 .lesson-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .tbl .name { display: flex; align-items: center; gap: var(--space-3); }
@@ -19,7 +19,7 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     margin-bottom: var(--space-3);
-    background: linear-gradient(135deg, var(--accent-violet, #7c3aed), var(--accent-cta, #db2777));
+    background: var(--surface-base);
 }
 .card-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
 </style>
@@ -105,12 +105,6 @@
         <div class="feature-grid mobile-only">
             {% for publicada in publicadas %}
                 <article class="card">
-                    {% if publicada.concluida %}
-                        <div class="stripe stripe-violet"></div>
-                    {% else %}
-                        <div class="stripe stripe-cta"></div>
-                    {% endif %}
-
                     <div class="card-cover">
                         {% if publicada.aula.imagem %}
                             <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">

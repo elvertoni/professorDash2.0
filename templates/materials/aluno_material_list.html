@@ -20,12 +20,6 @@
         <div class="feature-grid catalog-grid">
             {% for material in materiais %}
                 <article class="card">
-                    {% if material.arquivo %}
-                        <div class="stripe stripe-cta"></div>
-                    {% else %}
-                        <div class="stripe stripe-cyan"></div>
-                    {% endif %}
-                    
                     <div class="card-head">
                         <span class="tag-disc">
                             <i class="icon-inline" data-lucide="{% if material.tipo == 'pdf' %}file-text{% elif material.tipo == 'slide' %}presentation{% elif material.tipo == 'link' %}external-link{% elif material.tipo == 'video' %}video{% else %}file{% endif %}" aria-hidden="true"></i>

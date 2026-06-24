@@ -7,23 +7,17 @@
     <p>Conta administrativa com acesso total ao Django Admin.</p>
 </div>
 <div class="feature-grid account-grid">
-    <article class="card">
-        <div class="stripe"></div>
-        <span class="tag-disc">Conta</span>
+    <article class="card">        <span class="tag-disc">Conta</span>
         <h3>{{ request.user.email }}</h3>
         <p class="desc">Use o admin para criar professores e alunos sem auto-registro público.</p>
         <div class="card-foot"><span>Admin</span><i data-lucide="shield" aria-hidden="true"></i></div>
     </article>
-    <article class="card">
-        <div class="stripe"></div>
-        <span class="tag-disc">Ação</span>
+    <article class="card">        <span class="tag-disc">Ação</span>
         <h3>Django Admin</h3>
         <p class="desc">Gerencie usuários, perfis e permissões pela interface administrativa.</p>
         <div class="card-foot"><a href="/admin/" target="_blank" rel="noopener">Abrir admin <span class="sr-only">(abre em nova aba)</span></a><i data-lucide="external-link" aria-hidden="true"></i></div>
     </article>
-    <article class="card">
-        <div class="stripe"></div>
-        <span class="tag-disc">Catálogo</span>
+    <article class="card">        <span class="tag-disc">Catálogo</span>
         <h3>Acervo de Aulas</h3>
         <p class="desc">Navegue pelas aulas importadas e importe o acervo atualizado do GitHub.</p>
         <div class="card-foot"><a href="{% url 'catalog:aula_list' %}">Ver catálogo <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>

@@ -67,7 +67,7 @@
                 </div>
             </form>
         {% else %}
-            <div class="empty" style="padding: var(--space-6) 24px;">
+            <div class="empty in-table">
                 <i data-lucide="library" aria-hidden="true"></i>
                 <h2>Nenhuma aula avulsa disponível</h2>
                 {% if stats.total %}
@@ -102,21 +102,21 @@
                 {% for publicada in publicadas %}
                     <tr>
                         <td class="mono">
-                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                            <div class="ord-cell">
                                 <span>{{ publicada.ordem_na_turma }}</span>
-                                <div style="display: flex; gap: 2px;">
+                                <div class="reorder">
                                     <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_reorder' turma.pk publicada.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="direction" value="up">
-                                        <button class="btn btn-outline btn-sm" style="padding: 4px 6px; border-radius: var(--radius-sm);" type="submit" aria-label="Subir {{ publicada.aula.titulo }} na ordem" title="Subir">
-                                            <i data-lucide="arrow-up" style="width: 12px; height: 12px;" aria-hidden="true"></i>
+                                        <button class="btn btn-outline btn-sm" type="submit" aria-label="Subir {{ publicada.aula.titulo }} na ordem" title="Subir">
+                                            <i data-lucide="arrow-up" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                     <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_reorder' turma.pk publicada.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="direction" value="down">
-                                        <button class="btn btn-outline btn-sm" style="padding: 4px 6px; border-radius: var(--radius-sm);" type="submit" aria-label="Descer {{ publicada.aula.titulo }} na ordem" title="Descer">
-                                            <i data-lucide="arrow-down" style="width: 12px; height: 12px;" aria-hidden="true"></i>
+                                        <button class="btn btn-outline btn-sm" type="submit" aria-label="Descer {{ publicada.aula.titulo }} na ordem" title="Descer">
+                                            <i data-lucide="arrow-down" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -141,12 +141,12 @@
                             {% endif %}
                         </td>
                         <td>
-                            <div class="tbl-actions" style="display: flex; align-items: center; gap: var(--space-2);">
+                            <div class="tbl-actions">
                                 <a class="btn btn-primary btn-sm" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}">
                                     <i data-lucide="book-open" aria-hidden="true"></i> Ver aula
                                 </a>
                                 {% if publicada.publicada %}
-                                    <a class="btn btn-outline btn-sm" style="border-color: var(--shell-warning); color: var(--shell-warning);" href="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
+                                    <a class="btn btn-outline btn-sm btn-warning-outline" href="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
                                         <i data-lucide="eye-off" aria-hidden="true"></i> Despublicar
                                     </a>
                                 {% else %}
