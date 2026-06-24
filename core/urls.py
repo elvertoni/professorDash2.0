@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 
-from base.views import HomeView, health
+from base.views import HomeView, health, public_media
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,6 +16,7 @@ urlpatterns = [
     path('materiais/', include('materials.urls')),
     path('notificacoes/', include('notifications.urls')),
     path('health/', health, name='health'),
+    path('media/<path:path>', public_media, name='public_media'),
     path('', HomeView.as_view(), name='home'),
 ]
 

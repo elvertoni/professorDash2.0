@@ -1,5 +1,10 @@
-from django.http import JsonResponse
+import mimetypes
+from pathlib import Path
+
+from django.conf import settings
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
+from django.utils._os import safe_join
 from django.views.decorators.http import require_GET
 from django.views.generic import TemplateView
 
@@ -8,6 +13,22 @@ from django.views.generic import TemplateView
 def health(request):
     """Liveness probe: 200 sem tocar o banco e sem exigir autenticação."""
     return JsonResponse({'status': 'ok'})
+
+
+@require_GET
+def public_media(request, path):
+    """Serve arquivos públicos de MEDIA_ROOT, como capas de aulas."""
+    try:
+        full_path = safe_join(settings.MEDIA_ROOT, path)
+    except ValueError as exc:
+        raise Http404 from exc
+
+    media_path = Path(full_path)
+    if not media_path.is_file():
+        raise Http404
+
+    content_type, _ = mimetypes.guess_type(media_path.name)
+    return FileResponse(media_path.open('rb'), content_type=content_type)
 
 
 class HomeView(TemplateView):
