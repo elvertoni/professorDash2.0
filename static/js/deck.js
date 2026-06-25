@@ -1,6 +1,6 @@
 /* ──────────────────────────────────────────────────────────────────────────
    deck.js — Modo Apresentação das aulas.
-   Fatia o conteúdo da aula (.prose) por <h2> em slides, monta capa +
+   Fatia o conteúdo da aula (.prose) em slides legíveis, monta capa +
    encerramento e controla navegação por teclado/clique/controle remoto.
    Recursos de apresentador: visão geral (O), roteiro docente (N), tela
    preta (B), tela cheia (F). Vanilla JS, sem build, sem dependência além
@@ -15,20 +15,97 @@
     if (!stage || !source) return;
 
     /* ── Monta os slides ──────────────────────────────────────────────────── */
-    function buildSectionSlides() {
+    const MAX_SLIDE_WEIGHT = 7;
+
+    function makeSlideContent() {
+        const content = document.createElement('div');
+        content.className = 'deck-slide-content prose';
+        return content;
+    }
+
+    function isStandaloneBlock(node) {
+        return node.matches && node.matches(
+            'figure, table, pre, iframe, img, svg, .callout, .lesson-diagram, ' +
+            '.lesson-quiz, .lesson-steps'
+        );
+    }
+
+    function nodeWeight(node) {
+        if (isStandaloneBlock(node)) return 4;
+        if (node.tagName === 'H2') return 3;
+        if (node.tagName === 'H3') return 2;
+        if (node.tagName === 'UL' || node.tagName === 'OL') {
+            return Math.min(5, Math.max(2, node.children.length));
+        }
+        return 1;
+    }
+
+    function addSectionHeading(content, heading, continuation) {
+        if (!heading) return 0;
+        const clone = heading.cloneNode(true);
+        if (continuation) clone.classList.add('deck-repeat-heading');
+        content.appendChild(clone);
+        return nodeWeight(clone);
+    }
+
+    function splitSection(section) {
         const slides = [];
+        let content = makeSlideContent();
+        let weight = addSectionHeading(content, section.heading, false);
+        let hasBody = false;
+
+        function pushCurrent() {
+            if (content.children.length) slides.push(content);
+        }
+
+        function startNext() {
+            pushCurrent();
+            content = makeSlideContent();
+            weight = addSectionHeading(content, section.heading, true);
+            hasBody = false;
+        }
+
+        section.nodes.forEach((node) => {
+            const standalone = isStandaloneBlock(node);
+            const startsFresh = node.tagName === 'H3' || standalone;
+            const nextWeight = nodeWeight(node);
+
+            if (
+                hasBody &&
+                (startsFresh || weight + nextWeight > MAX_SLIDE_WEIGHT)
+            ) {
+                startNext();
+            }
+
+            content.appendChild(node.cloneNode(true));
+            weight += nextWeight;
+            hasBody = true;
+        });
+
+        pushCurrent();
+        return slides;
+    }
+
+    function buildSectionSlides() {
+        const sections = [];
         let current = null;
 
         Array.from(source.children).forEach((node) => {
-            const isHeading = node.tagName === 'H2';
-            if (isHeading || current === null) {
-                current = document.createElement('div');
-                current.className = 'deck-slide-content';
-                slides.push(current);
+            if (node.tagName === 'H2' || current === null) {
+                current = {
+                    heading: node.tagName === 'H2' ? node.cloneNode(true) : null,
+                    nodes: [],
+                };
+                sections.push(current);
+                if (node.tagName === 'H2') return;
             }
-            current.appendChild(node.cloneNode(true));
+            current.nodes.push(node);
         });
 
+        const slides = [];
+        sections.forEach((section) => {
+            splitSection(section).forEach((slide) => slides.push(slide));
+        });
         return slides;
     }
 
@@ -90,8 +167,8 @@
 
     if (elTotal) elTotal.textContent = String(total);
 
-    /* ── Auto-ajuste: encolhe a seção que não cabe em uma tela ────────────── */
-    const FIT_MIN = 0.6;
+    /* ── Auto-ajuste: correção fina; paginação evita texto pequeno na TV. ─── */
+    const FIT_MIN = 0.84;
 
     function fitSlide(slide) {
         const content = slide.firstElementChild;
