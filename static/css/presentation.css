@@ -131,11 +131,13 @@
 
 .deck-slide-content img {
     max-width: 100%;
-    max-height: calc(46vh * var(--deck-fit, 1));
+    max-height: calc(52vh * var(--deck-fit, 1));
     width: auto;
     height: auto;
     object-fit: contain;
     border-radius: var(--radius-md);
+    box-shadow: var(--shell-shadow-soft);
+    border: 1px solid var(--border);
 }
 
 .deck-slide-content figure { margin: calc(var(--deck-unit) * 0.8) 0; }
@@ -165,7 +167,8 @@
     display: grid;
     grid-template-columns: 56fr 44fr;
     align-items: stretch;
-    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .deck-capa-cover {
@@ -206,10 +209,20 @@
 @media (max-width: 720px) {
     .deck-capa.has-cover {
         grid-template-columns: 1fr;
-        grid-template-rows: 38% 62%;
+        grid-template-rows: auto auto;
+        overflow-y: auto;
     }
-    .deck-capa-cover { grid-column: 1; grid-row: 1; }
-    .deck-capa.has-cover .deck-capa-inner { grid-column: 1; grid-row: 2; }
+    .deck-capa-cover {
+        grid-column: 1;
+        grid-row: 1;
+        aspect-ratio: 16 / 9;
+        height: auto;
+    }
+    .deck-capa.has-cover .deck-capa-inner {
+        grid-column: 1;
+        grid-row: 2;
+        padding: var(--deck-pad);
+    }
 }
 
 .deck-capa-meta {

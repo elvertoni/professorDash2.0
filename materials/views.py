@@ -170,17 +170,12 @@ class AlunoMaterialListView(AlunoRequiredMixin, View):
                 matriculas__status=Matricula.Status.ATIVA,
             ).select_related('disciplina', 'professor')
         )
-        now = timezone.now()
         materiais = [
             material
             for material in Material.objects.filter(turma=turma)
             .select_related('aula_publicada', 'aula_publicada__aula')
             .order_by('-created_at')
-            if material.aula_publicada is None
-            or (
-                material.aula_publicada.publicada
-                and material.aula_publicada.disponivel_em <= now
-            )
+            if material.aula_publicada is None or material.aula_publicada.is_available
         ]
         return render(
             request,

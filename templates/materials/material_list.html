@@ -62,11 +62,11 @@
                         </td>
                         <td>
                             <div class="tbl-actions">
-                                <a class="btn btn-outline btn-sm" href="{% url 'materials:material_update' material.pk %}">
-                                    <i data-lucide="edit-3" aria-hidden="true"></i> Editar
+                                <a class="icon-btn table-icon-btn" href="{% url 'materials:material_update' material.pk %}" title="Editar material">
+                                    <i data-lucide="edit-3" aria-hidden="true"></i>
                                 </a>
-                                <a class="btn btn-danger btn-sm" href="{% url 'materials:material_delete' material.pk %}">
-                                    <i data-lucide="trash-2" aria-hidden="true"></i> Excluir
+                                <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'materials:material_delete' material.pk %}" title="Excluir material">
+                                    <i data-lucide="trash-2" aria-hidden="true"></i>
                                 </a>
                             </div>
                         </td>

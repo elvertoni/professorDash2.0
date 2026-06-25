@@ -2,28 +2,7 @@
 
 {% block title %}{{ turma.nome }} · Aulas · Prof. Toni Coimbra{% endblock %}
 
-{% block extra_head %}
-<style>
-.lesson-thumb {
-    flex: 0 0 auto;
-    width: 72px;
-    height: 48px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: var(--surface-base);
-}
-.lesson-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.tbl .name { display: flex; align-items: center; gap: var(--space-3); }
-.card-cover {
-    aspect-ratio: 16 / 9;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: var(--space-3);
-    background: var(--surface-base);
-}
-.card-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
-</style>
-{% endblock %}
+
 
 {% block content %}
 <section class="classroom-page">
@@ -55,59 +34,17 @@
     </div>
 
     {% if publicadas %}
-        <!-- Desktop Layout (Tabela) -->
-        <div class="tbl-wrap desktop-only">
-            <table class="tbl">
-                <thead>
-                    <tr>
-                        <th scope="col">Aula</th>
-                        <th scope="col">Liberada em</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for publicada in publicadas %}
-                        <tr>
-                            <td>
-                                <span class="name">
-                                    <span class="lesson-thumb">
-                                        {% if publicada.aula.imagem %}
-                                            <img src="{{ publicada.aula.imagem.url }}" alt="" loading="lazy" decoding="async">
-                                        {% endif %}
-                                    </span>
-                                    <span>
-                                        {{ publicada.aula.titulo }}
-                                        <small>{{ publicada.aula.trilha.label }}</small>
-                                    </span>
-                                </span>
-                            </td>
-                            <td class="mono">{{ publicada.disponivel_em|date:'d/m/Y' }}</td>
-                            <td>
-                                {% if publicada.concluida %}
-                                    <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
-                                {% else %}
-                                    <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
-                                    <i data-lucide="book-open" aria-hidden="true"></i> Estudar
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Mobile Layout (Cards) -->
-        <div class="feature-grid mobile-only">
+        <!-- Grade de Aulas (Design Atelier Responsivo) -->
+        <div class="feature-grid catalog-grid">
             {% for publicada in publicadas %}
-                <article class="card">
+                <article class="card lesson-card">
                     <div class="card-cover">
                         {% if publicada.aula.imagem %}
                             <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">
+                        {% else %}
+                            <div class="card-cover-fallback">
+                                <i data-lucide="book-open" aria-hidden="true"></i>
+                            </div>
                         {% endif %}
                     </div>
 
@@ -121,11 +58,12 @@
                     </div>
                     
                     <h3>{{ publicada.aula.titulo }}</h3>
-                    <p class="desc">
-                        <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> Liberada: {{ publicada.disponivel_em|date:'d/m/Y' }}
-                    </p>
+                    <p class="desc">{{ publicada.aula.tema|default:publicada.aula.trilha.label }}</p>
                     
                     <div class="card-foot">
+                        <span class="date">
+                            <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> Liberada: {{ publicada.disponivel_em|date:'d/m/Y' }}
+                        </span>
                         <a class="btn btn-primary btn-sm student-card-action" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
                             <i data-lucide="book-open" aria-hidden="true"></i> Estudar
                         </a>

@@ -65,14 +65,27 @@
         {% if para_fazer_hoje %}
             <div class="feature-grid catalog-grid">
                 {% for item in para_fazer_hoje %}
-                    <article class="card">                        <div class="card-head">
+                    <article class="card lesson-card">
+                        <div class="card-cover">
+                            {% if item.obj.aula.imagem %}
+                                <img src="{{ item.obj.aula.imagem.url }}" alt="Capa da aula: {{ item.obj.aula.titulo }}" loading="lazy" decoding="async">
+                            {% else %}
+                                <div class="card-cover-fallback">
+                                    <i data-lucide="book-open" aria-hidden="true"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-head">
                             <span class="tag-disc">{{ item.obj.turma.nome }}</span>
-                            <span class="badge badge-info"><i data-lucide="book-open" aria-hidden="true"></i> Aula de hoje</span>
+                            <span class="badge badge-info"><i data-lucide="zap" aria-hidden="true"></i> Aula de hoje</span>
                         </div>
                         <h3>{{ item.obj.aula.titulo }}</h3>
-                        <p class="desc">{{ item.obj.aula.disciplina.label }}</p>
+                        <p class="desc">{{ item.obj.aula.disciplina.label }} · {{ item.obj.aula.trilha.label }}</p>
                         <div class="card-foot">
-                            <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' item.obj.pk %}">
+                            <span class="date">
+                                <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> {{ item.obj.disponivel_em|date:'d/m/Y' }}
+                            </span>
+                            <a class="btn btn-primary btn-sm student-card-action" href="{% url 'classroom:aluno_aula_detail' item.obj.pk %}">
                                 <i data-lucide="play" aria-hidden="true"></i> Estudar agora
                             </a>
                         </div>
@@ -96,14 +109,33 @@
     {% if proximas %}
         <div class="feature-grid catalog-grid">
             {% for publicada in proximas %}
-                <article class="card">                    <div class="card-head">
+                <article class="card lesson-card">
+                    <div class="card-cover">
+                        {% if publicada.aula.imagem %}
+                            <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">
+                        {% else %}
+                            <div class="card-cover-fallback">
+                                <i data-lucide="book-open" aria-hidden="true"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-head">
                         <span class="tag-disc">{{ publicada.turma.nome }}</span>
-                        <span class="badge badge-violet"><i data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m' }}</span>
+                        {% if publicada.concluida %}
+                            <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
+                        {% else %}
+                            <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
+                        {% endif %}
                     </div>
                     <h3>{{ publicada.aula.titulo }}</h3>
-                    <p class="desc">{{ publicada.aula.disciplina.label }}</p>
+                    <p class="desc">{{ publicada.aula.disciplina.label }} · {{ publicada.aula.trilha.label }}</p>
                     <div class="card-foot">
-                        <a class="btn btn-primary btn-sm" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}"><i data-lucide="book-open" aria-hidden="true"></i> Estudar agora</a>
+                        <span class="date">
+                            <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m/Y' }}
+                        </span>
+                        <a class="btn btn-primary btn-sm student-card-action" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
+                            <i data-lucide="book-open" aria-hidden="true"></i> Estudar
+                        </a>
                     </div>
                 </article>
             {% endfor %}

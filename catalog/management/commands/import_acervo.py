@@ -88,11 +88,6 @@ class Command(BaseCommand):
         report = {'created': 0, 'updated': 0, 'skipped': 0}
 
         for raw_lesson in self.as_list(manifest.get('lessons')):
-            lesson_status = self.get_value(raw_lesson, 'status') or ''
-            if lesson_status != Aula.Status.APROVADA:
-                report['skipped'] += 1
-                continue
-
             disciplina_slug = self.get_value(raw_lesson, 'disciplina')
             if disciplina_filter and disciplina_slug != disciplina_filter:
                 continue
@@ -165,6 +160,7 @@ class Command(BaseCommand):
             and not force
             and aula.versao == versao
             and aula.atualizado_em == source_updated
+            and aula.status == (self.get_value(data, 'status') or Aula.Status.APROVADA)
             and aula.conteudo_html
         ):
             # Conteúdo inalterado: ainda assim faz backfill da capa se faltar.

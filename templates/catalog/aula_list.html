@@ -66,12 +66,27 @@
     {% if aulas %}
         <div class="feature-grid catalog-grid">
             {% for aula in aulas %}
-                <article class="card">                    <span class="tag-disc">{{ aula.disciplina.label }}</span>
+                <article class="card lesson-card">
+                    <div class="card-cover">
+                        {% if aula.imagem %}
+                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async">
+                        {% else %}
+                            <div class="card-cover-fallback">
+                                <i data-lucide="book-open" aria-hidden="true"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-head">
+                        <span class="tag-disc">{{ aula.disciplina.label }}</span>
+                        <span class="badge badge-violet"><i data-lucide="layers" aria-hidden="true"></i> {{ aula.trilha.label }}</span>
+                    </div>
                     <h3>{{ aula.ordem|stringformat:'02d' }} · {{ aula.titulo }}</h3>
                     <p class="desc">{{ aula.tema|default:aula.trilha.label }}</p>
                     <div class="card-foot">
-                        <span class="badge badge-violet"><i data-lucide="book-open" aria-hidden="true"></i> {{ aula.trilha.label }}</span>
-                        <a href="{{ aula.get_absolute_url }}">Ver aula <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+                        <span></span>
+                        <a class="btn btn-outline btn-sm" href="{{ aula.get_absolute_url }}">
+                            Ver aula <i data-lucide="arrow-right" aria-hidden="true"></i>
+                        </a>
                     </div>
                 </article>
             {% endfor %}

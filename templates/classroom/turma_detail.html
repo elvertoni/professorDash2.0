@@ -158,14 +158,12 @@
                                     <i data-lucide="file-text" aria-hidden="true"></i>
                                     Boletim
                                 </a>
-                                <a class="btn btn-outline btn-sm" href="{% url 'classroom:matricula_update' turma.pk matricula.pk %}">
+                                <a class="icon-btn table-icon-btn" href="{% url 'classroom:matricula_update' turma.pk matricula.pk %}" title="Editar matrícula">
                                     <i data-lucide="edit-3" aria-hidden="true"></i>
-                                    Editar
                                 </a>
                                 {% if matricula.status == 'ativa' %}
-                                    <a class="btn btn-danger btn-sm" href="{% url 'classroom:matricula_delete' turma.pk matricula.pk %}">
+                                    <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'classroom:matricula_delete' turma.pk matricula.pk %}" title="Desmatricular aluno">
                                         <i data-lucide="user-x" aria-hidden="true"></i>
-                                        Desmatricular
                                     </a>
                                 {% endif %}
                             </div>

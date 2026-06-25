@@ -135,8 +135,12 @@ class AulaPublicadaQuerySet(models.QuerySet):
         return self.filter(publicada=True)
 
     def available(self, now=None):
+        from catalog.models import Aula
         now = now or timezone.now()
-        return self.published().filter(disponivel_em__lte=now)
+        return self.published().filter(
+            disponivel_em__lte=now,
+            aula__status=Aula.Status.APROVADA
+        )
 
 
 class AulaPublicada(TimeStampedModel):
@@ -181,7 +185,12 @@ class AulaPublicada(TimeStampedModel):
 
     @property
     def is_available(self):
-        return self.publicada and self.disponivel_em <= timezone.now()
+        from catalog.models import Aula
+        return (
+            self.publicada
+            and self.disponivel_em <= timezone.now()
+            and self.aula.status == Aula.Status.APROVADA
+        )
 
     @property
     def is_scheduled(self):
