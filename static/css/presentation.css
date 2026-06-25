@@ -1,7 +1,8 @@
 /* ──────────────────────────────────────────────────────────────────────────
    Modo Apresentação (deck) — aula em tela cheia para projetar na sala/TV.
-   Tipografia escala por viewport (vmin) p/ leitura à distância no Educatron.
-   Reusa tokens do design system; força alto-contraste (tema dark fixo).
+   Superfície de PROJEÇÃO: tipografia escala por viewport (clamp) p/ leitura
+   à distância no Educatron (42", 4–6 m). Reusa tokens do design system;
+   força alto-contraste (tema dark fixo). Motion calmo, decelerado.
    ──────────────────────────────────────────────────────────────────────── */
 
 .deck-html,
@@ -17,9 +18,13 @@
     display: flex;
     flex-direction: column;
     color: var(--fg);
-    /* Escala-mestre: tudo dentro do slide deriva de --deck-unit. */
-    --deck-unit: clamp(15px, 2.1vw + 0.4vh, 34px);
+    /* Escala-mestre: tudo dentro do slide deriva de --deck-unit.
+       Em 1920×1080 satura no teto (40px) → corpo ~42px, legível a 4–6 m. */
+    --deck-unit: clamp(18px, 2.1vw + 0.4vh, 40px);
     --deck-pad: clamp(var(--space-6), 5vw, var(--space-12));
+    /* Linguagem de movimento do deck (decelerado, sem bounce). */
+    --deck-ease: cubic-bezier(.22, .61, .36, 1);
+    --deck-dur: .34s;
     cursor: default;
 }
 
@@ -35,6 +40,14 @@
     outline: none;
 }
 
+.deck-stage.is-nudge { animation: deck-nudge .32s var(--deck-ease); }
+
+@keyframes deck-nudge {
+    25% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    100% { transform: none; }
+}
+
 .deck-slide {
     position: absolute;
     inset: 0;
@@ -46,8 +59,12 @@
     overflow-x: hidden;
     opacity: 0;
     visibility: hidden;
+    /* Slides futuros entram pela direita; passados saem pela esquerda
+       (.is-prev) → o sentido do movimento já comunica avançar/voltar. */
     transform: translateX(24px);
-    transition: opacity .28s ease, transform .28s ease, visibility .28s;
+    transition: opacity var(--deck-dur) var(--deck-ease),
+                transform var(--deck-dur) var(--deck-ease),
+                visibility var(--deck-dur);
     scrollbar-width: thin;
 }
 
@@ -64,7 +81,7 @@
     width: min(100%, 1400px);
     margin: 0 auto;
     font-size: calc(var(--deck-unit) * 1.04);
-    line-height: 1.5;
+    line-height: 1.55;
 }
 
 .deck-slide-content > :first-child { margin-top: 0; }
@@ -78,17 +95,22 @@
     font-weight: 700;
     line-height: 1.1;
     max-width: none;
+    text-wrap: balance;
 }
 
+/* Sub-cabeçalho ganha cor (hue) — pista de hierarquia mais forte que peso
+   a 4–6 m de distância. */
 .deck-slide-content h3 {
     margin: calc(var(--deck-unit) * 1.1) 0 calc(var(--deck-unit) * 0.5);
+    color: var(--accent-text);
     font-size: calc(var(--deck-unit) * 1.4);
     font-weight: 600;
 }
 
 .deck-slide-content p,
 .deck-slide-content li {
-    max-width: 46ch;
+    max-width: 60ch;
+    text-wrap: pretty;
 }
 
 .deck-slide-content ul,
@@ -96,11 +118,11 @@
     padding-left: calc(var(--deck-unit) * 1.2);
 }
 
-.deck-slide-content li + li { margin-top: calc(var(--deck-unit) * 0.45); }
+.deck-slide-content li + li { margin-top: calc(var(--deck-unit) * 0.7); }
 
 .deck-slide-content img {
     max-width: 100%;
-    max-height: 56vh;
+    max-height: 50vh;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -109,8 +131,8 @@
 
 .deck-slide-content figure { margin: calc(var(--deck-unit) * 0.8) 0; }
 
-.deck-slide-content pre,
-.deck-slide-content table { font-size: calc(var(--deck-unit) * 0.8); }
+.deck-slide-content pre { font-size: calc(var(--deck-unit) * 0.85); }
+.deck-slide-content table { font-size: calc(var(--deck-unit) * 0.9); }
 
 /* Callouts/diagramas/quiz herdam o design system (.callout, .lesson-*),
    só ampliamos a base via font-size do container. */
@@ -119,6 +141,59 @@
 .deck-capa {
     width: min(100%, 1400px);
     margin: 0 auto;
+}
+
+/* Capa com imagem de capa: hero full-bleed + scrim p/ legibilidade na TV. */
+.deck-slide--capa { padding: 0; }
+
+.deck-capa.has-cover {
+    position: relative;
+    flex: 1;
+    align-self: stretch;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    padding: var(--deck-pad) calc(var(--deck-pad) * 1.4);
+    overflow: hidden;
+}
+
+.deck-capa-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    margin: 0;
+}
+
+.deck-capa-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Scrim: escurece o lado do texto (esquerda) + base, mantém ≥4.5:1. */
+.deck-capa-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg,
+            rgba(11, 11, 13, .98) 0%,
+            rgba(11, 11, 13, .82) 42%,
+            rgba(11, 11, 13, 0) 78%),
+        linear-gradient(0deg,
+            rgba(11, 11, 13, .70) 0%,
+            rgba(11, 11, 13, 0) 38%);
+}
+
+.deck-capa.has-cover .deck-capa-inner {
+    position: relative;
+    z-index: 1;
+    width: min(62%, 1100px);
+}
+
+@media (max-width: 720px) {
+    .deck-capa.has-cover .deck-capa-inner { width: 100%; }
 }
 
 .deck-capa-meta {
@@ -131,7 +206,7 @@
 .deck-tag {
     padding: calc(var(--deck-unit) * 0.22) calc(var(--deck-unit) * 0.6);
     border-radius: var(--radius-pill);
-    font-size: calc(var(--deck-unit) * 0.7);
+    font-size: calc(var(--deck-unit) * 0.78);
     font-weight: 600;
     letter-spacing: .01em;
 }
@@ -142,10 +217,12 @@
 
 .deck-capa-title {
     margin: 0 0 calc(var(--deck-unit) * 0.6);
+    max-width: 18ch;
     font-size: calc(var(--deck-unit) * 3.1);
     font-weight: 800;
     line-height: 1.04;
     letter-spacing: -.01em;
+    text-wrap: balance;
 }
 
 .deck-capa-dek {
@@ -154,6 +231,7 @@
     color: var(--fg-muted);
     font-size: calc(var(--deck-unit) * 1.25);
     line-height: 1.35;
+    text-wrap: pretty;
 }
 
 .deck-eyebrow {
@@ -161,7 +239,7 @@
     align-items: center;
     gap: .4em;
     color: var(--accent-text);
-    font-size: calc(var(--deck-unit) * 0.72);
+    font-size: calc(var(--deck-unit) * 0.8);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .08em;
@@ -184,8 +262,8 @@
 
 .deck-capa-foot {
     margin-top: calc(var(--deck-unit) * 1.4);
-    color: var(--fg-subtle);
-    font-size: calc(var(--deck-unit) * 0.8);
+    color: var(--fg-muted);
+    font-size: calc(var(--deck-unit) * 0.82);
 }
 
 /* ── Encerramento ───────────────────────────────────────────────────────── */
@@ -201,6 +279,7 @@
     padding: 0;
     font-size: calc(var(--deck-unit) * 2.8);
     font-weight: 800;
+    text-wrap: balance;
 }
 
 .deck-fim-sub {
@@ -216,18 +295,51 @@
     top: 0;
     bottom: calc(var(--deck-unit) * 3.6);
     width: 14vw;
-    max-width: 220px;
-    padding: 0;
+    max-width: 240px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-5);
     border: 0;
     background: transparent;
     cursor: pointer;
     z-index: 5;
     appearance: none;
+    opacity: 0;
+    transition: opacity .2s var(--deck-ease);
 }
 
-.deck-zone-prev { left: 0; }
-.deck-zone-next { right: 0; }
+.deck-zone-prev { left: 0; justify-content: flex-start; }
+.deck-zone-next { right: 0; justify-content: flex-end; }
+.deck-zone:hover,
+.deck-zone:focus-visible { opacity: 1; }
 .deck-zone:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -4px; }
+
+/* Pista de borda + chevron ao passar o mouse (descobribilidade no touch/TV). */
+.deck-zone::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+.deck-zone-prev::after { background: linear-gradient(90deg, var(--accent-tint), transparent 60%); }
+.deck-zone-next::after { background: linear-gradient(270deg, var(--accent-tint), transparent 60%); }
+
+.deck-zone-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--deck-unit) * 1.6);
+    height: calc(var(--deck-unit) * 1.6);
+    border-radius: var(--radius-pill);
+    color: var(--fg);
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-strong);
+}
+.deck-zone-chevron svg { width: 60%; height: 60%; }
+
+/* No início/fim do deck a zona correspondente fica inerte. */
+.deck-zone.is-disabled { pointer-events: none; }
+.deck-zone.is-disabled:hover { opacity: 0; }
 
 /* ── Barra de progresso ─────────────────────────────────────────────────── */
 .deck-progress {
@@ -247,14 +359,14 @@
     background: var(--accent);
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform .28s ease;
+    transition: transform var(--deck-dur) cubic-bezier(.4, 0, .2, 1);
 }
 
 /* ── Controles ──────────────────────────────────────────────────────────── */
 .deck-controls {
     position: absolute;
     left: 50%;
-    bottom: calc(var(--space-5));
+    bottom: var(--space-5);
     transform: translateX(-50%);
     display: flex;
     align-items: center;
@@ -266,7 +378,7 @@
     box-shadow: var(--shadow-pop);
     backdrop-filter: blur(16px);
     z-index: 10;
-    transition: opacity .3s ease, transform .3s ease;
+    transition: opacity .3s var(--deck-ease);
 }
 
 .deck-controls-left,
@@ -280,7 +392,7 @@
 .deck-counter {
     color: var(--fg-muted);
     font-family: var(--font-mono);
-    font-size: var(--text-ui);
+    font-size: var(--text-read);
     font-variant-numeric: tabular-nums;
 }
 
@@ -296,7 +408,10 @@
     color: var(--fg);
     background: var(--surface-raised);
     cursor: pointer;
-    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    transition: background .15s var(--deck-ease),
+                border-color .15s var(--deck-ease),
+                color .15s var(--deck-ease),
+                transform .08s var(--deck-ease);
 }
 
 .deck-icon-btn:hover {
@@ -305,18 +420,21 @@
     color: var(--accent-text);
 }
 
+.deck-icon-btn:active { transform: scale(.94); }
 .deck-icon-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .deck-icon-btn svg { width: 20px; height: 20px; }
 
-/* Auto-hide: controles + zonas somem quando ocioso. */
-.deck-body.is-idle .deck-controls,
-.deck-body.is-idle .deck-hint {
-    opacity: 0;
-    transform: translateX(-50%) translateY(12px);
+.deck-icon-btn[aria-disabled='true'] {
+    opacity: .38;
     pointer-events: none;
 }
 
-.deck-body.is-idle .deck-hint { transform: translateY(12px); }
+/* Auto-hide: controles + dica somem quando ocioso (fade only, sem deslocar). */
+.deck-body.is-idle .deck-controls,
+.deck-body.is-idle .deck-hint {
+    opacity: 0;
+    pointer-events: none;
+}
 
 /* ── Dica de teclado ────────────────────────────────────────────────────── */
 .deck-hint {
@@ -327,6 +445,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+    max-width: min(92vw, 1100px);
     padding: var(--space-2) var(--space-4);
     border: 1px solid var(--border);
     border-radius: var(--radius-pill);
@@ -334,10 +453,10 @@
     background: var(--surface-overlay);
     font-size: var(--text-ui);
     z-index: 10;
-    transition: opacity .4s ease;
+    transition: opacity .4s var(--deck-ease);
 }
 
-.deck-hint svg { width: 18px; height: 18px; }
+.deck-hint svg { width: 18px; height: 18px; flex: none; }
 .deck-hint.is-gone { opacity: 0; pointer-events: none; }
 
 .deck-hint kbd {
@@ -348,15 +467,16 @@
     background: var(--surface-base);
     font-family: var(--font-mono);
     font-size: .82em;
+    white-space: nowrap;
 }
 
-/* ── Overlay de roteiro docente ─────────────────────────────────────────── */
+/* ── Roteiro docente (painel lateral) ───────────────────────────────────── */
 .deck-notes {
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(460px, 38vw);
+    width: min(460px, 42vw);
     display: flex;
     flex-direction: column;
     padding: var(--space-5);
@@ -364,11 +484,16 @@
     background: var(--surface-raised);
     box-shadow: var(--shadow-pop);
     z-index: 20;
+    visibility: hidden;
     transform: translateX(100%);
-    transition: transform .3s ease;
+    transition: transform var(--deck-dur) var(--deck-ease),
+                visibility var(--deck-dur);
 }
 
-.deck-notes:not([hidden]) { transform: none; }
+.deck-notes.is-open {
+    visibility: visible;
+    transform: none;
+}
 
 .deck-notes-head {
     display: flex;
@@ -384,7 +509,114 @@
     line-height: 1.6;
 }
 
-.deck-notes-empty { color: var(--fg-subtle); }
+.deck-notes-empty { color: var(--fg-muted); }
+
+/* ── Tela preta (foco da sala) ──────────────────────────────────────────── */
+.deck-black {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s var(--deck-ease);
+}
+
+.deck-black.is-on {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* ── Visão geral / pular para seção ─────────────────────────────────────── */
+.deck-overview {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(var(--space-5), 4vw, var(--space-10));
+    background: var(--surface-base);
+    background: color-mix(in srgb, var(--surface-base) 92%, transparent);
+    backdrop-filter: blur(14px);
+}
+
+.deck-overview[hidden] { display: none; }
+
+.deck-overview-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+}
+
+.deck-overview-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-4);
+    align-content: start;
+}
+
+.deck-ov-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 110px;
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-raised);
+    color: var(--fg);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s var(--deck-ease),
+                background .15s var(--deck-ease),
+                transform .12s var(--deck-ease);
+}
+
+.deck-ov-item:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-overlay);
+    transform: translateY(-2px);
+}
+
+.deck-ov-item:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+.deck-ov-item.is-current {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.deck-ov-num {
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--text-ui);
+    font-variant-numeric: tabular-nums;
+}
+
+.deck-ov-title {
+    font-size: var(--text-label);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* ── Reduced motion: corte limpo, sem deslizes ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .deck-slide {
+        transform: none !important;
+        transition: opacity .12s linear, visibility .12s;
+    }
+    .deck-stage.is-nudge { animation: none; }
+    .deck-progress span { transition: none; }
+    .deck-notes,
+    .deck-black,
+    .deck-controls,
+    .deck-hint { transition: opacity .12s linear; }
+    .deck-notes { transform: none; }
+    .deck-ov-item:hover { transform: none; }
+}
 
 @media (max-width: 720px) {
     .deck-notes { width: 100%; }

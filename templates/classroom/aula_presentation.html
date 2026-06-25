@@ -15,28 +15,38 @@
 <body class="deck-body">
     <a class="sr-only" href="#deck-stage">Pular para os slides</a>
 
+    {# Região viva: anuncia "Slide X de N: título" a leitores de tela. #}
+    <div class="sr-only" aria-live="polite" data-deck-live></div>
+
     {# Fonte do conteúdo: deck.js fatia este .prose por <h2> em slides. #}
     <div id="deck-source" class="prose" hidden>{{ lesson_html|safe }}</div>
 
     {# Slide de capa (sempre o primeiro). #}
     <template id="deck-capa">
-        <div class="deck-capa">
-            <div class="deck-capa-meta">
-                <span class="deck-tag deck-tag-p">{{ turma.disciplina.label }}</span>
-                <span class="deck-tag deck-tag-s">{{ aula.trilha.label }}</span>
-                <span class="deck-tag deck-tag-ord">Aula {{ aula.ordem|stringformat:'02d' }}</span>
-            </div>
-            <h1 class="deck-capa-title">{{ aula.titulo }}</h1>
-            {% if aula.tema %}<p class="deck-capa-dek">{{ aula.tema }}</p>{% endif %}
-            {% if aula.objetivos %}
-                <div class="deck-capa-goals">
-                    <span class="deck-eyebrow">Objetivos da aula</span>
-                    <ul>
-                        {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
-                    </ul>
-                </div>
+        <div class="deck-capa{% if aula.imagem %} has-cover{% endif %}">
+            {% if aula.imagem %}
+                <figure class="deck-capa-cover" aria-hidden="true">
+                    <img src="{{ aula.imagem.url }}" alt="" decoding="async">
+                </figure>
             {% endif %}
-            <p class="deck-capa-foot">{{ turma.nome }} · Prof. Toni Coimbra</p>
+            <div class="deck-capa-inner">
+                <div class="deck-capa-meta">
+                    <span class="deck-tag deck-tag-p">{{ turma.disciplina.label }}</span>
+                    <span class="deck-tag deck-tag-s">{{ aula.trilha.label }}</span>
+                    <span class="deck-tag deck-tag-ord">Aula {{ aula.ordem|stringformat:'02d' }}</span>
+                </div>
+                <h1 class="deck-capa-title">{{ aula.titulo }}</h1>
+                {% if aula.tema %}<p class="deck-capa-dek">{{ aula.tema }}</p>{% endif %}
+                {% if aula.objetivos %}
+                    <div class="deck-capa-goals">
+                        <span class="deck-eyebrow">Objetivos da aula</span>
+                        <ul>
+                            {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                <p class="deck-capa-foot">{{ turma.nome }} · Prof. Toni Coimbra</p>
+            </div>
         </div>
     </template>
 
@@ -50,14 +60,32 @@
         </div>
     </template>
 
-    <main id="deck-stage" class="deck-stage" tabindex="-1" aria-live="polite"></main>
+    <main id="deck-stage" class="deck-stage" tabindex="-1"></main>
 
     {# Zonas de clique para avançar/voltar (toque na TV / clicker). #}
-    <button class="deck-zone deck-zone-prev" type="button" data-deck-prev aria-label="Slide anterior"></button>
-    <button class="deck-zone deck-zone-next" type="button" data-deck-next aria-label="Próximo slide"></button>
+    <button class="deck-zone deck-zone-prev" type="button" data-deck-prev aria-label="Slide anterior" tabindex="-1">
+        <span class="deck-zone-chevron" aria-hidden="true"><i data-lucide="chevron-left"></i></span>
+    </button>
+    <button class="deck-zone deck-zone-next" type="button" data-deck-next aria-label="Próximo slide" tabindex="-1">
+        <span class="deck-zone-chevron" aria-hidden="true"><i data-lucide="chevron-right"></i></span>
+    </button>
 
-    {# Overlay de roteiro docente (tecla N). #}
-    <aside id="deck-notes" class="deck-notes" hidden aria-label="Roteiro do professor">
+    {# Tela preta para redirecionar a atenção da sala (tecla B). #}
+    <div class="deck-black" data-deck-black aria-hidden="true"></div>
+
+    {# Visão geral / pular para seção (tecla O). #}
+    <div id="deck-overview" class="deck-overview" hidden aria-label="Visão geral dos slides">
+        <div class="deck-overview-head">
+            <span class="deck-eyebrow"><i data-lucide="layout-grid" aria-hidden="true"></i> Visão geral</span>
+            <button class="deck-icon-btn" type="button" data-deck-overview-close aria-label="Fechar visão geral">
+                <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="deck-overview-grid" data-deck-overview-grid></div>
+    </div>
+
+    {# Roteiro docente (tecla N) — painel lateral glanceável, não-modal. #}
+    <aside id="deck-notes" class="deck-notes" aria-label="Roteiro do professor" inert>
         <div class="deck-notes-head">
             <span class="deck-eyebrow"><i data-lucide="presentation" aria-hidden="true"></i> Roteiro do professor</span>
             <button class="deck-icon-btn" type="button" data-deck-notes-close aria-label="Fechar roteiro">
@@ -83,20 +111,23 @@
             <span class="deck-counter"><span data-deck-current>1</span> / <span data-deck-total>1</span></span>
         </div>
         <div class="deck-controls-center">
-            <button class="deck-icon-btn" type="button" data-deck-prev title="Anterior (←)" aria-label="Slide anterior">
+            <button class="deck-icon-btn" type="button" data-deck-prev data-deck-prev-btn title="Anterior (←)" aria-label="Slide anterior">
                 <i data-lucide="chevron-left" aria-hidden="true"></i>
             </button>
-            <button class="deck-icon-btn" type="button" data-deck-next title="Próximo (→)" aria-label="Próximo slide">
+            <button class="deck-icon-btn" type="button" data-deck-next data-deck-next-btn title="Próximo (→)" aria-label="Próximo slide">
                 <i data-lucide="chevron-right" aria-hidden="true"></i>
             </button>
         </div>
         <div class="deck-controls-right">
+            <button class="deck-icon-btn" type="button" data-deck-overview title="Visão geral (O)" aria-label="Abrir visão geral dos slides">
+                <i data-lucide="layout-grid" aria-hidden="true"></i>
+            </button>
             {% if teacher_notes_html %}
                 <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor">
                     <i data-lucide="notebook-pen" aria-hidden="true"></i>
                 </button>
             {% endif %}
-            <button class="deck-icon-btn" type="button" data-deck-fullscreen title="Tela cheia (F)" aria-label="Alternar tela cheia">
+            <button class="deck-icon-btn" type="button" data-deck-fullscreen title="Tela cheia (F)" aria-label="Entrar em tela cheia">
                 <i data-lucide="maximize" aria-hidden="true"></i>
             </button>
         </div>
@@ -104,7 +135,7 @@
 
     <div class="deck-hint" data-deck-hint>
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        Use <kbd>←</kbd> <kbd>→</kbd> para navegar · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair
+        <span><kbd>←</kbd> <kbd>→</kbd> navegar · laterais clicáveis · <kbd>F</kbd> tela cheia · <kbd>O</kbd> visão geral · <kbd>N</kbd> roteiro · <kbd>B</kbd> tela preta · <kbd>Esc</kbd> sair</span>
     </div>
 
     <script src="https://unpkg.com/lucide@latest"></script>

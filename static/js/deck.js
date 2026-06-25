@@ -2,7 +2,9 @@
    deck.js — Modo Apresentação das aulas.
    Fatia o conteúdo da aula (.prose) por <h2> em slides, monta capa +
    encerramento e controla navegação por teclado/clique/controle remoto.
-   Sem dependências além do lucide (ícones). Vanilla JS, zero build.
+   Recursos de apresentador: visão geral (O), roteiro docente (N), tela
+   preta (B), tela cheia (F). Vanilla JS, sem build, sem dependência além
+   do lucide (ícones).
    ──────────────────────────────────────────────────────────────────────── */
 (function () {
     'use strict';
@@ -30,10 +32,12 @@
         return slides;
     }
 
-    function wrap(contentEl) {
+    function wrap(contentEl, title) {
         const slide = document.createElement('section');
         slide.className = 'deck-slide';
+        slide.setAttribute('aria-hidden', 'true');
         slide.appendChild(contentEl);
+        slide.dataset.title = title || '';
         return slide;
     }
 
@@ -43,12 +47,23 @@
         return tpl.content.firstElementChild.cloneNode(true);
     }
 
+    function titleOf(contentEl, fallback) {
+        const h = contentEl.querySelector('h1, h2, h3');
+        const text = h ? h.textContent.trim() : '';
+        return text || fallback;
+    }
+
     const slideEls = [];
     const capa = fromTemplate('deck-capa');
-    if (capa) slideEls.push(wrap(capa));
-    buildSectionSlides().forEach((content) => slideEls.push(wrap(content)));
+    if (capa) {
+        const capaSlide = wrap(capa, titleOf(capa, 'Capa'));
+        capaSlide.classList.add('deck-slide--capa');
+        slideEls.push(capaSlide);
+    }
+    buildSectionSlides().forEach((content, i) =>
+        slideEls.push(wrap(content, titleOf(content, 'Seção ' + (i + 1)))));
     const fim = fromTemplate('deck-fim');
-    if (fim) slideEls.push(wrap(fim));
+    if (fim) slideEls.push(wrap(fim, 'Fim da aula'));
 
     slideEls.forEach((el) => stage.appendChild(el));
     source.remove();
@@ -60,32 +75,70 @@
     const elCurrent = document.querySelector('[data-deck-current]');
     const elTotal = document.querySelector('[data-deck-total]');
     const elProgress = document.querySelector('[data-deck-progress]');
+    const elLive = document.querySelector('[data-deck-live]');
+    const prevBtn = document.querySelector('[data-deck-prev-btn]');
+    const nextBtn = document.querySelector('[data-deck-next-btn]');
+    const prevZone = document.querySelector('.deck-zone-prev');
+    const nextZone = document.querySelector('.deck-zone-next');
     const notes = document.getElementById('deck-notes');
+    const notesHasContent = notes && !notes.querySelector('.deck-notes-empty');
+    const overview = document.getElementById('deck-overview');
+    const overviewGrid = document.querySelector('[data-deck-overview-grid]');
+    const blackEl = document.querySelector('[data-deck-black]');
     const hint = document.querySelector('[data-deck-hint]');
+    const fsBtn = document.querySelector('[data-deck-fullscreen]');
 
     if (elTotal) elTotal.textContent = String(total);
 
     function render() {
         slideEls.forEach((el, i) => {
-            el.classList.toggle('is-active', i === index);
+            const active = i === index;
+            el.classList.toggle('is-active', active);
             el.classList.toggle('is-prev', i < index);
-            if (i === index) el.scrollTop = 0;
+            el.setAttribute('aria-hidden', active ? 'false' : 'true');
+            if (active) el.scrollTop = 0;
         });
         if (elCurrent) elCurrent.textContent = String(index + 1);
         if (elProgress) {
             const ratio = total > 1 ? index / (total - 1) : 1;
             elProgress.style.transform = 'scaleX(' + ratio + ')';
         }
+        // Limites do deck: zona/botão correspondente fica inerte.
+        toggleBound(prevBtn, prevZone, index === 0);
+        toggleBound(nextBtn, nextZone, index === total - 1);
+        announce();
+        markOverviewCurrent();
+    }
+
+    function toggleBound(btn, zone, atBound) {
+        if (btn) btn.setAttribute('aria-disabled', atBound ? 'true' : 'false');
+        if (zone) zone.classList.toggle('is-disabled', atBound);
+    }
+
+    function announce() {
+        if (!elLive) return;
+        const title = slideEls[index].dataset.title;
+        elLive.textContent = 'Slide ' + (index + 1) + ' de ' + total +
+            (title ? ': ' + title : '');
     }
 
     function go(next) {
         const clamped = Math.max(0, Math.min(total - 1, next));
-        if (clamped === index) return;
+        if (clamped === index) {
+            nudge();
+            return;
+        }
         index = clamped;
         render();
     }
 
-    /* ── Navegação ────────────────────────────────────────────────────────── */
+    function nudge() {
+        stage.classList.remove('is-nudge');
+        // reflow para reiniciar a animação
+        void stage.offsetWidth;
+        stage.classList.add('is-nudge');
+    }
+
     function next() { go(index + 1); }
     function prev() { go(index - 1); }
 
@@ -94,19 +147,95 @@
     document.querySelectorAll('[data-deck-prev]').forEach((b) =>
         b.addEventListener('click', prev));
 
-    /* ── Roteiro docente (overlay) ────────────────────────────────────────── */
+    /* ── Roteiro docente (painel lateral, não-modal) ──────────────────────── */
+    let notesReturnFocus = null;
+
+    function notesOpen() { return notes && notes.classList.contains('is-open'); }
+
     function toggleNotes(force) {
-        if (!notes) return;
-        const open = typeof force === 'boolean' ? force : notes.hasAttribute('hidden');
-        if (open) notes.removeAttribute('hidden');
-        else notes.setAttribute('hidden', '');
+        if (!notes || !notesHasContent) return;
+        const open = typeof force === 'boolean' ? force : !notesOpen();
+        notes.classList.toggle('is-open', open);
+        if (open) {
+            notes.removeAttribute('inert');
+            notesReturnFocus = document.activeElement;
+            const close = notes.querySelector('[data-deck-notes-close]');
+            if (close) close.focus();
+        } else {
+            notes.setAttribute('inert', '');
+            if (notesReturnFocus && notesReturnFocus.focus) notesReturnFocus.focus();
+            notesReturnFocus = null;
+        }
     }
     document.querySelectorAll('[data-deck-notes]').forEach((b) =>
         b.addEventListener('click', () => toggleNotes()));
     document.querySelectorAll('[data-deck-notes-close]').forEach((b) =>
         b.addEventListener('click', () => toggleNotes(false)));
 
-    /* ── Tela cheia ───────────────────────────────────────────────────────── */
+    /* ── Visão geral / pular para seção ───────────────────────────────────── */
+    function buildOverview() {
+        if (!overviewGrid) return;
+        slideEls.forEach((el, i) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'deck-ov-item';
+            item.dataset.go = String(i);
+            const num = document.createElement('span');
+            num.className = 'deck-ov-num';
+            num.textContent = String(i + 1).padStart(2, '0');
+            const title = document.createElement('span');
+            title.className = 'deck-ov-title';
+            title.textContent = el.dataset.title || ('Slide ' + (i + 1));
+            item.append(num, title);
+            item.addEventListener('click', () => {
+                go(i);
+                toggleOverview(false);
+            });
+            overviewGrid.appendChild(item);
+        });
+    }
+
+    function markOverviewCurrent() {
+        if (!overviewGrid) return;
+        overviewGrid.querySelectorAll('.deck-ov-item').forEach((item, i) =>
+            item.classList.toggle('is-current', i === index));
+    }
+
+    function overviewOpen() { return overview && !overview.hasAttribute('hidden'); }
+
+    let overviewReturnFocus = null;
+    function toggleOverview(force) {
+        if (!overview) return;
+        const open = typeof force === 'boolean' ? force : !overviewOpen();
+        if (open) {
+            overview.removeAttribute('hidden');
+            overviewReturnFocus = document.activeElement;
+            const current = overviewGrid.querySelector('.deck-ov-item.is-current')
+                || overviewGrid.querySelector('.deck-ov-item');
+            if (current) current.focus();
+        } else {
+            overview.setAttribute('hidden', '');
+            if (overviewReturnFocus && overviewReturnFocus.focus) overviewReturnFocus.focus();
+            overviewReturnFocus = null;
+        }
+    }
+    document.querySelectorAll('[data-deck-overview]').forEach((b) =>
+        b.addEventListener('click', () => toggleOverview()));
+    document.querySelectorAll('[data-deck-overview-close]').forEach((b) =>
+        b.addEventListener('click', () => toggleOverview(false)));
+    buildOverview();
+
+    /* ── Tela preta ───────────────────────────────────────────────────────── */
+    function blackOn() { return blackEl && blackEl.classList.contains('is-on'); }
+    function toggleBlack(force) {
+        if (!blackEl) return;
+        const on = typeof force === 'boolean' ? force : !blackOn();
+        blackEl.classList.toggle('is-on', on);
+        blackEl.setAttribute('aria-hidden', on ? 'false' : 'true');
+    }
+    if (blackEl) blackEl.addEventListener('click', () => toggleBlack(false));
+
+    /* ── Tela cheia (ícone sincronizado) ──────────────────────────────────── */
     function toggleFullscreen() {
         const root = document.documentElement;
         if (!document.fullscreenElement) {
@@ -118,8 +247,35 @@
     document.querySelectorAll('[data-deck-fullscreen]').forEach((b) =>
         b.addEventListener('click', toggleFullscreen));
 
+    document.addEventListener('fullscreenchange', () => {
+        if (!fsBtn) return;
+        const on = !!document.fullscreenElement;
+        const icon = fsBtn.querySelector('i');
+        if (icon) {
+            icon.setAttribute('data-lucide', on ? 'minimize' : 'maximize');
+            if (window.lucide) window.lucide.createIcons();
+        }
+        const label = on ? 'Sair da tela cheia' : 'Entrar em tela cheia';
+        fsBtn.setAttribute('aria-label', label);
+        fsBtn.setAttribute('title', label + ' (F)');
+    });
+
     /* ── Teclado / controle remoto ────────────────────────────────────────── */
     document.addEventListener('keydown', (e) => {
+        // Overlays modais (visão geral) capturam o essencial.
+        if (overviewOpen()) {
+            if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') {
+                e.preventDefault();
+                toggleOverview(false);
+            }
+            return;
+        }
+        if (blackOn() && e.key !== 'F11') {
+            e.preventDefault();
+            toggleBlack(false);
+            return;
+        }
+
         switch (e.key) {
             case 'ArrowRight':
             case 'PageDown':
@@ -135,15 +291,21 @@
             case 'f':
             case 'F':
                 toggleFullscreen(); break;
+            case 'o':
+            case 'O':
+                e.preventDefault(); toggleOverview(); break;
+            case 'b':
+            case 'B':
+            case '.':
+                e.preventDefault(); toggleBlack(); break;
             case 'n':
             case 'N':
-                toggleNotes(); break;
+                if (notesHasContent) { e.preventDefault(); toggleNotes(); }
+                break;
             case 'Escape':
-                if (notes && !notes.hasAttribute('hidden')) {
-                    toggleNotes(false);
-                } else if (document.fullscreenElement) {
-                    toggleFullscreen();
-                } else {
+                if (notesOpen()) toggleNotes(false);
+                else if (document.fullscreenElement) toggleFullscreen();
+                else {
                     const exit = document.querySelector('.deck-controls a[href]');
                     if (exit) window.location.href = exit.href;
                 }
@@ -153,10 +315,14 @@
         }
     });
 
-    /* ── Auto-hide de controles (ocioso) ──────────────────────────────────── */
+    /* ── Auto-hide de controles (ocioso, com throttle) ────────────────────── */
     let idleTimer = null;
+    let lastPoke = 0;
     function poke() {
-        body.classList.remove('is-idle');
+        const now = Date.now();
+        if (body.classList.contains('is-idle')) body.classList.remove('is-idle');
+        if (now - lastPoke < 120 && idleTimer) return;
+        lastPoke = now;
         if (idleTimer) clearTimeout(idleTimer);
         idleTimer = setTimeout(() => body.classList.add('is-idle'), 3500);
     }
@@ -164,7 +330,7 @@
         document.addEventListener(evt, poke, { passive: true }));
     poke();
 
-    /* Dica de teclado some após alguns segundos. */
+    /* Dica de teclado some após alguns segundos; reaparece ao sair do ocioso. */
     if (hint) setTimeout(() => hint.classList.add('is-gone'), 6000);
 
     /* ── Início ───────────────────────────────────────────────────────────── */
