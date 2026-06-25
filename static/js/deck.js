@@ -90,13 +90,49 @@
 
     if (elTotal) elTotal.textContent = String(total);
 
+    /* ── Auto-ajuste: encolhe a seção que não cabe em uma tela ────────────── */
+    const FIT_MIN = 0.6;
+
+    function fitSlide(slide) {
+        const content = slide.firstElementChild;
+        if (!content) return;
+        slide.style.removeProperty('--deck-fit');
+        const cs = getComputedStyle(slide);
+        const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+        const avail = slide.clientHeight - padY;
+        const needed = content.scrollHeight;
+        if (avail <= 0 || needed <= avail) return;
+        let scale = Math.max(FIT_MIN, avail / needed);
+        slide.style.setProperty('--deck-fit', String(scale));
+        // Imagens/min-heights não escalam linearmente → uma passada de correção.
+        if (content.scrollHeight > avail && scale > FIT_MIN) {
+            scale = Math.max(FIT_MIN, scale * (avail / content.scrollHeight));
+            slide.style.setProperty('--deck-fit', String(scale));
+        }
+    }
+
+    let refitRAF = 0;
+    function refit() {
+        cancelAnimationFrame(refitRAF);
+        refitRAF = requestAnimationFrame(() => {
+            const active = slideEls[index];
+            if (active) fitSlide(active);
+        });
+    }
+    window.addEventListener('resize', refit);
+    window.addEventListener('orientationchange', refit);
+    // Imagens carregam tarde (async) → re-ajusta quando a altura real chega.
+    stage.querySelectorAll('img').forEach((img) => {
+        if (!img.complete) img.addEventListener('load', refit, { once: true });
+    });
+
     function render() {
         slideEls.forEach((el, i) => {
             const active = i === index;
             el.classList.toggle('is-active', active);
             el.classList.toggle('is-prev', i < index);
             el.setAttribute('aria-hidden', active ? 'false' : 'true');
-            if (active) el.scrollTop = 0;
+            if (active) { el.scrollTop = 0; fitSlide(el); }
         });
         if (elCurrent) elCurrent.textContent = String(index + 1);
         if (elProgress) {
@@ -149,6 +185,7 @@
 
     /* ── Roteiro docente (painel lateral, não-modal) ──────────────────────── */
     let notesReturnFocus = null;
+    const SUPPORTS_INERT = 'inert' in HTMLElement.prototype;
 
     function notesOpen() { return notes && notes.classList.contains('is-open'); }
 
@@ -156,6 +193,8 @@
         if (!notes || !notesHasContent) return;
         const open = typeof force === 'boolean' ? force : !notesOpen();
         notes.classList.toggle('is-open', open);
+        // Fallback p/ browsers de TV sem suporte a `inert`.
+        if (!SUPPORTS_INERT) notes.setAttribute('aria-hidden', open ? 'false' : 'true');
         if (open) {
             notes.removeAttribute('inert');
             notesReturnFocus = document.activeElement;
@@ -258,6 +297,7 @@
         const label = on ? 'Sair da tela cheia' : 'Entrar em tela cheia';
         fsBtn.setAttribute('aria-label', label);
         fsBtn.setAttribute('title', label + ' (F)');
+        refit();
     });
 
     /* ── Teclado / controle remoto ────────────────────────────────────────── */
@@ -331,7 +371,7 @@
     poke();
 
     /* Dica de teclado some após alguns segundos; reaparece ao sair do ocioso. */
-    if (hint) setTimeout(() => hint.classList.add('is-gone'), 6000);
+    if (hint) setTimeout(() => hint.classList.add('is-gone'), 4500);
 
     /* ── Início ───────────────────────────────────────────────────────────── */
     render();

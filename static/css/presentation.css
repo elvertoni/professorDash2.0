@@ -20,8 +20,8 @@
     color: var(--fg);
     /* Escala-mestre: tudo dentro do slide deriva de --deck-unit.
        Em 1920×1080 satura no teto (40px) → corpo ~42px, legível a 4–6 m. */
-    --deck-unit: clamp(18px, 2.1vw + 0.4vh, 40px);
-    --deck-pad: clamp(var(--space-6), 5vw, var(--space-12));
+    --deck-unit-base: clamp(16px, 1.6vw + 0.4vh, 32px);
+    --deck-pad: clamp(var(--space-5), 4vw, var(--space-10));
     /* Linguagem de movimento do deck (decelerado, sem bounce). */
     --deck-ease: cubic-bezier(.22, .61, .36, 1);
     --deck-dur: .34s;
@@ -49,11 +49,15 @@
 }
 
 .deck-slide {
+    /* --deck-fit: multiplicador por slide aplicado pelo auto-ajuste (deck.js)
+       quando uma seção não cabe em uma tela. 1 = sem redução. */
+    --deck-fit: 1;
+    --deck-unit: calc(var(--deck-unit-base) * var(--deck-fit));
     position: absolute;
     inset: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     padding: var(--deck-pad) calc(var(--deck-pad) * 1.4);
     overflow-y: auto;
     overflow-x: hidden;
@@ -76,22 +80,27 @@
 
 .deck-slide.is-prev { transform: translateX(-24px); }
 
+/* margin:auto num flex-column flex-start centraliza quando cabe e alinha ao
+   topo (rola o resto) quando não cabe — nunca corta como justify-center. */
+.deck-slide-content,
+.deck-fim { margin: auto; }
+.deck-capa:not(.has-cover) { margin: auto; }
+
 /* Conteúdo de seção fatiado do .prose: reescala via --deck-unit. */
 .deck-slide-content {
     width: min(100%, 1400px);
-    margin: 0 auto;
-    font-size: calc(var(--deck-unit) * 1.04);
-    line-height: 1.55;
+    font-size: calc(var(--deck-unit) * 1.0);
+    line-height: 1.45;
 }
 
 .deck-slide-content > :first-child { margin-top: 0; }
 
 .deck-slide-content h2 {
-    margin: 0 0 calc(var(--deck-unit) * 0.9);
+    margin: 0 0 calc(var(--deck-unit) * 0.7);
     padding-left: calc(var(--deck-unit) * 0.6);
     border-left: 4px solid var(--accent);
     color: var(--fg);
-    font-size: calc(var(--deck-unit) * 2.1);
+    font-size: calc(var(--deck-unit) * 1.8);
     font-weight: 700;
     line-height: 1.1;
     max-width: none;
@@ -101,9 +110,9 @@
 /* Sub-cabeçalho ganha cor (hue) — pista de hierarquia mais forte que peso
    a 4–6 m de distância. */
 .deck-slide-content h3 {
-    margin: calc(var(--deck-unit) * 1.1) 0 calc(var(--deck-unit) * 0.5);
+    margin: calc(var(--deck-unit) * 0.8) 0 calc(var(--deck-unit) * 0.35);
     color: var(--accent-text);
-    font-size: calc(var(--deck-unit) * 1.4);
+    font-size: calc(var(--deck-unit) * 1.3);
     font-weight: 600;
 }
 
@@ -118,11 +127,11 @@
     padding-left: calc(var(--deck-unit) * 1.2);
 }
 
-.deck-slide-content li + li { margin-top: calc(var(--deck-unit) * 0.7); }
+.deck-slide-content li + li { margin-top: calc(var(--deck-unit) * 0.5); }
 
 .deck-slide-content img {
     max-width: 100%;
-    max-height: 50vh;
+    max-height: calc(46vh * var(--deck-fit, 1));
     width: auto;
     height: auto;
     object-fit: contain;
@@ -143,7 +152,8 @@
     margin: 0 auto;
 }
 
-/* Capa com imagem de capa: hero full-bleed + scrim p/ legibilidade na TV. */
+/* Capa com imagem: layout DIVIDIDO — texto à esquerda (coluna sólida),
+   imagem contida à direita. Sem texto sobre foto = sem sobreposição. */
 .deck-slide--capa { padding: 0; }
 
 .deck-capa.has-cover {
@@ -152,48 +162,54 @@
     align-self: stretch;
     width: 100%;
     margin: 0;
-    display: flex;
-    align-items: center;
-    padding: var(--deck-pad) calc(var(--deck-pad) * 1.4);
+    display: grid;
+    grid-template-columns: 56fr 44fr;
+    align-items: stretch;
     overflow: hidden;
 }
 
 .deck-capa-cover {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
     margin: 0;
+    overflow: hidden;
 }
 
+/* Absoluto p/ preencher a célula independente de resolução de % no grid. */
 .deck-capa-cover img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* Scrim: escurece o lado do texto (esquerda) + base, mantém ≥4.5:1. */
+/* Emenda suave entre a coluna de texto e a foto. */
 .deck-capa-cover::after {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(90deg,
-            rgba(11, 11, 13, .98) 0%,
-            rgba(11, 11, 13, .82) 42%,
-            rgba(11, 11, 13, 0) 78%),
-        linear-gradient(0deg,
-            rgba(11, 11, 13, .70) 0%,
-            rgba(11, 11, 13, 0) 38%);
+    background: linear-gradient(90deg,
+        var(--surface-base) 0%,
+        rgba(11, 11, 13, 0) 22%);
 }
 
 .deck-capa.has-cover .deck-capa-inner {
-    position: relative;
-    z-index: 1;
-    width: min(62%, 1100px);
+    grid-column: 1;
+    align-self: center;
+    width: 100%;
+    padding: var(--deck-pad) calc(var(--deck-pad) * 1.15);
+    background: var(--surface-base);
 }
 
 @media (max-width: 720px) {
-    .deck-capa.has-cover .deck-capa-inner { width: 100%; }
+    .deck-capa.has-cover {
+        grid-template-columns: 1fr;
+        grid-template-rows: 38% 62%;
+    }
+    .deck-capa-cover { grid-column: 1; grid-row: 1; }
+    .deck-capa.has-cover .deck-capa-inner { grid-column: 1; grid-row: 2; }
 }
 
 .deck-capa-meta {
@@ -218,9 +234,9 @@
 .deck-capa-title {
     margin: 0 0 calc(var(--deck-unit) * 0.6);
     max-width: 18ch;
-    font-size: calc(var(--deck-unit) * 3.1);
+    font-size: calc(var(--deck-unit) * 2.6);
     font-weight: 800;
-    line-height: 1.04;
+    line-height: 1.05;
     letter-spacing: -.01em;
     text-wrap: balance;
 }
@@ -440,7 +456,8 @@
 .deck-hint {
     position: absolute;
     left: 50%;
-    top: var(--space-4);
+    bottom: calc(var(--space-5) + 56px);
+    top: auto;
     transform: translateX(-50%);
     display: inline-flex;
     align-items: center;
