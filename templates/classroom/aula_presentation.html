@@ -1,0 +1,113 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR" data-theme="dark" class="deck-html">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Apresentação · {{ aula.titulo }} · Prof. Toni Coimbra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'css/presentation.css' %}">
+</head>
+<body class="deck-body">
+    <a class="sr-only" href="#deck-stage">Pular para os slides</a>
+
+    {# Fonte do conteúdo: deck.js fatia este .prose por <h2> em slides. #}
+    <div id="deck-source" class="prose" hidden>{{ lesson_html|safe }}</div>
+
+    {# Slide de capa (sempre o primeiro). #}
+    <template id="deck-capa">
+        <div class="deck-capa">
+            <div class="deck-capa-meta">
+                <span class="deck-tag deck-tag-p">{{ turma.disciplina.label }}</span>
+                <span class="deck-tag deck-tag-s">{{ aula.trilha.label }}</span>
+                <span class="deck-tag deck-tag-ord">Aula {{ aula.ordem|stringformat:'02d' }}</span>
+            </div>
+            <h1 class="deck-capa-title">{{ aula.titulo }}</h1>
+            {% if aula.tema %}<p class="deck-capa-dek">{{ aula.tema }}</p>{% endif %}
+            {% if aula.objetivos %}
+                <div class="deck-capa-goals">
+                    <span class="deck-eyebrow">Objetivos da aula</span>
+                    <ul>
+                        {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <p class="deck-capa-foot">{{ turma.nome }} · Prof. Toni Coimbra</p>
+        </div>
+    </template>
+
+    {# Slide de encerramento (sempre o último). #}
+    <template id="deck-fim">
+        <div class="deck-fim">
+            <span class="deck-eyebrow">{{ turma.disciplina.label }}</span>
+            <h2 class="deck-fim-title">Fim da aula</h2>
+            <p class="deck-fim-sub">{{ aula.titulo }}</p>
+            <p class="deck-capa-foot">Dúvidas? Vamos conversar.</p>
+        </div>
+    </template>
+
+    <main id="deck-stage" class="deck-stage" tabindex="-1" aria-live="polite"></main>
+
+    {# Zonas de clique para avançar/voltar (toque na TV / clicker). #}
+    <button class="deck-zone deck-zone-prev" type="button" data-deck-prev aria-label="Slide anterior"></button>
+    <button class="deck-zone deck-zone-next" type="button" data-deck-next aria-label="Próximo slide"></button>
+
+    {# Overlay de roteiro docente (tecla N). #}
+    <aside id="deck-notes" class="deck-notes" hidden aria-label="Roteiro do professor">
+        <div class="deck-notes-head">
+            <span class="deck-eyebrow"><i data-lucide="presentation" aria-hidden="true"></i> Roteiro do professor</span>
+            <button class="deck-icon-btn" type="button" data-deck-notes-close aria-label="Fechar roteiro">
+                <i data-lucide="x" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="deck-notes-body prose">
+            {% if teacher_notes_html %}
+                {{ teacher_notes_html|safe }}
+            {% else %}
+                <p class="deck-notes-empty">Esta aula não tem roteiro docente (bloco <code>:::roteiro</code>).</p>
+            {% endif %}
+        </div>
+    </aside>
+
+    <div class="deck-progress" aria-hidden="true"><span data-deck-progress></span></div>
+
+    <nav class="deck-controls" aria-label="Controles da apresentação">
+        <div class="deck-controls-left">
+            <a class="deck-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" title="Sair (Esc)" aria-label="Sair da apresentação">
+                <i data-lucide="x" aria-hidden="true"></i>
+            </a>
+            <span class="deck-counter"><span data-deck-current>1</span> / <span data-deck-total>1</span></span>
+        </div>
+        <div class="deck-controls-center">
+            <button class="deck-icon-btn" type="button" data-deck-prev title="Anterior (←)" aria-label="Slide anterior">
+                <i data-lucide="chevron-left" aria-hidden="true"></i>
+            </button>
+            <button class="deck-icon-btn" type="button" data-deck-next title="Próximo (→)" aria-label="Próximo slide">
+                <i data-lucide="chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="deck-controls-right">
+            {% if teacher_notes_html %}
+                <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor">
+                    <i data-lucide="notebook-pen" aria-hidden="true"></i>
+                </button>
+            {% endif %}
+            <button class="deck-icon-btn" type="button" data-deck-fullscreen title="Tela cheia (F)" aria-label="Alternar tela cheia">
+                <i data-lucide="maximize" aria-hidden="true"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="deck-hint" data-deck-hint>
+        <i data-lucide="keyboard" aria-hidden="true"></i>
+        Use <kbd>←</kbd> <kbd>→</kbd> para navegar · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{% static 'js/deck.js' %}"></script>
+</body>
+</html>

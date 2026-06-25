@@ -6,6 +6,7 @@ from .views import (
     AlunoDashboardView,
     AlunoTurmaAulasView,
     AulaPublicadaDeleteView,
+    AulaPresentationView,
     AulaPublicadaManageView,
     AulaPublicadaPreviewView,
     AulaPublicadaReorderView,
@@ -95,6 +96,11 @@ urlpatterns = [
         '<int:turma_pk>/aulas/<int:pk>/visualizar/',
         AulaPublicadaPreviewView.as_view(),
         name='aula_publicada_preview',
+    ),
+    path(
+        '<int:turma_pk>/aulas/<int:pk>/apresentar/',
+        AulaPresentationView.as_view(),
+        name='aula_apresentar',
     ),
     path(
         '<int:turma_pk>/aulas/<int:pk>/publicar/',

@@ -1,0 +1,392 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Modo Apresentação (deck) — aula em tela cheia para projetar na sala/TV.
+   Tipografia escala por viewport (vmin) p/ leitura à distância no Educatron.
+   Reusa tokens do design system; força alto-contraste (tema dark fixo).
+   ──────────────────────────────────────────────────────────────────────── */
+
+.deck-html,
+.deck-body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--surface-base);
+}
+
+.deck-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: var(--fg);
+    /* Escala-mestre: tudo dentro do slide deriva de --deck-unit. */
+    --deck-unit: clamp(15px, 2.1vw + 0.4vh, 34px);
+    --deck-pad: clamp(var(--space-6), 5vw, var(--space-12));
+    cursor: default;
+}
+
+.deck-body.is-idle { cursor: none; }
+
+/* ── Palco / slides ─────────────────────────────────────────────────────── */
+.deck-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: stretch;
+    outline: none;
+}
+
+.deck-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--deck-pad) calc(var(--deck-pad) * 1.4);
+    overflow-y: auto;
+    overflow-x: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(24px);
+    transition: opacity .28s ease, transform .28s ease, visibility .28s;
+    scrollbar-width: thin;
+}
+
+.deck-slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+.deck-slide.is-prev { transform: translateX(-24px); }
+
+/* Conteúdo de seção fatiado do .prose: reescala via --deck-unit. */
+.deck-slide-content {
+    width: min(100%, 1400px);
+    margin: 0 auto;
+    font-size: calc(var(--deck-unit) * 1.04);
+    line-height: 1.5;
+}
+
+.deck-slide-content > :first-child { margin-top: 0; }
+
+.deck-slide-content h2 {
+    margin: 0 0 calc(var(--deck-unit) * 0.9);
+    padding-left: calc(var(--deck-unit) * 0.6);
+    border-left: 4px solid var(--accent);
+    color: var(--fg);
+    font-size: calc(var(--deck-unit) * 2.1);
+    font-weight: 700;
+    line-height: 1.1;
+    max-width: none;
+}
+
+.deck-slide-content h3 {
+    margin: calc(var(--deck-unit) * 1.1) 0 calc(var(--deck-unit) * 0.5);
+    font-size: calc(var(--deck-unit) * 1.4);
+    font-weight: 600;
+}
+
+.deck-slide-content p,
+.deck-slide-content li {
+    max-width: 46ch;
+}
+
+.deck-slide-content ul,
+.deck-slide-content ol {
+    padding-left: calc(var(--deck-unit) * 1.2);
+}
+
+.deck-slide-content li + li { margin-top: calc(var(--deck-unit) * 0.45); }
+
+.deck-slide-content img {
+    max-width: 100%;
+    max-height: 56vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+}
+
+.deck-slide-content figure { margin: calc(var(--deck-unit) * 0.8) 0; }
+
+.deck-slide-content pre,
+.deck-slide-content table { font-size: calc(var(--deck-unit) * 0.8); }
+
+/* Callouts/diagramas/quiz herdam o design system (.callout, .lesson-*),
+   só ampliamos a base via font-size do container. */
+
+/* ── Capa ───────────────────────────────────────────────────────────────── */
+.deck-capa {
+    width: min(100%, 1400px);
+    margin: 0 auto;
+}
+
+.deck-capa-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--deck-unit) * 0.5);
+    margin-bottom: calc(var(--deck-unit) * 1.1);
+}
+
+.deck-tag {
+    padding: calc(var(--deck-unit) * 0.22) calc(var(--deck-unit) * 0.6);
+    border-radius: var(--radius-pill);
+    font-size: calc(var(--deck-unit) * 0.7);
+    font-weight: 600;
+    letter-spacing: .01em;
+}
+
+.deck-tag-p { color: var(--accent-ink); background: var(--accent); }
+.deck-tag-s { color: var(--fg); background: var(--surface-overlay); border: 1px solid var(--border-strong); }
+.deck-tag-ord { color: var(--fg-muted); background: var(--surface-raised); }
+
+.deck-capa-title {
+    margin: 0 0 calc(var(--deck-unit) * 0.6);
+    font-size: calc(var(--deck-unit) * 3.1);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -.01em;
+}
+
+.deck-capa-dek {
+    margin: 0 0 calc(var(--deck-unit) * 1.4);
+    max-width: 40ch;
+    color: var(--fg-muted);
+    font-size: calc(var(--deck-unit) * 1.25);
+    line-height: 1.35;
+}
+
+.deck-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .4em;
+    color: var(--accent-text);
+    font-size: calc(var(--deck-unit) * 0.72);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.deck-capa-goals {
+    padding: calc(var(--deck-unit) * 0.9) calc(var(--deck-unit) * 1.1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-raised);
+}
+
+.deck-capa-goals ul {
+    margin: calc(var(--deck-unit) * 0.5) 0 0;
+    padding-left: calc(var(--deck-unit) * 1.1);
+    font-size: calc(var(--deck-unit) * 1.02);
+}
+
+.deck-capa-goals li + li { margin-top: calc(var(--deck-unit) * 0.4); }
+
+.deck-capa-foot {
+    margin-top: calc(var(--deck-unit) * 1.4);
+    color: var(--fg-subtle);
+    font-size: calc(var(--deck-unit) * 0.8);
+}
+
+/* ── Encerramento ───────────────────────────────────────────────────────── */
+.deck-fim {
+    width: min(100%, 1100px);
+    margin: 0 auto;
+    text-align: center;
+}
+
+.deck-fim-title {
+    margin: calc(var(--deck-unit) * 0.6) 0 0;
+    border: 0;
+    padding: 0;
+    font-size: calc(var(--deck-unit) * 2.8);
+    font-weight: 800;
+}
+
+.deck-fim-sub {
+    margin: calc(var(--deck-unit) * 0.4) auto 0;
+    max-width: 40ch;
+    color: var(--fg-muted);
+    font-size: calc(var(--deck-unit) * 1.2);
+}
+
+/* ── Zonas de clique (esquerda/direita) ─────────────────────────────────── */
+.deck-zone {
+    position: absolute;
+    top: 0;
+    bottom: calc(var(--deck-unit) * 3.6);
+    width: 14vw;
+    max-width: 220px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    z-index: 5;
+    appearance: none;
+}
+
+.deck-zone-prev { left: 0; }
+.deck-zone-next { right: 0; }
+.deck-zone:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -4px; }
+
+/* ── Barra de progresso ─────────────────────────────────────────────────── */
+.deck-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--border);
+    z-index: 8;
+}
+
+.deck-progress span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform .28s ease;
+}
+
+/* ── Controles ──────────────────────────────────────────────────────────── */
+.deck-controls {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--space-5));
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--surface-overlay);
+    box-shadow: var(--shadow-pop);
+    backdrop-filter: blur(16px);
+    z-index: 10;
+    transition: opacity .3s ease, transform .3s ease;
+}
+
+.deck-controls-left,
+.deck-controls-center,
+.deck-controls-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.deck-counter {
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-ui);
+    font-variant-numeric: tabular-nums;
+}
+
+.deck-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--fg);
+    background: var(--surface-raised);
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.deck-icon-btn:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-overlay);
+    color: var(--accent-text);
+}
+
+.deck-icon-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.deck-icon-btn svg { width: 20px; height: 20px; }
+
+/* Auto-hide: controles + zonas somem quando ocioso. */
+.deck-body.is-idle .deck-controls,
+.deck-body.is-idle .deck-hint {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+    pointer-events: none;
+}
+
+.deck-body.is-idle .deck-hint { transform: translateY(12px); }
+
+/* ── Dica de teclado ────────────────────────────────────────────────────── */
+.deck-hint {
+    position: absolute;
+    left: 50%;
+    top: var(--space-4);
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--fg-muted);
+    background: var(--surface-overlay);
+    font-size: var(--text-ui);
+    z-index: 10;
+    transition: opacity .4s ease;
+}
+
+.deck-hint svg { width: 18px; height: 18px; }
+.deck-hint.is-gone { opacity: 0; pointer-events: none; }
+
+.deck-hint kbd {
+    padding: 2px 7px;
+    border: 1px solid var(--border-strong);
+    border-bottom-width: 2px;
+    border-radius: var(--radius-xs);
+    background: var(--surface-base);
+    font-family: var(--font-mono);
+    font-size: .82em;
+}
+
+/* ── Overlay de roteiro docente ─────────────────────────────────────────── */
+.deck-notes {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(460px, 38vw);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-5);
+    border-left: 1px solid var(--border-strong);
+    background: var(--surface-raised);
+    box-shadow: var(--shadow-pop);
+    z-index: 20;
+    transform: translateX(100%);
+    transition: transform .3s ease;
+}
+
+.deck-notes:not([hidden]) { transform: none; }
+
+.deck-notes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.deck-notes-body {
+    flex: 1;
+    overflow-y: auto;
+    font-size: var(--text-read);
+    line-height: 1.6;
+}
+
+.deck-notes-empty { color: var(--fg-subtle); }
+
+@media (max-width: 720px) {
+    .deck-notes { width: 100%; }
+    .deck-controls { gap: var(--space-3); }
+}

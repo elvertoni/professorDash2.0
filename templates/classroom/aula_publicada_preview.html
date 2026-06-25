@@ -86,6 +86,10 @@
             {% endif %}
         </div>
         <div class="teacher-preview-actions">
+            <a class="btn btn-primary btn-sm" href="{% url 'classroom:aula_apresentar' turma.pk publicada.pk %}" title="Abrir em tela cheia para projetar na sala">
+                <i data-lucide="monitor-play" aria-hidden="true"></i>
+                Apresentar
+            </a>
             <a class="btn btn-outline btn-sm" href="{% url 'classroom:aula_publicada_update' turma.pk publicada.pk %}">
                 <i data-lucide="settings-2" aria-hidden="true"></i>
                 Ajustar liberação

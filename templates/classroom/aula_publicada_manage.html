@@ -145,6 +145,9 @@
                                 <a class="btn btn-primary btn-sm" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}">
                                     <i data-lucide="book-open" aria-hidden="true"></i> Ver aula
                                 </a>
+                                <a class="btn btn-outline btn-sm" href="{% url 'classroom:aula_apresentar' turma.pk publicada.pk %}" title="Projetar na sala (TV)">
+                                    <i data-lucide="monitor-play" aria-hidden="true"></i> Apresentar
+                                </a>
                                 {% if publicada.publicada %}
                                     <a class="btn btn-outline btn-sm btn-warning-outline" href="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
                                         <i data-lucide="eye-off" aria-hidden="true"></i> Despublicar

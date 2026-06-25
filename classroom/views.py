@@ -583,6 +583,28 @@ class AulaPublicadaPreviewView(AulaPublicadaActionMixin, View):
         )
 
 
+class AulaPresentationView(AulaPublicadaActionMixin, View):
+    '''Modo apresentação: aula em tela cheia para projetar na sala (TV/Educatron).'''
+
+    template_name = 'classroom/aula_presentation.html'
+
+    def get(self, request, turma_pk, pk):
+        turma = self.get_turma(turma_pk)
+        publicada = self.get_publicada(turma, pk)
+        aula = publicada.aula
+        return render(
+            request,
+            self.template_name,
+            {
+                'turma': turma,
+                'publicada': publicada,
+                'aula': aula,
+                'lesson_html': sanitize_lesson_html(aula.conteudo_html),
+                'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md),
+            },
+        )
+
+
 class AulaPublicadaUpdateView(AulaPublicadaActionMixin, View):
     template_name = 'classroom/aula_publicada_form.html'
 
