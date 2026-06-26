@@ -1908,8 +1908,8 @@ table.tbl {
 .lesson-hero {
     margin: 0 0 var(--space-5);
     overflow: hidden;
-    aspect-ratio: 21 / 9;
-    max-height: 340px;
+    aspect-ratio: 16 / 9;
+    max-height: 460px;
     border-radius: var(--radius-md);
     background: var(--surface-base);
     box-shadow: var(--shadow-pop);
