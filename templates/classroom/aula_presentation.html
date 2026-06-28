@@ -131,9 +131,11 @@
     </dialog>
     {% endif %}
 
-    {# Ordem importa: quiz.js registra o componente Alpine; lucide e deck.js
-       montam o DOM dos slides; Alpine (defer) roda por último e inicializa o
-       quiz já presente nos slides. #}
+    {% comment %}
+    Ordem importa: quiz.js registra o componente Alpine; lucide e deck.js
+    montam o DOM dos slides; Alpine (defer) roda por último e inicializa o
+    quiz já presente nos slides.
+    {% endcomment %}
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{% static 'js/deck.js' %}"></script>
