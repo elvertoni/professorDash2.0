@@ -56,7 +56,9 @@ uv pip install --python .\.venv\Scripts\python.exe -r requirements.txt
 python manage.py makemigrations <app>   # gerar migrations antes do push
 ```
 
-> Management commands custom: `catalog/import_acervo` e `base/seed_demo`.
+> Management commands custom: `catalog/import_acervo`, `base/seed_demo`, `base/test_email <dest>` (testa SMTP).
+
+**Email**: SMTP via env (`EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`). Sem `EMAIL_HOST` → fallback `console.EmailBackend` (settings.py:160). Validar prod: `test_email`.
 
 ## Arquitetura
 
@@ -70,7 +72,7 @@ Portal educacional **single-tenant** (Prof. Toni / SEED-PR). É a camada de **en
 | `base` | Recursos compartilhados | `TimeStampedModel` (abstract, herdado por *todos* os models), mixins de permissão, storage protegido de media |
 | `accounts` | Usuários e auth | `User` (custom, `email` = `USERNAME_FIELD`, `role` professor/aluno/admin), `ProfessorProfile`, `AlunoProfile` |
 | `catalog` | Taxonomia do acervo (espelha `manifesto.json`) | `Disciplina`, `Trilha`, `Aula` (canônica importada: `conteudo_html`/`conteudo_md`) |
-| `classroom` | Turmas e publicação | `Turma`, `Matricula`, `AulaPublicada` (Aula→Turma com `disponivel_em`), `ProgressoAula` |
+| `classroom` | Turmas, publicação e modo apresentação | `Turma`, `Matricula`, `AulaPublicada` (Aula→Turma com `disponivel_em`), `ProgressoAula` |
 | `materials` | Materiais extras (upload manual) | `Material` (FileField protegido ou link) |
 | `activities` | Controle de presença/tarefas do professor (estilo Notion) | `Atividade` (item: `titulo`/`descricao`/`data`), `AtividadeCheck` (`feito`+`observacao` por aluno). **Sem entrega/nota/arquivo** — entregas oficiais ficam no Google Classroom |
 | `notifications` | Avisos in-app (sino no header) | `Notificacao` (apenas eventos de aula publicada; entrega/correção foram removidos) |
@@ -79,6 +81,7 @@ Portal educacional **single-tenant** (Prof. Toni / SEED-PR). É a camada de **en
 
 - **Acervo → turma → aluno**: `import_acervo` lê `manifesto.json` + `aulas/{disciplina}/{trilha}/{NN-slug}/canonica.md` → parser custom → `Aula` (depósito interno; **catálogo fora do nav**). Na turma, o botão **Sincronizar aulas** (`TurmaSyncAulasView`) importa a disciplina da turma do head e publica todas como `AulaPublicada` (disponível agora, idempotente). Aluno vê respeitando `disponivel_em`.
 - **Atividade → check**: professor cria `Atividade` (item de controle) na turma → grade alunos×checkbox (`AtividadeChecksView`, bulk-save) marca `AtividadeCheck.feito` + observação. Não há entrega do aluno no portal.
+- **Modo apresentação** (`AulaPresentationView`, rota `/turmas/<turma>/aulas/<pk>/apresentar/`): deck fullscreen da aula para TV de sala — capa hero + lightbox, quiz interativo com feedback, tipografia editorial. Mobile-first não se aplica aqui (alvo é tela grande).
 - **Tema por papel**: aluno = `light`, professor/admin = `dark` (server-rendered no `base.html`; toggle localStorage sobrescreve).
 - **Escopo de visibilidade** (em vez de tenant): aluno só enxerga turmas/aulas das suas `Matricula`; atividades são tela do professor. Toda rota privada exige auth + papel.
 - **Media protegida**: materiais NUNCA expostos publicamente — servidos via view com checagem de permissão (aluno da turma ou professor).
