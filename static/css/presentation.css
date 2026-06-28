@@ -329,8 +329,9 @@
     border-radius: var(--radius-xl);
     overflow: hidden;
     background: var(--surface-raised);
-    border: 1px solid var(--border);
-    box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8),
+                inset 0 0 0 1px rgba(255, 255, 255, .04);
     padding: 0;
     color: inherit;
     font: inherit;
@@ -370,7 +371,7 @@
 .deck-cover-title {
     margin: 0 0 calc(var(--deck-fs) * 0.7);
     max-width: 16ch;
-    font-size: clamp(34px, calc(var(--deck-fs) * 2.2 + 1.6vw), 100px);
+    font-size: clamp(34px, calc(var(--deck-fs) * 2.2 + 1.6vw), 96px);
     font-weight: 800;
     line-height: 1.02;
     letter-spacing: -.025em;
@@ -399,20 +400,35 @@
     letter-spacing: .09em;
 }
 
+/* Objetivos: lista editorial (sem card), separada por filete fino. */
 .deck-cover-goals {
-    padding: calc(var(--deck-fs) * 1) calc(var(--deck-fs) * 1.15);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    background: var(--surface-raised);
+    margin-top: calc(var(--deck-fs) * 1.4);
+    padding-top: calc(var(--deck-fs) * 1.05);
+    border-top: 1px solid var(--border-strong);
 }
 
 .deck-cover-goals ul {
-    margin: calc(var(--deck-fs) * 0.6) 0 0;
-    padding-left: calc(var(--deck-fs) * 1.2);
+    list-style: none;
+    margin: calc(var(--deck-fs) * 0.7) 0 0;
+    padding: 0;
     font-size: calc(var(--deck-fs) * 1.02);
-    line-height: 1.5;
+    line-height: 1.45;
 }
-.deck-cover-goals li + li { margin-top: calc(var(--deck-fs) * 0.45); }
+.deck-cover-goals li {
+    position: relative;
+    padding-left: calc(var(--deck-fs) * 1.25);
+}
+.deck-cover-goals li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .6em;
+    width: .42em;
+    height: .42em;
+    border-radius: 50%;
+    background: var(--accent);
+}
+.deck-cover-goals li + li { margin-top: calc(var(--deck-fs) * 0.5); }
 
 .deck-cover-foot {
     margin-top: calc(var(--deck-fs) * 1.5);
