@@ -1,474 +1,581 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   Modo Apresentação (deck) — aula em tela cheia para projetar na sala/TV.
-   Superficie de PROJECAO: tipografia escala por viewport (clamp) p/ leitura
-   a distancia no Educatron (42", 4-6 m). Reusa tokens do design system;
-   força alto-contraste (tema dark fixo). Motion calmo, decelerado.
-   ──────────────────────────────────────────────────────────────────────── */
+   Modo Apresentação (cinema) — aula em rolagem vertical para projetar na
+   sala/TV (Educatron 42", 4-6 m) e também assistir no PC/celular.
+   Filosofia: UMA escala tipográfica fixa partilhada por TODAS as seções
+   (zero auto-shrink por seção → leitura uniforme), seções full-bleed que
+   revelam ao rolar. Reusa tokens + componentes do design system. Tema dark
+   fixo, alto contraste. Movimento decelerado, sem bounce.
+   ────────────────────────────────────────────────────────────────────────
+   TIPOGRAFIA PREMIUM EDITORIAL — princípios:
+   • Nenhum texto menor que o corpo. Callouts, quiz, steps = 1em.
+   • Corpo generoso (~35px em 1080p) para leitura a distância.
+   • Line-height 1.65 (editorial, respiro entre linhas).
+   • Headings dramáticos (h2 2.2×, h3 1.4×) sem side-stripe.
+   • Scroll contínuo, sem avançar slide. Ler como artigo premium.
+   ──────────────────────────────────────────────────────────── */
 
-.deck-html,
-.deck-body {
+.deck-html {
     height: 100%;
-    margin: 0;
-    overflow: hidden;
+    scroll-behavior: smooth;
     background: var(--surface-base);
 }
 
 .deck-body {
-    position: relative;
-    display: flex;
-    flex-direction: column;
+    min-height: 100%;
+    margin: 0;
     color: var(--fg);
-    /* Escala-mestre: tudo dentro do slide deriva de --deck-unit.
-       Em 1920x1080 o corpo fica perto de 35px, legivel em TV 42". */
-    --deck-unit-base: clamp(22px, 1.35vw + 0.8vh, 40px);
-    --deck-pad: clamp(var(--space-5), 3.2vw, var(--space-8));
-    /* Linguagem de movimento do deck (decelerado, sem bounce). */
+    background: var(--surface-base);
+
+    /* ── Escala-mestre única: TODA tipografia do deck deriva de --deck-fs.
+       Fixa por viewport (não por seção) → mesmo tamanho em todas as telas.
+       Em 1920×1080 o corpo fica ~35px, confortável a 4-6 m na TV 42". ── */
+    --deck-fs: clamp(22px, 1.1vw + 1.6vh, 40px);
+    --deck-pad-x: clamp(var(--space-5), 6vw, 160px);
+    --deck-pad-y: clamp(var(--space-8), 9vh, 150px);
+    --deck-measure: 65ch;
+
+    /* Linguagem de movimento (decelerado, sem bounce). */
     --deck-ease: cubic-bezier(.22, .61, .36, 1);
-    --deck-dur: .34s;
+    --deck-ease-out: cubic-bezier(.16, 1, .3, 1);
+    --deck-dur: .7s;
+
+    /* Realce pontual emerald→cyan (CTA do design system). Usado em filetes e
+       marcadores — nunca em background-clip:text. */
+    --deck-grad: linear-gradient(120deg, #2DD4BF 0%, var(--accent) 100%);
+
+    font-size: var(--deck-fs);
     cursor: default;
 }
 
 .deck-body.is-idle { cursor: none; }
 
-/* ── Palco / slides ─────────────────────────────────────────────────────── */
-.deck-stage {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    place-items: stretch;
-    outline: none;
-}
+/* Z-index semântico do deck. */
+.deck-progress { z-index: 30; }
+.deck-rail { z-index: 25; }
+.deck-controls,
+.deck-hint,
+.deck-scrollcue { z-index: 40; }
+.deck-notes { z-index: 60; }
 
-.deck-stage.is-nudge { animation: deck-nudge .32s var(--deck-ease); }
-
-@keyframes deck-nudge {
-    25% { transform: translateX(8px); }
-    60% { transform: translateX(-5px); }
-    100% { transform: none; }
-}
-
-.deck-slide {
-    /* --deck-fit: multiplicador por slide aplicado pelo auto-ajuste (deck.js)
-       quando uma seção não cabe em uma tela. 1 = sem redução. */
-    --deck-fit: 1;
-    --deck-unit: calc(var(--deck-unit-base) * var(--deck-fit));
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: var(--deck-pad) calc(var(--deck-pad) * 1.3);
+/* ── Trilha de rolagem (o elemento que rola) ─────────────────────────────── */
+.deck-scroll {
+    height: 100svh;
     overflow-y: auto;
     overflow-x: hidden;
-    opacity: 0;
-    visibility: hidden;
-    /* Slides futuros entram pela direita; passados saem pela esquerda
-       (.is-prev) → o sentido do movimento já comunica avançar/voltar. */
-    transform: translateX(24px);
-    transition: opacity var(--deck-dur) var(--deck-ease),
-                transform var(--deck-dur) var(--deck-ease),
-                visibility var(--deck-dur);
+    scroll-snap-type: y proximity;
     scrollbar-width: thin;
 }
 
-.deck-slide.is-active {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
+/* Cada seção = um "ato": ocupa a tela, centra o conteúdo, alinha topo quando
+   transborda (rola livre — snap é proximity, nunca prende conteúdo longo). */
+.deck-act {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--deck-pad-y) var(--deck-pad-x);
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
 }
 
-.deck-slide.is-prev { transform: translateX(-24px); }
-
-/* margin:auto num flex-column flex-start centraliza quando cabe e alinha ao
-   topo (rola o resto) quando não cabe — nunca corta como justify-center. */
-.deck-slide-content,
-.deck-fim { margin: auto; }
-.deck-capa:not(.has-cover) { margin: auto; }
-
-/* Conteúdo de seção fatiado do .prose: reescala via --deck-unit. */
-.deck-slide-content {
-    width: min(100%, 1500px);
-    font-size: calc(var(--deck-unit) * 1.0);
-    line-height: 1.44;
+/* Faixa fina entre atos: respiro visual sem peso de "card". */
+.deck-act + .deck-act::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--deck-pad-x);
+    right: var(--deck-pad-x);
+    height: 1px;
+    background: var(--border);
+    opacity: .6;
 }
 
-.deck-slide-content > :first-child { margin-top: 0; }
+/* ── Reveal ao rolar (realçado por IntersectionObserver via .is-in) ──────── */
+/* Default É VISÍVEL (sem JS, headless, aba oculta → conteúdo aparece).
+   O reveal só enriquece um padrão já visível. */
+@media (prefers-reduced-motion: no-preference) {
+    .js .deck-reveal > * {
+        opacity: 0;
+        transform: translateY(22px);
+        filter: blur(6px);
+        transition: opacity var(--deck-dur) var(--deck-ease-out),
+                    transform var(--deck-dur) var(--deck-ease-out),
+                    filter var(--deck-dur) var(--deck-ease-out);
+        transition-delay: calc(var(--i, 0) * 90ms);
+        will-change: opacity, transform;
+    }
+    .js .deck-reveal.is-in > * {
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+}
 
-.deck-slide-content h2 {
-    margin: 0 0 calc(var(--deck-unit) * 0.7);
-    padding-left: calc(var(--deck-unit) * 0.6);
-    border-left: 4px solid var(--accent);
-    color: var(--fg);
-    font-size: calc(var(--deck-unit) * 1.45);
-    font-weight: 700;
-    line-height: 1.08;
+/* ── Conteúdo de seção (fatiado do .prose) ──────────────────────────────── */
+.deck-act-body {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    font-size: 1em;
+    line-height: 1.65;
+}
+
+.deck-act-body > :first-child { margin-top: 0; }
+.deck-act-body > :last-child { margin-bottom: 0; }
+
+/* Marcador de seção: número (sequência REAL da aula) + título.
+   Substitui o antigo border-left (side-stripe banido). */
+.deck-act-head {
+    display: flex;
+    align-items: baseline;
+    gap: calc(var(--deck-fs) * 0.6);
+    margin: 0 0 calc(var(--deck-fs) * 1.3);
+}
+
+.deck-act-num {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: calc(var(--deck-fs) * 0.92);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: .04em;
+    color: var(--accent-text);
+    font-variant-numeric: tabular-nums;
+    padding-top: .15em;
+}
+
+/* Filete curto com o gradiente da marca (realce pontual). */
+.deck-act-num::after {
+    content: '';
+    display: block;
+    width: 2.4em;
+    height: 3px;
+    margin-top: calc(var(--deck-fs) * 0.45);
+    border-radius: var(--radius-pill);
+    background: var(--deck-grad);
+}
+
+.deck-act-body h2,
+.deck-act-title {
+    margin: 0;
+    /* Anula o side-stripe herdado de .prose h2 (o conteúdo também é .prose). */
+    padding: 0;
+    border: 0;
     max-width: none;
+    color: var(--fg);
+    font-size: calc(var(--deck-fs) * 2.2);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -.018em;
     text-wrap: balance;
 }
 
-.deck-slide-content h2.deck-repeat-heading {
-    margin-bottom: calc(var(--deck-unit) * 0.45);
-    color: var(--fg-muted);
-    font-size: calc(var(--deck-unit) * 1.1);
-}
+/* h2 repetido (continuação de seção longa) entra mudo. */
+.deck-act-body h2 + * { margin-top: calc(var(--deck-fs) * 1.2); }
 
-/* Sub-cabecalho ganha cor (hue): hierarquia clara a 4-6 m. */
-.deck-slide-content h3 {
-    margin: calc(var(--deck-unit) * 0.65) 0 calc(var(--deck-unit) * 0.3);
+.deck-act-body h3 {
+    margin: calc(var(--deck-fs) * 1.4) 0 calc(var(--deck-fs) * 0.6);
     color: var(--accent-text);
-    font-size: calc(var(--deck-unit) * 1.12);
+    font-size: calc(var(--deck-fs) * 1.4);
     font-weight: 600;
-    line-height: 1.15;
+    line-height: 1.18;
+    letter-spacing: -.008em;
 }
 
-.deck-slide-content p,
-.deck-slide-content li {
-    max-width: 48ch;
+.deck-act-body p,
+.deck-act-body li {
+    max-width: var(--deck-measure);
     text-wrap: pretty;
 }
 
-.deck-slide-content p,
-.deck-slide-content ul,
-.deck-slide-content ol {
-    margin-bottom: calc(var(--deck-unit) * 0.5);
+.deck-act-body p,
+.deck-act-body ul,
+.deck-act-body ol {
+    margin: 0 0 calc(var(--deck-fs) * 0.95);
+    line-height: 1.65;
 }
 
-.deck-slide-content ul,
-.deck-slide-content ol {
-    padding-left: calc(var(--deck-unit) * 1.05);
+.deck-act-body ul,
+.deck-act-body ol { padding-left: calc(var(--deck-fs) * 1.2); }
+.deck-act-body li + li { margin-top: calc(var(--deck-fs) * 0.45); }
+
+.deck-act-body strong { color: var(--fg); font-weight: 650; }
+
+.deck-act-body a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: .18em;
+    text-decoration-thickness: 1px;
 }
 
-.deck-slide-content li + li { margin-top: calc(var(--deck-unit) * 0.32); }
-
-.deck-slide-content img {
+/* Mídia: contida na tela, com profundidade sutil. */
+.deck-act-body img,
+.deck-act-body svg {
     max-width: 100%;
-    max-height: calc(60vh * var(--deck-fit, 1));
+    max-height: 70svh;
     width: auto;
     height: auto;
     object-fit: contain;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shell-shadow-soft);
+    border-radius: var(--radius-lg);
     border: 1px solid var(--border);
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7);
 }
 
-.deck-slide-content figure { margin: calc(var(--deck-unit) * 0.8) 0; }
+.deck-act-body figure { margin: calc(var(--deck-fs) * 1.2) 0; }
+.deck-act-body figure > :first-child { margin-top: 0; }
 
-.deck-slide-content pre { font-size: calc(var(--deck-unit) * 0.85); }
-.deck-slide-content table { font-size: calc(var(--deck-unit) * 0.9); }
+.deck-act-body pre {
+    font-size: calc(var(--deck-fs) * 0.85);
+    line-height: 1.55;
+    border-radius: var(--radius-lg);
+}
+.deck-act-body code { font-size: .92em; }
+.deck-act-body table { font-size: 1em; }
 
-/* Callouts/diagramas/quiz herdam o design system (.callout, .lesson-*),
-   só ampliamos a base via font-size do container. */
-.deck-slide-content .callout,
-.deck-slide-content .lesson-diagram,
-.deck-slide-content .lesson-quiz,
-.deck-slide-content .lesson-steps li {
-    margin: calc(var(--deck-unit) * 0.45) 0;
-    padding: calc(var(--deck-unit) * 0.55);
+/* Componentes do design system (callout/diagrama/quiz/passos) —
+   TODOS usam 1em (= --deck-fs). Nenhum texto menor que o corpo.
+   Princípio: leitura uniforme mesmo de longe (TV/projetor). */
+.deck-act-body .callout,
+.deck-act-body .lesson-diagram,
+.deck-act-body .lesson-quiz,
+.deck-act-body .lesson-steps li {
+    margin: calc(var(--deck-fs) * 0.8) 0;
+    padding: calc(var(--deck-fs) * 0.85);
+    border-radius: var(--radius-lg);
 }
 
-.deck-slide-content .callout {
-    grid-template-columns: calc(var(--deck-unit) * 1.2) minmax(0, 1fr);
-    gap: calc(var(--deck-unit) * 0.45);
+.deck-act-body .callout {
+    grid-template-columns: calc(var(--deck-fs) * 1.5) minmax(0, 1fr);
+    gap: calc(var(--deck-fs) * 0.6);
 }
 
-.deck-slide-content .callout .ic {
-    width: calc(var(--deck-unit) * 1.2);
-    height: calc(var(--deck-unit) * 1.2);
+.deck-act-body .callout .ic {
+    width: calc(var(--deck-fs) * 1.5);
+    height: calc(var(--deck-fs) * 1.5);
+}
+.deck-act-body .callout .ic svg { width: 60%; height: 60%; }
+
+/* Uniforme: mesmo tamanho do corpo (1em) para TODOS os componentes. */
+.deck-act-body .callout .ct b,
+.deck-act-body .lesson-quiz-head strong,
+.deck-act-body .lesson-steps strong {
+    font-size: 1em;
+    font-weight: 700;
 }
 
-.deck-slide-content .callout .ic svg {
-    width: 62%;
-    height: 62%;
-}
-
-.deck-slide-content .callout .ct b,
-.deck-slide-content .lesson-quiz-head strong,
-.deck-slide-content .lesson-steps strong {
-    font-size: calc(var(--deck-unit) * 0.74);
-}
-
-.deck-slide-content .callout .ct p,
-.deck-slide-content .lesson-steps p,
-.deck-slide-content .lesson-quiz-question ol {
+.deck-act-body .callout .ct p,
+.deck-act-body .lesson-steps p,
+.deck-act-body .lesson-quiz-question ol,
+.deck-act-body .lesson-quiz-question .quiz-options {
     color: var(--fg);
-    font-size: calc(var(--deck-unit) * 0.9);
-    line-height: 1.42;
+    font-size: 1em;
+    line-height: 1.65;
 }
 
-.deck-slide-content .lesson-diagram figcaption,
-.deck-slide-content .lesson-quiz-head span {
-    font-size: calc(var(--deck-unit) * 0.58);
+.deck-act-body .lesson-diagram figcaption,
+.deck-act-body .lesson-quiz-head span {
+    font-size: calc(var(--deck-fs) * 0.78);
 }
 
-/* ── Capa ───────────────────────────────────────────────────────────────── */
-.deck-capa {
-    width: min(100%, 1400px);
+/* Quiz interativo no deck: escalar botões para a tipografia do deck. */
+.deck-act-body .quiz-option {
+    gap: calc(var(--deck-fs) * 0.5);
+    padding: calc(var(--deck-fs) * 0.5) calc(var(--deck-fs) * 0.65);
+    font-size: 1em;
+    border-radius: var(--radius-lg);
+}
+
+.deck-act-body .quiz-option-letter {
+    width: calc(var(--deck-fs) * 1.3);
+    height: calc(var(--deck-fs) * 1.3);
+    font-size: calc(var(--deck-fs) * 0.6);
+}
+
+.deck-act-body .quiz-feedback {
+    font-size: calc(var(--deck-fs) * 0.85);
+    margin-top: calc(var(--deck-fs) * 0.4);
+}
+
+.deck-act-body .quiz-result {
+    font-size: 1em;
+    padding: calc(var(--deck-fs) * 0.55) calc(var(--deck-fs) * 0.75);
+    border-radius: var(--radius-lg);
+}
+
+/* ── Ato de capa (hero) ─────────────────────────────────────────────────── */
+.deck-act--cover {
+    justify-content: center;
+    overflow: hidden;
+}
+
+.deck-cover {
+    width: 100%;
+    max-width: 1320px;
     margin: 0 auto;
 }
 
-/* Capa com imagem: layout DIVIDIDO — texto à esquerda (coluna sólida),
-   imagem contida à direita. Sem texto sobre foto = sem sobreposição. */
-.deck-slide--capa { padding: 0; }
-
-.deck-capa.has-cover {
-    position: relative;
-    flex: 1;
-    align-self: stretch;
-    width: 100%;
-    margin: 0;
+.deck-cover.has-cover {
     display: grid;
-    grid-template-columns: 56fr 44fr;
-    align-items: stretch;
-    overflow-y: auto;
-    scrollbar-width: thin;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: clamp(var(--space-6), 5vw, 96px);
 }
 
-.deck-capa-cover {
+.deck-cover-figure {
     position: relative;
-    grid-column: 2;
-    grid-row: 1;
     margin: 0;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-xl);
     overflow: hidden;
     background: var(--surface-raised);
+    border: 1px solid var(--border);
+    box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8);
 }
 
-/* Absoluto p/ preencher a célula independente de resolução de % no grid. */
-.deck-capa-cover img {
+.deck-cover-figure img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    padding: clamp(16px, 2vw, 32px);
-    object-fit: contain;
-    box-sizing: border-box;
+    object-fit: cover;
 }
 
-/* Emenda suave entre a coluna de texto e a foto. */
-.deck-capa-cover::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg,
-        var(--surface-base) 0%,
-        rgba(11, 11, 13, 0) 22%);
-}
-
-.deck-capa.has-cover .deck-capa-inner {
-    grid-column: 1;
-    align-self: center;
-    width: 100%;
-    padding: var(--deck-pad) calc(var(--deck-pad) * 1.15);
-    background: var(--surface-base);
-}
-
-@media (max-width: 720px) {
-    .deck-capa.has-cover {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-        overflow-y: auto;
-    }
-    .deck-capa-cover {
-        grid-column: 1;
-        grid-row: 1;
-        aspect-ratio: 16 / 9;
-        height: auto;
-    }
-    .deck-capa.has-cover .deck-capa-inner {
-        grid-column: 1;
-        grid-row: 2;
-        padding: var(--deck-pad);
-    }
-}
-
-.deck-capa-meta {
+.deck-cover-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: calc(var(--deck-unit) * 0.5);
-    margin-bottom: calc(var(--deck-unit) * 1.1);
+    gap: calc(var(--deck-fs) * 0.5);
+    margin-bottom: calc(var(--deck-fs) * 1.2);
 }
 
 .deck-tag {
-    padding: calc(var(--deck-unit) * 0.22) calc(var(--deck-unit) * 0.6);
+    padding: calc(var(--deck-fs) * 0.28) calc(var(--deck-fs) * 0.7);
     border-radius: var(--radius-pill);
-    font-size: calc(var(--deck-unit) * 0.78);
+    font-size: calc(var(--deck-fs) * 0.78);
     font-weight: 600;
     letter-spacing: .01em;
+    line-height: 1;
 }
 
 .deck-tag-p { color: var(--accent-ink); background: var(--accent); }
 .deck-tag-s { color: var(--fg); background: var(--surface-overlay); border: 1px solid var(--border-strong); }
 .deck-tag-ord { color: var(--fg-muted); background: var(--surface-raised); }
 
-.deck-capa-title {
-    margin: 0 0 calc(var(--deck-unit) * 0.6);
-    max-width: 18ch;
-    font-size: calc(var(--deck-unit) * 2.6);
+.deck-cover-title {
+    margin: 0 0 calc(var(--deck-fs) * 0.7);
+    max-width: 16ch;
+    /* Escala com o viewport p/ nunca transbordar em telas estreitas. */
+    font-size: clamp(30px, var(--deck-fs) * 2.0 + 1.6vw, 92px);
     font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -.01em;
+    line-height: 1.02;
+    letter-spacing: -.025em;
     text-wrap: balance;
+    overflow-wrap: break-word;
 }
 
-.deck-capa-dek {
-    margin: 0 0 calc(var(--deck-unit) * 1.4);
-    max-width: 40ch;
+.deck-cover-dek {
+    margin: 0 0 calc(var(--deck-fs) * 1.5);
+    max-width: 38ch;
     color: var(--fg-muted);
-    font-size: calc(var(--deck-unit) * 1.25);
-    line-height: 1.35;
+    font-size: calc(var(--deck-fs) * 1.28);
+    line-height: 1.32;
     text-wrap: pretty;
 }
 
 .deck-eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: .4em;
+    gap: .45em;
     color: var(--accent-text);
-    font-size: calc(var(--deck-unit) * 0.8);
+    font-size: calc(var(--deck-fs) * 0.8);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .08em;
+    letter-spacing: .09em;
 }
 
-.deck-capa-goals {
-    padding: calc(var(--deck-unit) * 0.9) calc(var(--deck-unit) * 1.1);
+.deck-cover-goals {
+    padding: calc(var(--deck-fs) * 1) calc(var(--deck-fs) * 1.15);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     background: var(--surface-raised);
 }
 
-.deck-capa-goals ul {
-    margin: calc(var(--deck-unit) * 0.5) 0 0;
-    padding-left: calc(var(--deck-unit) * 1.1);
-    font-size: calc(var(--deck-unit) * 1.02);
+.deck-cover-goals ul {
+    margin: calc(var(--deck-fs) * 0.6) 0 0;
+    padding-left: calc(var(--deck-fs) * 1.2);
+    font-size: calc(var(--deck-fs) * 1.02);
+    line-height: 1.5;
 }
+.deck-cover-goals li + li { margin-top: calc(var(--deck-fs) * 0.45); }
 
-.deck-capa-goals li + li { margin-top: calc(var(--deck-unit) * 0.4); }
-
-.deck-capa-foot {
-    margin-top: calc(var(--deck-unit) * 1.4);
+.deck-cover-foot {
+    margin-top: calc(var(--deck-fs) * 1.5);
     color: var(--fg-muted);
-    font-size: calc(var(--deck-unit) * 0.82);
+    font-size: calc(var(--deck-fs) * 0.85);
 }
 
-/* ── Encerramento ───────────────────────────────────────────────────────── */
-.deck-fim {
-    width: min(100%, 1100px);
+@media (max-width: 860px) {
+    .deck-cover.has-cover {
+        grid-template-columns: 1fr;
+        gap: clamp(var(--space-5), 6vw, 48px);
+    }
+    .deck-cover-figure { order: -1; aspect-ratio: 16 / 9; }
+}
+
+/* ── Ato de encerramento ────────────────────────────────────────────────── */
+.deck-act--end { justify-content: center; text-align: center; }
+
+.deck-end {
+    width: 100%;
+    max-width: 900px;
     margin: 0 auto;
-    text-align: center;
 }
 
-.deck-fim-title {
-    margin: calc(var(--deck-unit) * 0.6) 0 0;
-    border: 0;
-    padding: 0;
-    font-size: calc(var(--deck-unit) * 2.8);
+.deck-end .deck-eyebrow { justify-content: center; }
+
+.deck-end-title {
+    margin: calc(var(--deck-fs) * 0.7) 0 0;
+    font-size: calc(var(--deck-fs) * 2.6);
     font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
     text-wrap: balance;
 }
 
-.deck-fim-sub {
-    margin: calc(var(--deck-unit) * 0.4) auto 0;
-    max-width: 40ch;
+.deck-end-sub {
+    margin: calc(var(--deck-fs) * 0.5) auto 0;
+    max-width: 38ch;
     color: var(--fg-muted);
-    font-size: calc(var(--deck-unit) * 1.2);
+    font-size: calc(var(--deck-fs) * 1.22);
+    line-height: 1.3;
 }
 
-/* ── Zonas de clique (esquerda/direita) ─────────────────────────────────── */
-.deck-zone {
-    position: absolute;
-    top: 0;
-    bottom: calc(var(--deck-unit) * 3.6);
-    width: 14vw;
-    max-width: 240px;
-    display: flex;
-    align-items: center;
-    padding: 0 var(--space-5);
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    z-index: 5;
-    appearance: none;
-    opacity: 0;
-    transition: opacity .2s var(--deck-ease);
-}
-
-.deck-zone-prev { left: 0; justify-content: flex-start; }
-.deck-zone-next { right: 0; justify-content: flex-end; }
-.deck-zone:hover,
-.deck-zone:focus-visible { opacity: 1; }
-.deck-zone:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -4px; }
-
-/* Pista de borda + chevron ao passar o mouse (descobribilidade no touch/TV). */
-.deck-zone::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-}
-.deck-zone-prev::after { background: linear-gradient(90deg, var(--accent-tint), transparent 60%); }
-.deck-zone-next::after { background: linear-gradient(270deg, var(--accent-tint), transparent 60%); }
-
-.deck-zone-chevron {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(var(--deck-unit) * 1.6);
-    height: calc(var(--deck-unit) * 1.6);
-    border-radius: var(--radius-pill);
-    color: var(--fg);
-    background: var(--surface-overlay);
-    border: 1px solid var(--border-strong);
-}
-.deck-zone-chevron svg { width: 60%; height: 60%; }
-
-/* No início/fim do deck a zona correspondente fica inerte. */
-.deck-zone.is-disabled { pointer-events: none; }
-.deck-zone.is-disabled:hover { opacity: 0; }
-
-/* ── Barra de progresso ─────────────────────────────────────────────────── */
+/* ── Barra de progresso (rolagem) ──────────────────────────────────────── */
 .deck-progress {
-    position: absolute;
+    position: fixed;
+    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
     height: 4px;
     background: var(--border);
-    z-index: 8;
 }
 
 .deck-progress span {
     display: block;
     height: 100%;
     width: 100%;
-    background: var(--accent);
+    background: var(--deck-grad);
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform var(--deck-dur) cubic-bezier(.4, 0, .2, 1);
+    transition: transform .1s linear;
 }
 
-/* ── Controles ──────────────────────────────────────────────────────────── */
-.deck-controls {
+/* ── Trilho de seções (navegação por pontos) ───────────────────────────── */
+.deck-rail {
+    position: fixed;
+    top: 50%;
+    right: clamp(12px, 2vw, 28px);
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: opacity .3s var(--deck-ease);
+}
+
+.deck-rail-dot {
+    position: relative;
+    width: 11px;
+    height: 11px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--border-strong);
+    cursor: pointer;
+    transition: background .2s var(--deck-ease),
+                transform .2s var(--deck-ease);
+}
+
+.deck-rail-dot:hover { background: var(--fg-muted); transform: scale(1.2); }
+.deck-rail-dot:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
+
+.deck-rail-dot.is-current {
+    background: var(--accent);
+    transform: scale(1.35);
+    box-shadow: 0 0 0 4px var(--accent-tint);
+}
+
+/* Rótulo da seção ao passar o mouse. */
+.deck-rail-dot::before {
+    content: attr(aria-label);
     position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    font-size: var(--text-ui);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s var(--deck-ease), transform .18s var(--deck-ease);
+}
+
+.deck-rail-dot:hover::before,
+.deck-rail-dot:focus-visible::before {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 860px) { .deck-rail { display: none; } }
+
+/* ── Pista de rolagem (convite no hero) ────────────────────────────────── */
+.deck-scrollcue {
+    position: fixed;
+    left: 50%;
+    /* Acima do agrupamento controles+dica (que ficam colados à base). */
+    bottom: clamp(116px, 15vh, 220px);
+    transform: translateX(-50%);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--fg-muted);
+    font-size: var(--text-ui);
+    letter-spacing: .04em;
+    pointer-events: none;
+    transition: opacity .4s var(--deck-ease);
+}
+
+.deck-scrollcue svg { width: 22px; height: 22px; animation: deck-bob 1.8s var(--deck-ease) infinite; }
+.deck-scrollcue.is-gone { opacity: 0; }
+
+@keyframes deck-bob {
+    0%, 100% { transform: translateY(0); opacity: .55; }
+    50% { transform: translateY(6px); opacity: 1; }
+}
+
+/* ── Controles flutuantes ──────────────────────────────────────────────── */
+.deck-controls {
+    position: fixed;
     left: 50%;
     bottom: var(--space-5);
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: var(--space-5);
-    padding: var(--space-2) var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-pill);
-    background: var(--surface-overlay);
+    background: color-mix(in srgb, var(--surface-overlay) 86%, transparent);
     box-shadow: var(--shadow-pop);
     backdrop-filter: blur(16px);
-    z-index: 10;
     transition: opacity .3s var(--deck-ease);
 }
 
-.deck-controls-left,
-.deck-controls-center,
-.deck-controls-right {
+.deck-controls-group {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -479,14 +586,22 @@
     font-family: var(--font-mono);
     font-size: var(--text-read);
     font-variant-numeric: tabular-nums;
+    padding: 0 var(--space-1);
+}
+
+.deck-divider {
+    width: 1px;
+    align-self: stretch;
+    margin: 4px 0;
+    background: var(--border-strong);
 }
 
 .deck-icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     padding: 0;
     border: 1px solid var(--border);
     border-radius: var(--radius-pill);
@@ -509,24 +624,16 @@
 .deck-icon-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .deck-icon-btn svg { width: 20px; height: 20px; }
 
-.deck-icon-btn[aria-disabled='true'] {
-    opacity: .38;
-    pointer-events: none;
-}
-
-/* Auto-hide: controles + dica somem quando ocioso (fade only, sem deslocar). */
+/* Auto-hide quando ocioso (fade, sem deslocar). */
 .deck-body.is-idle .deck-controls,
-.deck-body.is-idle .deck-hint {
-    opacity: 0;
-    pointer-events: none;
-}
+.deck-body.is-idle .deck-rail,
+.deck-body.is-idle .deck-hint { opacity: 0; pointer-events: none; }
 
-/* ── Dica de teclado ────────────────────────────────────────────────────── */
+/* ── Dica de teclado ───────────────────────────────────────────────────── */
 .deck-hint {
-    position: absolute;
+    position: fixed;
     left: 50%;
-    bottom: calc(var(--space-5) + 56px);
-    top: auto;
+    bottom: calc(var(--space-5) + 60px);
     transform: translateX(-50%);
     display: inline-flex;
     align-items: center;
@@ -536,9 +643,9 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-pill);
     color: var(--fg-muted);
-    background: var(--surface-overlay);
+    background: color-mix(in srgb, var(--surface-overlay) 86%, transparent);
+    backdrop-filter: blur(12px);
     font-size: var(--text-ui);
-    z-index: 10;
     transition: opacity .4s var(--deck-ease);
 }
 
@@ -556,9 +663,9 @@
     white-space: nowrap;
 }
 
-/* ── Roteiro docente (painel lateral) ───────────────────────────────────── */
+/* ── Roteiro docente (painel lateral) ──────────────────────────────────── */
 .deck-notes {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
@@ -569,17 +676,13 @@
     border-left: 1px solid var(--border-strong);
     background: var(--surface-raised);
     box-shadow: var(--shadow-pop);
-    z-index: 20;
     visibility: hidden;
     transform: translateX(100%);
     transition: transform var(--deck-dur) var(--deck-ease),
                 visibility var(--deck-dur);
 }
 
-.deck-notes.is-open {
-    visibility: visible;
-    transform: none;
-}
+.deck-notes.is-open { visibility: visible; transform: none; }
 
 .deck-notes-head {
     display: flex;
@@ -597,114 +700,22 @@
 
 .deck-notes-empty { color: var(--fg-muted); }
 
-/* ── Tela preta (foco da sala) ──────────────────────────────────────────── */
-.deck-black {
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    background: #000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s var(--deck-ease);
-}
-
-.deck-black.is-on {
-    opacity: 1;
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-/* ── Visão geral / pular para seção ─────────────────────────────────────── */
-.deck-overview {
-    position: fixed;
-    inset: 0;
-    z-index: 25;
-    display: flex;
-    flex-direction: column;
-    padding: clamp(var(--space-5), 4vw, var(--space-10));
-    background: var(--surface-base);
-    background: color-mix(in srgb, var(--surface-base) 92%, transparent);
-    backdrop-filter: blur(14px);
-}
-
-.deck-overview[hidden] { display: none; }
-
-.deck-overview-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-5);
-}
-
-.deck-overview-grid {
-    flex: 1;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: var(--space-4);
-    align-content: start;
-}
-
-.deck-ov-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    min-height: 110px;
-    padding: var(--space-4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface-raised);
-    color: var(--fg);
-    text-align: left;
-    cursor: pointer;
-    transition: border-color .15s var(--deck-ease),
-                background .15s var(--deck-ease),
-                transform .12s var(--deck-ease);
-}
-
-.deck-ov-item:hover {
-    border-color: var(--border-strong);
-    background: var(--surface-overlay);
-    transform: translateY(-2px);
-}
-
-.deck-ov-item:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-
-.deck-ov-item.is-current {
-    border-color: var(--accent);
-    box-shadow: inset 0 0 0 1px var(--accent);
-}
-
-.deck-ov-num {
-    color: var(--fg-subtle);
-    font-family: var(--font-mono);
-    font-size: var(--text-ui);
-    font-variant-numeric: tabular-nums;
-}
-
-.deck-ov-title {
-    font-size: var(--text-label);
-    font-weight: 600;
-    line-height: 1.3;
-}
-
-/* ── Reduced motion: corte limpo, sem deslizes ──────────────────────────── */
+/* ── Reduced motion: tudo aparece imediatamente, sem deslizes ──────────── */
 @media (prefers-reduced-motion: reduce) {
-    .deck-slide {
-        transform: none !important;
-        transition: opacity .12s linear, visibility .12s;
+    .deck-html { scroll-behavior: auto; }
+    .deck-scroll { scroll-snap-type: none; }
+    .js .deck-reveal > * {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        transition: none;
     }
-    .deck-stage.is-nudge { animation: none; }
+    .deck-scrollcue svg { animation: none; }
+    .deck-notes { transition: visibility .12s; transform: none; }
     .deck-progress span { transition: none; }
-    .deck-notes,
-    .deck-black,
-    .deck-controls,
-    .deck-hint { transition: opacity .12s linear; }
-    .deck-notes { transform: none; }
-    .deck-ov-item:hover { transform: none; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 860px) {
     .deck-notes { width: 100%; }
-    .deck-controls { gap: var(--space-3); }
+    .deck-controls { gap: var(--space-2); }
 }

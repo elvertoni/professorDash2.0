@@ -111,9 +111,15 @@
             </aside>
             <div class="atelier-body">
                 {% if aula.imagem %}
-                    <figure class="lesson-hero">
-                        <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async">
-                    </figure>
+                    <div x-data="{ lightbox: false }" @keydown.escape.window="lightbox = false">
+                        <figure class="lesson-hero" @click="lightbox = true">
+                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async">
+                        </figure>
+                        <div class="lesson-lightbox" x-show="lightbox" x-cloak @click.self="lightbox = false" x-transition.opacity>
+                            <button class="lesson-lightbox-close" @click="lightbox = false" aria-label="Fechar" type="button">&times;</button>
+                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}">
+                        </div>
+                    </div>
                 {% endif %}
                 <div class="atelier-meta">
                     <span class="tag p">{{ turma.disciplina.label }}</span>

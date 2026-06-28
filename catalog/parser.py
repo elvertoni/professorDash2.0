@@ -54,6 +54,7 @@ ALLOWED_LESSON_TAGS = frozenset(
         'b',
         'blockquote',
         'br',
+        'button',
         'caption',
         'code',
         'dd',
@@ -103,16 +104,32 @@ ALLOWED_LESSON_TAGS = frozenset(
     }
 )
 
-ALLOWED_LESSON_ATTRIBUTES = {
+_BASE_ATTRIBUTES = {
     '*': ['aria-hidden', 'aria-label', 'class', 'id', 'role', 'title'],
     'a': ['href', 'title'],
+    'button': ['type', 'disabled'],
     'figure': ['class', 'data-diagram-type'],
     'i': ['aria-hidden', 'class', 'data-lucide'],
     'img': ['alt', 'decoding', 'height', 'loading', 'src', 'title', 'width'],
     'ol': ['class', 'start', 'type'],
+    'section': ['data-quiz-total'],
     'td': ['align', 'colspan', 'rowspan'],
     'th': ['align', 'colspan', 'rowspan', 'scope'],
 }
+
+
+def _allowed_attributes_filter(tag, name, value):
+    """Allow standard attributes + Alpine.js directives (x-*, @*, :*)."""
+    if name.startswith(('x-', '@', ':')):
+        return True
+    allowed = _BASE_ATTRIBUTES.get(tag, [])
+    if name in allowed:
+        return True
+    wildcard = _BASE_ATTRIBUTES.get('*', [])
+    return name in wildcard
+
+
+ALLOWED_LESSON_ATTRIBUTES = _allowed_attributes_filter
 
 ALLOWED_LESSON_PROTOCOLS = frozenset({'http', 'https', 'mailto'})
 
@@ -241,6 +258,14 @@ def render_diagram_fences(markdown_content):
 
 
 def render_quiz_fences(markdown_content):
+    """Render ```quiz fences into HTML.
+
+    When at least one alternative has ``correta: true``, generates
+    interactive Alpine.js HTML with clickable option buttons and
+    correct/wrong feedback.  Otherwise, keeps the original static
+    ``<ol>`` layout (backward compatible).
+    """
+
     def replace(match):
         raw_body = match.group('body').strip()
         data = parse_yaml_block(raw_body)
@@ -252,36 +277,105 @@ def render_quiz_fences(markdown_content):
                 '</section>'
             )
 
-        questions = []
+        questions_static = []
+        questions_interactive = []
+        has_any_correct = False
+
         for q_index, question in enumerate(data, start=1):
             if not isinstance(question, dict):
                 continue
             prompt = escape(str(question.get('pergunta') or f'Questão {q_index}'))
-            alternatives = []
-            for alt in question.get('alternativas') or []:
+            alts_raw = question.get('alternativas') or []
+            q_has_correct = any(
+                isinstance(a, dict) and a.get('correta')
+                for a in alts_raw
+            )
+            if q_has_correct:
+                has_any_correct = True
+
+            # --- static alternative list (fallback) ---
+            static_items = []
+            # --- interactive alternative buttons ---
+            interactive_items = []
+            for alt_index, alt in enumerate(alts_raw):
                 if not isinstance(alt, dict):
                     continue
                 text = escape(str(alt.get('texto') or ''))
-                if text:
-                    alternatives.append(f'<li>{text}</li>')
-            alternatives_html = ''.join(alternatives)
-            questions.append(
+                if not text:
+                    continue
+                is_correct = bool(alt.get('correta'))
+                letter = chr(65 + alt_index)  # A, B, C, D…
+                static_items.append(f'<li>{text}</li>')
+                correct_js = 'true' if is_correct else 'false'
+                interactive_items.append(
+                    f'<button type="button" class="quiz-option"'
+                    f' :class="optionClass({alt_index}, {correct_js})"'
+                    f' :disabled="answered"'
+                    f' @click="choose({alt_index}, {correct_js});'
+                    f' $dispatch(\'quiz-answered\', {{ correct: {correct_js} }})">'
+                    f'<span class="quiz-option-letter">{letter}</span>'
+                    f'<span class="quiz-option-text">{text}</span>'
+                    f'<span class="quiz-option-icon" aria-hidden="true"></span>'
+                    f'</button>'
+                )
+
+            static_html = ''.join(static_items)
+            interactive_html = ''.join(interactive_items)
+
+            questions_static.append(
                 '<li class="lesson-quiz-question">'
                 f'<p><strong>Questão {q_index}.</strong> {prompt}</p>'
-                f'<ol type="A">{alternatives_html}</ol>'
+                f'<ol type="A">{static_html}</ol>'
                 '</li>'
             )
 
-        if not questions:
+            questions_interactive.append(
+                f'<li class="lesson-quiz-question" x-data="quizQuestion()"'
+                f' @quiz-answered.stop="$dispatch(\'quiz-answer-registered\','
+                f' {{ correct: $event.detail.correct }})">'
+                f'<p><strong>Questão {q_index}.</strong> {prompt}</p>'
+                f'<div class="quiz-options">{interactive_html}</div>'
+                f'<p class="quiz-feedback" x-show="answered" x-cloak>'
+                f'<span x-show="isCorrect" class="quiz-feedback--correct">'
+                f'✓ Correto!</span>'
+                f'<span x-show="!isCorrect" class="quiz-feedback--wrong">'
+                f'✗ Incorreta — veja a resposta destacada.</span>'
+                f'</p>'
+                f'</li>'
+            )
+
+        if not questions_static and not questions_interactive:
             return ''
 
+        # Interactive path: at least one question has `correta`.
+        if has_any_correct:
+            total_q = len(questions_interactive)
+            return (
+                f'<section class="lesson-quiz lesson-quiz--interactive"'
+                f' x-data="quizSection()" data-quiz-total="{total_q}"'
+                f' @quiz-answer-registered.stop='
+                f'"registerAnswer($event.detail.correct)">\n'
+                '<div class="lesson-quiz-head">\n'
+                '<strong>Quiz</strong>\n'
+                '<span>Avaliação formativa</span>\n'
+                '</div>\n'
+                f'<ol class="lesson-quiz-list">'
+                f'{"".join(questions_interactive)}</ol>\n'
+                '<div class="quiz-result" x-show="allAnswered"'
+                ' x-transition x-cloak :class="resultClass">\n'
+                '<span x-text="resultText"></span>\n'
+                '</div>\n'
+                '</section>'
+            )
+
+        # Static path: no question has `correta`.
         return (
             '<section class="lesson-quiz">\n'
             '<div class="lesson-quiz-head">\n'
             '<strong>Quiz</strong>\n'
             '<span>Avaliação formativa</span>\n'
             '</div>\n'
-            f'<ol class="lesson-quiz-list">{"".join(questions)}</ol>\n'
+            f'<ol class="lesson-quiz-list">{"".join(questions_static)}</ol>\n'
             '</section>'
         )
 
