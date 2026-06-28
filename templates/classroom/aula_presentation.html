@@ -35,7 +35,7 @@
                 {% if aula.tema %}<p class="deck-cover-dek">{{ aula.tema }}</p>{% endif %}
                 {% if aula.objetivos %}
                     <div class="deck-cover-goals">
-                        <span class="deck-eyebrow">Objetivos da aula</span>
+                        <strong class="deck-cover-goals-title">Ao final desta aula</strong>
                         <ul>
                             {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
                         </ul>
@@ -44,9 +44,9 @@
                 <p class="deck-cover-foot">{{ turma.nome }} · Prof. Toni Coimbra</p>
             </div>
             {% if aula.imagem %}
-                <figure class="deck-cover-figure" aria-hidden="true" style="cursor:zoom-in" @click="$dispatch('deck-lightbox-open')">
+                <button class="deck-cover-figure" type="button" data-deck-lightbox-open aria-label="Ampliar capa da aula">
                     <img src="{{ aula.imagem.url }}" alt="" decoding="async">
-                </figure>
+                </button>
             {% endif %}
         </div>
     </template>
@@ -54,7 +54,7 @@
     {# Ato de encerramento (sempre o último). #}
     <template id="deck-end">
         <div class="deck-end">
-            <span class="deck-eyebrow">{{ turma.disciplina.label }}</span>
+            <span class="deck-end-context">{{ turma.disciplina.label }}</span>
             <h2 class="deck-end-title">Fim da aula</h2>
             <p class="deck-end-sub">{{ aula.titulo }}</p>
             <p class="deck-cover-foot">Dúvidas? Vamos conversar.</p>
@@ -70,11 +70,13 @@
     {# Palco: deck.js injeta os atos aqui (este é o elemento que rola). #}
     <main id="deck-scroll" class="deck-scroll" tabindex="-1"></main>
 
-    {# Convite de rolagem (some ao rolar). #}
-    <div class="deck-scrollcue" data-deck-scrollcue aria-hidden="true">
-        <span>Role para baixo</span>
-        <i data-lucide="chevrons-down"></i>
-    </div>
+    {# Zonas laterais: úteis com mouse, lousa digital e controle remoto. #}
+    <button class="deck-stage-nav deck-stage-nav--previous" type="button" data-deck-previous aria-label="Ir para a seção anterior" disabled>
+        <i data-lucide="chevron-up" aria-hidden="true"></i>
+    </button>
+    <button class="deck-stage-nav deck-stage-nav--next" type="button" data-deck-next aria-label="Ir para a próxima seção">
+        <i data-lucide="chevron-down" aria-hidden="true"></i>
+    </button>
 
     {# Roteiro docente (tecla N) — painel lateral glanceável, não-modal. #}
     <aside id="deck-notes" class="deck-notes" aria-label="Roteiro do professor" inert>
@@ -98,12 +100,21 @@
             <a class="deck-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" data-deck-exit title="Sair (Esc)" aria-label="Sair da apresentação">
                 <i data-lucide="x" aria-hidden="true"></i>
             </a>
-            <span class="deck-counter"><span data-deck-current>1</span> / <span data-deck-total>1</span></span>
+            <button class="deck-icon-btn" type="button" data-deck-previous aria-label="Seção anterior" title="Seção anterior (↑)" disabled>
+                <i data-lucide="chevron-up" aria-hidden="true"></i>
+            </button>
+            <div class="deck-position">
+                <span class="deck-current-title" data-deck-current-title>Capa</span>
+                <span class="deck-counter"><span data-deck-current>1</span> / <span data-deck-total>1</span></span>
+            </div>
+            <button class="deck-icon-btn" type="button" data-deck-next aria-label="Próxima seção" title="Próxima seção (↓)">
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
         </div>
         <div class="deck-divider" aria-hidden="true"></div>
         <div class="deck-controls-group">
             {% if teacher_notes_html %}
-                <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor">
+                <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor" aria-controls="deck-notes" aria-expanded="false">
                     <i data-lucide="notebook-pen" aria-hidden="true"></i>
                 </button>
             {% endif %}
@@ -115,22 +126,16 @@
 
     <div class="deck-hint" data-deck-hint>
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        <span>Role ou use <kbd>↓</kbd> <kbd>↑</kbd> · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair</span>
+        <span>Role, clique nas laterais ou use <kbd>↓</kbd> <kbd>↑</kbd> · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair</span>
     </div>
 
     {% if aula.imagem %}
-    <div class="lesson-lightbox" x-data="{ open: false }" x-show="open" x-cloak
-         @deck-lightbox-open.window="open = true"
-         @click.self="open = false"
-         @keydown.escape.window="open = false"
-         x-transition.opacity
-         style="z-index:9999">
-        <button class="lesson-lightbox-close" @click="open = false" aria-label="Fechar" type="button">&times;</button>
+    <dialog class="lesson-lightbox deck-lightbox" data-deck-lightbox aria-label="Capa ampliada da aula">
+        <button class="lesson-lightbox-close" data-deck-lightbox-close aria-label="Fechar capa ampliada" type="button">&times;</button>
         <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}">
-    </div>
+    </dialog>
     {% endif %}
 
-    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="{% static 'js/deck.js' %}"></script>

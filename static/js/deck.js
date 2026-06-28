@@ -14,9 +14,6 @@
     const source = document.getElementById('deck-source');
     if (!scroll || !source) return;
 
-    // Sinaliza p/ o CSS que o JS está vivo (gate dos reveals → no-JS mostra tudo).
-    document.documentElement.classList.add('js');
-
     /* ── Agrupa o conteúdo do .prose em seções por <h2> ───────────────────── */
     function buildSections() {
         const sections = [];
@@ -54,6 +51,7 @@
         const act = document.createElement('section');
         act.className = 'deck-act ' + className;
         act.dataset.title = title || '';
+        act.setAttribute('aria-label', title || 'Seção da aula');
         return act;
     }
 
@@ -96,8 +94,11 @@
             const num = document.createElement('span');
             num.className = 'deck-act-num';
             num.textContent = String(sectionNo).padStart(2, '0');
+            section.heading.id = 'deck-section-' + sectionNo;
             head.append(num, section.heading); // section.heading já é clone
             inner.appendChild(head);
+            act.setAttribute('aria-labelledby', section.heading.id);
+            act.removeAttribute('aria-label');
         }
         section.nodes.forEach((node) => inner.appendChild(node.cloneNode(true)));
 
@@ -128,8 +129,12 @@
     const notes = document.getElementById('deck-notes');
     const notesHasContent = notes && !notes.querySelector('.deck-notes-empty');
     const hint = document.querySelector('[data-deck-hint]');
-    const scrollcue = document.querySelector('[data-deck-scrollcue]');
     const fsBtn = document.querySelector('[data-deck-fullscreen]');
+    const elCurrentTitle = document.querySelector('[data-deck-current-title]');
+    const previousButtons = Array.from(document.querySelectorAll('[data-deck-previous]'));
+    const nextButtons = Array.from(document.querySelectorAll('[data-deck-next]'));
+    const notesButtons = Array.from(document.querySelectorAll('[data-deck-notes]'));
+    const lightbox = document.querySelector('[data-deck-lightbox]');
 
     if (elTotal) elTotal.textContent = String(total);
 
@@ -141,9 +146,7 @@
             dot.type = 'button';
             dot.className = 'deck-rail-dot';
             dot.setAttribute('aria-label', act.dataset.title || ('Seção ' + (i + 1)));
-            dot.addEventListener('click', () => {
-                act.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
-            });
+            dot.addEventListener('click', () => scrollToAct(act));
             rail.appendChild(dot);
             dots.push(dot);
         });
@@ -151,6 +154,13 @@
 
     function prefersReducedMotion() {
         return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function scrollToAct(act) {
+        scroll.scrollTo({
+            top: act.offsetTop,
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        });
     }
 
     /* ── Reveal ao entrar na tela ─────────────────────────────────────────── */
@@ -182,7 +192,15 @@
     function setActive(i) {
         activeIndex = i;
         if (elCurrent) elCurrent.textContent = String(i + 1);
-        dots.forEach((dot, d) => dot.classList.toggle('is-current', d === i));
+        if (elCurrentTitle) elCurrentTitle.textContent = acts[i].dataset.title || 'Seção da aula';
+        previousButtons.forEach((button) => { button.disabled = i === 0; });
+        nextButtons.forEach((button) => { button.disabled = i === total - 1; });
+        dots.forEach((dot, d) => {
+            const current = d === i;
+            dot.classList.toggle('is-current', current);
+            if (current) dot.setAttribute('aria-current', 'step');
+            else dot.removeAttribute('aria-current');
+        });
         announce(i);
     }
 
@@ -201,7 +219,13 @@
             const max = scroll.scrollHeight - scroll.clientHeight;
             const ratio = max > 0 ? Math.min(1, scroll.scrollTop / max) : 1;
             if (elProgress) elProgress.style.transform = 'scaleX(' + ratio + ')';
-            if (scrollcue && scroll.scrollTop > 40) scrollcue.classList.add('is-gone');
+
+            const marker = scroll.scrollTop + (scroll.clientHeight * 0.45);
+            let visibleIndex = 0;
+            acts.forEach((act, i) => {
+                if (act.offsetTop <= marker) visibleIndex = i;
+            });
+            if (visibleIndex !== activeIndex) setActive(visibleIndex);
         });
     }
     scroll.addEventListener('scroll', updateProgress, { passive: true });
@@ -210,11 +234,13 @@
     function go(i) {
         if (!total) return;
         const clamped = Math.max(0, Math.min(total - 1, i));
-        acts[clamped].scrollIntoView({
-            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-            block: 'start',
-        });
+        scrollToAct(acts[clamped]);
     }
+
+    previousButtons.forEach((button) =>
+        button.addEventListener('click', () => go(activeIndex - 1)));
+    nextButtons.forEach((button) =>
+        button.addEventListener('click', () => go(activeIndex + 1)));
 
     /* ── Roteiro docente (painel lateral, não-modal) ──────────────────────── */
     let notesReturnFocus = null;
@@ -226,6 +252,7 @@
         if (!notes || !notesHasContent) return;
         const open = typeof force === 'boolean' ? force : !notesOpen();
         notes.classList.toggle('is-open', open);
+        notesButtons.forEach((button) => button.setAttribute('aria-expanded', String(open)));
         if (!SUPPORTS_INERT) notes.setAttribute('aria-hidden', open ? 'false' : 'true');
         if (open) {
             notes.removeAttribute('inert');
@@ -242,6 +269,21 @@
         b.addEventListener('click', () => toggleNotes()));
     document.querySelectorAll('[data-deck-notes-close]').forEach((b) =>
         b.addEventListener('click', () => toggleNotes(false)));
+
+    /* ── Capa ampliada (dialog nativo, foco e Esc do navegador) ──────────── */
+    document.querySelectorAll('[data-deck-lightbox-open]').forEach((button) =>
+        button.addEventListener('click', () => {
+            if (lightbox && !lightbox.open) lightbox.showModal();
+        }));
+    document.querySelectorAll('[data-deck-lightbox-close]').forEach((button) =>
+        button.addEventListener('click', () => {
+            if (lightbox && lightbox.open) lightbox.close();
+        }));
+    if (lightbox) {
+        lightbox.addEventListener('click', (event) => {
+            if (event.target === lightbox) lightbox.close();
+        });
+    }
 
     /* ── Tela cheia (ícone sincronizado) ──────────────────────────────────── */
     function toggleFullscreen() {
@@ -270,15 +312,21 @@
 
     /* ── Teclado / controle remoto ────────────────────────────────────────── */
     document.addEventListener('keydown', (e) => {
-        // Em campo editável, não sequestra teclas.
+        // Preserva edição e ativação nativa de controles com Espaço/Enter.
+        const interactive = e.target && e.target.closest(
+            'input, textarea, select, button, a, [contenteditable="true"]'
+        );
+        if (interactive && (e.key === ' ' || e.key === 'Enter')) return;
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
 
         switch (e.key) {
             case 'ArrowDown':
+            case 'ArrowRight':
             case 'PageDown':
             case ' ':
                 e.preventDefault(); go(activeIndex + 1); break;
             case 'ArrowUp':
+            case 'ArrowLeft':
             case 'PageUp':
                 e.preventDefault(); go(activeIndex - 1); break;
             case 'Home':
@@ -293,7 +341,8 @@
                 if (notesHasContent) { e.preventDefault(); toggleNotes(); }
                 break;
             case 'Escape':
-                if (notesOpen()) toggleNotes(false);
+                if (lightbox && lightbox.open) lightbox.close();
+                else if (notesOpen()) toggleNotes(false);
                 else if (document.fullscreenElement) toggleFullscreen();
                 else {
                     const exit = document.querySelector('[data-deck-exit]');
@@ -316,9 +365,8 @@
         if (idleTimer) clearTimeout(idleTimer);
         idleTimer = setTimeout(() => body.classList.add('is-idle'), 3500);
     }
-    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'].forEach((evt) =>
-        scroll.addEventListener(evt, poke, { passive: true }));
-    document.addEventListener('mousemove', poke, { passive: true });
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel', 'focusin'].forEach((evt) =>
+        document.addEventListener(evt, poke, { passive: true }));
     poke();
 
     /* Dica de teclado some após alguns segundos. */

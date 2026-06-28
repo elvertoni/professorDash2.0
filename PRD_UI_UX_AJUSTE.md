@@ -494,6 +494,8 @@ Use esta secao para registrar decisoes tomadas durante as sprints. Nao deixe dec
   - Restam ~19 inline-styles estaticos token-based (`var(--space-*)`) em telas de `classroom` (confirm/manage) — debt cosmetico de baixo risco, nao refatorado sem QA visual no navegador.
   - Validacao: `python manage.py check` -> 0 issues; 50 templates compilam; render do `form_fields` confirma `aria-invalid`/`aria-describedby`/`role=alert`. Validacao visual desktop/mobile + dark/light continua pendente para o humano (ambiente sem porta TCP).
 
+- [x] D.7. Decisao concluida: o modo apresentacao preserva a aula como artigo cinematografico em atos por `<h2>`, com rolagem continua para nao truncar material didatico. A conducao em sala combina controles anterior/proximo, zonas laterais, setas verticais e horizontais para controle remoto, contador com titulo da secao e trilho de progresso. Marcadores expõem `aria-current`, controles de limite ficam desabilitados, roteiro informa `aria-expanded` e a capa ampliada usa `<dialog>` nativo. Callouts usam borda completa, e animacoes nunca ocultam o conteudo quando observer/JS falham. O tema permanece escuro e fixo por ser uma superficie de projecao, portanto a validacao claro/escuro nao se aplica a esta rota standalone.
+
 ### Nota de auditoria complementar — UI/UX
 
 - Auditoria feita com agentes especialistas em jornada do aluno, jornada do professor e design system/acessibilidade.

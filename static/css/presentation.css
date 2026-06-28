@@ -39,8 +39,8 @@
     --deck-ease-out: cubic-bezier(.16, 1, .3, 1);
     --deck-dur: .7s;
 
-    /* Realce pontual emerald→cyan (CTA do design system). Usado em filetes e
-       marcadores — nunca em background-clip:text. */
+    /* Realce pontual emerald→cyan (CTA do design system). Usado somente em
+       filetes e marcadores, nunca no preenchimento de texto. */
     --deck-grad: linear-gradient(120deg, #2DD4BF 0%, var(--accent) 100%);
 
     font-size: var(--deck-fs);
@@ -54,8 +54,9 @@
 .deck-rail { z-index: 25; }
 .deck-controls,
 .deck-hint,
-.deck-scrollcue { z-index: 40; }
+.deck-stage-nav { z-index: 40; }
 .deck-notes { z-index: 60; }
+.deck-lightbox { z-index: 70; }
 
 /* ── Trilha de rolagem (o elemento que rola) ─────────────────────────────── */
 .deck-scroll {
@@ -92,24 +93,18 @@
 }
 
 /* ── Reveal ao rolar (realçado por IntersectionObserver via .is-in) ──────── */
-/* Default É VISÍVEL (sem JS, headless, aba oculta → conteúdo aparece).
-   O reveal só enriquece um padrão já visível. */
+/* O conteúdo nasce visível. Se o observer não disparar (headless, aba
+   suspensa ou JS parcial), nenhuma seção fica escondida. */
 @media (prefers-reduced-motion: no-preference) {
-    .js .deck-reveal > * {
-        opacity: 0;
-        transform: translateY(22px);
-        filter: blur(6px);
-        transition: opacity var(--deck-dur) var(--deck-ease-out),
-                    transform var(--deck-dur) var(--deck-ease-out),
-                    filter var(--deck-dur) var(--deck-ease-out);
-        transition-delay: calc(var(--i, 0) * 90ms);
-        will-change: opacity, transform;
+    .deck-reveal.is-in > * {
+        animation: deck-reveal-in var(--deck-dur) var(--deck-ease-out) both;
+        animation-delay: calc(var(--i, 0) * 70ms);
     }
-    .js .deck-reveal.is-in > * {
-        opacity: 1;
-        transform: none;
-        filter: none;
-    }
+}
+
+@keyframes deck-reveal-in {
+    from { opacity: .72; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
 }
 
 /* ── Conteúdo de seção (fatiado do .prose) ──────────────────────────────── */
@@ -169,6 +164,7 @@
     line-height: 1.06;
     letter-spacing: -.018em;
     text-wrap: balance;
+    overflow-wrap: anywhere;
 }
 
 /* h2 repetido (continuação de seção longa) entra mudo. */
@@ -181,6 +177,7 @@
     font-weight: 600;
     line-height: 1.18;
     letter-spacing: -.008em;
+    overflow-wrap: anywhere;
 }
 
 .deck-act-body p,
@@ -248,7 +245,11 @@
 .deck-act-body .callout {
     grid-template-columns: calc(var(--deck-fs) * 1.5) minmax(0, 1fr);
     gap: calc(var(--deck-fs) * 0.6);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-raised);
 }
+
+.deck-act-body .lesson-callout { border: 1px solid var(--border-strong); }
 
 .deck-act-body .callout .ic {
     width: calc(var(--deck-fs) * 1.5);
@@ -315,6 +316,8 @@
     margin: 0 auto;
 }
 
+.deck-cover-text { min-width: 0; }
+
 .deck-cover.has-cover {
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
@@ -331,6 +334,15 @@
     background: var(--surface-raised);
     border: 1px solid var(--border);
     box-shadow: 0 40px 80px -40px rgba(0, 0, 0, .8);
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: zoom-in;
+}
+
+.deck-cover-figure:focus-visible {
+    outline: 3px solid var(--border-focus);
+    outline-offset: 4px;
 }
 
 .deck-cover-figure img {
@@ -365,12 +377,12 @@
     margin: 0 0 calc(var(--deck-fs) * 0.7);
     max-width: 16ch;
     /* Escala com o viewport p/ nunca transbordar em telas estreitas. */
-    font-size: clamp(30px, var(--deck-fs) * 2.0 + 1.6vw, 92px);
+    font-size: clamp(30px, calc(var(--deck-fs) * 2 + 1.6vw), 92px);
     font-weight: 800;
     line-height: 1.02;
     letter-spacing: -.025em;
     text-wrap: balance;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .deck-cover-dek {
@@ -382,7 +394,8 @@
     text-wrap: pretty;
 }
 
-.deck-eyebrow {
+.deck-cover-goals-title,
+.deck-end-context {
     display: inline-flex;
     align-items: center;
     gap: .45em;
@@ -431,7 +444,7 @@
     margin: 0 auto;
 }
 
-.deck-end .deck-eyebrow { justify-content: center; }
+.deck-end-context { justify-content: center; }
 
 .deck-end-title {
     margin: calc(var(--deck-fs) * 0.7) 0 0;
@@ -504,6 +517,39 @@
     box-shadow: 0 0 0 4px var(--accent-tint);
 }
 
+/* ── Navegação lateral para mouse e lousa digital ─────────────────────── */
+.deck-stage-nav {
+    position: fixed;
+    top: 50%;
+    display: grid;
+    width: 52px;
+    height: 88px;
+    padding: 0;
+    place-items: center;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: var(--radius-md);
+    color: var(--fg-muted);
+    background: transparent;
+    cursor: pointer;
+    opacity: .22;
+    transition: opacity .18s var(--deck-ease),
+                background .18s var(--deck-ease),
+                color .18s var(--deck-ease);
+}
+
+.deck-stage-nav--previous { left: var(--space-2); }
+.deck-stage-nav--next { right: var(--space-2); }
+.deck-stage-nav:hover,
+.deck-stage-nav:focus-visible {
+    color: var(--accent-text);
+    background: var(--surface-raised);
+    opacity: 1;
+}
+.deck-stage-nav:focus-visible { outline: 2px solid var(--border-focus); }
+.deck-stage-nav:disabled { opacity: 0; pointer-events: none; }
+.deck-stage-nav svg { width: 28px; height: 28px; }
+
 /* Rótulo da seção ao passar o mouse. */
 .deck-rail-dot::before {
     content: attr(aria-label);
@@ -530,32 +576,6 @@
 }
 
 @media (max-width: 860px) { .deck-rail { display: none; } }
-
-/* ── Pista de rolagem (convite no hero) ────────────────────────────────── */
-.deck-scrollcue {
-    position: fixed;
-    left: 50%;
-    /* Acima do agrupamento controles+dica (que ficam colados à base). */
-    bottom: clamp(116px, 15vh, 220px);
-    transform: translateX(-50%);
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    color: var(--fg-muted);
-    font-size: var(--text-ui);
-    letter-spacing: .04em;
-    pointer-events: none;
-    transition: opacity .4s var(--deck-ease);
-}
-
-.deck-scrollcue svg { width: 22px; height: 22px; animation: deck-bob 1.8s var(--deck-ease) infinite; }
-.deck-scrollcue.is-gone { opacity: 0; }
-
-@keyframes deck-bob {
-    0%, 100% { transform: translateY(0); opacity: .55; }
-    50% { transform: translateY(6px); opacity: 1; }
-}
 
 /* ── Controles flutuantes ──────────────────────────────────────────────── */
 .deck-controls {
@@ -586,7 +606,25 @@
     font-family: var(--font-mono);
     font-size: var(--text-read);
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.deck-position {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-3);
     padding: 0 var(--space-1);
+}
+
+.deck-current-title {
+    max-width: min(32vw, 360px);
+    overflow: hidden;
+    color: var(--fg);
+    font-size: var(--text-ui);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .deck-divider {
@@ -623,18 +661,26 @@
 .deck-icon-btn:active { transform: scale(.94); }
 .deck-icon-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .deck-icon-btn svg { width: 20px; height: 20px; }
+.deck-icon-btn:disabled {
+    color: var(--fg-subtle);
+    background: transparent;
+    cursor: not-allowed;
+    opacity: .38;
+}
 
 /* Auto-hide quando ocioso (fade, sem deslocar). */
 .deck-body.is-idle .deck-controls,
 .deck-body.is-idle .deck-rail,
-.deck-body.is-idle .deck-hint { opacity: 0; pointer-events: none; }
+.deck-body.is-idle .deck-hint,
+.deck-body.is-idle .deck-stage-nav { opacity: 0; pointer-events: none; }
+
+.deck-body.is-idle .deck-controls:focus-within { opacity: 1; pointer-events: auto; }
 
 /* ── Dica de teclado ───────────────────────────────────────────────────── */
 .deck-hint {
     position: fixed;
-    left: 50%;
-    bottom: calc(var(--space-5) + 60px);
-    transform: translateX(-50%);
+    top: var(--space-5);
+    right: calc(var(--space-5) + 28px);
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -700,17 +746,25 @@
 
 .deck-notes-empty { color: var(--fg-muted); }
 
+/* Dialog nativo da capa: remove o box padrão e mantém a escala semântica. */
+.deck-lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.deck-lightbox:not([open]) { display: none; }
+.deck-lightbox::backdrop { background: rgba(0, 0, 0, .78); }
+
 /* ── Reduced motion: tudo aparece imediatamente, sem deslizes ──────────── */
 @media (prefers-reduced-motion: reduce) {
     .deck-html { scroll-behavior: auto; }
     .deck-scroll { scroll-snap-type: none; }
-    .js .deck-reveal > * {
-        opacity: 1;
-        transform: none;
-        filter: none;
-        transition: none;
-    }
-    .deck-scrollcue svg { animation: none; }
+    .deck-reveal.is-in > * { animation: none; }
     .deck-notes { transition: visibility .12s; transform: none; }
     .deck-progress span { transition: none; }
 }
@@ -718,4 +772,25 @@
 @media (max-width: 860px) {
     .deck-notes { width: 100%; }
     .deck-controls { gap: var(--space-2); }
+    .deck-stage-nav { display: none; }
+    .deck-current-title { max-width: 26vw; }
+}
+
+@media (max-width: 600px) {
+    .deck-act { padding-bottom: 128px; }
+    .deck-hint { display: none; }
+    .deck-controls { bottom: var(--space-3); }
+    .deck-controls .deck-divider { display: none; }
+    .deck-current-title { display: none; }
+    .deck-position { gap: var(--space-2); }
+    .deck-icon-btn { width: 40px; height: 40px; }
+    .deck-cover-title { font-size: clamp(34px, 11vw, 44px); }
+    .deck-tag { font-size: calc(var(--deck-fs) * 0.68); }
+}
+
+@media (max-height: 700px) and (min-width: 861px) {
+    .deck-body {
+        --deck-pad-y: var(--space-8);
+    }
+    .deck-cover-figure { max-height: 62vh; }
 }
