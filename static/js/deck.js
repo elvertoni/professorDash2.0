@@ -1,12 +1,12 @@
 /* ──────────────────────────────────────────────────────────────────────────
    deck.js — Modo Apresentação (slides) das aulas.
-   Transforma o conteúdo da aula (.prose) em SLIDES DISCRETOS e glanceáveis
-   para projetar na sala/TV (42", 4-6 m). Cada slide carrega UMA ideia:
-   divisor de seção, ponto (bullets que constroem no clique), destaque
-   (callout), passos, mídia, quiz interativo. Texto corrido NÃO vai para a
-   tela — é roteado para o roteiro do professor (tecla N), slide a slide.
-   Avança por clique/seta; sem rolagem de navegação. Build-in por step.
-   Vanilla JS; o quiz interativo usa Alpine (carregado no template).
+   Transforma o conteúdo da aula (.prose) em SLIDES discretos e glanceáveis
+   para projetar na sala/TV (42", 4-6 m). Modelo "substância paginada":
+   cada seção (<h2>) vira um ou mais slides com cabeçalho da seção + conteúdo
+   real (prosa curta paginada, bullets, passos, callout, mídia, quiz). A prosa
+   longa é fatiada em páginas que NUNCA estouram a tela; o professor expande
+   falando. O roteiro (:::roteiro) fica no painel lateral (tecla N).
+   Avança por clique/seta; build-in por step. Quiz usa Alpine (no template).
    ──────────────────────────────────────────────────────────────────────── */
 (function () {
     'use strict';
@@ -16,15 +16,16 @@
     const source = document.getElementById('deck-source');
     if (!stage || !source) return;
 
-    /* ── Tipos de slide ───────────────────────────────────────────────────── */
     const COVER = 'cover';
-    const DIVIDER = 'divider';
+    const PROSE = 'prose';
     const POINT = 'point';
     const STEPS = 'steps';
     const CALLOUT = 'callout';
     const MEDIA = 'media';
     const QUIZ = 'quiz';
     const END = 'end';
+
+    const PROSE_BUDGET = 300; // ~caracteres por página de prosa (glanceável)
 
     function el(tag, cls) {
         const node = document.createElement(tag);
@@ -38,97 +39,180 @@
         return tpl.content.firstElementChild.cloneNode(true);
     }
 
-    /* ── 1) Percorre o .prose montando a lista de slides ──────────────────── */
+    /* ── Paginação de prosa ───────────────────────────────────────────────── */
+    function splitParagraph(p) {
+        // Divide um parágrafo longo em pedaços (<p>) por frases, sob o budget.
+        const text = p.textContent.trim();
+        if (text.length <= PROSE_BUDGET) return [p];
+        const sentences = text.split(/(?<=[.!?…])\s+/);
+        const chunks = [];
+        let buf = '';
+        sentences.forEach((s) => {
+            if (buf && (buf.length + s.length) > PROSE_BUDGET) {
+                chunks.push(buf.trim());
+                buf = '';
+            }
+            buf += (buf ? ' ' : '') + s;
+        });
+        if (buf.trim()) chunks.push(buf.trim());
+        return chunks.map((c) => {
+            const np = el('p');
+            np.textContent = c;
+            return np;
+        });
+    }
+
+    function paginate(paragraphs) {
+        // Recebe nós <p>; devolve páginas (cada uma = array de <p>) sob o budget.
+        const flat = [];
+        paragraphs.forEach((p) => splitParagraph(p).forEach((x) => flat.push(x)));
+        const pages = [];
+        let page = [];
+        let len = 0;
+        flat.forEach((p) => {
+            const l = p.textContent.length;
+            if (page.length && (len + l) > PROSE_BUDGET) {
+                pages.push(page);
+                page = [];
+                len = 0;
+            }
+            page.push(p);
+            len += l;
+        });
+        if (page.length) pages.push(page);
+        return pages;
+    }
+
+    /* ── 1) Percorre o .prose montando especificações de slide ────────────── */
     const specs = [];
     let sectionNo = 0;
-    let lastSectionTitle = '';
-    let openPoint = null; // slide de pontos em acumulação
+    let section = null;          // { num, title } da seção corrente (<h2>)
+    let subTitle = null;         // <h3> corrente (subtítulo dentro da seção)
+    let proseBuf = [];           // <p> acumulados aguardando flush
+    let openPoint = null;        // slide de bullets em acumulação
+
+    function sectionCtx() {
+        return section
+            ? { sectionNo: section.num, sectionTitle: section.title }
+            : { sectionNo: null, sectionTitle: '' };
+    }
+
+    function flushProse() {
+        if (!proseBuf.length) return;
+        const pages = paginate(proseBuf);
+        const ctx = sectionCtx();
+        pages.forEach((pageNodes, i) => {
+            specs.push(Object.assign({
+                type: PROSE,
+                subTitle: subTitle,
+                body: pageNodes,
+                page: i,
+                pages: pages.length,
+                notes: [],
+            }, ctx));
+        });
+        proseBuf = [];
+    }
+
+    function pushList(type, build, sub, ctx) {
+        // Fatia listas longas em páginas para nunca estourar a tela na TV.
+        const MAX = type === STEPS ? 4 : 3;
+        const pages = Math.max(1, Math.ceil(build.length / MAX));
+        for (let p = 0; p < pages; p += 1) {
+            specs.push(Object.assign({
+                type: type,
+                subTitle: sub,
+                build: build.slice(p * MAX, (p + 1) * MAX),
+                page: p,
+                pages: pages,
+                notes: [],
+            }, ctx));
+        }
+    }
 
     function flushPoint() {
-        if (openPoint && openPoint.build.length) specs.push(openPoint);
+        if (openPoint && openPoint.build.length) {
+            pushList(POINT, openPoint.build, openPoint.subTitle, {
+                sectionNo: openPoint.sectionNo,
+                sectionTitle: openPoint.sectionTitle,
+            });
+        }
         openPoint = null;
     }
 
-    function ensurePoint() {
-        if (!openPoint) openPoint = { type: POINT, title: lastSectionTitle, build: [], notes: [] };
-        return openPoint;
-    }
-
-    function routeNote(node) {
-        const target = openPoint || specs[specs.length - 1];
-        if (!target) return;
-        if (!target.notes) target.notes = [];
-        target.notes.push(node.cloneNode(true));
-    }
+    function flushAll() { flushProse(); flushPoint(); }
 
     Array.from(source.children).forEach((node) => {
         const tag = node.tagName;
         const cls = node.classList || { contains: () => false };
 
         if (tag === 'H2') {
-            flushPoint();
+            flushAll();
             sectionNo += 1;
-            lastSectionTitle = node.textContent.trim();
-            specs.push({ type: DIVIDER, title: lastSectionTitle, sectionNo: sectionNo, notes: [] });
+            section = { num: sectionNo, title: node.textContent.trim() };
+            subTitle = null;
             return;
         }
         if (tag === 'H3') {
-            flushPoint();
-            openPoint = { type: POINT, title: node.textContent.trim(), build: [], notes: [] };
+            flushAll();
+            subTitle = node.textContent.trim();
             return;
         }
-        // Blocos especiais primeiro (têm classe própria e viram slide isolado).
+        // Blocos especiais → slide próprio, com contexto da seção.
         if (cls.contains('callout') || cls.contains('lesson-callout')) {
-            flushPoint();
+            flushAll();
             const label = node.querySelector('.ct b, b, strong');
-            specs.push({
+            specs.push(Object.assign({
                 type: CALLOUT,
-                title: (label && label.textContent.trim()) || 'Destaque',
-                node: node.cloneNode(true),
-                notes: [],
-            });
+                blockTitle: (label && label.textContent.trim()) || 'Destaque',
+                node: node.cloneNode(true), notes: [],
+            }, sectionCtx()));
             return;
         }
         if (cls.contains('lesson-steps')) {
-            flushPoint();
+            flushAll();
             const items = Array.from(node.children).map((li) => li.cloneNode(true));
-            specs.push({ type: STEPS, title: lastSectionTitle, build: items, notes: [] });
+            pushList(STEPS, items, subTitle, sectionCtx());
             return;
         }
         if (cls.contains('lesson-diagram') || tag === 'FIGURE') {
-            flushPoint();
-            specs.push({ type: MEDIA, title: lastSectionTitle || 'Imagem', node: node.cloneNode(true), notes: [] });
+            flushAll();
+            specs.push(Object.assign({ type: MEDIA, node: node.cloneNode(true), notes: [] }, sectionCtx()));
             return;
         }
         if (cls.contains('lesson-quiz')) {
-            flushPoint();
-            specs.push({ type: QUIZ, title: 'Quiz', node: node.cloneNode(true), notes: [] });
+            flushAll();
+            specs.push(Object.assign({ type: QUIZ, node: node.cloneNode(true), notes: [] }, sectionCtx()));
             return;
         }
-        // Listas comuns → bullets que constroem no ponto aberto.
         if (tag === 'UL' || tag === 'OL') {
-            const point = ensurePoint();
-            Array.from(node.children).forEach((li) => point.build.push(li.cloneNode(true)));
-            return;
-        }
-        if (tag === 'IMG') {
-            flushPoint();
-            const fig = el('figure', 'lesson-diagram');
-            fig.appendChild(node.cloneNode(true));
-            specs.push({ type: MEDIA, title: lastSectionTitle || 'Imagem', node: fig, notes: [] });
+            flushProse();
+            if (!openPoint) openPoint = Object.assign({ type: POINT, subTitle: subTitle, build: [], notes: [] }, sectionCtx());
+            Array.from(node.children).forEach((li) => openPoint.build.push(li.cloneNode(true)));
             return;
         }
         if (tag === 'P') {
-            // Texto corrido → roteiro do professor, nunca na TV.
-            if (node.textContent.trim()) routeNote(node);
+            if (node.textContent.trim()) {
+                flushPoint();
+                proseBuf.push(node.cloneNode(true));
+            }
             return;
         }
-        // Qualquer outra coisa (tabela, pre…) entra como item visível do ponto.
-        ensurePoint().build.push(node.cloneNode(true));
+        if (tag === 'IMG') {
+            flushAll();
+            const fig = el('figure', 'lesson-diagram');
+            fig.appendChild(node.cloneNode(true));
+            specs.push(Object.assign({ type: MEDIA, node: fig, notes: [] }, sectionCtx()));
+            return;
+        }
+        // Fallback (tabela, pre…) entra como item de ponto.
+        flushProse();
+        if (!openPoint) openPoint = Object.assign({ type: POINT, subTitle: subTitle, build: [], notes: [] }, sectionCtx());
+        openPoint.build.push(node.cloneNode(true));
     });
-    flushPoint();
+    flushAll();
 
-    /* ── 2) Capa (início) e Encerramento (fim) ────────────────────────────── */
+    /* ── 2) Capa + Encerramento ───────────────────────────────────────────── */
     const coverEl = fromTemplate('deck-cover');
     const endEl = fromTemplate('deck-end');
     const roteiroEl = document.getElementById('deck-roteiro');
@@ -146,7 +230,7 @@
 
     if (!slideSpecs.length) return;
 
-    /* ── 3) Renderiza cada slide para o palco ─────────────────────────────── */
+    /* ── 3) Renderização ──────────────────────────────────────────────────── */
     function markBuilds(items) {
         items.forEach((item, i) => {
             item.classList.add('deck-build');
@@ -155,67 +239,88 @@
         return items.length;
     }
 
-    function buildTitle(text, sectionNo) {
-        const head = el('div', 'deck-slide-head');
-        if (sectionNo) {
-            const num = el('span', 'deck-sec-num');
-            num.textContent = String(sectionNo).padStart(2, '0');
+    function sectionHeader(spec, big) {
+        // Cabeçalho da seção: número + título. big=true → título grande (prosa).
+        if (!spec.sectionTitle && !spec.sectionNo) return null;
+        const head = el('div', big ? 'deck-prose-head' : 'deck-eyebrow-sec');
+        if (spec.sectionNo) {
+            const num = el('span', big ? 'deck-prose-num' : 'deck-eyebrow-num');
+            num.textContent = String(spec.sectionNo).padStart(2, '0');
             head.appendChild(num);
         }
-        const h = el('h2', 'deck-slide-title');
-        h.textContent = text;
-        head.appendChild(h);
+        if (spec.sectionTitle) {
+            const t = el(big ? 'h2' : 'span', big ? 'deck-prose-title' : 'deck-eyebrow-title');
+            t.textContent = spec.sectionTitle;
+            head.appendChild(t);
+        }
         return head;
+    }
+
+    function titleBlock(text) {
+        const h = el('h3', 'deck-subtitle');
+        h.textContent = text;
+        return h;
     }
 
     const slides = []; // { el, steps, title, notesHTML, items[] }
 
     slideSpecs.forEach((spec, index) => {
-        const section = el('section', 'deck-slide deck-slide--' + spec.type);
-        section.dataset.index = String(index);
+        const sec = el('section', 'deck-slide deck-slide--' + spec.type);
+        sec.dataset.index = String(index);
         const inner = el('div', 'deck-slide-inner');
         let steps = 1;
         let items = [];
-        let title = spec.title || 'Slide';
+        let title = spec.title || spec.sectionTitle || spec.blockTitle || 'Slide';
 
         if (spec.type === COVER || spec.type === END) {
             inner.classList.add('deck-slide-inner--bleed');
             inner.appendChild(spec.node);
-        } else if (spec.type === DIVIDER) {
-            const wrap = el('div', 'deck-divider-wrap');
-            const num = el('span', 'deck-divider-num');
-            num.textContent = String(spec.sectionNo).padStart(2, '0');
-            const h = el('h2', 'deck-divider-title');
-            h.textContent = spec.title;
-            wrap.append(num, h);
-            inner.appendChild(wrap);
-            section.setAttribute('aria-label', 'Seção ' + spec.sectionNo + ': ' + spec.title);
+        } else if (spec.type === PROSE) {
+            const head = sectionHeader(spec, true);
+            if (head) inner.appendChild(head);
+            else inner.classList.add('deck-slide--lead'); // intro sem seção
+            if (spec.subTitle) inner.appendChild(titleBlock(spec.subTitle));
+            const bodyWrap = el('div', 'deck-prose-body');
+            spec.body.forEach((p) => bodyWrap.appendChild(p));
+            items = Array.from(bodyWrap.children);
+            steps = markBuilds(items) || 1;
+            inner.appendChild(bodyWrap);
+            if (spec.pages > 1) {
+                const pg = el('span', 'deck-page-mark');
+                pg.textContent = (spec.page + 1) + ' / ' + spec.pages;
+                inner.appendChild(pg);
+            }
+            title = spec.sectionTitle || 'Abertura';
         } else if (spec.type === POINT || spec.type === STEPS) {
-            inner.appendChild(buildTitle(spec.title, spec.type === STEPS ? null : null));
-            const list = el(spec.type === STEPS ? 'ol' : 'ul',
-                spec.type === STEPS ? 'deck-steps' : 'deck-points');
+            const eye = sectionHeader(spec, false);
+            if (eye) inner.appendChild(eye);
+            if (spec.subTitle) inner.appendChild(titleBlock(spec.subTitle));
+            const list = el(spec.type === STEPS ? 'ol' : 'ul', spec.type === STEPS ? 'deck-steps' : 'deck-points');
             spec.build.forEach((node) => {
-                // node já é um <li> (ou outro bloco) clonado.
-                if (node.tagName === 'LI') {
-                    list.appendChild(node);
-                } else {
-                    const li = el('li');
-                    li.appendChild(node);
-                    list.appendChild(li);
-                }
+                if (node.tagName === 'LI') list.appendChild(node);
+                else { const li = el('li'); li.appendChild(node); list.appendChild(li); }
             });
             items = Array.from(list.children);
             steps = markBuilds(items) || 1;
             inner.appendChild(list);
-            section.setAttribute('aria-label', spec.title);
+            if (spec.pages > 1) {
+                const pg = el('span', 'deck-page-mark');
+                pg.textContent = (spec.page + 1) + ' / ' + spec.pages;
+                inner.appendChild(pg);
+            }
+            title = spec.subTitle || spec.sectionTitle || 'Tópico';
         } else if (spec.type === CALLOUT || spec.type === MEDIA || spec.type === QUIZ) {
+            const eye = sectionHeader(spec, false);
+            if (eye) { eye.classList.add('deck-eyebrow-center'); inner.appendChild(eye); }
             inner.classList.add('deck-slide-inner--center');
             inner.appendChild(spec.node);
+            if (spec.type === QUIZ) title = 'Quiz';
+            else if (spec.type === CALLOUT) title = spec.blockTitle || 'Destaque';
+            else title = spec.sectionTitle || 'Imagem';
         }
 
-        section.appendChild(inner);
+        sec.appendChild(inner);
 
-        // Roteiro do slide (texto corrido roteado). Guardado p/ painel de notas.
         let notesHTML = '';
         if (spec.notes && spec.notes.length) {
             const holder = el('div');
@@ -223,8 +328,8 @@
             notesHTML = holder.innerHTML;
         }
 
-        stage.appendChild(section);
-        slides.push({ el: section, steps: steps, title: title, notesHTML: notesHTML, items: items });
+        stage.appendChild(sec);
+        slides.push({ el: sec, steps: steps, title: title, notesHTML: notesHTML, items: items });
     });
 
     source.remove();
@@ -232,7 +337,7 @@
 
     const total = slides.length;
 
-    /* ── 4) Elementos de UI ───────────────────────────────────────────────── */
+    /* ── 4) UI ────────────────────────────────────────────────────────────── */
     const elCurrent = document.querySelector('[data-deck-current]');
     const elTotal = document.querySelector('[data-deck-total]');
     const elProgress = document.querySelector('[data-deck-progress]');
@@ -249,7 +354,6 @@
 
     if (elTotal) elTotal.textContent = String(total);
 
-    /* ── Trilho de pontos (saltar para um slide) ──────────────────────────── */
     const dots = [];
     if (rail) {
         slides.forEach((slide, i) => {
@@ -262,18 +366,13 @@
         });
     }
 
-    function prefersReducedMotion() {
-        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    }
-
-    /* ── 5) Estado de navegação (slide + step) ────────────────────────────── */
+    /* ── 5) Navegação (slide + step) ──────────────────────────────────────── */
     let index = -1;
     let step = 0;
 
     function showSteps(slide, upto) {
         slide.items.forEach((item) => {
-            const s = Number(item.dataset.step);
-            item.classList.toggle('is-shown', s <= upto);
+            item.classList.toggle('is-shown', Number(item.dataset.step) <= upto);
         });
     }
 
@@ -291,22 +390,14 @@
 
     function next() {
         const slide = slides[index];
-        if (step < slide.steps - 1) {
-            step += 1;
-            showSteps(slide, step);
-        } else if (index < total - 1) {
-            goTo(index + 1, false);
-        }
+        if (step < slide.steps - 1) { step += 1; showSteps(slide, step); }
+        else if (index < total - 1) goTo(index + 1, false);
     }
 
     function previous() {
         const slide = slides[index];
-        if (step > 0) {
-            step -= 1;
-            showSteps(slide, step);
-        } else if (index > 0) {
-            goTo(index - 1, true);
-        }
+        if (step > 0) { step -= 1; showSteps(slide, step); }
+        else if (index > 0) goTo(index - 1, true);
     }
 
     function update() {
@@ -328,35 +419,24 @@
 
     function announce(slide) {
         if (!elLive) return;
-        elLive.textContent = 'Slide ' + (index + 1) + ' de ' + total +
-            (slide.title ? ': ' + slide.title : '');
+        elLive.textContent = 'Slide ' + (index + 1) + ' de ' + total + (slide.title ? ': ' + slide.title : '');
     }
 
-    /* ── 6) Roteiro do professor (painel lateral, por slide) ──────────────── */
-    function hasNotes() {
-        return slides.some((s) => s.notesHTML);
-    }
-
+    /* ── 6) Roteiro do professor (por slide) ──────────────────────────────── */
     function renderNotes(slide) {
         if (!notesBody) return;
-        if (slide.notesHTML) {
-            notesBody.innerHTML = slide.notesHTML;
-        } else {
-            notesBody.innerHTML = '<p class="deck-notes-empty">Sem roteiro para este slide. Você conduz a fala.</p>';
-        }
+        notesBody.innerHTML = slide.notesHTML ||
+            '<p class="deck-notes-empty">Sem roteiro para este slide. Você conduz a fala.</p>';
     }
 
     let notesReturnFocus = null;
     const SUPPORTS_INERT = 'inert' in HTMLElement.prototype;
-
     function notesOpen() { return notes && notes.classList.contains('is-open'); }
-
     function toggleNotes(force) {
         if (!notes) return;
         const open = typeof force === 'boolean' ? force : !notesOpen();
         notes.classList.toggle('is-open', open);
-        document.querySelectorAll('[data-deck-notes]').forEach((b) =>
-            b.setAttribute('aria-expanded', String(open)));
+        document.querySelectorAll('[data-deck-notes]').forEach((b) => b.setAttribute('aria-expanded', String(open)));
         if (!SUPPORTS_INERT) notes.setAttribute('aria-hidden', open ? 'false' : 'true');
         if (open) {
             notes.removeAttribute('inert');
@@ -369,12 +449,10 @@
             notesReturnFocus = null;
         }
     }
-    document.querySelectorAll('[data-deck-notes]').forEach((b) =>
-        b.addEventListener('click', () => toggleNotes()));
-    document.querySelectorAll('[data-deck-notes-close]').forEach((b) =>
-        b.addEventListener('click', () => toggleNotes(false)));
+    document.querySelectorAll('[data-deck-notes]').forEach((b) => b.addEventListener('click', () => toggleNotes()));
+    document.querySelectorAll('[data-deck-notes-close]').forEach((b) => b.addEventListener('click', () => toggleNotes(false)));
 
-    /* ── 7) Capa ampliada (dialog nativo) ─────────────────────────────────── */
+    /* ── 7) Capa ampliada ─────────────────────────────────────────────────── */
     document.addEventListener('click', (event) => {
         const open = event.target.closest('[data-deck-lightbox-open]');
         if (open && lightbox && !lightbox.open) lightbox.showModal();
@@ -382,9 +460,7 @@
         if (close && lightbox && lightbox.open) lightbox.close();
     });
     if (lightbox) {
-        lightbox.addEventListener('click', (event) => {
-            if (event.target === lightbox) lightbox.close();
-        });
+        lightbox.addEventListener('click', (event) => { if (event.target === lightbox) lightbox.close(); });
     }
 
     /* ── 8) Tela cheia ────────────────────────────────────────────────────── */
@@ -396,8 +472,7 @@
             (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document);
         }
     }
-    document.querySelectorAll('[data-deck-fullscreen]').forEach((b) =>
-        b.addEventListener('click', toggleFullscreen));
+    document.querySelectorAll('[data-deck-fullscreen]').forEach((b) => b.addEventListener('click', toggleFullscreen));
     document.addEventListener('fullscreenchange', () => {
         if (!fsBtn) return;
         const on = !!document.fullscreenElement;
@@ -411,53 +486,34 @@
         fsBtn.setAttribute('title', label + ' (F)');
     });
 
-    /* ── 9) Cliques nas zonas laterais e botões ───────────────────────────── */
+    /* ── 9) Botões e teclado ──────────────────────────────────────────────── */
     nextButtons.forEach((b) => b.addEventListener('click', next));
     previousButtons.forEach((b) => b.addEventListener('click', previous));
 
-    /* ── 10) Teclado / controle remoto ────────────────────────────────────── */
     document.addEventListener('keydown', (e) => {
-        const interactive = e.target && e.target.closest(
-            'input, textarea, select, button, a, [contenteditable="true"]'
-        );
+        const interactive = e.target && e.target.closest('input, textarea, select, button, a, [contenteditable="true"]');
         if (interactive && (e.key === ' ' || e.key === 'Enter')) return;
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-
         switch (e.key) {
-            case 'ArrowRight':
-            case 'ArrowDown':
-            case 'PageDown':
-            case ' ':
+            case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
                 e.preventDefault(); next(); break;
-            case 'ArrowLeft':
-            case 'ArrowUp':
-            case 'PageUp':
+            case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
                 e.preventDefault(); previous(); break;
-            case 'Home':
-                e.preventDefault(); goTo(0, false); break;
-            case 'End':
-                e.preventDefault(); goTo(total - 1, false); break;
-            case 'f':
-            case 'F':
-                toggleFullscreen(); break;
-            case 'n':
-            case 'N':
-                e.preventDefault(); toggleNotes(); break;
+            case 'Home': e.preventDefault(); goTo(0, false); break;
+            case 'End': e.preventDefault(); goTo(total - 1, false); break;
+            case 'f': case 'F': toggleFullscreen(); break;
+            case 'n': case 'N': e.preventDefault(); toggleNotes(); break;
             case 'Escape':
                 if (lightbox && lightbox.open) lightbox.close();
                 else if (notesOpen()) toggleNotes(false);
                 else if (document.fullscreenElement) toggleFullscreen();
-                else {
-                    const exit = document.querySelector('[data-deck-exit]');
-                    if (exit) window.location.href = exit.href;
-                }
+                else { const exit = document.querySelector('[data-deck-exit]'); if (exit) window.location.href = exit.href; }
                 break;
-            default:
-                break;
+            default: break;
         }
     });
 
-    /* ── 11) Auto-hide de controles (ocioso) ──────────────────────────────── */
+    /* ── 10) Auto-hide ocioso ─────────────────────────────────────────────── */
     let idleTimer = null;
     let lastPoke = 0;
     function poke() {
@@ -471,10 +527,35 @@
     ['mousemove', 'mousedown', 'keydown', 'touchstart', 'focusin'].forEach((evt) =>
         document.addEventListener(evt, poke, { passive: true }));
     poke();
-
     if (hint) setTimeout(() => hint.classList.add('is-gone'), 6000);
+
+    /* ── 11) Auto-fit: nenhum slide pode estourar a tela (TV não rola) ────── */
+    function fitAll() {
+        const baseFs = parseFloat(getComputedStyle(body).fontSize) || 32;
+        slides.forEach(({ el: s }) => {
+            s.style.removeProperty('--deck-fs');
+            if (s.scrollHeight - s.clientHeight <= 2) return;
+            let fs = baseFs;
+            let guard = 0;
+            while (s.scrollHeight - s.clientHeight > 2 && guard < 12) {
+                fs *= 0.94;
+                if (fs < 12) break;
+                s.style.setProperty('--deck-fs', fs + 'px');
+                guard += 1;
+            }
+        });
+    }
+
+    let fitRAF = 0;
+    function scheduleFit() {
+        cancelAnimationFrame(fitRAF);
+        fitRAF = requestAnimationFrame(fitAll);
+    }
+    window.addEventListener('resize', scheduleFit, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
 
     /* ── 12) Início ───────────────────────────────────────────────────────── */
     goTo(0, false);
     if (window.lucide) window.lucide.createIcons();
+    fitAll();
 }());

@@ -147,8 +147,8 @@
 .deck-points > li {
     position: relative;
     padding-left: calc(var(--deck-fs) * 1.7);
-    font-size: calc(var(--deck-fs) * 1.5);
-    line-height: 1.3;
+    font-size: calc(var(--deck-fs) * 1.4);
+    line-height: 1.28;
     text-wrap: pretty;
 }
 
@@ -201,40 +201,110 @@
     line-height: 1.2;
 }
 
-/* ── Slide: DIVISOR DE SEÇÃO (respiro + número grande) ───────────────────── */
-.deck-divider-wrap { max-width: none; }
-
-.deck-divider-num {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: calc(var(--deck-fs) * 1.4);
-    font-weight: 500;
-    letter-spacing: .08em;
-    color: var(--accent-text);
-    font-variant-numeric: tabular-nums;
-    margin-bottom: calc(var(--deck-fs) * 0.7);
+/* ── Slide: PROSA (conteúdo real paginado, com cabeçalho da seção) ───────── */
+.deck-prose-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: calc(var(--deck-fs) * 0.55);
+    margin: 0 0 calc(var(--deck-fs) * 1.1);
 }
 
-.deck-divider-num::after {
+.deck-prose-num {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: calc(var(--deck-fs) * 1.1);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: .04em;
+    color: var(--accent-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.deck-prose-title {
+    margin: 0;
+    color: var(--fg);
+    font-size: calc(var(--deck-fs) * 1.9);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -.018em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+
+/* Filete da marca sob o cabeçalho (realce pontual). */
+.deck-prose-head::after {
     content: '';
-    display: block;
-    width: 2.6em;
+    flex-basis: 100%;
     height: 3px;
-    margin-top: calc(var(--deck-fs) * 0.55);
+    width: 2.6em;
+    max-width: 2.6em;
+    margin-top: calc(var(--deck-fs) * 0.2);
     border-radius: var(--radius-pill);
     background: var(--deck-grad);
 }
 
-.deck-divider-title {
-    margin: 0;
-    max-width: 16ch; /* ch nesta escala grande mantém quebra por palavra */
-    color: var(--fg);
-    font-size: clamp(40px, calc(var(--deck-fs) * 3.2 + 1vw), 132px);
-    font-weight: 800;
-    line-height: 1.0;
-    letter-spacing: -.03em;
-    text-wrap: balance;
-    overflow-wrap: break-word;
+.deck-prose-body {
+    max-width: 30ch;
+    font-size: calc(var(--deck-fs) * 1.45);
+    line-height: 1.4;
+    text-wrap: pretty;
+}
+
+.deck-prose-body > p { margin: 0 0 calc(var(--deck-fs) * 0.7); }
+.deck-prose-body > p:last-child { margin-bottom: 0; }
+.deck-prose-body strong { color: var(--fg); font-weight: 700; }
+
+/* Abertura da aula (prosa sem seção): vira declaração grande. */
+.deck-slide--lead .deck-prose-body {
+    max-width: 24ch;
+    font-size: calc(var(--deck-fs) * 1.95);
+    line-height: 1.22;
+    font-weight: 500;
+    letter-spacing: -.01em;
+}
+
+/* Subtítulo (<h3>) dentro da seção. */
+.deck-subtitle {
+    margin: 0 0 calc(var(--deck-fs) * 0.9);
+    color: var(--accent-text);
+    font-size: calc(var(--deck-fs) * 1.45);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -.008em;
+}
+
+/* Indicador de página (1 / N) quando a prosa da seção é fatiada. */
+.deck-page-mark {
+    display: inline-block;
+    margin-top: calc(var(--deck-fs) * 1.1);
+    font-family: var(--font-mono);
+    font-size: calc(var(--deck-fs) * 0.72);
+    color: var(--fg-subtle);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Eyebrow de seção em slides de bloco (callout/quiz/mídia/ponto). */
+.deck-eyebrow-sec {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .55em;
+    margin: 0 0 calc(var(--deck-fs) * 1.1);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+.deck-eyebrow-center { align-self: center; }
+.deck-eyebrow-num {
+    font-family: var(--font-mono);
+    font-size: calc(var(--deck-fs) * 0.72);
+    font-weight: 600;
+    color: var(--accent-text);
+    font-variant-numeric: tabular-nums;
+}
+.deck-eyebrow-title {
+    font-size: calc(var(--deck-fs) * 0.72);
+    font-weight: 600;
+    color: var(--fg-muted);
 }
 
 /* ── Slide: DESTAQUE (callout do design system, escalado) ────────────────── */
