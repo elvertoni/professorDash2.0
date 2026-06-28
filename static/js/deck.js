@@ -1,37 +1,35 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   deck.js — Modo Apresentação (cinema) das aulas.
-   Fatia o conteúdo da aula (.prose) em ATOS verticais (1 por <h2>), monta
-   capa + encerramento e conduz a leitura por ROLAGEM: cada ato revela ao
-   entrar na tela (IntersectionObserver), com barra de progresso, trilho de
-   pontos para saltar, roteiro docente (N), tela cheia (F) e saída (Esc).
-   Vanilla JS, sem build, só depende do lucide (ícones).
+   deck.js — Modo Apresentação (slides) das aulas.
+   Transforma o conteúdo da aula (.prose) em SLIDES DISCRETOS e glanceáveis
+   para projetar na sala/TV (42", 4-6 m). Cada slide carrega UMA ideia:
+   divisor de seção, ponto (bullets que constroem no clique), destaque
+   (callout), passos, mídia, quiz interativo. Texto corrido NÃO vai para a
+   tela — é roteado para o roteiro do professor (tecla N), slide a slide.
+   Avança por clique/seta; sem rolagem de navegação. Build-in por step.
+   Vanilla JS; o quiz interativo usa Alpine (carregado no template).
    ──────────────────────────────────────────────────────────────────────── */
 (function () {
     'use strict';
 
     const body = document.body;
-    const scroll = document.getElementById('deck-scroll');
+    const stage = document.getElementById('deck-stage');
     const source = document.getElementById('deck-source');
-    if (!scroll || !source) return;
+    if (!stage || !source) return;
 
-    /* ── Agrupa o conteúdo do .prose em seções por <h2> ───────────────────── */
-    function buildSections() {
-        const sections = [];
-        let current = null;
+    /* ── Tipos de slide ───────────────────────────────────────────────────── */
+    const COVER = 'cover';
+    const DIVIDER = 'divider';
+    const POINT = 'point';
+    const STEPS = 'steps';
+    const CALLOUT = 'callout';
+    const MEDIA = 'media';
+    const QUIZ = 'quiz';
+    const END = 'end';
 
-        Array.from(source.children).forEach((node) => {
-            if (node.tagName === 'H2' || current === null) {
-                current = {
-                    heading: node.tagName === 'H2' ? node.cloneNode(true) : null,
-                    nodes: [],
-                };
-                sections.push(current);
-                if (node.tagName === 'H2') return;
-            }
-            current.nodes.push(node);
-        });
-        // Remove seção-fantasma inicial (sem heading e sem corpo).
-        return sections.filter((s) => s.heading || s.nodes.length);
+    function el(tag, cls) {
+        const node = document.createElement(tag);
+        if (cls) node.className = cls;
+        return node;
     }
 
     function fromTemplate(id) {
@@ -40,113 +38,225 @@
         return tpl.content.firstElementChild.cloneNode(true);
     }
 
-    function headingText(node, fallback) {
-        if (!node) return fallback;
-        const text = node.textContent.trim();
-        return text || fallback;
-    }
-
-    /* ── Monta um ato (<section> full-bleed) ──────────────────────────────── */
-    function makeAct(className, title) {
-        const act = document.createElement('section');
-        act.className = 'deck-act ' + className;
-        act.dataset.title = title || '';
-        act.setAttribute('aria-label', title || 'Seção da aula');
-        return act;
-    }
-
-    const acts = [];
-    // Contêineres que revelam ao rolar (.deck-reveal). 1 por ato; o stagger
-    // anima os filhos DIRETOS deste contêiner (--i define o atraso no CSS).
-    const revealEls = [];
-
-    function registerReveal(act, container) {
-        container.classList.add('deck-reveal');
-        revealEls.push(container);
-        Array.from(container.children).forEach((child, i) => {
-            child.style.setProperty('--i', String(i));
-        });
-        acts.push(act);
-    }
-
-    // 1) Capa (hero).
-    const cover = fromTemplate('deck-cover');
-    if (cover) {
-        const act = makeAct('deck-act--cover', 'Capa');
-        act.appendChild(cover);
-        registerReveal(act, cover);
-    }
-
-    // 2) Seções da aula.
-    const sections = buildSections();
+    /* ── 1) Percorre o .prose montando a lista de slides ──────────────────── */
+    const specs = [];
     let sectionNo = 0;
-    sections.forEach((section) => {
-        sectionNo += 1;
-        const title = headingText(section.heading, 'Seção ' + sectionNo);
-        const act = makeAct('deck-act--section', title);
+    let lastSectionTitle = '';
+    let openPoint = null; // slide de pontos em acumulação
 
-        const inner = document.createElement('div');
-        inner.className = 'deck-act-body prose';
+    function flushPoint() {
+        if (openPoint && openPoint.build.length) specs.push(openPoint);
+        openPoint = null;
+    }
 
-        if (section.heading) {
-            const head = document.createElement('div');
-            head.className = 'deck-act-head';
-            const num = document.createElement('span');
-            num.className = 'deck-act-num';
-            num.textContent = String(sectionNo).padStart(2, '0');
-            section.heading.id = 'deck-section-' + sectionNo;
-            head.append(num, section.heading); // section.heading já é clone
-            inner.appendChild(head);
-            act.setAttribute('aria-labelledby', section.heading.id);
-            act.removeAttribute('aria-label');
+    function ensurePoint() {
+        if (!openPoint) openPoint = { type: POINT, title: lastSectionTitle, build: [], notes: [] };
+        return openPoint;
+    }
+
+    function routeNote(node) {
+        const target = openPoint || specs[specs.length - 1];
+        if (!target) return;
+        if (!target.notes) target.notes = [];
+        target.notes.push(node.cloneNode(true));
+    }
+
+    Array.from(source.children).forEach((node) => {
+        const tag = node.tagName;
+        const cls = node.classList || { contains: () => false };
+
+        if (tag === 'H2') {
+            flushPoint();
+            sectionNo += 1;
+            lastSectionTitle = node.textContent.trim();
+            specs.push({ type: DIVIDER, title: lastSectionTitle, sectionNo: sectionNo, notes: [] });
+            return;
         }
-        section.nodes.forEach((node) => inner.appendChild(node.cloneNode(true)));
+        if (tag === 'H3') {
+            flushPoint();
+            openPoint = { type: POINT, title: node.textContent.trim(), build: [], notes: [] };
+            return;
+        }
+        // Blocos especiais primeiro (têm classe própria e viram slide isolado).
+        if (cls.contains('callout') || cls.contains('lesson-callout')) {
+            flushPoint();
+            const label = node.querySelector('.ct b, b, strong');
+            specs.push({
+                type: CALLOUT,
+                title: (label && label.textContent.trim()) || 'Destaque',
+                node: node.cloneNode(true),
+                notes: [],
+            });
+            return;
+        }
+        if (cls.contains('lesson-steps')) {
+            flushPoint();
+            const items = Array.from(node.children).map((li) => li.cloneNode(true));
+            specs.push({ type: STEPS, title: lastSectionTitle, build: items, notes: [] });
+            return;
+        }
+        if (cls.contains('lesson-diagram') || tag === 'FIGURE') {
+            flushPoint();
+            specs.push({ type: MEDIA, title: lastSectionTitle || 'Imagem', node: node.cloneNode(true), notes: [] });
+            return;
+        }
+        if (cls.contains('lesson-quiz')) {
+            flushPoint();
+            specs.push({ type: QUIZ, title: 'Quiz', node: node.cloneNode(true), notes: [] });
+            return;
+        }
+        // Listas comuns → bullets que constroem no ponto aberto.
+        if (tag === 'UL' || tag === 'OL') {
+            const point = ensurePoint();
+            Array.from(node.children).forEach((li) => point.build.push(li.cloneNode(true)));
+            return;
+        }
+        if (tag === 'IMG') {
+            flushPoint();
+            const fig = el('figure', 'lesson-diagram');
+            fig.appendChild(node.cloneNode(true));
+            specs.push({ type: MEDIA, title: lastSectionTitle || 'Imagem', node: fig, notes: [] });
+            return;
+        }
+        if (tag === 'P') {
+            // Texto corrido → roteiro do professor, nunca na TV.
+            if (node.textContent.trim()) routeNote(node);
+            return;
+        }
+        // Qualquer outra coisa (tabela, pre…) entra como item visível do ponto.
+        ensurePoint().build.push(node.cloneNode(true));
+    });
+    flushPoint();
 
-        act.appendChild(inner);
-        registerReveal(act, inner);
+    /* ── 2) Capa (início) e Encerramento (fim) ────────────────────────────── */
+    const coverEl = fromTemplate('deck-cover');
+    const endEl = fromTemplate('deck-end');
+    const roteiroEl = document.getElementById('deck-roteiro');
+
+    const slideSpecs = [];
+    if (coverEl) {
+        const notes = [];
+        if (roteiroEl && roteiroEl.children.length) {
+            Array.from(roteiroEl.children).forEach((n) => notes.push(n.cloneNode(true)));
+        }
+        slideSpecs.push({ type: COVER, node: coverEl, title: 'Capa', notes: notes });
+    }
+    specs.forEach((s) => slideSpecs.push(s));
+    if (endEl) slideSpecs.push({ type: END, node: endEl, title: 'Fim da aula', notes: [] });
+
+    if (!slideSpecs.length) return;
+
+    /* ── 3) Renderiza cada slide para o palco ─────────────────────────────── */
+    function markBuilds(items) {
+        items.forEach((item, i) => {
+            item.classList.add('deck-build');
+            item.dataset.step = String(i);
+        });
+        return items.length;
+    }
+
+    function buildTitle(text, sectionNo) {
+        const head = el('div', 'deck-slide-head');
+        if (sectionNo) {
+            const num = el('span', 'deck-sec-num');
+            num.textContent = String(sectionNo).padStart(2, '0');
+            head.appendChild(num);
+        }
+        const h = el('h2', 'deck-slide-title');
+        h.textContent = text;
+        head.appendChild(h);
+        return head;
+    }
+
+    const slides = []; // { el, steps, title, notesHTML, items[] }
+
+    slideSpecs.forEach((spec, index) => {
+        const section = el('section', 'deck-slide deck-slide--' + spec.type);
+        section.dataset.index = String(index);
+        const inner = el('div', 'deck-slide-inner');
+        let steps = 1;
+        let items = [];
+        let title = spec.title || 'Slide';
+
+        if (spec.type === COVER || spec.type === END) {
+            inner.classList.add('deck-slide-inner--bleed');
+            inner.appendChild(spec.node);
+        } else if (spec.type === DIVIDER) {
+            const wrap = el('div', 'deck-divider-wrap');
+            const num = el('span', 'deck-divider-num');
+            num.textContent = String(spec.sectionNo).padStart(2, '0');
+            const h = el('h2', 'deck-divider-title');
+            h.textContent = spec.title;
+            wrap.append(num, h);
+            inner.appendChild(wrap);
+            section.setAttribute('aria-label', 'Seção ' + spec.sectionNo + ': ' + spec.title);
+        } else if (spec.type === POINT || spec.type === STEPS) {
+            inner.appendChild(buildTitle(spec.title, spec.type === STEPS ? null : null));
+            const list = el(spec.type === STEPS ? 'ol' : 'ul',
+                spec.type === STEPS ? 'deck-steps' : 'deck-points');
+            spec.build.forEach((node) => {
+                // node já é um <li> (ou outro bloco) clonado.
+                if (node.tagName === 'LI') {
+                    list.appendChild(node);
+                } else {
+                    const li = el('li');
+                    li.appendChild(node);
+                    list.appendChild(li);
+                }
+            });
+            items = Array.from(list.children);
+            steps = markBuilds(items) || 1;
+            inner.appendChild(list);
+            section.setAttribute('aria-label', spec.title);
+        } else if (spec.type === CALLOUT || spec.type === MEDIA || spec.type === QUIZ) {
+            inner.classList.add('deck-slide-inner--center');
+            inner.appendChild(spec.node);
+        }
+
+        section.appendChild(inner);
+
+        // Roteiro do slide (texto corrido roteado). Guardado p/ painel de notas.
+        let notesHTML = '';
+        if (spec.notes && spec.notes.length) {
+            const holder = el('div');
+            spec.notes.forEach((n) => holder.appendChild(n));
+            notesHTML = holder.innerHTML;
+        }
+
+        stage.appendChild(section);
+        slides.push({ el: section, steps: steps, title: title, notesHTML: notesHTML, items: items });
     });
 
-    // 3) Encerramento.
-    const end = fromTemplate('deck-end');
-    if (end) {
-        const act = makeAct('deck-act--end', 'Fim da aula');
-        act.appendChild(end);
-        registerReveal(act, end);
-    }
-
-    acts.forEach((act) => scroll.appendChild(act));
     source.remove();
+    if (roteiroEl) roteiroEl.remove();
 
-    const total = acts.length;
-    if (!total) return; // aula vazia: nada a apresentar (capa/fim sempre criam ≥2).
+    const total = slides.length;
 
-    /* ── Elementos de UI ──────────────────────────────────────────────────── */
+    /* ── 4) Elementos de UI ───────────────────────────────────────────────── */
     const elCurrent = document.querySelector('[data-deck-current]');
     const elTotal = document.querySelector('[data-deck-total]');
     const elProgress = document.querySelector('[data-deck-progress]');
     const elLive = document.querySelector('[data-deck-live]');
+    const elCurrentTitle = document.querySelector('[data-deck-current-title]');
     const rail = document.querySelector('[data-deck-rail]');
     const notes = document.getElementById('deck-notes');
-    const notesHasContent = notes && !notes.querySelector('.deck-notes-empty');
+    const notesBody = document.querySelector('[data-deck-notes-body]');
     const hint = document.querySelector('[data-deck-hint]');
     const fsBtn = document.querySelector('[data-deck-fullscreen]');
-    const elCurrentTitle = document.querySelector('[data-deck-current-title]');
     const previousButtons = Array.from(document.querySelectorAll('[data-deck-previous]'));
     const nextButtons = Array.from(document.querySelectorAll('[data-deck-next]'));
-    const notesButtons = Array.from(document.querySelectorAll('[data-deck-notes]'));
     const lightbox = document.querySelector('[data-deck-lightbox]');
 
     if (elTotal) elTotal.textContent = String(total);
 
-    /* ── Trilho de pontos (saltar para um ato) ────────────────────────────── */
+    /* ── Trilho de pontos (saltar para um slide) ──────────────────────────── */
     const dots = [];
     if (rail) {
-        acts.forEach((act, i) => {
-            const dot = document.createElement('button');
+        slides.forEach((slide, i) => {
+            const dot = el('button', 'deck-rail-dot');
             dot.type = 'button';
-            dot.className = 'deck-rail-dot';
-            dot.setAttribute('aria-label', act.dataset.title || ('Seção ' + (i + 1)));
-            dot.addEventListener('click', () => scrollToAct(act));
+            dot.setAttribute('aria-label', slide.title || ('Slide ' + (i + 1)));
+            dot.addEventListener('click', () => goTo(i, false));
             rail.appendChild(dot);
             dots.push(dot);
         });
@@ -156,103 +266,97 @@
         return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
-    function scrollToAct(act) {
-        scroll.scrollTo({
-            top: act.offsetTop,
-            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    /* ── 5) Estado de navegação (slide + step) ────────────────────────────── */
+    let index = -1;
+    let step = 0;
+
+    function showSteps(slide, upto) {
+        slide.items.forEach((item) => {
+            const s = Number(item.dataset.step);
+            item.classList.toggle('is-shown', s <= upto);
         });
     }
 
-    /* ── Reveal ao entrar na tela ─────────────────────────────────────────── */
-    let activeIndex = 0;
+    function goTo(i, landAtEnd) {
+        const clamped = Math.max(0, Math.min(total - 1, i));
+        if (clamped === index) return;
+        if (index >= 0) slides[index].el.classList.remove('is-active');
+        index = clamped;
+        const slide = slides[index];
+        slide.el.classList.add('is-active');
+        step = landAtEnd ? slide.steps - 1 : 0;
+        showSteps(slide, step);
+        update();
+    }
 
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-in');
-                io.unobserve(entry.target); // revela uma vez, não re-esconde
-            }
-        });
-    }, { root: scroll, rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
+    function next() {
+        const slide = slides[index];
+        if (step < slide.steps - 1) {
+            step += 1;
+            showSteps(slide, step);
+        } else if (index < total - 1) {
+            goTo(index + 1, false);
+        }
+    }
 
-    revealEls.forEach((el) => io.observe(el));
+    function previous() {
+        const slide = slides[index];
+        if (step > 0) {
+            step -= 1;
+            showSteps(slide, step);
+        } else if (index > 0) {
+            goTo(index - 1, true);
+        }
+    }
 
-    /* ── Ato corrente (qual está mais centrado) → trilho + contador + a11y ── */
-    const centerIO = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            const i = acts.indexOf(entry.target);
-            if (i === -1 || i === activeIndex) return;
-            setActive(i);
-        });
-    }, { root: scroll, rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-
-    acts.forEach((act) => centerIO.observe(act));
-
-    function setActive(i) {
-        activeIndex = i;
-        if (elCurrent) elCurrent.textContent = String(i + 1);
-        if (elCurrentTitle) elCurrentTitle.textContent = acts[i].dataset.title || 'Seção da aula';
-        previousButtons.forEach((button) => { button.disabled = i === 0; });
-        nextButtons.forEach((button) => { button.disabled = i === total - 1; });
+    function update() {
+        const slide = slides[index];
+        if (elCurrent) elCurrent.textContent = String(index + 1);
+        if (elCurrentTitle) elCurrentTitle.textContent = slide.title || 'Slide';
+        if (elProgress) elProgress.style.transform = 'scaleX(' + ((index + 1) / total) + ')';
+        previousButtons.forEach((b) => { b.disabled = index === 0; });
+        nextButtons.forEach((b) => { b.disabled = index === total - 1; });
         dots.forEach((dot, d) => {
-            const current = d === i;
+            const current = d === index;
             dot.classList.toggle('is-current', current);
             if (current) dot.setAttribute('aria-current', 'step');
             else dot.removeAttribute('aria-current');
         });
-        announce(i);
+        renderNotes(slide);
+        announce(slide);
     }
 
-    function announce(i) {
+    function announce(slide) {
         if (!elLive) return;
-        const title = acts[i].dataset.title;
-        elLive.textContent = 'Seção ' + (i + 1) + ' de ' + total +
-            (title ? ': ' + title : '');
+        elLive.textContent = 'Slide ' + (index + 1) + ' de ' + total +
+            (slide.title ? ': ' + slide.title : '');
     }
 
-    /* ── Barra de progresso (proporção rolada) ────────────────────────────── */
-    let progressRAF = 0;
-    function updateProgress() {
-        cancelAnimationFrame(progressRAF);
-        progressRAF = requestAnimationFrame(() => {
-            const max = scroll.scrollHeight - scroll.clientHeight;
-            const ratio = max > 0 ? Math.min(1, scroll.scrollTop / max) : 1;
-            if (elProgress) elProgress.style.transform = 'scaleX(' + ratio + ')';
-
-            const marker = scroll.scrollTop + (scroll.clientHeight * 0.45);
-            let visibleIndex = 0;
-            acts.forEach((act, i) => {
-                if (act.offsetTop <= marker) visibleIndex = i;
-            });
-            if (visibleIndex !== activeIndex) setActive(visibleIndex);
-        });
-    }
-    scroll.addEventListener('scroll', updateProgress, { passive: true });
-
-    /* ── Navegação por teclado (além do scroll nativo) ────────────────────── */
-    function go(i) {
-        if (!total) return;
-        const clamped = Math.max(0, Math.min(total - 1, i));
-        scrollToAct(acts[clamped]);
+    /* ── 6) Roteiro do professor (painel lateral, por slide) ──────────────── */
+    function hasNotes() {
+        return slides.some((s) => s.notesHTML);
     }
 
-    previousButtons.forEach((button) =>
-        button.addEventListener('click', () => go(activeIndex - 1)));
-    nextButtons.forEach((button) =>
-        button.addEventListener('click', () => go(activeIndex + 1)));
+    function renderNotes(slide) {
+        if (!notesBody) return;
+        if (slide.notesHTML) {
+            notesBody.innerHTML = slide.notesHTML;
+        } else {
+            notesBody.innerHTML = '<p class="deck-notes-empty">Sem roteiro para este slide. Você conduz a fala.</p>';
+        }
+    }
 
-    /* ── Roteiro docente (painel lateral, não-modal) ──────────────────────── */
     let notesReturnFocus = null;
     const SUPPORTS_INERT = 'inert' in HTMLElement.prototype;
 
     function notesOpen() { return notes && notes.classList.contains('is-open'); }
 
     function toggleNotes(force) {
-        if (!notes || !notesHasContent) return;
+        if (!notes) return;
         const open = typeof force === 'boolean' ? force : !notesOpen();
         notes.classList.toggle('is-open', open);
-        notesButtons.forEach((button) => button.setAttribute('aria-expanded', String(open)));
+        document.querySelectorAll('[data-deck-notes]').forEach((b) =>
+            b.setAttribute('aria-expanded', String(open)));
         if (!SUPPORTS_INERT) notes.setAttribute('aria-hidden', open ? 'false' : 'true');
         if (open) {
             notes.removeAttribute('inert');
@@ -270,22 +374,20 @@
     document.querySelectorAll('[data-deck-notes-close]').forEach((b) =>
         b.addEventListener('click', () => toggleNotes(false)));
 
-    /* ── Capa ampliada (dialog nativo, foco e Esc do navegador) ──────────── */
-    document.querySelectorAll('[data-deck-lightbox-open]').forEach((button) =>
-        button.addEventListener('click', () => {
-            if (lightbox && !lightbox.open) lightbox.showModal();
-        }));
-    document.querySelectorAll('[data-deck-lightbox-close]').forEach((button) =>
-        button.addEventListener('click', () => {
-            if (lightbox && lightbox.open) lightbox.close();
-        }));
+    /* ── 7) Capa ampliada (dialog nativo) ─────────────────────────────────── */
+    document.addEventListener('click', (event) => {
+        const open = event.target.closest('[data-deck-lightbox-open]');
+        if (open && lightbox && !lightbox.open) lightbox.showModal();
+        const close = event.target.closest('[data-deck-lightbox-close]');
+        if (close && lightbox && lightbox.open) lightbox.close();
+    });
     if (lightbox) {
         lightbox.addEventListener('click', (event) => {
             if (event.target === lightbox) lightbox.close();
         });
     }
 
-    /* ── Tela cheia (ícone sincronizado) ──────────────────────────────────── */
+    /* ── 8) Tela cheia ────────────────────────────────────────────────────── */
     function toggleFullscreen() {
         const root = document.documentElement;
         if (!document.fullscreenElement) {
@@ -296,7 +398,6 @@
     }
     document.querySelectorAll('[data-deck-fullscreen]').forEach((b) =>
         b.addEventListener('click', toggleFullscreen));
-
     document.addEventListener('fullscreenchange', () => {
         if (!fsBtn) return;
         const on = !!document.fullscreenElement;
@@ -310,9 +411,12 @@
         fsBtn.setAttribute('title', label + ' (F)');
     });
 
-    /* ── Teclado / controle remoto ────────────────────────────────────────── */
+    /* ── 9) Cliques nas zonas laterais e botões ───────────────────────────── */
+    nextButtons.forEach((b) => b.addEventListener('click', next));
+    previousButtons.forEach((b) => b.addEventListener('click', previous));
+
+    /* ── 10) Teclado / controle remoto ────────────────────────────────────── */
     document.addEventListener('keydown', (e) => {
-        // Preserva edição e ativação nativa de controles com Espaço/Enter.
         const interactive = e.target && e.target.closest(
             'input, textarea, select, button, a, [contenteditable="true"]'
         );
@@ -320,26 +424,25 @@
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
 
         switch (e.key) {
-            case 'ArrowDown':
             case 'ArrowRight':
+            case 'ArrowDown':
             case 'PageDown':
             case ' ':
-                e.preventDefault(); go(activeIndex + 1); break;
-            case 'ArrowUp':
+                e.preventDefault(); next(); break;
             case 'ArrowLeft':
+            case 'ArrowUp':
             case 'PageUp':
-                e.preventDefault(); go(activeIndex - 1); break;
+                e.preventDefault(); previous(); break;
             case 'Home':
-                e.preventDefault(); go(0); break;
+                e.preventDefault(); goTo(0, false); break;
             case 'End':
-                e.preventDefault(); go(total - 1); break;
+                e.preventDefault(); goTo(total - 1, false); break;
             case 'f':
             case 'F':
                 toggleFullscreen(); break;
             case 'n':
             case 'N':
-                if (notesHasContent) { e.preventDefault(); toggleNotes(); }
-                break;
+                e.preventDefault(); toggleNotes(); break;
             case 'Escape':
                 if (lightbox && lightbox.open) lightbox.close();
                 else if (notesOpen()) toggleNotes(false);
@@ -354,7 +457,7 @@
         }
     });
 
-    /* ── Auto-hide de controles (ocioso, com throttle) ────────────────────── */
+    /* ── 11) Auto-hide de controles (ocioso) ──────────────────────────────── */
     let idleTimer = null;
     let lastPoke = 0;
     function poke() {
@@ -365,20 +468,13 @@
         if (idleTimer) clearTimeout(idleTimer);
         idleTimer = setTimeout(() => body.classList.add('is-idle'), 3500);
     }
-    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel', 'focusin'].forEach((evt) =>
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'focusin'].forEach((evt) =>
         document.addEventListener(evt, poke, { passive: true }));
     poke();
 
-    /* Dica de teclado some após alguns segundos. */
-    if (hint) setTimeout(() => hint.classList.add('is-gone'), 5000);
+    if (hint) setTimeout(() => hint.classList.add('is-gone'), 6000);
 
-    /* ── Início ───────────────────────────────────────────────────────────── */
-    // 1º ato visível imediatamente (sem esperar o observer disparar).
-    if (revealEls[0]) {
-        revealEls[0].classList.add('is-in');
-        io.unobserve(revealEls[0]);
-    }
-    setActive(0);
-    updateProgress();
+    /* ── 12) Início ───────────────────────────────────────────────────────── */
+    goTo(0, false);
     if (window.lucide) window.lucide.createIcons();
 }());

@@ -14,15 +14,18 @@
     <link rel="stylesheet" href="{% static 'css/presentation.css' %}">
 </head>
 <body class="deck-body">
-    <a class="sr-only" href="#deck-scroll">Pular para o conteúdo</a>
+    <a class="sr-only" href="#deck-stage">Pular para o conteúdo</a>
 
-    {# Região viva: anuncia "Seção X de N: título" a leitores de tela. #}
+    {# Região viva: anuncia "Slide X de N: título" a leitores de tela. #}
     <div class="sr-only" aria-live="polite" data-deck-live></div>
 
-    {# Fonte do conteúdo: deck.js fatia este .prose por <h2> em atos. #}
+    {# Fonte do conteúdo: deck.js transforma este .prose em slides discretos. #}
     <div id="deck-source" class="prose" hidden>{{ lesson_html|safe }}</div>
 
-    {# Ato de capa (sempre o primeiro). #}
+    {# Roteiro global (:::roteiro) — deck.js anexa ao slide de capa. #}
+    <div id="deck-roteiro" class="prose" hidden>{{ teacher_notes_html|safe }}</div>
+
+    {# Slide de capa (sempre o primeiro). #}
     <template id="deck-cover">
         <div class="deck-cover{% if aula.imagem %} has-cover{% endif %}">
             <div class="deck-cover-text">
@@ -51,7 +54,7 @@
         </div>
     </template>
 
-    {# Ato de encerramento (sempre o último). #}
+    {# Slide de encerramento (sempre o último). #}
     <template id="deck-end">
         <div class="deck-end">
             <span class="deck-end-context">{{ turma.disciplina.label }}</span>
@@ -61,21 +64,21 @@
         </div>
     </template>
 
-    {# Barra de progresso da rolagem. #}
+    {# Barra de progresso (proporção de slides). #}
     <div class="deck-progress" aria-hidden="true"><span data-deck-progress></span></div>
 
-    {# Trilho de pontos (saltar para um ato) — populado pelo deck.js. #}
-    <nav class="deck-rail" aria-label="Navegar pelas seções" data-deck-rail></nav>
+    {# Trilho de pontos (saltar para um slide) — populado pelo deck.js. #}
+    <nav class="deck-rail" aria-label="Navegar pelos slides" data-deck-rail></nav>
 
-    {# Palco: deck.js injeta os atos aqui (este é o elemento que rola). #}
-    <main id="deck-scroll" class="deck-scroll" tabindex="-1"></main>
+    {# Palco: deck.js injeta os slides aqui. #}
+    <main id="deck-stage" class="deck-stage" tabindex="-1"></main>
 
     {# Zonas laterais: úteis com mouse, lousa digital e controle remoto. #}
-    <button class="deck-stage-nav deck-stage-nav--previous" type="button" data-deck-previous aria-label="Ir para a seção anterior" disabled>
-        <i data-lucide="chevron-up" aria-hidden="true"></i>
+    <button class="deck-stage-nav deck-stage-nav--previous" type="button" data-deck-previous aria-label="Voltar" disabled>
+        <i data-lucide="chevron-left" aria-hidden="true"></i>
     </button>
-    <button class="deck-stage-nav deck-stage-nav--next" type="button" data-deck-next aria-label="Ir para a próxima seção">
-        <i data-lucide="chevron-down" aria-hidden="true"></i>
+    <button class="deck-stage-nav deck-stage-nav--next" type="button" data-deck-next aria-label="Avançar">
+        <i data-lucide="chevron-right" aria-hidden="true"></i>
     </button>
 
     {# Roteiro docente (tecla N) — painel lateral glanceável, não-modal. #}
@@ -86,13 +89,7 @@
                 <i data-lucide="x" aria-hidden="true"></i>
             </button>
         </div>
-        <div class="deck-notes-body prose">
-            {% if teacher_notes_html %}
-                {{ teacher_notes_html|safe }}
-            {% else %}
-                <p class="deck-notes-empty">Esta aula não tem roteiro docente (bloco <code>:::roteiro</code>).</p>
-            {% endif %}
-        </div>
+        <div class="deck-notes-body prose" data-deck-notes-body></div>
     </aside>
 
     <nav class="deck-controls" aria-label="Controles da apresentação">
@@ -100,24 +97,22 @@
             <a class="deck-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" data-deck-exit title="Sair (Esc)" aria-label="Sair da apresentação">
                 <i data-lucide="x" aria-hidden="true"></i>
             </a>
-            <button class="deck-icon-btn" type="button" data-deck-previous aria-label="Seção anterior" title="Seção anterior (↑)" disabled>
-                <i data-lucide="chevron-up" aria-hidden="true"></i>
+            <button class="deck-icon-btn" type="button" data-deck-previous aria-label="Voltar" title="Voltar (←)" disabled>
+                <i data-lucide="chevron-left" aria-hidden="true"></i>
             </button>
             <div class="deck-position">
                 <span class="deck-current-title" data-deck-current-title>Capa</span>
                 <span class="deck-counter"><span data-deck-current>1</span> / <span data-deck-total>1</span></span>
             </div>
-            <button class="deck-icon-btn" type="button" data-deck-next aria-label="Próxima seção" title="Próxima seção (↓)">
-                <i data-lucide="chevron-down" aria-hidden="true"></i>
+            <button class="deck-icon-btn" type="button" data-deck-next aria-label="Avançar" title="Avançar (→)">
+                <i data-lucide="chevron-right" aria-hidden="true"></i>
             </button>
         </div>
         <div class="deck-divider" aria-hidden="true"></div>
         <div class="deck-controls-group">
-            {% if teacher_notes_html %}
-                <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor" aria-controls="deck-notes" aria-expanded="false">
-                    <i data-lucide="notebook-pen" aria-hidden="true"></i>
-                </button>
-            {% endif %}
+            <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor" aria-controls="deck-notes" aria-expanded="false">
+                <i data-lucide="notebook-pen" aria-hidden="true"></i>
+            </button>
             <button class="deck-icon-btn" type="button" data-deck-fullscreen title="Tela cheia (F)" aria-label="Entrar em tela cheia">
                 <i data-lucide="maximize" aria-hidden="true"></i>
             </button>
@@ -126,7 +121,7 @@
 
     <div class="deck-hint" data-deck-hint>
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        <span>Role, clique nas laterais ou use <kbd>↓</kbd> <kbd>↑</kbd> · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair</span>
+        <span>Clique ou use <kbd>→</kbd> <kbd>←</kbd> para avançar · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair</span>
     </div>
 
     {% if aula.imagem %}
@@ -136,8 +131,12 @@
     </dialog>
     {% endif %}
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+    {# Ordem importa: quiz.js registra o componente Alpine; lucide e deck.js
+       montam o DOM dos slides; Alpine (defer) roda por último e inicializa o
+       quiz já presente nos slides. #}
     <script src="{% static 'js/quiz.js' %}"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{% static 'js/deck.js' %}"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
 </body>
 </html>
