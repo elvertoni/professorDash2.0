@@ -239,25 +239,10 @@
         return items.length;
     }
 
-    function sectionHeader(spec, big) {
-        // Cabeçalho da seção: número + título. big=true → título grande (prosa).
-        if (!spec.sectionTitle && !spec.sectionNo) return null;
-        const head = el('div', big ? 'deck-prose-head' : 'deck-eyebrow-sec');
-        if (spec.sectionNo) {
-            const num = el('span', big ? 'deck-prose-num' : 'deck-eyebrow-num');
-            num.textContent = String(spec.sectionNo).padStart(2, '0');
-            head.appendChild(num);
-        }
-        if (spec.sectionTitle) {
-            const t = el(big ? 'h2' : 'span', big ? 'deck-prose-title' : 'deck-eyebrow-title');
-            t.textContent = spec.sectionTitle;
-            head.appendChild(t);
-        }
-        return head;
-    }
-
-    function titleBlock(text) {
-        const h = el('h3', 'deck-subtitle');
+    function sectionHeading(text) {
+        // Título da seção como cabeçalho real (sem número/eyebrow — bans do DS).
+        if (!text) return null;
+        const h = el('h2', 'deck-heading');
         h.textContent = text;
         return h;
     }
@@ -276,10 +261,9 @@
             inner.classList.add('deck-slide-inner--bleed');
             inner.appendChild(spec.node);
         } else if (spec.type === PROSE) {
-            const head = sectionHeader(spec, true);
+            const head = spec.page === 0 ? sectionHeading(spec.subTitle || spec.sectionTitle) : null;
             if (head) inner.appendChild(head);
-            else inner.classList.add('deck-slide--lead'); // intro sem seção
-            if (spec.subTitle) inner.appendChild(titleBlock(spec.subTitle));
+            else if (!spec.sectionTitle && !spec.subTitle) inner.classList.add('deck-slide--lead'); // abertura
             const bodyWrap = el('div', 'deck-prose-body');
             spec.body.forEach((p) => bodyWrap.appendChild(p));
             items = Array.from(bodyWrap.children);
@@ -292,9 +276,8 @@
             }
             title = spec.sectionTitle || 'Abertura';
         } else if (spec.type === POINT || spec.type === STEPS) {
-            const eye = sectionHeader(spec, false);
-            if (eye) inner.appendChild(eye);
-            if (spec.subTitle) inner.appendChild(titleBlock(spec.subTitle));
+            const head = spec.page === 0 ? sectionHeading(spec.subTitle || spec.sectionTitle) : null;
+            if (head) inner.appendChild(head);
             const list = el(spec.type === STEPS ? 'ol' : 'ul', spec.type === STEPS ? 'deck-steps' : 'deck-points');
             spec.build.forEach((node) => {
                 if (node.tagName === 'LI') list.appendChild(node);
@@ -310,8 +293,7 @@
             }
             title = spec.subTitle || spec.sectionTitle || 'Tópico';
         } else if (spec.type === CALLOUT || spec.type === MEDIA || spec.type === QUIZ) {
-            const eye = sectionHeader(spec, false);
-            if (eye) { eye.classList.add('deck-eyebrow-center'); inner.appendChild(eye); }
+            // Blocos têm identidade própria (Conceito/Quiz/legenda) — sem eyebrow.
             inner.classList.add('deck-slide-inner--center');
             inner.appendChild(spec.node);
             if (spec.type === QUIZ) title = 'Quiz';

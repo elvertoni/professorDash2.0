@@ -102,35 +102,27 @@
 }
 .deck-build.is-shown { opacity: 1; transform: none; }
 
-/* ── Cabeçalho de slide (número de seção + título) ───────────────────────── */
-.deck-slide-head {
-    display: flex;
-    align-items: baseline;
-    gap: calc(var(--deck-fs) * 0.6);
-    margin: 0 0 calc(var(--deck-fs) * 1.4);
-}
-
-.deck-sec-num {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: calc(var(--deck-fs) * 0.95);
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: .04em;
-    color: var(--accent-text);
-    font-variant-numeric: tabular-nums;
-    padding-top: .2em;
-}
-
-.deck-slide-title {
-    margin: 0;
+/* ── Título de seção (cabeçalho real — sem número/eyebrow, bans do DS) ────── */
+.deck-heading {
+    margin: 0 0 calc(var(--deck-fs) * 1.05);
     color: var(--fg);
-    font-size: calc(var(--deck-fs) * 2.3);
+    font-size: calc(var(--deck-fs) * 1.95);
     font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -.02em;
+    line-height: 1.04;
+    letter-spacing: -.026em;
     text-wrap: balance;
     overflow-wrap: break-word;
+}
+
+/* Filete editorial curto sob o título (realce pontual da marca). */
+.deck-heading::after {
+    content: '';
+    display: block;
+    width: 2.4em;
+    height: 3px;
+    margin-top: calc(var(--deck-fs) * 0.55);
+    border-radius: var(--radius-pill);
+    background: var(--deck-grad);
 }
 
 /* ── Slide: PONTO (bullets que constroem) ────────────────────────────────── */
@@ -201,110 +193,37 @@
     line-height: 1.2;
 }
 
-/* ── Slide: PROSA (conteúdo real paginado, com cabeçalho da seção) ───────── */
-.deck-prose-head {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: calc(var(--deck-fs) * 0.55);
-    margin: 0 0 calc(var(--deck-fs) * 1.1);
-}
-
-.deck-prose-num {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: calc(var(--deck-fs) * 1.1);
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: .04em;
-    color: var(--accent-text);
-    font-variant-numeric: tabular-nums;
-}
-
-.deck-prose-title {
-    margin: 0;
-    color: var(--fg);
-    font-size: calc(var(--deck-fs) * 1.9);
-    font-weight: 700;
-    line-height: 1.06;
-    letter-spacing: -.018em;
-    text-wrap: balance;
-    overflow-wrap: break-word;
-}
-
-/* Filete da marca sob o cabeçalho (realce pontual). */
-.deck-prose-head::after {
-    content: '';
-    flex-basis: 100%;
-    height: 3px;
-    width: 2.6em;
-    max-width: 2.6em;
-    margin-top: calc(var(--deck-fs) * 0.2);
-    border-radius: var(--radius-pill);
-    background: var(--deck-grad);
-}
-
+/* ── Slide: PROSA (conteúdo real paginado) ───────────────────────────────── */
 .deck-prose-body {
-    max-width: 30ch;
-    font-size: calc(var(--deck-fs) * 1.45);
-    line-height: 1.4;
+    max-width: 32ch;
+    font-size: calc(var(--deck-fs) * 1.4);
+    line-height: 1.5;
     text-wrap: pretty;
 }
 
-.deck-prose-body > p { margin: 0 0 calc(var(--deck-fs) * 0.7); }
+.deck-prose-body > p { margin: 0 0 calc(var(--deck-fs) * 0.75); }
 .deck-prose-body > p:last-child { margin-bottom: 0; }
 .deck-prose-body strong { color: var(--fg); font-weight: 700; }
 
-/* Abertura da aula (prosa sem seção): vira declaração grande. */
+/* Abertura da aula (prosa sem seção): declaração grande de entrada. */
 .deck-slide--lead .deck-prose-body {
-    max-width: 24ch;
-    font-size: calc(var(--deck-fs) * 1.95);
-    line-height: 1.22;
+    max-width: 22ch;
+    font-size: calc(var(--deck-fs) * 1.85);
+    line-height: 1.2;
     font-weight: 500;
-    letter-spacing: -.01em;
-}
-
-/* Subtítulo (<h3>) dentro da seção. */
-.deck-subtitle {
-    margin: 0 0 calc(var(--deck-fs) * 0.9);
-    color: var(--accent-text);
-    font-size: calc(var(--deck-fs) * 1.45);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -.008em;
+    letter-spacing: -.014em;
+    color: var(--fg);
 }
 
 /* Indicador de página (1 / N) quando a prosa da seção é fatiada. */
 .deck-page-mark {
     display: inline-block;
-    margin-top: calc(var(--deck-fs) * 1.1);
+    margin-top: calc(var(--deck-fs) * 1.2);
     font-family: var(--font-mono);
-    font-size: calc(var(--deck-fs) * 0.72);
+    font-size: calc(var(--deck-fs) * 0.7);
     color: var(--fg-subtle);
     font-variant-numeric: tabular-nums;
-}
-
-/* Eyebrow de seção em slides de bloco (callout/quiz/mídia/ponto). */
-.deck-eyebrow-sec {
-    display: inline-flex;
-    align-items: baseline;
-    gap: .55em;
-    margin: 0 0 calc(var(--deck-fs) * 1.1);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-}
-.deck-eyebrow-center { align-self: center; }
-.deck-eyebrow-num {
-    font-family: var(--font-mono);
-    font-size: calc(var(--deck-fs) * 0.72);
-    font-weight: 600;
-    color: var(--accent-text);
-    font-variant-numeric: tabular-nums;
-}
-.deck-eyebrow-title {
-    font-size: calc(var(--deck-fs) * 0.72);
-    font-weight: 600;
-    color: var(--fg-muted);
+    letter-spacing: .02em;
 }
 
 /* ── Slide: DESTAQUE (callout do design system, escalado) ────────────────── */
