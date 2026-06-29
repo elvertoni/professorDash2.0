@@ -25,6 +25,11 @@
     --deck-pad-x: clamp(var(--space-5), 6vw, 160px);
     --deck-pad-y: clamp(var(--space-6), 8vh, 120px);
 
+    /* Tamanho ÚNICO do corpo (prosa/bullets/passos): tudo no mesmo tamanho,
+       projetado grande na TV. Ajuste a escala aqui para subir/baixar todo o
+       conteúdo de uma vez. */
+    --deck-content-fs: calc(var(--deck-fs) * 1.5);
+
     /* Movimento decelerado, sem bounce. */
     --deck-ease: cubic-bezier(.22, .61, .36, 1);
     --deck-ease-out: cubic-bezier(.16, 1, .3, 1);
@@ -93,6 +98,16 @@
 
 .deck-slide-inner--bleed { max-width: none; }
 
+/* Âncora vertical estável: slides de seção (heading + corpo) começam sempre no
+   mesmo topo e fluem para baixo — ritmo de lousa, sem o título saltando de
+   posição a cada slide conforme a quantidade de conteúdo. Capa, encerramento,
+   abertura (lead) e blocos (callout/mídia/quiz) seguem centrados no palco. */
+.deck-slide--prose .deck-slide-inner:not(.deck-slide--lead),
+.deck-slide--point .deck-slide-inner,
+.deck-slide--steps .deck-slide-inner {
+    margin-block: 0 auto;
+}
+
 /* ── Build-in (revelar item a item) ──────────────────────────────────────── */
 .deck-build {
     opacity: 0;
@@ -139,7 +154,7 @@
 .deck-points > li {
     position: relative;
     padding-left: calc(var(--deck-fs) * 1.7);
-    font-size: calc(var(--deck-fs) * 1.4);
+    font-size: var(--deck-content-fs);
     line-height: 1.28;
     text-wrap: pretty;
 }
@@ -173,7 +188,7 @@
     counter-increment: deckstep;
     position: relative;
     padding-left: calc(var(--deck-fs) * 2.6);
-    font-size: calc(var(--deck-fs) * 1.35);
+    font-size: var(--deck-content-fs);
     line-height: 1.32;
     text-wrap: pretty;
 }
@@ -195,8 +210,8 @@
 
 /* ── Slide: PROSA (conteúdo real paginado) ───────────────────────────────── */
 .deck-prose-body {
-    max-width: 32ch;
-    font-size: calc(var(--deck-fs) * 1.4);
+    max-width: 34ch;
+    font-size: var(--deck-content-fs);
     line-height: 1.5;
     text-wrap: pretty;
 }
@@ -231,7 +246,7 @@
 .deck-slide--callout .lesson-callout {
     width: 100%;
     max-width: 1100px;
-    font-size: calc(var(--deck-fs) * 1.15);
+    font-size: calc(var(--deck-fs) * 1.3);
     padding: calc(var(--deck-fs) * 1.1);
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-strong);
@@ -273,13 +288,13 @@
     width: 100%;
     max-width: 1200px;
     margin: 0;
-    font-size: calc(var(--deck-fs) * 1.05);
+    font-size: calc(var(--deck-fs) * 1.2);
     text-align: left;
 }
 
-.deck-slide--quiz .lesson-quiz-head strong { font-size: calc(var(--deck-fs) * 1.2); }
-.deck-slide--quiz .lesson-quiz-head span { font-size: calc(var(--deck-fs) * 0.8); }
-.deck-slide--quiz .lesson-quiz-question > p { font-size: calc(var(--deck-fs) * 1.15); line-height: 1.35; }
+.deck-slide--quiz .lesson-quiz-head strong { font-size: calc(var(--deck-fs) * 1.35); }
+.deck-slide--quiz .lesson-quiz-head span { font-size: calc(var(--deck-fs) * 0.85); }
+.deck-slide--quiz .lesson-quiz-question > p { font-size: calc(var(--deck-fs) * 1.3); line-height: 1.35; }
 
 .deck-slide--quiz .quiz-option {
     gap: calc(var(--deck-fs) * 0.5);

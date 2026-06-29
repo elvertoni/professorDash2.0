@@ -25,7 +25,7 @@
     const QUIZ = 'quiz';
     const END = 'end';
 
-    const PROSE_BUDGET = 300; // ~caracteres por página de prosa (glanceável)
+    const PROSE_BUDGET = 380; // ~caracteres por página de prosa (glanceável)
 
     function el(tag, cls) {
         const node = document.createElement(tag);
@@ -266,8 +266,8 @@
             else if (!spec.sectionTitle && !spec.subTitle) inner.classList.add('deck-slide--lead'); // abertura
             const bodyWrap = el('div', 'deck-prose-body');
             spec.body.forEach((p) => bodyWrap.appendChild(p));
-            items = Array.from(bodyWrap.children);
-            steps = markBuilds(items) || 1;
+            // Prosa aparece inteira (fluxo de leitura) — sem build por parágrafo.
+            // Só listas/passos constroem item a item.
             inner.appendChild(bodyWrap);
             if (spec.pages > 1) {
                 const pg = el('span', 'deck-page-mark');
@@ -511,21 +511,32 @@
     poke();
     if (hint) setTimeout(() => hint.classList.add('is-gone'), 6000);
 
-    /* ── 11) Auto-fit: nenhum slide pode estourar a tela (TV não rola) ────── */
-    function fitAll() {
-        const baseFs = parseFloat(getComputedStyle(body).fontSize) || 32;
+    /* ── 11) Auto-fit GLOBAL: uma escala única pro deck inteiro ────────────── */
+    /* Filosofia: todos os slides no MESMO tamanho (como deck profissional).
+       Em vez de encolher slide a slide (gera tamanhos diferentes na projeção),
+       achamos a única escala que faz o slide MAIS cheio caber e aplicamos a
+       TODOS. A paginação (PROSE_BUDGET + listas cap) já evita que algo precise
+       encolher muito; o auto-fit é só a rede de segurança final (TV não rola). */
+    function worstOverflow() {
+        let max = 0;
         slides.forEach(({ el: s }) => {
-            s.style.removeProperty('--deck-fs');
-            if (s.scrollHeight - s.clientHeight <= 2) return;
-            let fs = baseFs;
-            let guard = 0;
-            while (s.scrollHeight - s.clientHeight > 2 && guard < 12) {
-                fs *= 0.94;
-                if (fs < 12) break;
-                s.style.setProperty('--deck-fs', fs + 'px');
-                guard += 1;
-            }
+            const o = s.scrollHeight - s.clientHeight;
+            if (o > max) max = o;
         });
+        return max;
+    }
+
+    function fitAll() {
+        body.style.removeProperty('--deck-fs'); // volta ao clamp do CSS
+        const baseFs = parseFloat(getComputedStyle(body).fontSize) || 32;
+        let fs = baseFs;
+        let guard = 0;
+        while (worstOverflow() > 2 && guard < 14) {
+            fs *= 0.95;
+            if (fs < 14) break; // piso de legibilidade na sala
+            body.style.setProperty('--deck-fs', fs + 'px');
+            guard += 1;
+        }
     }
 
     let fitRAF = 0;
