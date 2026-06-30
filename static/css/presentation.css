@@ -312,6 +312,93 @@
     font-size: 1em;
     padding: calc(var(--deck-fs) * 0.55) calc(var(--deck-fs) * 0.75);
     border-radius: var(--radius-lg);
+}/* ── Slide: TABELA (tabela elegante para apresentação) ──────────────────── */
+.deck-slide--table {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.deck-slide--table .tbl-wrap {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: calc(var(--deck-fs) * 1.05);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-raised);
+    overflow: hidden;
+}
+
+.deck-slide--table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.deck-slide--table th,
+.deck-slide--table td {
+    padding: calc(var(--deck-fs) * 0.6) calc(var(--deck-fs) * 0.8);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.deck-slide--table th {
+    background: var(--surface-overlay);
+    color: var(--fg);
+    font-weight: 700;
+    border-bottom: 2px solid var(--border-strong);
+}
+
+.deck-slide--table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ── Slide: CÓDIGO (bloco de código monoespaçado legível) ────────────────── */
+.deck-slide--code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.deck-slide--code pre {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: calc(var(--deck-fs) * 0.9);
+    font-family: var(--font-mono);
+    font-size: calc(var(--deck-fs) * 0.92);
+    line-height: 1.42;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-raised);
+    overflow-x: auto;
+    text-align: left;
+    box-shadow: var(--shadow-pop);
+}
+
+.deck-slide--code code {
+    font-family: inherit;
+    color: var(--accent-text);
+}
+
+/* ── Palco de medição oculto ────────────────────────────────────────────── */
+.deck-stage-measure {
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+    width: 100vw;
+    height: 100vh;
+    visibility: hidden;
+    overflow: hidden;
+    z-index: -9999;
+}
+.deck-stage-measure .deck-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    visibility: visible;
+    display: flex;
+    transform: none;
 }
 
 /* Links dentro de qualquer slide. */

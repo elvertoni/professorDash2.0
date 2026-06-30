@@ -1,12 +1,7 @@
 /* ──────────────────────────────────────────────────────────────────────────
    deck.js — Modo Apresentação (slides) das aulas.
-   Transforma o conteúdo da aula (.prose) em SLIDES discretos e glanceáveis
-   para projetar na sala/TV (42", 4-6 m). Modelo "substância paginada":
-   cada seção (<h2>) vira um ou mais slides com cabeçalho da seção + conteúdo
-   real (prosa curta paginada, bullets, passos, callout, mídia, quiz). A prosa
-   longa é fatiada em páginas que NUNCA estouram a tela; o professor expande
-   falando. O roteiro (:::roteiro) fica no painel lateral (tecla N).
-   Avança por clique/seta; build-in por step. Quiz usa Alpine (no template).
+   Motor de paginação e renderização dinâmico baseado em medição real do DOM
+   e rebalanceamento iterativo de slides.
    ──────────────────────────────────────────────────────────────────────── */
 (function () {
     'use strict';
@@ -16,6 +11,7 @@
     const source = document.getElementById('deck-source');
     if (!stage || !source) return;
 
+    // Constantes de tipos de slide e orçamentos
     const COVER = 'cover';
     const PROSE = 'prose';
     const POINT = 'point';
@@ -23,10 +19,29 @@
     const CALLOUT = 'callout';
     const MEDIA = 'media';
     const QUIZ = 'quiz';
+    const TABLE = 'table';
+    const CODE = 'code';
     const END = 'end';
 
-    const PROSE_BUDGET = 380; // ~caracteres por página de prosa (glanceável)
+    // Orçamento visual estimado inicial (unidades de linha de conteúdo)
+    const SLIDE_WEIGHT_LIMIT = 15;
 
+    // Palco de medição temporário
+    let measureStage = document.getElementById('deck-stage-measure');
+    if (!measureStage) {
+        measureStage = document.createElement('div');
+        measureStage.id = 'deck-stage-measure';
+        measureStage.className = 'deck-stage-measure';
+        document.body.appendChild(measureStage);
+    }
+
+    // Variável para armazenar os slides processados
+    let slides = []; // { el, steps, title, notesHTML, items[] }
+    let totalSlides = 0;
+    let currentIndex = 0;
+    let currentStep = 0;
+
+    /* ── Auxiliares de criação DOM ────────────────────────────────────────── */
     function el(tag, cls) {
         const node = document.createElement(tag);
         if (cls) node.className = cls;
@@ -39,287 +54,706 @@
         return tpl.content.firstElementChild.cloneNode(true);
     }
 
-    /* ── Paginação de prosa ───────────────────────────────────────────────── */
-    function splitParagraph(p) {
-        // Divide um parágrafo longo em pedaços (<p>) por frases, sob o budget.
-        const text = p.textContent.trim();
-        if (text.length <= PROSE_BUDGET) return [p];
-        const sentences = text.split(/(?<=[.!?…])\s+/);
-        const chunks = [];
-        let buf = '';
-        sentences.forEach((s) => {
-            if (buf && (buf.length + s.length) > PROSE_BUDGET) {
-                chunks.push(buf.trim());
-                buf = '';
-            }
-            buf += (buf ? ' ' : '') + s;
-        });
-        if (buf.trim()) chunks.push(buf.trim());
-        return chunks.map((c) => {
-            const np = el('p');
-            np.textContent = c;
-            return np;
-        });
-    }
+    /* ── FASE 1: Segmentação Semântica ───────────────────────────────────── */
+    function parseLessonContent(sourceEl) {
+        const blocks = [];
+        Array.from(sourceEl.children).forEach((node) => {
+            const tag = node.tagName;
+            const cls = node.classList || { contains: () => false };
+            let type = 'other';
 
-    function paginate(paragraphs) {
-        // Recebe nós <p>; devolve páginas (cada uma = array de <p>) sob o budget.
-        const flat = [];
-        paragraphs.forEach((p) => splitParagraph(p).forEach((x) => flat.push(x)));
-        const pages = [];
-        let page = [];
-        let len = 0;
-        flat.forEach((p) => {
-            const l = p.textContent.length;
-            if (page.length && (len + l) > PROSE_BUDGET) {
-                pages.push(page);
-                page = [];
-                len = 0;
-            }
-            page.push(p);
-            len += l;
-        });
-        if (page.length) pages.push(page);
-        return pages;
-    }
+            if (tag === 'H2') type = 'h2';
+            else if (tag === 'H3') type = 'h3';
+            else if (cls.contains('callout') || cls.contains('lesson-callout')) type = CALLOUT;
+            else if (cls.contains('lesson-steps')) type = STEPS;
+            else if (cls.contains('lesson-diagram') || tag === 'FIGURE' || tag === 'IMG') type = MEDIA;
+            else if (cls.contains('lesson-quiz')) type = QUIZ;
+            else if (tag === 'UL' || tag === 'OL') type = POINT;
+            else if (tag === 'TABLE' || cls.contains('tbl-wrap') || node.querySelector('table')) type = TABLE;
+            else if (tag === 'PRE' || node.querySelector('pre')) type = CODE;
+            else if (tag === 'P') type = 'p';
 
-    /* ── 1) Percorre o .prose montando especificações de slide ────────────── */
-    const specs = [];
-    let sectionNo = 0;
-    let section = null;          // { num, title } da seção corrente (<h2>)
-    let subTitle = null;         // <h3> corrente (subtítulo dentro da seção)
-    let proseBuf = [];           // <p> acumulados aguardando flush
-    let openPoint = null;        // slide de bullets em acumulação
-
-    function sectionCtx() {
-        return section
-            ? { sectionNo: section.num, sectionTitle: section.title }
-            : { sectionNo: null, sectionTitle: '' };
-    }
-
-    function flushProse() {
-        if (!proseBuf.length) return;
-        const pages = paginate(proseBuf);
-        const ctx = sectionCtx();
-        pages.forEach((pageNodes, i) => {
-            specs.push(Object.assign({
-                type: PROSE,
-                subTitle: subTitle,
-                body: pageNodes,
-                page: i,
-                pages: pages.length,
-                notes: [],
-            }, ctx));
-        });
-        proseBuf = [];
-    }
-
-    function pushList(type, build, sub, ctx) {
-        // Fatia listas longas em páginas para nunca estourar a tela na TV.
-        const MAX = type === STEPS ? 4 : 3;
-        const pages = Math.max(1, Math.ceil(build.length / MAX));
-        for (let p = 0; p < pages; p += 1) {
-            specs.push(Object.assign({
+            blocks.push({
+                element: node.cloneNode(true),
                 type: type,
-                subTitle: sub,
-                build: build.slice(p * MAX, (p + 1) * MAX),
-                page: p,
-                pages: pages,
-                notes: [],
-            }, ctx));
-        }
-    }
-
-    function flushPoint() {
-        if (openPoint && openPoint.build.length) {
-            pushList(POINT, openPoint.build, openPoint.subTitle, {
-                sectionNo: openPoint.sectionNo,
-                sectionTitle: openPoint.sectionTitle,
+                weight: 0 // preenchido na Fase 2
             });
-        }
-        openPoint = null;
-    }
-
-    function flushAll() { flushProse(); flushPoint(); }
-
-    Array.from(source.children).forEach((node) => {
-        const tag = node.tagName;
-        const cls = node.classList || { contains: () => false };
-
-        if (tag === 'H2') {
-            flushAll();
-            sectionNo += 1;
-            section = { num: sectionNo, title: node.textContent.trim() };
-            subTitle = null;
-            return;
-        }
-        if (tag === 'H3') {
-            flushAll();
-            subTitle = node.textContent.trim();
-            return;
-        }
-        // Blocos especiais → slide próprio, com contexto da seção.
-        if (cls.contains('callout') || cls.contains('lesson-callout')) {
-            flushAll();
-            const label = node.querySelector('.ct b, b, strong');
-            specs.push(Object.assign({
-                type: CALLOUT,
-                blockTitle: (label && label.textContent.trim()) || 'Destaque',
-                node: node.cloneNode(true), notes: [],
-            }, sectionCtx()));
-            return;
-        }
-        if (cls.contains('lesson-steps')) {
-            flushAll();
-            const items = Array.from(node.children).map((li) => li.cloneNode(true));
-            pushList(STEPS, items, subTitle, sectionCtx());
-            return;
-        }
-        if (cls.contains('lesson-diagram') || tag === 'FIGURE') {
-            flushAll();
-            specs.push(Object.assign({ type: MEDIA, node: node.cloneNode(true), notes: [] }, sectionCtx()));
-            return;
-        }
-        if (cls.contains('lesson-quiz')) {
-            flushAll();
-            specs.push(Object.assign({ type: QUIZ, node: node.cloneNode(true), notes: [] }, sectionCtx()));
-            return;
-        }
-        if (tag === 'UL' || tag === 'OL') {
-            flushProse();
-            if (!openPoint) openPoint = Object.assign({ type: POINT, subTitle: subTitle, build: [], notes: [] }, sectionCtx());
-            Array.from(node.children).forEach((li) => openPoint.build.push(li.cloneNode(true)));
-            return;
-        }
-        if (tag === 'P') {
-            if (node.textContent.trim()) {
-                flushPoint();
-                proseBuf.push(node.cloneNode(true));
-            }
-            return;
-        }
-        if (tag === 'IMG') {
-            flushAll();
-            const fig = el('figure', 'lesson-diagram');
-            fig.appendChild(node.cloneNode(true));
-            specs.push(Object.assign({ type: MEDIA, node: fig, notes: [] }, sectionCtx()));
-            return;
-        }
-        // Fallback (tabela, pre…) entra como item de ponto.
-        flushProse();
-        if (!openPoint) openPoint = Object.assign({ type: POINT, subTitle: subTitle, build: [], notes: [] }, sectionCtx());
-        openPoint.build.push(node.cloneNode(true));
-    });
-    flushAll();
-
-    /* ── 2) Capa + Encerramento ───────────────────────────────────────────── */
-    const coverEl = fromTemplate('deck-cover');
-    const endEl = fromTemplate('deck-end');
-    const roteiroEl = document.getElementById('deck-roteiro');
-
-    const slideSpecs = [];
-    if (coverEl) {
-        const notes = [];
-        if (roteiroEl && roteiroEl.children.length) {
-            Array.from(roteiroEl.children).forEach((n) => notes.push(n.cloneNode(true)));
-        }
-        slideSpecs.push({ type: COVER, node: coverEl, title: 'Capa', notes: notes });
-    }
-    specs.forEach((s) => slideSpecs.push(s));
-    if (endEl) slideSpecs.push({ type: END, node: endEl, title: 'Fim da aula', notes: [] });
-
-    if (!slideSpecs.length) return;
-
-    /* ── 3) Renderização ──────────────────────────────────────────────────── */
-    function markBuilds(items) {
-        items.forEach((item, i) => {
-            item.classList.add('deck-build');
-            item.dataset.step = String(i);
         });
-        return items.length;
+        return blocks;
     }
 
-    function sectionHeading(text) {
-        // Título da seção como cabeçalho real (sem número/eyebrow — bans do DS).
-        if (!text) return null;
-        const h = el('h2', 'deck-heading');
-        h.textContent = text;
-        return h;
+    /* ── FASE 2: Estimativa de Peso Visual ───────────────────────────────── */
+    function estimateVisualWeight(block) {
+        const text = block.element.textContent.trim();
+        const html = block.element.innerHTML || '';
+        
+        switch (block.type) {
+            case 'h2':
+                return 4;
+            case 'h3':
+                return 3;
+            case 'p': {
+                // Linhas estimadas baseadas em ~45 caracteres por linha + margens
+                const charWeight = Math.ceil(text.length / 45);
+                const formattingBonus = (html.includes('<strong>') || html.includes('<code>')) ? 1 : 0;
+                return Math.max(2, charWeight + formattingBonus + 1);
+            }
+            case POINT:
+            case STEPS: {
+                // Soma do peso de cada item da lista
+                let listWeight = 0;
+                const items = Array.from(block.element.querySelectorAll('li'));
+                items.forEach(li => {
+                    const liText = li.textContent.trim();
+                    listWeight += Math.max(1.5, Math.ceil(liText.length / 40) + 1);
+                });
+                return Math.max(3, listWeight);
+            }
+            case CALLOUT: {
+                const calloutText = block.element.querySelector('.ct')?.textContent || text;
+                return Math.max(5, Math.ceil(calloutText.length / 50) + 3);
+            }
+            case TABLE: {
+                const rows = block.element.querySelectorAll('tr').length || 3;
+                const cols = block.element.querySelectorAll('th, td').length / rows || 3;
+                return Math.max(6, rows * 1.8 + cols * 0.5);
+            }
+            case CODE: {
+                const lines = text.split('\n').length || 4;
+                return Math.max(5, lines + 2);
+            }
+            case MEDIA:
+                return 12; // Mídia grande tem peso alto
+            case QUIZ:
+                return 15; // Quiz interativo consome o slide inteiro
+            default:
+                return 5;
+        }
     }
 
-    const slides = []; // { el, steps, title, notesHTML, items[] }
+    /* ── FASE 3: Composição Inicial dos Slides ────────────────────────────── */
+    function composeInitialSlides(blocks) {
+        const specs = [];
+        let currentSectionTitle = '';
+        let currentSubTitle = '';
+        let sectionNo = 0;
 
-    slideSpecs.forEach((spec, index) => {
+        let activeSpec = null;
+        let accumulatedWeight = 0;
+
+        function startNewSlide(type) {
+            if (activeSpec) {
+                specs.push(activeSpec);
+            }
+            activeSpec = {
+                type: type,
+                sectionNo: sectionNo,
+                sectionTitle: currentSectionTitle,
+                subTitle: currentSubTitle,
+                blocks: [],
+                page: 0,
+                pages: 1
+            };
+            accumulatedWeight = 0;
+        }
+
+        blocks.forEach((block) => {
+            if (block.type === 'h2') {
+                sectionNo += 1;
+                currentSectionTitle = block.element.textContent.trim();
+                currentSubTitle = '';
+                startNewSlide(PROSE);
+                return;
+            }
+            if (block.type === 'h3') {
+                currentSubTitle = block.element.textContent.trim();
+                startNewSlide(PROSE);
+                return;
+            }
+
+            // Elementos gigantes ou isolados ganham slides próprios
+            if (block.type === QUIZ || block.type === MEDIA || block.type === TABLE || block.type === CODE) {
+                startNewSlide(block.type);
+                activeSpec.blocks.push(block);
+                activeSpec.weight = block.weight;
+                startNewSlide(PROSE); // Próximo slide volta a ser prosa comum
+                return;
+            }
+
+            // Se não há slide ativo, inicia um de prosa
+            if (!activeSpec) {
+                startNewSlide(PROSE);
+            }
+
+            // Determina se cabe no slide atual
+            const blockWeight = block.weight;
+            const wouldOverflow = (accumulatedWeight + blockWeight) > SLIDE_WEIGHT_LIMIT;
+
+            if (wouldOverflow && activeSpec.blocks.length > 0) {
+                // Começa novo slide de continuação da seção
+                const prevType = activeSpec.type;
+                startNewSlide(prevType);
+            }
+
+            activeSpec.blocks.push(block);
+            accumulatedWeight += blockWeight;
+            
+            // Se o tipo do slide ainda é genérico (PROSE), mas adicionamos uma lista,
+            // podemos alterar o tipo para representar melhor a estrutura se ela for dominante
+            if (activeSpec.type === PROSE && (block.type === POINT || block.type === STEPS)) {
+                if (activeSpec.blocks.length === 1) {
+                    activeSpec.type = block.type;
+                }
+            }
+        });
+
+        if (activeSpec && activeSpec.blocks.length > 0) {
+            specs.push(activeSpec);
+        }
+
+        // Calcula paginação para cada subseção de slides consecutivos
+        let currentGroup = [];
+        let currentGroupKey = '';
+
+        function flushGroupPagination() {
+            if (currentGroup.length > 1) {
+                currentGroup.forEach((spec, i) => {
+                    spec.page = i;
+                    spec.pages = currentGroup.length;
+                });
+            }
+            currentGroup = [];
+        }
+
+        specs.forEach((spec) => {
+            const key = spec.sectionTitle + '||' + spec.subTitle;
+            if (key !== currentGroupKey) {
+                flushGroupPagination();
+                currentGroupKey = key;
+            }
+            // Apenas slides de conteúdo comum (prosa, ponto, passos) entram na paginação da seção
+            if (spec.type === PROSE || spec.type === POINT || spec.type === STEPS) {
+                currentGroup.push(spec);
+            } else {
+                flushGroupPagination();
+            }
+        });
+        flushGroupPagination();
+
+        return specs;
+    }
+
+    /* ── Fracionamento de blocos de texto e lista para rebalanceamento ────── */
+    function splitParagraphHTML(htmlContent) {
+        // Divide o HTML por sentenças de forma segura sem quebrar tags inline
+        const sentences = htmlContent.trim().split(/(?<=[.!?…])\s+(?![^<>]*>)/);
+        return sentences.filter(s => s.trim().length > 0);
+    }
+
+    /* ── FASE 4 & 5: Medição e Rebalanceamento Iterativo ──────────────────── */
+    function measureSlideReal(slideEl) {
+        measureStage.innerHTML = '';
+        measureStage.appendChild(slideEl);
+        
+        // Medição baseada na altura física do conteúdo interno em relação à altura útil disponível
+        const innerEl = slideEl.querySelector('.deck-slide-inner');
+        const style = window.getComputedStyle(slideEl);
+        const paddingTop = parseFloat(style.paddingTop) || 0;
+        const paddingBottom = parseFloat(style.paddingBottom) || 0;
+        const paddingY = paddingTop + paddingBottom;
+        
+        const clientH = slideEl.clientHeight || 1;
+        const availableH = Math.max(1, clientH - paddingY);
+        const contentH = innerEl ? innerEl.offsetHeight : slideEl.scrollHeight - paddingY;
+        
+        measureStage.innerHTML = '';
+        return {
+            scrollHeight: slideEl.scrollHeight,
+            clientHeight: clientH,
+            contentHeight: contentH,
+            availableHeight: availableH,
+            ocupacao: contentH / availableH,
+            overflow: contentH > availableH || slideEl.scrollHeight > clientH
+        };
+    }
+
+    function rebalanceDeck(slideSpecs) {
+        let maxIterations = 20;
+        let changed = true;
+
+        while (changed && maxIterations > 0) {
+            changed = false;
+            maxIterations -= 1;
+
+            for (let i = 0; i < slideSpecs.length; i++) {
+                const spec = slideSpecs[i];
+                if (spec.type === COVER || spec.type === END || spec.type === QUIZ || spec.type === MEDIA) {
+                    continue; // Pula capas, encerramentos e mídias dedicadas
+                }
+
+                // Renderiza temporariamente para medição real
+                const tempEl = renderSlideElement(spec, i);
+                const measurement = measureSlideReal(tempEl);
+
+                // Cenário A: O slide transborda (ocupação > 0.90 ou overflow real)
+                if (measurement.overflow || measurement.ocupacao > 0.90) {
+                    // 1. Se tem múltiplos blocos, move o último para o próximo
+                    if (spec.blocks.length > 1) {
+                        const lastBlock = spec.blocks.pop();
+                        
+                        // Garante que existe um slide seguinte compatível ou cria um
+                        let nextSpec = slideSpecs[i + 1];
+                        const isNextCompatible = nextSpec && 
+                            (nextSpec.type === spec.type || nextSpec.type === PROSE) &&
+                            nextSpec.sectionTitle === spec.sectionTitle &&
+                            nextSpec.subTitle === spec.subTitle;
+
+                        if (!isNextCompatible) {
+                            // Inserir novo slide
+                            nextSpec = {
+                                type: spec.type,
+                                sectionNo: spec.sectionNo,
+                                sectionTitle: spec.sectionTitle,
+                                subTitle: spec.subTitle,
+                                blocks: [],
+                                page: spec.page + 1,
+                                pages: spec.pages + 1
+                            };
+                            slideSpecs.splice(i + 1, 0, nextSpec);
+                        }
+                        
+                        nextSpec.blocks.unshift(lastBlock);
+                        changed = true;
+                        break; // Recomeça a varredura após alteração estrutural
+                    }
+                    
+                    // 2. Se tem um único bloco e ele é uma Lista/Passos, divide os itens
+                    const singleBlock = spec.blocks[0];
+                    if (singleBlock && (singleBlock.type === POINT || singleBlock.type === STEPS)) {
+                        const listItems = Array.from(singleBlock.element.children);
+                        if (listItems.length > 1) {
+                            // Divide a lista ao meio
+                            const mid = Math.ceil(listItems.length / 2);
+                            const firstHalf = listItems.slice(0, mid);
+                            const secondHalf = listItems.slice(mid);
+
+                            // Atualiza bloco atual
+                            singleBlock.element.innerHTML = '';
+                            firstHalf.forEach(li => singleBlock.element.appendChild(li.cloneNode(true)));
+
+                            // Cria novo bloco de lista para o excesso
+                            const newListEl = el(singleBlock.element.tagName, singleBlock.element.className);
+                            secondHalf.forEach(li => newListEl.appendChild(li.cloneNode(true)));
+                            const newBlock = {
+                                element: newListEl,
+                                type: singleBlock.type,
+                                weight: 0
+                            };
+
+                            // Insere no próximo slide
+                            let nextSpec = slideSpecs[i + 1];
+                            const isNextCompatible = nextSpec && 
+                                (nextSpec.type === spec.type || nextSpec.type === PROSE) &&
+                                nextSpec.sectionTitle === spec.sectionTitle &&
+                                nextSpec.subTitle === spec.subTitle;
+
+                            if (!isNextCompatible) {
+                                nextSpec = {
+                                    type: spec.type,
+                                    sectionNo: spec.sectionNo,
+                                    sectionTitle: spec.sectionTitle,
+                                    subTitle: spec.subTitle,
+                                    blocks: [],
+                                    page: spec.page + 1,
+                                    pages: spec.pages + 1
+                                };
+                                slideSpecs.splice(i + 1, 0, nextSpec);
+                            }
+
+                            nextSpec.blocks.unshift(newBlock);
+                            changed = true;
+                            break;
+                        }
+                    }
+
+                    // 3. Se tem um único parágrafo longo, divide-o por frases
+                    if (singleBlock && singleBlock.type === 'p') {
+                        const sentences = splitParagraphHTML(singleBlock.element.innerHTML);
+                        if (sentences.length > 1) {
+                            const mid = Math.ceil(sentences.length / 2);
+                            const firstSentences = sentences.slice(0, mid);
+                            const secondSentences = sentences.slice(mid);
+
+                            // Atualiza parágrafo atual
+                            singleBlock.element.innerHTML = firstSentences.join(' ');
+
+                            // Cria novo bloco para frases excedentes
+                            const newPEl = el('p', singleBlock.element.className);
+                            newPEl.innerHTML = secondSentences.join(' ');
+                            const newBlock = {
+                                element: newPEl,
+                                type: 'p',
+                                weight: 0
+                            };
+
+                            let nextSpec = slideSpecs[i + 1];
+                            const isNextCompatible = nextSpec && 
+                                (nextSpec.type === spec.type || nextSpec.type === PROSE) &&
+                                nextSpec.sectionTitle === spec.sectionTitle &&
+                                nextSpec.subTitle === spec.subTitle;
+
+                            if (!isNextCompatible) {
+                                nextSpec = {
+                                    type: PROSE,
+                                    sectionNo: spec.sectionNo,
+                                    sectionTitle: spec.sectionTitle,
+                                    subTitle: spec.subTitle,
+                                    blocks: [],
+                                    page: spec.page + 1,
+                                    pages: spec.pages + 1
+                                };
+                                slideSpecs.splice(i + 1, 0, nextSpec);
+                            }
+
+                            nextSpec.blocks.unshift(newBlock);
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Cenário B: Slide excessivamente vazio (ocupação < 0.35)
+                if (measurement.ocupacao < 0.35 && i < slideSpecs.length - 1) {
+                    const nextSpec = slideSpecs[i + 1];
+                    const isNextCompatible = nextSpec &&
+                        (nextSpec.type === spec.type || nextSpec.type === PROSE) &&
+                        nextSpec.sectionTitle === spec.sectionTitle &&
+                        nextSpec.subTitle === spec.subTitle;
+
+                    if (isNextCompatible && nextSpec.blocks.length > 0) {
+                        // Tenta mover o primeiro bloco do próximo slide para este
+                        const firstBlockOfNext = nextSpec.blocks[0];
+                        
+                        // Cria spec temporária simulando a união
+                        const tempSpec = {
+                            type: spec.type,
+                            sectionTitle: spec.sectionTitle,
+                            subTitle: spec.subTitle,
+                            blocks: [...spec.blocks, firstBlockOfNext],
+                            page: spec.page,
+                            pages: spec.pages
+                        };
+                        const unionEl = renderSlideElement(tempSpec, i);
+                        const unionMeasurement = measureSlideReal(unionEl);
+
+                        // Se couber perfeitamente sem estourar, realiza a fusão do bloco
+                        if (!unionMeasurement.overflow && unionMeasurement.ocupacao <= 0.85) {
+                            spec.blocks.push(nextSpec.blocks.shift());
+                            if (nextSpec.blocks.length === 0) {
+                                // Se o próximo slide ficou vazio, remove ele do spec
+                                slideSpecs.splice(i + 1, 1);
+                            }
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Recalcula a paginação final após o rebalanceamento
+        let currentGroup = [];
+        let currentGroupKey = '';
+
+        function flushGroupPagination() {
+            if (currentGroup.length > 0) {
+                currentGroup.forEach((spec, i) => {
+                    spec.page = i;
+                    spec.pages = currentGroup.length;
+                });
+            }
+            currentGroup = [];
+        }
+
+        slideSpecs.forEach((spec) => {
+            const key = spec.sectionTitle + '||' + spec.subTitle;
+            if (key !== currentGroupKey) {
+                flushGroupPagination();
+                currentGroupKey = key;
+            }
+            if (spec.type === PROSE || spec.type === POINT || spec.type === STEPS) {
+                currentGroup.push(spec);
+            } else {
+                flushGroupPagination();
+            }
+        });
+        flushGroupPagination();
+    }
+
+    /* ── Renderizador de Elemento Slide ──────────────────────────────────── */
+    function renderSlideElement(spec, index) {
         const sec = el('section', 'deck-slide deck-slide--' + spec.type);
         sec.dataset.index = String(index);
         const inner = el('div', 'deck-slide-inner');
-        let steps = 1;
-        let items = [];
-        let title = spec.title || spec.sectionTitle || spec.blockTitle || 'Slide';
 
         if (spec.type === COVER || spec.type === END) {
             inner.classList.add('deck-slide-inner--bleed');
-            inner.appendChild(spec.node);
-        } else if (spec.type === PROSE) {
-            const head = spec.page === 0 ? sectionHeading(spec.subTitle || spec.sectionTitle) : null;
-            if (head) inner.appendChild(head);
-            else if (!spec.sectionTitle && !spec.subTitle) inner.classList.add('deck-slide--lead'); // abertura
+            inner.appendChild(spec.node || el('div'));
+            sec.appendChild(inner);
+            return sec;
+        }
+
+        // Títulos de seção/subtítulo
+        const hasHeader = spec.page === 0;
+        const sectionText = spec.subTitle || spec.sectionTitle;
+        
+        if (sectionText) {
+            const h = el('h2', 'deck-heading');
+            if (hasHeader) {
+                h.textContent = sectionText;
+            } else {
+                h.innerHTML = sectionText + ' <span class="deck-page-mark" style="margin-top:0; font-size:0.5em; vertical-align:middle;">(continuação)</span>';
+            }
+            inner.appendChild(h);
+        } else if (!spec.sectionTitle && !spec.subTitle) {
+            inner.classList.add('deck-slide--lead');
+        }
+
+        // Renderização dos blocos internos
+        if (spec.type === PROSE) {
             const bodyWrap = el('div', 'deck-prose-body');
-            spec.body.forEach((p) => bodyWrap.appendChild(p));
-            // Prosa aparece inteira (fluxo de leitura) — sem build por parágrafo.
-            // Só listas/passos constroem item a item.
-            inner.appendChild(bodyWrap);
-            if (spec.pages > 1) {
-                const pg = el('span', 'deck-page-mark');
-                pg.textContent = (spec.page + 1) + ' / ' + spec.pages;
-                inner.appendChild(pg);
-            }
-            title = spec.sectionTitle || 'Abertura';
-        } else if (spec.type === POINT || spec.type === STEPS) {
-            const head = spec.page === 0 ? sectionHeading(spec.subTitle || spec.sectionTitle) : null;
-            if (head) inner.appendChild(head);
-            const list = el(spec.type === STEPS ? 'ol' : 'ul', spec.type === STEPS ? 'deck-steps' : 'deck-points');
-            spec.build.forEach((node) => {
-                if (node.tagName === 'LI') list.appendChild(node);
-                else { const li = el('li'); li.appendChild(node); list.appendChild(li); }
+            spec.blocks.forEach(block => {
+                bodyWrap.appendChild(block.element.cloneNode(true));
             });
-            items = Array.from(list.children);
-            steps = markBuilds(items) || 1;
+            inner.appendChild(bodyWrap);
+        } else if (spec.type === POINT || spec.type === STEPS) {
+            const listTag = spec.type === STEPS ? 'ol' : 'ul';
+            const listClass = spec.type === STEPS ? 'deck-steps' : 'deck-points';
+            const list = el(listTag, listClass);
+
+            spec.blocks.forEach(block => {
+                if (block.element.tagName === 'LI') {
+                    list.appendChild(block.element.cloneNode(true));
+                } else if (block.element.tagName === 'UL' || block.element.tagName === 'OL') {
+                    Array.from(block.element.children).forEach(li => {
+                        list.appendChild(li.cloneNode(true));
+                    });
+                } else {
+                    const li = el('li');
+                    li.appendChild(block.element.cloneNode(true));
+                    list.appendChild(li);
+                }
+            });
+            
+            // Adiciona classe de build-in nos itens
+            Array.from(list.children).forEach((li, itemIndex) => {
+                li.classList.add('deck-build');
+                li.dataset.step = String(itemIndex);
+            });
+
             inner.appendChild(list);
-            if (spec.pages > 1) {
-                const pg = el('span', 'deck-page-mark');
-                pg.textContent = (spec.page + 1) + ' / ' + spec.pages;
-                inner.appendChild(pg);
-            }
-            title = spec.subTitle || spec.sectionTitle || 'Tópico';
-        } else if (spec.type === CALLOUT || spec.type === MEDIA || spec.type === QUIZ) {
-            // Blocos têm identidade própria (Conceito/Quiz/legenda) — sem eyebrow.
+        } else if (spec.type === CALLOUT || spec.type === MEDIA || spec.type === QUIZ || spec.type === TABLE || spec.type === CODE) {
             inner.classList.add('deck-slide-inner--center');
-            inner.appendChild(spec.node);
-            if (spec.type === QUIZ) title = 'Quiz';
-            else if (spec.type === CALLOUT) title = spec.blockTitle || 'Destaque';
-            else title = spec.sectionTitle || 'Imagem';
+            spec.blocks.forEach(block => {
+                inner.appendChild(block.element.cloneNode(true));
+            });
+        }
+
+        // Indicador de paginação discreto
+        if (spec.pages > 1) {
+            const pg = el('span', 'deck-page-mark');
+            pg.textContent = (spec.page + 1) + ' / ' + spec.pages;
+            inner.appendChild(pg);
         }
 
         sec.appendChild(inner);
+        return sec;
+    }
 
-        let notesHTML = '';
-        if (spec.notes && spec.notes.length) {
-            const holder = el('div');
-            spec.notes.forEach((n) => holder.appendChild(n));
-            notesHTML = holder.innerHTML;
+    /* ── FASE 6: Escalonamento Tipográfico Global ─────────────────────────── */
+    function calculateWorstOverflow() {
+        let maxOverflow = 0;
+        slides.forEach(({ el: s }) => {
+            const o = s.scrollHeight - s.clientHeight;
+            if (o > maxOverflow) maxOverflow = o;
+        });
+        return maxOverflow;
+    }
+
+    function fitAll() {
+        body.style.removeProperty('--deck-fs'); // restaura padrão CSS
+        const baseFs = parseFloat(getComputedStyle(body).fontSize) || 32;
+        let fs = baseFs;
+        let iterations = 0;
+
+        // Diminui a fonte progressivamente em 4% por vez se houver estouro real
+        while (calculateWorstOverflow() > 2 && iterations < 12) {
+            fs *= 0.96;
+            if (fs < 14) break; // limite mínimo absoluto de legibilidade
+            body.style.setProperty('--deck-fs', fs + 'px');
+            iterations += 1;
+        }
+    }
+
+    /* ── Carregamento de Recursos Visuais ────────────────────────────────── */
+    function waitForAssets(callback) {
+        const images = Array.from(source.querySelectorAll('img'));
+        let loadedCount = 0;
+        const totalImages = images.length;
+
+        function checkDone() {
+            loadedCount += 1;
+            if (loadedCount >= totalImages) {
+                if (document.fonts && document.fonts.ready) {
+                    document.fonts.ready.then(callback);
+                } else {
+                    callback();
+                }
+            }
         }
 
-        stage.appendChild(sec);
-        slides.push({ el: sec, steps: steps, title: title, notesHTML: notesHTML, items: items });
-    });
+        if (totalImages === 0) {
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(callback);
+            } else {
+                callback();
+            }
+            return;
+        }
 
-    source.remove();
-    if (roteiroEl) roteiroEl.remove();
+        images.forEach(img => {
+            if (img.complete) {
+                checkDone();
+            } else {
+                img.addEventListener('load', checkDone);
+                img.addEventListener('error', checkDone); // Garante progresso se imagem falhar
+            }
+        });
+    }
 
-    const total = slides.length;
+    /* ── COMPOSIÇÃO FINAL E INICIALIZAÇÃO DO DECK ─────────────────────────── */
+    function buildDeck() {
+        // 1. Extração do conteúdo
+        const rawBlocks = parseLessonContent(source);
+        
+        // 2. Estimativa de pesos
+        rawBlocks.forEach(block => {
+            block.weight = estimateVisualWeight(block);
+        });
 
-    /* ── 4) UI ────────────────────────────────────────────────────────────── */
+        // 3. Composição preliminar
+        const slideSpecs = composeInitialSlides(rawBlocks);
+
+        // 4. Inserção de Capa e Encerramento
+        const coverEl = fromTemplate('deck-cover');
+        const endEl = fromTemplate('deck-end');
+        const roteiroEl = document.getElementById('deck-roteiro');
+
+        const finalSpecs = [];
+        
+        if (coverEl) {
+            const notes = [];
+            if (roteiroEl && roteiroEl.children.length) {
+                Array.from(roteiroEl.children).forEach(n => notes.push(n.cloneNode(true)));
+            }
+            finalSpecs.push({
+                type: COVER,
+                node: coverEl,
+                title: 'Capa',
+                notes: notes,
+                page: 0,
+                pages: 1,
+                blocks: []
+            });
+        }
+
+        slideSpecs.forEach(spec => finalSpecs.push(spec));
+
+        if (endEl) {
+            finalSpecs.push({
+                type: END,
+                node: endEl,
+                title: 'Fim da aula',
+                notes: [],
+                page: 0,
+                pages: 1,
+                blocks: []
+            });
+        }
+
+        // 5. Rebalanceamento baseado em medição DOM real
+        rebalanceDeck(finalSpecs);
+
+        // 6. Renderização definitiva no palco real
+        stage.innerHTML = '';
+        slides = [];
+
+        finalSpecs.forEach((spec, idx) => {
+            const slideEl = renderSlideElement(spec, idx);
+            stage.appendChild(slideEl);
+
+            // Título para Dots e controles
+            let slideTitle = spec.title || spec.sectionTitle || 'Slide';
+            if (spec.type === QUIZ) slideTitle = 'Quiz';
+            else if (spec.type === CALLOUT) slideTitle = 'Destaque';
+            else if (spec.type === TABLE) slideTitle = 'Tabela';
+            else if (spec.type === CODE) slideTitle = 'Código';
+
+            // Notas do professor
+            let notesHTML = '';
+            if (spec.notes && spec.notes.length) {
+                const holder = el('div');
+                spec.notes.forEach(n => holder.appendChild(n));
+                notesHTML = holder.innerHTML;
+            } else if (spec.blocks && spec.blocks.length) {
+                // Se o bloco tiver notas internas (ex: roteiro específico)
+                const holder = el('div');
+                spec.blocks.forEach(block => {
+                    const blockNotes = block.element.querySelector('.teacher-note');
+                    if (blockNotes) holder.appendChild(blockNotes.cloneNode(true));
+                });
+                notesHTML = holder.innerHTML;
+            }
+
+            // Itens de build-in
+            const items = Array.from(slideEl.querySelectorAll('.deck-build'));
+            const steps = items.length || 1;
+
+            slides.push({
+                el: slideEl,
+                steps: steps,
+                title: slideTitle,
+                notesHTML: notesHTML,
+                items: items
+            });
+        });
+
+        // Limpeza dos containers originais
+        source.remove();
+        if (roteiroEl) roteiroEl.remove();
+
+        totalSlides = slides.length;
+
+        // Atualização da UI (dots, total)
+        initUI();
+
+        // 7. Escalonamento tipográfico final
+        fitAll();
+
+        // Posição inicial
+        goTo(0, false);
+
+        // Ícones Lucide
+        if (window.lucide) window.lucide.createIcons();
+
+        // Executa testes automatizados integrados se solicitado na URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('test') === 'true') {
+            runIntegratedTests();
+        }
+    }
+
+    /* ── INTERFACE GRÁFICA E NAVEGAÇÃO ───────────────────────────────────── */
     const elCurrent = document.querySelector('[data-deck-current]');
     const elTotal = document.querySelector('[data-deck-total]');
     const elProgress = document.querySelector('[data-deck-progress]');
@@ -334,23 +768,23 @@
     const nextButtons = Array.from(document.querySelectorAll('[data-deck-next]'));
     const lightbox = document.querySelector('[data-deck-lightbox]');
 
-    if (elTotal) elTotal.textContent = String(total);
-
     const dots = [];
-    if (rail) {
-        slides.forEach((slide, i) => {
-            const dot = el('button', 'deck-rail-dot');
-            dot.type = 'button';
-            dot.setAttribute('aria-label', slide.title || ('Slide ' + (i + 1)));
-            dot.addEventListener('click', () => goTo(i, false));
-            rail.appendChild(dot);
-            dots.push(dot);
-        });
-    }
 
-    /* ── 5) Navegação (slide + step) ──────────────────────────────────────── */
-    let index = -1;
-    let step = 0;
+    function initUI() {
+        if (elTotal) elTotal.textContent = String(totalSlides);
+
+        if (rail) {
+            rail.innerHTML = '';
+            slides.forEach((slide, i) => {
+                const dot = el('button', 'deck-rail-dot');
+                dot.type = 'button';
+                dot.setAttribute('aria-label', slide.title || ('Slide ' + (i + 1)));
+                dot.addEventListener('click', () => goTo(i, false));
+                rail.appendChild(dot);
+                dots.push(dot);
+            });
+        }
+    }
 
     function showSteps(slide, upto) {
         slide.items.forEach((item) => {
@@ -359,93 +793,123 @@
     }
 
     function goTo(i, landAtEnd) {
-        const clamped = Math.max(0, Math.min(total - 1, i));
-        if (clamped === index) return;
-        if (index >= 0) slides[index].el.classList.remove('is-active');
-        index = clamped;
-        const slide = slides[index];
-        slide.el.classList.add('is-active');
-        step = landAtEnd ? slide.steps - 1 : 0;
-        showSteps(slide, step);
-        update();
+        const clamped = Math.max(0, Math.min(totalSlides - 1, i));
+        if (clamped === currentIndex && currentIndex >= 0) return;
+        
+        if (currentIndex >= 0 && slides[currentIndex]) {
+            slides[currentIndex].el.classList.remove('is-active');
+        }
+        
+        currentIndex = clamped;
+        const slide = slides[currentIndex];
+        if (slide) {
+            slide.el.classList.add('is-active');
+            currentStep = landAtEnd ? slide.steps - 1 : 0;
+            showSteps(slide, currentStep);
+            updateUI();
+        }
     }
 
     function next() {
-        const slide = slides[index];
-        if (step < slide.steps - 1) { step += 1; showSteps(slide, step); }
-        else if (index < total - 1) goTo(index + 1, false);
+        const slide = slides[currentIndex];
+        if (!slide) return;
+        
+        if (currentStep < slide.steps - 1) {
+            currentStep += 1;
+            showSteps(slide, currentStep);
+        } else if (currentIndex < totalSlides - 1) {
+            goTo(currentIndex + 1, false);
+        }
     }
 
     function previous() {
-        const slide = slides[index];
-        if (step > 0) { step -= 1; showSteps(slide, step); }
-        else if (index > 0) goTo(index - 1, true);
+        const slide = slides[currentIndex];
+        if (!slide) return;
+
+        if (currentStep > 0) {
+            currentStep -= 1;
+            showSteps(slide, currentStep);
+        } else if (currentIndex > 0) {
+            goTo(currentIndex - 1, true);
+        }
     }
 
-    function update() {
-        const slide = slides[index];
-        if (elCurrent) elCurrent.textContent = String(index + 1);
+    function updateUI() {
+        const slide = slides[currentIndex];
+        if (!slide) return;
+
+        if (elCurrent) elCurrent.textContent = String(currentIndex + 1);
         if (elCurrentTitle) elCurrentTitle.textContent = slide.title || 'Slide';
-        if (elProgress) elProgress.style.transform = 'scaleX(' + ((index + 1) / total) + ')';
-        previousButtons.forEach((b) => { b.disabled = index === 0; });
-        nextButtons.forEach((b) => { b.disabled = index === total - 1; });
+        if (elProgress) elProgress.style.transform = 'scaleX(' + ((currentIndex + 1) / totalSlides) + ')';
+        
+        previousButtons.forEach(b => { b.disabled = currentIndex === 0; });
+        nextButtons.forEach(b => { b.disabled = currentIndex === totalSlides - 1; });
+        
         dots.forEach((dot, d) => {
-            const current = d === index;
+            const current = d === currentIndex;
             dot.classList.toggle('is-current', current);
             if (current) dot.setAttribute('aria-current', 'step');
             else dot.removeAttribute('aria-current');
         });
-        renderNotes(slide);
-        announce(slide);
+
+        // Roteiro do professor
+        if (notesBody) {
+            notesBody.innerHTML = slide.notesHTML ||
+                '<p class="deck-notes-empty">Sem roteiro para este slide. Você conduz a fala.</p>';
+        }
+
+        // Acessibilidade
+        if (elLive) {
+            elLive.textContent = 'Slide ' + (currentIndex + 1) + ' de ' + totalSlides + (slide.title ? ': ' + slide.title : '');
+        }
     }
 
-    function announce(slide) {
-        if (!elLive) return;
-        elLive.textContent = 'Slide ' + (index + 1) + ' de ' + total + (slide.title ? ': ' + slide.title : '');
-    }
-
-    /* ── 6) Roteiro do professor (por slide) ──────────────────────────────── */
-    function renderNotes(slide) {
-        if (!notesBody) return;
-        notesBody.innerHTML = slide.notesHTML ||
-            '<p class="deck-notes-empty">Sem roteiro para este slide. Você conduz a fala.</p>';
-    }
-
+    /* ── Painel de Roteiro Docente (Acessibilidade e Teclado) ─────────────── */
     let notesReturnFocus = null;
     const SUPPORTS_INERT = 'inert' in HTMLElement.prototype;
-    function notesOpen() { return notes && notes.classList.contains('is-open'); }
+    
+    function notesOpen() {
+        return notes && notes.classList.contains('is-open');
+    }
+
     function toggleNotes(force) {
         if (!notes) return;
         const open = typeof force === 'boolean' ? force : !notesOpen();
         notes.classList.toggle('is-open', open);
-        document.querySelectorAll('[data-deck-notes]').forEach((b) => b.setAttribute('aria-expanded', String(open)));
+        document.querySelectorAll('[data-deck-notes]').forEach(b => b.setAttribute('aria-expanded', String(open)));
+        
         if (!SUPPORTS_INERT) notes.setAttribute('aria-hidden', open ? 'false' : 'true');
+        
         if (open) {
             notes.removeAttribute('inert');
             notesReturnFocus = document.activeElement;
-            const close = notes.querySelector('[data-deck-notes-close]');
-            if (close) close.focus();
+            const closeBtn = notes.querySelector('[data-deck-notes-close]');
+            if (closeBtn) closeBtn.focus();
         } else {
             notes.setAttribute('inert', '');
             if (notesReturnFocus && notesReturnFocus.focus) notesReturnFocus.focus();
             notesReturnFocus = null;
         }
     }
-    document.querySelectorAll('[data-deck-notes]').forEach((b) => b.addEventListener('click', () => toggleNotes()));
-    document.querySelectorAll('[data-deck-notes-close]').forEach((b) => b.addEventListener('click', () => toggleNotes(false)));
 
-    /* ── 7) Capa ampliada ─────────────────────────────────────────────────── */
+    document.querySelectorAll('[data-deck-notes]').forEach(b => b.addEventListener('click', () => toggleNotes()));
+    document.querySelectorAll('[data-deck-notes-close]').forEach(b => b.addEventListener('click', () => toggleNotes(false)));
+
+    /* ── Capa Ampliada (Dialog) ──────────────────────────────────────────── */
     document.addEventListener('click', (event) => {
-        const open = event.target.closest('[data-deck-lightbox-open]');
-        if (open && lightbox && !lightbox.open) lightbox.showModal();
-        const close = event.target.closest('[data-deck-lightbox-close]');
-        if (close && lightbox && lightbox.open) lightbox.close();
+        const openBtn = event.target.closest('[data-deck-lightbox-open]');
+        if (openBtn && lightbox && !lightbox.open) lightbox.showModal();
+        
+        const closeBtn = event.target.closest('[data-deck-lightbox-close]');
+        if (closeBtn && lightbox && lightbox.open) lightbox.close();
     });
     if (lightbox) {
-        lightbox.addEventListener('click', (event) => { if (event.target === lightbox) lightbox.close(); });
+        lightbox.addEventListener('click', (event) => {
+            if (event.target === lightbox) lightbox.close();
+        });
     }
 
-    /* ── 8) Tela cheia ────────────────────────────────────────────────────── */
+    /* ── Tela Cheia ──────────────────────────────────────────────────────── */
     function toggleFullscreen() {
         const root = document.documentElement;
         if (!document.fullscreenElement) {
@@ -454,7 +918,9 @@
             (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document);
         }
     }
-    document.querySelectorAll('[data-deck-fullscreen]').forEach((b) => b.addEventListener('click', toggleFullscreen));
+
+    document.querySelectorAll('[data-deck-fullscreen]').forEach(b => b.addEventListener('click', toggleFullscreen));
+    
     document.addEventListener('fullscreenchange', () => {
         if (!fsBtn) return;
         const on = !!document.fullscreenElement;
@@ -468,34 +934,38 @@
         fsBtn.setAttribute('title', label + ' (F)');
     });
 
-    /* ── 9) Botões e teclado ──────────────────────────────────────────────── */
-    nextButtons.forEach((b) => b.addEventListener('click', next));
-    previousButtons.forEach((b) => b.addEventListener('click', previous));
+    /* ── Eventos de Teclado e Navegação ──────────────────────────────────── */
+    nextButtons.forEach(b => b.addEventListener('click', next));
+    previousButtons.forEach(b => b.addEventListener('click', previous));
 
     document.addEventListener('keydown', (e) => {
         const interactive = e.target && e.target.closest('input, textarea, select, button, a, [contenteditable="true"]');
         if (interactive && (e.key === ' ' || e.key === 'Enter')) return;
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+        
         switch (e.key) {
             case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
                 e.preventDefault(); next(); break;
             case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
                 e.preventDefault(); previous(); break;
             case 'Home': e.preventDefault(); goTo(0, false); break;
-            case 'End': e.preventDefault(); goTo(total - 1, false); break;
+            case 'End': e.preventDefault(); goTo(totalSlides - 1, false); break;
             case 'f': case 'F': toggleFullscreen(); break;
             case 'n': case 'N': e.preventDefault(); toggleNotes(); break;
             case 'Escape':
                 if (lightbox && lightbox.open) lightbox.close();
                 else if (notesOpen()) toggleNotes(false);
                 else if (document.fullscreenElement) toggleFullscreen();
-                else { const exit = document.querySelector('[data-deck-exit]'); if (exit) window.location.href = exit.href; }
+                else {
+                    const exit = document.querySelector('[data-deck-exit]');
+                    if (exit) window.location.href = exit.href;
+                }
                 break;
             default: break;
         }
     });
 
-    /* ── 10) Auto-hide ocioso ─────────────────────────────────────────────── */
+    /* ── Auto-hide ocioso dos controles ───────────────────────────────────── */
     let idleTimer = null;
     let lastPoke = 0;
     function poke() {
@@ -506,49 +976,170 @@
         if (idleTimer) clearTimeout(idleTimer);
         idleTimer = setTimeout(() => body.classList.add('is-idle'), 3500);
     }
-    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'focusin'].forEach((evt) =>
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'focusin'].forEach(evt =>
         document.addEventListener(evt, poke, { passive: true }));
     poke();
     if (hint) setTimeout(() => hint.classList.add('is-gone'), 6000);
 
-    /* ── 11) Auto-fit GLOBAL: uma escala única pro deck inteiro ────────────── */
-    /* Filosofia: todos os slides no MESMO tamanho (como deck profissional).
-       Em vez de encolher slide a slide (gera tamanhos diferentes na projeção),
-       achamos a única escala que faz o slide MAIS cheio caber e aplicamos a
-       TODOS. A paginação (PROSE_BUDGET + listas cap) já evita que algo precise
-       encolher muito; o auto-fit é só a rede de segurança final (TV não rola). */
-    function worstOverflow() {
-        let max = 0;
-        slides.forEach(({ el: s }) => {
-            const o = s.scrollHeight - s.clientHeight;
-            if (o > max) max = o;
-        });
-        return max;
-    }
-
-    function fitAll() {
-        body.style.removeProperty('--deck-fs'); // volta ao clamp do CSS
-        const baseFs = parseFloat(getComputedStyle(body).fontSize) || 32;
-        let fs = baseFs;
-        let guard = 0;
-        while (worstOverflow() > 2 && guard < 14) {
-            fs *= 0.95;
-            if (fs < 14) break; // piso de legibilidade na sala
-            body.style.setProperty('--deck-fs', fs + 'px');
-            guard += 1;
-        }
-    }
-
+    /* ── Escuta de redimensionamento de Viewport ─────────────────────────── */
     let fitRAF = 0;
     function scheduleFit() {
         cancelAnimationFrame(fitRAF);
         fitRAF = requestAnimationFrame(fitAll);
     }
     window.addEventListener('resize', scheduleFit, { passive: true });
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
 
-    /* ── 12) Início ───────────────────────────────────────────────────────── */
-    goTo(0, false);
-    if (window.lucide) window.lucide.createIcons();
-    fitAll();
+    /* ── EXECUÇÃO DA AUTOMAÇÃO DE TESTES INTEGRADOS (NAVEGADOR) ───────────── */
+    function runIntegratedTests() {
+        console.log('%c[TEST SUITE] Iniciando testes de validação visual do deck...', 'color: #2DD4BF; font-weight: bold;');
+        
+        // Cria container visual da suite de testes
+        const testContainer = el('div');
+        testContainer.style.position = 'fixed';
+        testContainer.style.top = '12px';
+        testContainer.style.left = '50%';
+        testContainer.style.transform = 'translateX(-50%)';
+        testContainer.style.zIndex = '99999';
+        testContainer.style.background = '#0F172A';
+        testContainer.style.border = '2px solid #2DD4BF';
+        testContainer.style.borderRadius = '8px';
+        testContainer.style.padding = '12px 20px';
+        testContainer.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+        testContainer.style.fontFamily = 'monospace';
+        testContainer.style.fontSize = '13px';
+        testContainer.style.color = '#F8FAFC';
+        testContainer.style.maxWidth = '90vw';
+        testContainer.style.maxHeight = '240px';
+        testContainer.style.overflowY = 'auto';
+
+        const testHeader = el('div');
+        testHeader.style.fontWeight = 'bold';
+        testHeader.style.borderBottom = '1px solid #334155';
+        testHeader.style.paddingBottom = '6px';
+        testHeader.style.marginBottom = '8px';
+        testHeader.style.display = 'flex';
+        testHeader.style.justifyContent = 'space-between';
+        testHeader.textContent = 'Suite de Teste Visual do Deck';
+        
+        const closeBtn = el('button');
+        closeBtn.textContent = '[X]';
+        closeBtn.style.background = 'none';
+        closeBtn.style.border = 'none';
+        closeBtn.style.color = '#EF4444';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.addEventListener('click', () => testContainer.remove());
+        testHeader.appendChild(closeBtn);
+        testContainer.appendChild(testHeader);
+
+        const testBody = el('div');
+        testContainer.appendChild(testBody);
+        document.body.appendChild(testContainer);
+
+        let errors = 0;
+        let originalIndex = currentIndex;
+
+        // Monitor de Erros Globais no Console
+        let jsConsoleErrors = [];
+        const originalOnError = window.onerror;
+        window.onerror = function(message, source, lineno, colno, error) {
+            jsConsoleErrors.push({ message, line: lineno });
+            if (originalOnError) originalOnError.apply(this, arguments);
+            return false;
+        };
+
+        // Passa slide por slide de forma assíncrona para medir e auditar
+        let sIdx = 0;
+        function testNextSlide() {
+            if (sIdx < totalSlides) {
+                goTo(sIdx, false);
+                setTimeout(() => {
+                    const slide = slides[sIdx];
+                    const innerEl = slide.el.querySelector('.deck-slide-inner');
+                    const style = window.getComputedStyle(slide.el);
+                    const paddingTop = parseFloat(style.paddingTop) || 0;
+                    const paddingBottom = parseFloat(style.paddingBottom) || 0;
+                    const paddingY = paddingTop + paddingBottom;
+                    
+                    const clientH = slide.el.clientHeight || 1;
+                    const availableH = Math.max(1, clientH - paddingY);
+                    const contentH = innerEl ? innerEl.offsetHeight : slide.el.scrollHeight - paddingY;
+                    
+                    const isOverflow = contentH > availableH || slide.el.scrollHeight > clientH;
+                    // Evita alertar sobre slides vazios para Cover, End, Media ou Quiz
+                    const isTooEmpty = (contentH / availableH) < 0.35 && 
+                        !slide.el.className.includes('deck-slide--cover') && 
+                        !slide.el.className.includes('deck-slide--end') && 
+                        !slide.el.className.includes('deck-slide--media') && 
+                        !slide.el.className.includes('deck-slide--quiz');
+                    
+                    let status = 'OK';
+                    let color = '#10B981';
+                    
+                    if (isOverflow) {
+                        status = 'FALHA (Overflow detectado!)';
+                        color = '#EF4444';
+                        errors += 1;
+                    } else if (isTooEmpty) {
+                        status = 'AVISO (Muito vazio)';
+                        color = '#F59E0B';
+                    }
+
+                    const itemLine = el('div');
+                    itemLine.style.marginBottom = '4px';
+                    itemLine.innerHTML = `Slide ${sIdx + 1} (${slide.title}): <span style="color: ${color}; font-weight: bold;">${status}</span> (Ocupação: ${Math.round(contentH * 100 / availableH)}%)`;
+                    testBody.appendChild(itemLine);
+                    testContainer.scrollTop = testContainer.scrollHeight;
+
+                    sIdx += 1;
+                    testNextSlide();
+                }, 150);
+            } else {
+                // Finalizou a verificação dos slides
+                // Valida erros no console JS
+                let jsStatus = 'Zero Erros no Console JS';
+                let jsColor = '#10B981';
+                if (jsConsoleErrors.length > 0) {
+                    jsStatus = `${jsConsoleErrors.length} Erro(s) de JS detectado(s)!`;
+                    jsColor = '#EF4444';
+                    errors += jsConsoleErrors.length;
+                }
+
+                const jsLine = el('div');
+                jsLine.style.marginTop = '8px';
+                jsLine.style.borderTop = '1px dashed #334155';
+                jsLine.style.paddingTop = '6px';
+                jsLine.innerHTML = `Console JS: <span style="color: ${jsColor}; font-weight: bold;">${jsStatus}</span>`;
+                testBody.appendChild(jsLine);
+
+                // Resultado Geral
+                const summaryLine = el('div');
+                summaryLine.style.marginTop = '10px';
+                summaryLine.style.fontWeight = 'bold';
+                summaryLine.style.fontSize = '14px';
+                
+                if (errors === 0) {
+                    summaryLine.innerHTML = `<span style="color: #10B981;">STATUS: PASSED (Tudo verde!)</span>`;
+                    console.log('%c[TEST SUITE] PASSED. Todos os slides válidos.', 'color: #10B981; font-weight: bold;');
+                } else {
+                    summaryLine.innerHTML = `<span style="color: #EF4444;">STATUS: FAILED (${errors} erros detectados)</span>`;
+                    console.error(`[TEST SUITE] FAILED. ${errors} problemas detectados.`);
+                }
+                testBody.appendChild(summaryLine);
+                testContainer.scrollTop = testContainer.scrollHeight;
+
+                // Restaura o monitor e volta ao slide inicial
+                window.onerror = originalOnError;
+                goTo(originalIndex, false);
+            }
+        }
+
+        // Aguarda assets iniciais antes de rodar os testes
+        setTimeout(testNextSlide, 600);
+    }
+
+    /* ── INÍCIO ───────────────────────────────────────────────────────────── */
+    // Aguarda fontes e imagens carregarem, depois constrói o deck
+    waitForAssets(() => {
+        buildDeck();
+    });
 }());
