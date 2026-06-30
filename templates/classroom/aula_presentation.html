@@ -13,8 +13,15 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/presentation.css' %}">
 </head>
-<body class="deck-body">
+<body class="deck-body is-deck-loading">
     <a class="sr-only" href="#deck-stage">Pular para o conteúdo</a>
+
+    {# Splash: cobre o palco com a marca até o deck.js terminar de montar. #}
+    <div class="deck-splash" aria-hidden="true">
+        <img src="{% static 'logo.svg' %}" alt="" width="56" height="56" decoding="async">
+        <span class="deck-splash-text">Preparando aula…</span>
+        <span class="deck-splash-dot"></span>
+    </div>
 
     {# Região viva: anuncia "Slide X de N: título" a leitores de tela. #}
     <div class="sr-only" aria-live="polite" data-deck-live></div>
