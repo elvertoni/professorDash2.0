@@ -39,7 +39,7 @@
     // Estado do deck
     let slides = []; // { el, steps, title, notesHTML, items[] }
     let totalSlides = 0;
-    let currentIndex = 0;
+    let currentIndex = -1;
     let currentStep = 0;
     let resizeObserver = null;
 
@@ -48,6 +48,10 @@
         const node = document.createElement(tag);
         if (cls) node.className = cls;
         return node;
+    }
+
+    function prefersReducedMotion() {
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
     function fromTemplate(id) {
@@ -267,6 +271,8 @@
         slides.forEach(({ el: s }) => {
             const inner = s.querySelector('.deck-slide-inner');
             if (!inner) return;
+            const previousScroll = s.scrollTop;
+            s.classList.remove('is-overflowing');
             inner.style.removeProperty('--slide-scale');
             const style = window.getComputedStyle(s);
             const padY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
@@ -278,9 +284,12 @@
             let k = 1;
             if (contentH > availH) k = Math.min(k, availH / contentH);
             if (contentW > availW) k = Math.min(k, availW / contentW);
-            if (k > 1) k = 1;
-            if (k < MIN_SCALE) k = MIN_SCALE;
+            k = Math.min(k, 1);
+            const needsScroll = k < MIN_SCALE;
+            s.classList.toggle('is-overflowing', needsScroll);
+            k = Math.max(k, MIN_SCALE);
             inner.style.setProperty('--slide-scale', k.toFixed(4));
+            s.scrollTop = needsScroll ? previousScroll : 0;
         });
     }
 
@@ -364,6 +373,13 @@
             else if (spec.type === CODE) slideTitle = 'Código';
             else if (spec.type === MEDIA) slideTitle = 'Imagem';
 
+            slideEl.setAttribute('role', 'group');
+            slideEl.setAttribute('aria-roledescription', 'slide');
+            slideEl.setAttribute(
+                'aria-label',
+                'Slide ' + (idx + 1) + ' de ' + finalSpecs.length + ': ' + slideTitle
+            );
+
             let notesHTML = '';
             if (spec.notes && spec.notes.length) {
                 const holder = el('div');
@@ -410,11 +426,6 @@
         // Revela o palco (some o splash de carregamento).
         body.classList.remove('is-deck-loading');
 
-        // Suite de teste visual sob demanda: ?test=true
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('test') === 'true') {
-            runIntegratedTests();
-        }
     }
 
     /* ── INTERFACE GRÁFICA E NAVEGAÇÃO ───────────────────────────────────── */
@@ -443,7 +454,9 @@
             slides.forEach((slide, i) => {
                 const dot = el('button', 'deck-rail-dot');
                 dot.type = 'button';
-                dot.setAttribute('aria-label', slide.title || ('Slide ' + (i + 1)));
+                const label = 'Slide ' + (i + 1) + ': ' + (slide.title || 'Sem título');
+                dot.setAttribute('aria-label', label);
+                dot.title = label;
                 dot.addEventListener('click', () => goTo(i, false));
                 rail.appendChild(dot);
                 dots.push(dot);
@@ -453,7 +466,10 @@
 
     function showSteps(slide, upto) {
         slide.items.forEach((item) => {
-            item.classList.toggle('is-shown', Number(item.dataset.step) <= upto);
+            const shown = Number(item.dataset.step) <= upto;
+            item.classList.toggle('is-shown', shown);
+            item.setAttribute('aria-hidden', String(!shown));
+            item.inert = !shown;
         });
     }
 
@@ -472,7 +488,36 @@
             currentStep = landAtEnd ? slide.steps - 1 : 0;
             showSteps(slide, currentStep);
             updateUI();
+            requestAnimationFrame(() => {
+                slide.el.scrollTop = landAtEnd ? slide.el.scrollHeight : 0;
+            });
         }
+    }
+
+    function scrollActiveSlide(direction) {
+        const slide = slides[currentIndex];
+        if (!slide || !slide.el.classList.contains('is-overflowing')) return false;
+
+        const node = slide.el;
+        const remaining = direction > 0
+            ? node.scrollHeight - node.clientHeight - node.scrollTop
+            : node.scrollTop;
+        if (remaining <= 8) return false;
+
+        node.scrollBy({
+            top: direction * Math.max(240, node.clientHeight * .72),
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        });
+        return true;
+    }
+
+    function revealCurrentStep(slide) {
+        const item = slide.items[currentStep];
+        if (!item || !slide.el.classList.contains('is-overflowing')) return;
+        item.scrollIntoView({
+            block: 'nearest',
+            behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        });
     }
 
     function next() {
@@ -482,6 +527,9 @@
         if (currentStep < slide.steps - 1) {
             currentStep += 1;
             showSteps(slide, currentStep);
+            revealCurrentStep(slide);
+        } else if (scrollActiveSlide(1)) {
+            return;
         } else if (currentIndex < totalSlides - 1) {
             goTo(currentIndex + 1, false);
         }
@@ -494,6 +542,9 @@
         if (currentStep > 0) {
             currentStep -= 1;
             showSteps(slide, currentStep);
+            revealCurrentStep(slide);
+        } else if (scrollActiveSlide(-1)) {
+            return;
         } else if (currentIndex > 0) {
             goTo(currentIndex - 1, true);
         }
@@ -549,7 +600,11 @@
             notes.removeAttribute('inert');
             notesReturnFocus = document.activeElement;
             const closeBtn = notes.querySelector('[data-deck-notes-close]');
-            if (closeBtn) closeBtn.focus();
+            if (closeBtn) {
+                requestAnimationFrame(() => {
+                    if (notesOpen()) closeBtn.focus();
+                });
+            }
         } else {
             notes.setAttribute('inert', '');
             if (notesReturnFocus && notesReturnFocus.focus) notesReturnFocus.focus();
@@ -561,9 +616,13 @@
     document.querySelectorAll('[data-deck-notes-close]').forEach(b => b.addEventListener('click', () => toggleNotes(false)));
 
     /* ── Capa Ampliada (Dialog) ──────────────────────────────────────────── */
+    let lightboxReturnFocus = null;
     document.addEventListener('click', (event) => {
         const openBtn = event.target.closest('[data-deck-lightbox-open]');
-        if (openBtn && lightbox && !lightbox.open) lightbox.showModal();
+        if (openBtn && lightbox && !lightbox.open) {
+            lightboxReturnFocus = openBtn;
+            lightbox.showModal();
+        }
 
         const closeBtn = event.target.closest('[data-deck-lightbox-close]');
         if (closeBtn && lightbox && lightbox.open) lightbox.close();
@@ -571,6 +630,12 @@
     if (lightbox) {
         lightbox.addEventListener('click', (event) => {
             if (event.target === lightbox) lightbox.close();
+        });
+        lightbox.addEventListener('close', () => {
+            if (lightboxReturnFocus && lightboxReturnFocus.focus) {
+                lightboxReturnFocus.focus();
+            }
+            lightboxReturnFocus = null;
         });
     }
 
@@ -603,7 +668,53 @@
     nextButtons.forEach(b => b.addEventListener('click', next));
     previousButtons.forEach(b => b.addEventListener('click', previous));
 
+    stage.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.target.closest('a, button, input, select, textarea, [contenteditable="true"]')) {
+            return;
+        }
+        const selection = window.getSelection();
+        if (selection && !selection.isCollapsed) return;
+
+        const bounds = stage.getBoundingClientRect();
+        if (event.clientX < bounds.left + bounds.width * .32) previous();
+        else next();
+    });
+
     document.addEventListener('keydown', (e) => {
+        if (lightbox && lightbox.open) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                lightbox.close();
+            }
+            return;
+        }
+
+        const notesHasFocus = notesOpen() && notes && notes.contains(e.target);
+        if (notesHasFocus && notesBody) {
+            const notesStep = Math.max(180, notesBody.clientHeight * .72);
+            const scrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
+            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+                e.preventDefault();
+                notesBody.scrollBy({ top: notesStep, behavior: scrollBehavior });
+                return;
+            }
+            if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                notesBody.scrollBy({ top: -notesStep, behavior: scrollBehavior });
+                return;
+            }
+            if (e.key === 'Home') {
+                e.preventDefault();
+                notesBody.scrollTo({ top: 0, behavior: scrollBehavior });
+                return;
+            }
+            if (e.key === 'End') {
+                e.preventDefault();
+                notesBody.scrollTo({ top: notesBody.scrollHeight, behavior: scrollBehavior });
+                return;
+            }
+        }
+
         const interactive = e.target && e.target.closest('input, textarea, select, button, a, [contenteditable="true"]');
         if (interactive && (e.key === ' ' || e.key === 'Enter')) return;
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
@@ -653,148 +764,6 @@
         fitRAF = requestAnimationFrame(fitAll);
     }
     window.addEventListener('resize', scheduleFit, { passive: true });
-
-    /* ── SUITE DE TESTE VISUAL INTEGRADO (NAVEGADOR): ?test=true ──────────── */
-    function runIntegratedTests() {
-        console.log('%c[TEST SUITE] Iniciando testes de validação visual do deck...', 'color: #2DD4BF; font-weight: bold;');
-
-        const testContainer = el('div');
-        testContainer.style.position = 'fixed';
-        testContainer.style.top = '12px';
-        testContainer.style.left = '50%';
-        testContainer.style.transform = 'translateX(-50%)';
-        testContainer.style.zIndex = '99999';
-        testContainer.style.background = '#0F172A';
-        testContainer.style.border = '2px solid #2DD4BF';
-        testContainer.style.borderRadius = '8px';
-        testContainer.style.padding = '12px 20px';
-        testContainer.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-        testContainer.style.fontFamily = 'monospace';
-        testContainer.style.fontSize = '13px';
-        testContainer.style.color = '#F8FAFC';
-        testContainer.style.maxWidth = '90vw';
-        testContainer.style.maxHeight = '240px';
-        testContainer.style.overflowY = 'auto';
-
-        const testHeader = el('div');
-        testHeader.style.fontWeight = 'bold';
-        testHeader.style.borderBottom = '1px solid #334155';
-        testHeader.style.paddingBottom = '6px';
-        testHeader.style.marginBottom = '8px';
-        testHeader.style.display = 'flex';
-        testHeader.style.justifyContent = 'space-between';
-        testHeader.textContent = 'Suite de Teste Visual do Deck';
-
-        const closeBtn = el('button');
-        closeBtn.textContent = '[X]';
-        closeBtn.style.background = 'none';
-        closeBtn.style.border = 'none';
-        closeBtn.style.color = '#EF4444';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.addEventListener('click', () => testContainer.remove());
-        testHeader.appendChild(closeBtn);
-        testContainer.appendChild(testHeader);
-
-        const testBody = el('div');
-        testContainer.appendChild(testBody);
-        document.body.appendChild(testContainer);
-
-        let errors = 0;
-        let originalIndex = currentIndex;
-
-        let jsConsoleErrors = [];
-        const originalOnError = window.onerror;
-        window.onerror = function (message, source, lineno, colno, error) {
-            jsConsoleErrors.push({ message, line: lineno });
-            if (originalOnError) originalOnError.apply(this, arguments);
-            return false;
-        };
-
-        let sIdx = 0;
-        function testNextSlide() {
-            if (sIdx < totalSlides) {
-                goTo(sIdx, false);
-                setTimeout(() => {
-                    const slide = slides[sIdx];
-                    const innerEl = slide.el.querySelector('.deck-slide-inner');
-                    const style = window.getComputedStyle(slide.el);
-                    const paddingTop = parseFloat(style.paddingTop) || 0;
-                    const paddingBottom = parseFloat(style.paddingBottom) || 0;
-                    const paddingY = paddingTop + paddingBottom;
-
-                    const clientH = slide.el.clientHeight || 1;
-                    const availableH = Math.max(1, clientH - paddingY);
-                    // Altura visual real (já considerando a escala fit-to-stage).
-                    const rect = innerEl ? innerEl.getBoundingClientRect() : null;
-                    const contentH = rect ? rect.height : (slide.el.scrollHeight - paddingY);
-
-                    const isOverflow = contentH > availableH + 2;
-                    const isTooEmpty = (contentH / availableH) < 0.30 &&
-                        !slide.el.className.includes('deck-slide--cover') &&
-                        !slide.el.className.includes('deck-slide--end') &&
-                        !slide.el.className.includes('deck-slide--media') &&
-                        !slide.el.className.includes('deck-slide--quiz') &&
-                        !slide.el.className.includes('deck-slide--lead');
-
-                    let status = 'OK';
-                    let color = '#10B981';
-
-                    if (isOverflow) {
-                        status = 'FALHA (Overflow detectado!)';
-                        color = '#EF4444';
-                        errors += 1;
-                    } else if (isTooEmpty) {
-                        status = 'AVISO (Muito vazio)';
-                        color = '#F59E0B';
-                    }
-
-                    const itemLine = el('div');
-                    itemLine.style.marginBottom = '4px';
-                    itemLine.innerHTML = `Slide ${sIdx + 1} (${slide.title}): <span style="color: ${color}; font-weight: bold;">${status}</span> (Ocupação: ${Math.round(contentH * 100 / availableH)}%)`;
-                    testBody.appendChild(itemLine);
-                    testContainer.scrollTop = testContainer.scrollHeight;
-
-                    sIdx += 1;
-                    testNextSlide();
-                }, 150);
-            } else {
-                let jsStatus = 'Zero Erros no Console JS';
-                let jsColor = '#10B981';
-                if (jsConsoleErrors.length > 0) {
-                    jsStatus = `${jsConsoleErrors.length} Erro(s) de JS detectado(s)!`;
-                    jsColor = '#EF4444';
-                    errors += jsConsoleErrors.length;
-                }
-
-                const jsLine = el('div');
-                jsLine.style.marginTop = '8px';
-                jsLine.style.borderTop = '1px dashed #334155';
-                jsLine.style.paddingTop = '6px';
-                jsLine.innerHTML = `Console JS: <span style="color: ${jsColor}; font-weight: bold;">${jsStatus}</span>`;
-                testBody.appendChild(jsLine);
-
-                const summaryLine = el('div');
-                summaryLine.style.marginTop = '10px';
-                summaryLine.style.fontWeight = 'bold';
-                summaryLine.style.fontSize = '14px';
-
-                if (errors === 0) {
-                    summaryLine.innerHTML = `<span style="color: #10B981;">STATUS: PASSED (Tudo verde!)</span>`;
-                    console.log('%c[TEST SUITE] PASSED. Todos os slides válidos.', 'color: #10B981; font-weight: bold;');
-                } else {
-                    summaryLine.innerHTML = `<span style="color: #EF4444;">STATUS: FAILED (${errors} erros detectados)</span>`;
-                    console.error(`[TEST SUITE] FAILED. ${errors} problemas detectados.`);
-                }
-                testBody.appendChild(summaryLine);
-                testContainer.scrollTop = testContainer.scrollHeight;
-
-                window.onerror = originalOnError;
-                goTo(originalIndex, false);
-            }
-        }
-
-        setTimeout(testNextSlide, 600);
-    }
 
     /* ── INÍCIO ───────────────────────────────────────────────────────────── */
     // Aguarda fontes e imagens carregarem, depois constrói o deck.

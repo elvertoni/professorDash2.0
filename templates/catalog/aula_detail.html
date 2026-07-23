@@ -14,7 +14,7 @@
         <div class="atelier-rail">
             <aside class="atelier-side">
                 <div class="course">{{ aula.disciplina.label }}</div>
-                <h4>{{ aula.trilha.label }}</h4>
+                <p class="page-title">{{ aula.trilha.label }}</p>
                 <div class="mod active"><i data-lucide="book-open" aria-hidden="true"></i> Aula {{ aula.ordem|stringformat:'02d' }}</div>
                 {% if aula.versao %}
                     <div class="mod"><i data-lucide="history" aria-hidden="true"></i> Versão {{ aula.versao }}</div>
@@ -32,7 +32,7 @@
 
                 {% if aula.objetivos %}
                     <section class="lesson-goals">
-                        <span class="eyebrow">Objetivos</span>
+                        <h2 class="eyebrow">Objetivos</h2>
                         <ul>
                             {% for objetivo in aula.objetivos %}
                                 <li>{{ objetivo }}</li>
@@ -50,15 +50,21 @@
                         <div class="label-sm text-primary">Ações do professor</div>
                         <h3>Publicar esta aula em uma turma</h3>
                         <div class="lesson-publish-form">
-                            <select class="select lesson-publish-select" id="turma-select" required aria-label="Selecione a turma para publicar esta aula">
-                                <option value="">Selecione a turma...</option>
-                                {% for t in minhas_turmas %}
-                                    <option value="{% url 'classroom:turma_aulas' t.pk %}?aula={{ aula.pk }}">{{ t.nome }} ({{ t.serie }})</option>
-                                {% endfor %}
-                            </select>
-                            <button class="btn btn-primary" type="button" data-selected-url-target="turma-select">
+                            <div>
+                                <label class="sr-only" for="turma-select">Turma para publicar esta aula</label>
+                                <select class="select lesson-publish-select" id="turma-select"
+                                        aria-describedby="turma-select-error" aria-invalid="false">
+                                    <option value="">Selecione a turma...</option>
+                                    {% for t in minhas_turmas %}
+                                        <option value="{% url 'classroom:turma_aulas' t.pk %}?aula={{ aula.pk }}">{{ t.nome }} ({{ t.serie }})</option>
+                                    {% endfor %}
+                                </select>
+                                <p class="err" id="turma-select-error" role="alert" aria-live="assertive" hidden>Selecione uma turma para continuar.</p>
+                            </div>
+                            <button class="btn btn-primary" type="button" data-selected-url-target="turma-select"
+                                    disabled aria-disabled="true">
                                 <i data-lucide="send" aria-hidden="true"></i>
-                                Publicar
+                                Continuar para publicar
                             </button>
                         </div>
                     </div>
@@ -84,4 +90,40 @@
         {% endif %}
     </nav>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (function () {
+        var select = document.getElementById('turma-select');
+        var button = document.querySelector('[data-selected-url-target="turma-select"]');
+        var error = document.getElementById('turma-select-error');
+
+        if (!select || !button || !error) {
+            return;
+        }
+
+        var touched = false;
+
+        function syncPublishState() {
+            var hasSelection = Boolean(select.value);
+            var showError = touched && !hasSelection;
+
+            button.disabled = !hasSelection;
+            button.setAttribute('aria-disabled', String(!hasSelection));
+            select.setAttribute('aria-invalid', String(showError));
+            error.hidden = !showError;
+        }
+
+        select.addEventListener('change', function () {
+            touched = true;
+            syncPublishState();
+        });
+        select.addEventListener('blur', function () {
+            touched = true;
+            syncPublishState();
+        });
+        syncPublishState();
+    }());
+</script>
 {% endblock %}

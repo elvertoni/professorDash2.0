@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html lang="pt-BR" data-theme="dark" class="deck-html">
+<html lang="pt-BR" data-theme="dark" class="deck-html no-js">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,9 +12,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="{% static 'css/presentation.css' %}">
+    <script>document.documentElement.classList.remove('no-js');</script>
 </head>
 <body class="deck-body is-deck-loading">
-    <a class="sr-only" href="#deck-stage">Pular para o conteúdo</a>
+    <a class="skip-link sr-only" href="#deck-stage">Pular para o conteúdo</a>
 
     {# Splash: cobre o palco com a marca até o deck.js terminar de montar. #}
     <div class="deck-splash" aria-hidden="true">
@@ -23,11 +24,31 @@
         <span class="deck-splash-dot"></span>
     </div>
 
+    <noscript>
+        <div class="deck-noscript" role="alert">
+            <span>O modo apresentação precisa de JavaScript. A aula completa está disponível abaixo.</span>
+            <a href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}">Voltar à aula</a>
+        </div>
+    </noscript>
+
     {# Região viva: anuncia "Slide X de N: título" a leitores de tela. #}
     <div class="sr-only" aria-live="polite" data-deck-live></div>
 
-    {# Fonte do conteúdo: deck.js transforma este .prose em slides discretos. #}
-    <div id="deck-source" class="prose" hidden>{{ lesson_html|safe }}</div>
+    {# Fallback legível e fonte única: deck.js consome a .prose ao montar. #}
+    <article id="deck-fallback" class="deck-fallback" aria-labelledby="deck-fallback-title">
+        <header class="deck-fallback-head">
+            <div>
+                <span class="deck-eyebrow">{{ turma.disciplina.label }} · Aula {{ aula.ordem|stringformat:'02d' }}</span>
+                <h1 id="deck-fallback-title">{{ aula.titulo }}</h1>
+                {% if aula.tema %}<p>{{ aula.tema }}</p>{% endif %}
+            </div>
+            <a class="btn btn-outline deck-fallback-exit"
+               href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}">
+                Voltar à aula
+            </a>
+        </header>
+        <div id="deck-source" class="prose">{{ lesson_html|safe }}</div>
+    </article>
 
     {# Roteiro global (:::roteiro) — deck.js anexa ao slide de capa. #}
     <div id="deck-roteiro" class="prose" hidden>{{ teacher_notes_html|safe }}</div>
@@ -55,7 +76,8 @@
             </div>
             {% if aula.imagem %}
                 <button class="deck-cover-figure" type="button" data-deck-lightbox-open aria-label="Ampliar capa da aula">
-                    <img src="{{ aula.imagem.url }}" alt="" decoding="async">
+                    <img src="{{ aula.imagem.url }}" alt="" loading="eager"
+                         fetchpriority="high" decoding="async">
                 </button>
             {% endif %}
         </div>
@@ -68,6 +90,7 @@
             <h2 class="deck-end-title">Fim da aula</h2>
             <p class="deck-end-sub">{{ aula.titulo }}</p>
             <p class="deck-cover-foot">Dúvidas? Vamos conversar.</p>
+            <p class="deck-end-hint"><kbd>Esc</kbd> para voltar à aula · <kbd>←</kbd> para rever</p>
         </div>
     </template>
 
@@ -81,10 +104,12 @@
     <main id="deck-stage" class="deck-stage" tabindex="-1"></main>
 
     {# Zonas laterais: úteis com mouse, lousa digital e controle remoto. #}
-    <button class="deck-stage-nav deck-stage-nav--previous" type="button" data-deck-previous aria-label="Voltar" disabled>
+    <button class="deck-stage-nav deck-stage-nav--previous" type="button" data-deck-previous
+            aria-label="Voltar" aria-keyshortcuts="ArrowLeft ArrowUp PageUp" disabled>
         <i data-lucide="chevron-left" aria-hidden="true"></i>
     </button>
-    <button class="deck-stage-nav deck-stage-nav--next" type="button" data-deck-next aria-label="Avançar">
+    <button class="deck-stage-nav deck-stage-nav--next" type="button" data-deck-next
+            aria-label="Avançar" aria-keyshortcuts="ArrowRight ArrowDown PageDown Space">
         <i data-lucide="chevron-right" aria-hidden="true"></i>
     </button>
 
@@ -96,31 +121,38 @@
                 <i data-lucide="x" aria-hidden="true"></i>
             </button>
         </div>
-        <div class="deck-notes-body prose" data-deck-notes-body></div>
+        <div class="deck-notes-body prose" data-deck-notes-body tabindex="0"
+             aria-label="Notas do slide atual"></div>
     </aside>
 
     <nav class="deck-controls" aria-label="Controles da apresentação">
         <div class="deck-controls-group">
-            <a class="deck-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" data-deck-exit title="Sair (Esc)" aria-label="Sair da apresentação">
+            <a class="deck-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" data-deck-exit
+               title="Sair (Esc)" aria-label="Sair da apresentação" aria-keyshortcuts="Escape">
                 <i data-lucide="x" aria-hidden="true"></i>
             </a>
-            <button class="deck-icon-btn" type="button" data-deck-previous aria-label="Voltar" title="Voltar (←)" disabled>
+            <button class="deck-icon-btn" type="button" data-deck-previous aria-label="Voltar"
+                    aria-keyshortcuts="ArrowLeft ArrowUp PageUp" title="Voltar (←)" disabled>
                 <i data-lucide="chevron-left" aria-hidden="true"></i>
             </button>
             <div class="deck-position">
                 <span class="deck-current-title" data-deck-current-title>Capa</span>
                 <span class="deck-counter"><span data-deck-current>1</span> / <span data-deck-total>1</span></span>
             </div>
-            <button class="deck-icon-btn" type="button" data-deck-next aria-label="Avançar" title="Avançar (→)">
+            <button class="deck-icon-btn" type="button" data-deck-next aria-label="Avançar"
+                    aria-keyshortcuts="ArrowRight ArrowDown PageDown Space" title="Avançar (→)">
                 <i data-lucide="chevron-right" aria-hidden="true"></i>
             </button>
         </div>
         <div class="deck-divider" aria-hidden="true"></div>
         <div class="deck-controls-group">
-            <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)" aria-label="Abrir roteiro do professor" aria-controls="deck-notes" aria-expanded="false">
+            <button class="deck-icon-btn" type="button" data-deck-notes title="Roteiro (N)"
+                    aria-label="Abrir roteiro do professor" aria-keyshortcuts="N"
+                    aria-controls="deck-notes" aria-expanded="false">
                 <i data-lucide="notebook-pen" aria-hidden="true"></i>
             </button>
-            <button class="deck-icon-btn" type="button" data-deck-fullscreen title="Tela cheia (F)" aria-label="Entrar em tela cheia">
+            <button class="deck-icon-btn" type="button" data-deck-fullscreen title="Tela cheia (F)"
+                    aria-label="Entrar em tela cheia" aria-keyshortcuts="F">
                 <i data-lucide="maximize" aria-hidden="true"></i>
             </button>
         </div>
@@ -128,7 +160,7 @@
 
     <div class="deck-hint" data-deck-hint>
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        <span>Clique ou use <kbd>→</kbd> <kbd>←</kbd> para avançar · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair</span>
+        <span>Clique no palco ou use <kbd>→</kbd> <kbd>←</kbd> para navegar · <kbd>F</kbd> tela cheia · <kbd>N</kbd> roteiro · <kbd>Esc</kbd> sair</span>
     </div>
 
     {% if aula.imagem %}
@@ -143,6 +175,25 @@
     montam o DOM dos slides; Alpine (defer) roda por último e inicializa o
     quiz já presente nos slides.
     {% endcomment %}
+    <script>
+        (() => {
+            const fallback = document.getElementById('deck-fallback');
+            const source = document.getElementById('deck-source');
+            if (!fallback || !source || !window.MutationObserver) return;
+
+            const observer = new MutationObserver(() => {
+                if (!document.body.classList.contains('is-deck-loading')) {
+                    observer.disconnect();
+                    return;
+                }
+                if (!document.getElementById('deck-source')) {
+                    fallback.appendChild(source);
+                    observer.disconnect();
+                }
+            });
+            observer.observe(fallback, { childList: true });
+        })();
+    </script>
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{% static 'js/deck.js' %}"></script>

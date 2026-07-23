@@ -40,6 +40,26 @@
     border-radius: var(--radius-md);
     background: var(--surface-base);
 }
+.lesson-hero-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+}
+.lesson-hero-trigger:focus-visible {
+    outline: 3px solid var(--border-focus);
+    outline-offset: 3px;
+}
+dialog.lesson-lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+dialog.lesson-lightbox:not([open]) { display: none; }
 @media (max-width: 720px) {
     .teacher-preview-bar {
         position: static;
@@ -63,7 +83,7 @@
         <span>Prévia</span>
     </nav>
 
-    <div class="teacher-preview-bar" aria-label="Controles da aula">
+    <div class="teacher-preview-bar lesson-actionbar" role="region" aria-label="Controles da aula">
         <div class="teacher-preview-main">
             <span class="badge badge-violet">
                 <i data-lucide="user-cog" aria-hidden="true"></i>
@@ -78,14 +98,6 @@
             {% endif %}
         </div>
         <div class="teacher-preview-actions">
-            <a class="btn btn-primary btn-sm" href="{% url 'classroom:aula_apresentar' turma.pk publicada.pk %}" title="Abrir em tela cheia para projetar na sala">
-                <i data-lucide="monitor-play" aria-hidden="true"></i>
-                Apresentar
-            </a>
-            <a class="btn btn-outline btn-sm" href="{% url 'classroom:aula_publicada_update' turma.pk publicada.pk %}">
-                <i data-lucide="settings-2" aria-hidden="true"></i>
-                Ajustar liberação
-            </a>
             {% if not publicada.publicada %}
                 <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
                     {% csrf_token %}
@@ -95,6 +107,14 @@
                     </button>
                 </form>
             {% endif %}
+            <a class="btn {% if publicada.publicada %}btn-primary{% else %}btn-outline{% endif %} btn-sm" href="{% url 'classroom:aula_apresentar' turma.pk publicada.pk %}" title="Abrir em tela cheia para projetar na sala">
+                <i data-lucide="monitor-play" aria-hidden="true"></i>
+                Apresentar
+            </a>
+            <a class="btn btn-outline btn-sm" href="{% url 'classroom:aula_publicada_update' turma.pk publicada.pk %}">
+                <i data-lucide="settings-2" aria-hidden="true"></i>
+                Ajustar liberação
+            </a>
         </div>
     </div>
 
@@ -111,14 +131,23 @@
             </aside>
             <div class="atelier-body">
                 {% if aula.imagem %}
-                    <div x-data="{ lightbox: false }" @keydown.escape.window="lightbox = false">
-                        <figure class="lesson-hero" @click="lightbox = true">
-                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async">
-                        </figure>
-                        <div class="lesson-lightbox" x-show="lightbox" x-cloak @click.self="lightbox = false" x-transition.opacity>
-                            <button class="lesson-lightbox-close" @click="lightbox = false" aria-label="Fechar" type="button">&times;</button>
+                    <div data-cover-lightbox>
+                        <button class="lesson-hero lesson-hero-trigger" type="button"
+                                data-cover-lightbox-open
+                                aria-label="Ampliar capa da aula {{ aula.titulo }}"
+                                aria-controls="cover-dialog-{{ publicada.pk }}"
+                                aria-expanded="false"
+                                aria-haspopup="dialog">
+                            <img src="{{ aula.imagem.url }}" alt="" loading="lazy" decoding="async">
+                        </button>
+                        <dialog class="lesson-lightbox" id="cover-dialog-{{ publicada.pk }}"
+                                data-cover-lightbox-dialog
+                                aria-label="Capa ampliada da aula {{ aula.titulo }}"
+                                hidden>
+                            <button class="lesson-lightbox-close" data-cover-lightbox-close
+                                    aria-label="Fechar capa ampliada" type="button">&times;</button>
                             <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}">
-                        </div>
+                        </dialog>
                     </div>
                 {% endif %}
                 <div class="atelier-meta">
@@ -175,4 +204,36 @@
         {% endif %}
     </nav>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('[data-cover-lightbox]').forEach((lightbox) => {
+    const trigger = lightbox.querySelector('[data-cover-lightbox-open]');
+    const dialog = lightbox.querySelector('[data-cover-lightbox-dialog]');
+    const closeButton = lightbox.querySelector('[data-cover-lightbox-close]');
+
+    if (!trigger || !dialog || !closeButton) {
+        return;
+    }
+
+    trigger.addEventListener('click', () => {
+        dialog.hidden = false;
+        dialog.showModal();
+        trigger.setAttribute('aria-expanded', 'true');
+    });
+
+    closeButton.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) {
+            dialog.close();
+        }
+    });
+    dialog.addEventListener('close', () => {
+        dialog.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.focus();
+    });
+});
+</script>
 {% endblock %}

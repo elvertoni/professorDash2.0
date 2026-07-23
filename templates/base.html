@@ -21,6 +21,7 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <a class="skip-link sr-only" href="#conteudo">Pular para o conteúdo</a>
     <header class="site-header">
         <a class="brand" href="{% url 'home' %}" aria-label="Página inicial do Prof. Toni Coimbra">
             {% include 'partials/_brand.html' %}
@@ -34,7 +35,6 @@
             <nav class="mobile-nav-panel" aria-label="Navegação principal mobile">
                 {% if not user.is_authenticated %}
                     <a href="{% url 'home' %}#jornada">Jornada</a>
-                    <a href="{% url 'home' %}#recursos">Recursos</a>
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
                 {% elif user.is_aluno %}
                     <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
@@ -47,7 +47,6 @@
         <nav class="site-nav" aria-label="Navegação principal">
             {% if not user.is_authenticated %}
                 <a href="{% url 'home' %}#jornada">Jornada</a>
-                <a href="{% url 'home' %}#recursos">Recursos</a>
                 <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
             {% elif user.is_aluno %}
                 <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
@@ -59,7 +58,7 @@
         <div class="header-actions">
             {% if user.is_authenticated %}
                 <details class="notification-menu">
-                    <summary class="icon-btn" aria-label="Abrir notificações" title="Notificações">
+                    <summary class="icon-btn" aria-label="{% if notifications_unread_count %}Abrir notificações: {{ notifications_unread_count }} não lida{{ notifications_unread_count|pluralize:'s' }}{% else %}Abrir notificações{% endif %}" title="Notificações">
                         <i data-lucide="bell" aria-hidden="true"></i>
                         {% if notifications_unread_count %}
                             <span class="dot"></span>
@@ -108,7 +107,9 @@
                     </div>
                 </details>
             {% endif %}
-            <button class="icon-btn" type="button" data-theme-toggle aria-label="Alternar tema" title="Alternar tema">
+            <button class="icon-btn" type="button" data-theme-toggle
+                    aria-label="{% if user.is_authenticated and user.is_aluno %}Ativar tema escuro{% else %}Ativar tema claro{% endif %}"
+                    title="{% if user.is_authenticated and user.is_aluno %}Ativar tema escuro{% else %}Ativar tema claro{% endif %}">
                 <i data-lucide="sun-moon" aria-hidden="true"></i>
             </button>
             {% if user.is_authenticated %}
@@ -159,9 +160,10 @@
     </header>
 
     {% if messages %}
-        <div class="message-stack" aria-live="polite">
+        <div class="message-stack">
             {% for message in messages %}
-                <div class="toast {% if message.tags == 'success' %}s{% elif message.tags == 'error' %}e{% else %}i{% endif %}">
+                <div class="toast {% if message.tags == 'success' %}s{% elif message.tags == 'error' %}e{% else %}i{% endif %}"
+                     {% if message.tags == 'error' %}role="alert" aria-live="assertive"{% else %}role="status" aria-live="polite"{% endif %}>
                     <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-triangle{% else %}info{% endif %}" aria-hidden="true"></i>
                     <div>{{ message }}</div>
                 </div>
@@ -169,18 +171,39 @@
         </div>
     {% endif %}
 
-    <main>
+    <main id="conteudo">
         {% block content %}{% endblock %}
     </main>
 
     <footer class="site-footer">
         <span>Prof. Toni Coimbra</span>
-        <span class="muted">Portal educacional de instalação única para publicação de aulas, atividades e materiais.</span>
+        <span class="muted">Portal do Prof. Toni para publicar aulas, atividades e materiais por turma.</span>
     </footer>
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        (function () {
+            var root = document.documentElement;
+
+            function updateThemeToggleState() {
+                var isLight = root.getAttribute('data-theme') === 'light';
+                var nextThemeLabel = isLight ? 'Ativar tema escuro' : 'Ativar tema claro';
+
+                document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+                    button.setAttribute('aria-label', nextThemeLabel);
+                    button.setAttribute('title', nextThemeLabel);
+                });
+            }
+
+            new MutationObserver(updateThemeToggleState).observe(root, {
+                attributes: true,
+                attributeFilter: ['data-theme']
+            });
+            updateThemeToggleState();
+        }());
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

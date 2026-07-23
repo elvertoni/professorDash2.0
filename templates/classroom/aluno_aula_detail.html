@@ -18,7 +18,6 @@
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-pop);
-    backdrop-filter: blur(16px);
 }
 .lesson-actionbar-status {
     display: inline-flex;
@@ -28,9 +27,44 @@
     font-size: 0.9375rem;
     font-weight: 600;
 }
-.lesson-actionbar form { margin: 0; }
+.lesson-actionbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+.lesson-actionbar-actions form { margin: 0; }
+.lesson-goals h2 {
+    margin: 0;
+    font-size: var(--text-h2);
+    font-weight: 700;
+}
+.lesson-hero-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    color: inherit;
+}
+.lesson-hero-trigger:focus-visible {
+    outline: 3px solid var(--border-focus);
+    outline-offset: 3px;
+}
+dialog.lesson-lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+dialog.lesson-lightbox:not([open]) { display: none; }
 @media (max-width: 600px) {
     .lesson-actionbar { flex-direction: column; align-items: stretch; }
+    .lesson-actionbar-actions { display: grid; width: 100%; }
+    .lesson-actionbar-actions form { width: 100%; }
     .lesson-actionbar .btn { width: 100%; }
 }
 </style>
@@ -58,14 +92,19 @@
             </aside>
             <div class="atelier-body">
                 {% if aula.imagem %}
-                    <div x-data="{ lightbox: false }" @keydown.escape.window="lightbox = false">
-                        <figure class="lesson-hero" @click="lightbox = true">
-                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async">
-                        </figure>
-                        <div class="lesson-lightbox" x-show="lightbox" x-cloak @click.self="lightbox = false" x-transition.opacity>
-                            <button class="lesson-lightbox-close" @click="lightbox = false" aria-label="Fechar" type="button">&times;</button>
+                    <div data-cover-lightbox>
+                        <button class="lesson-hero lesson-hero-trigger" type="button"
+                                data-lightbox-trigger aria-controls="lesson-cover-dialog"
+                                aria-haspopup="dialog" aria-label="Ampliar capa da aula {{ aula.titulo }}">
+                            <img src="{{ aula.imagem.url }}" alt="" loading="eager"
+                                 fetchpriority="high" decoding="async">
+                        </button>
+                        <dialog id="lesson-cover-dialog" class="lesson-lightbox"
+                                data-lightbox-dialog aria-label="Capa ampliada da aula {{ aula.titulo }}">
+                            <button class="lesson-lightbox-close" data-close
+                                    aria-label="Fechar capa ampliada" type="button">&times;</button>
                             <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}">
-                        </div>
+                        </dialog>
                     </div>
                 {% endif %}
                 <div class="atelier-meta">
@@ -82,7 +121,7 @@
 
                 {% if aula.objetivos %}
                     <section class="lesson-goals">
-                        <span class="eyebrow">Objetivos</span>
+                        <h2>Objetivos</h2>
                         <ul>
                             {% for objetivo in aula.objetivos %}
                                 <li>{{ objetivo }}</li>
@@ -123,20 +162,56 @@
                 <i data-lucide="circle-dashed" aria-hidden="true"></i> Em andamento
             {% endif %}
         </span>
-        <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
-            {% csrf_token %}
+        <div class="lesson-actionbar-actions">
             {% if progresso.concluido %}
-                <button class="btn btn-outline" type="submit">
-                    <i data-lucide="rotate-ccw" aria-hidden="true"></i>
-                    Marcar como não concluída
-                </button>
+                {% if next_aula %}
+                    <a class="btn btn-primary" href="{% url 'classroom:aluno_aula_detail' next_aula.pk %}">
+                        <i data-lucide="arrow-right" aria-hidden="true"></i>
+                        Próxima aula
+                    </a>
+                {% else %}
+                    <a class="btn btn-primary" href="{% url 'classroom:aluno_turma_aulas' turma.pk %}">
+                        <i data-lucide="arrow-left" aria-hidden="true"></i>
+                        Voltar às aulas
+                    </a>
+                {% endif %}
+                <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-ghost" type="submit">
+                        <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                        Marcar como não concluída
+                    </button>
+                </form>
             {% else %}
-                <button class="btn btn-primary" type="submit">
-                    <i data-lucide="check-check" aria-hidden="true"></i>
-                    Concluir aula
-                </button>
+                <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">
+                        <i data-lucide="check-check" aria-hidden="true"></i>
+                        Concluir aula
+                    </button>
+                </form>
             {% endif %}
-        </form>
+        </div>
     </div>
 </section>
+{% if aula.imagem %}
+    <script>
+        (() => {
+            const root = document.querySelector('[data-cover-lightbox]');
+            if (!root) return;
+
+            const trigger = root.querySelector('[data-lightbox-trigger]');
+            const dialog = root.querySelector('[data-lightbox-dialog]');
+            const closeButton = root.querySelector('[data-close]');
+            if (!trigger || !dialog || !closeButton || typeof dialog.showModal !== 'function') return;
+
+            trigger.addEventListener('click', () => dialog.showModal());
+            closeButton.addEventListener('click', () => dialog.close());
+            dialog.addEventListener('click', (event) => {
+                if (event.target === dialog) dialog.close();
+            });
+            dialog.addEventListener('close', () => trigger.focus());
+        })();
+    </script>
+{% endif %}
 {% endblock %}

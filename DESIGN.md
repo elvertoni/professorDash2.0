@@ -18,10 +18,10 @@ Dark-first (`color-scheme: dark`), with a fully-supported light theme (`[data-th
 
 ### Light
 - Bg `#f4f5f9`/`#ebedf3`, surfaces near-white, text `--shell-text #0f172a` / muted `#475569` / soft `#64748b`
-- Brand darkened for contrast: primary `#047857`, secondary `#7c3aed`; semantic warning `#b45309`, danger `#b91c1c`, info `#0284c7`
+- Brand darkened for contrast: primary `#047857`, secondary `#7c3aed`; semantic warning `#b45309`, danger `#b91c1c`, info `#0369a1`
 
 ### Gradients (tokens only — no literal gradients in templates)
-`--grad-primary` (emerald→cyan 135°), `--grad-cta` (emerald→cyan 45°), `--grad-brand` (mint→violet→cyan 120°). Stripe utilities: `.stripe-cta/.stripe-violet/.stripe-warning/.stripe-cyan/.stripe-success`. Text: `.text-gradient-brand/.text-success/.text-warning/.text-info/.text-strong`.
+`--grad-primary` (emerald→cyan 135°), `--grad-cta` (emerald→cyan 45°), `--grad-brand` (mint→violet→cyan 120°). Stripe utilities: `.stripe-cta/.stripe-violet/.stripe-warning/.stripe-cyan/.stripe-success`. Text: `.text-brand/.text-success/.text-warning/.text-info/.text-strong`. Gradientes ficam em superfícies e CTAs, nunca em texto.
 
 **Color has function**: green=action/progress, yellow=deadline/attention, red=risk, violet/cyan=support only.
 
@@ -46,7 +46,9 @@ App-specific documented wrappers: site chrome (`site-header/site-nav/site-footer
 
 **Theme by role** (decision D.5): default `data-theme` is server-rendered per role in `base.html` — aluno = `light`, professor/admin/anônimo = `dark`. The `localStorage` toggle still overrides as a personal preference.
 
-**ADHD-focus patterns** (decision D.6, template-scoped `<style>` in the dashboard/reader templates, tokens `shell-*`): `serie-section`/`serie-header` (professor série→disciplina accordion, Alpine), `dash-collapsible` (native `<details>` secondary panel, closed by default — e.g. Prazos), `dash-tabs`/`dash-tab` (Alpine tab switcher on the aluno dashboard — Prazos/Aulas/Notas), `aluno-progress` (big progress panel), `lesson-actionbar` (sticky single-CTA bar on the lesson reader). Goal: one decision per screen, next action always reachable. **Alpine.js (3.14.1) is loaded in `base.html`** (was missing before; `x-data`/`x-show`/`@click` depend on it); `[x-cloak]{display:none!important}` in `app.css` prevents tab flash.
+**ADHD-focus patterns** (decision D.6, template-scoped `<style>` in the dashboard/reader templates, tokens `shell-*`): `serie-section`/`serie-header` (professor série→disciplina accordion, Alpine), `dash-collapsible` (native `<details>` secondary panel, closed by default — e.g. Prazos), `dash-tabs`/`dash-tab` (Alpine tab switcher on the aluno dashboard — Agora/Aulas/Turmas), `aluno-progress` (big progress panel), `lesson-actionbar` (sticky single-CTA bar on the lesson reader). Goal: one decision per screen, next action always reachable. **Alpine.js (3.14.1) is loaded in `base.html`** (was missing before; `x-data`/`x-show`/`@click` depend on it); `[x-cloak]{display:none!important}` in `app.css` prevents tab flash.
+
+**Modo apresentação**: superfície standalone de projeção, escura e de alto contraste. `deck.js` transforma a aula em slides semânticos por `<h2>`/bloco, preserva builds progressivos e usa rolagem interna somente quando um bloco indivisível não cabe no piso legível. Controles devem funcionar por clique, teclado/controle remoto e foco visível; roteiro (`N`), tela cheia (`F`) e saída (`Esc`) nunca competem com o conteúdo.
 
 ## Motion
 

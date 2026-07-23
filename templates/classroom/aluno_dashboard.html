@@ -15,9 +15,9 @@
     justify-content: space-between;
 }
 .aluno-progress-row b {
-    font-size: 1.75rem;
+    font-size: var(--text-h1);
     font-weight: 700;
-    color: var(--accent);
+    color: var(--accent-text);
 }
 .aluno-progress .progress {
     height: 14px;
@@ -32,13 +32,53 @@
     margin-bottom: var(--space-4);
 }
 .focus-block-head h2 {
-    font-size: 1.375rem;
+    font-size: var(--text-h2);
+}
+.dash-tabs {
+    display: flex;
+    gap: 2px;
+    margin: var(--space-8) 0 var(--space-5);
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+}
+.dash-tab {
+    min-height: 44px;
+    flex-shrink: 0;
+    margin-bottom: -1px;
+    padding: 11px 18px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: var(--text-ui);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .15s ease-out, border-color .15s ease-out;
+}
+.dash-tab:hover { color: var(--fg); }
+.dash-tab.active {
+    border-bottom-color: var(--accent);
+    color: var(--accent-text);
+}
+.dash-tab:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+.dash-tab .count {
+    margin-left: 6px;
+    font-size: var(--text-caption);
+    opacity: .8;
+}
+@media (prefers-reduced-motion: reduce) {
+    .dash-tab { transition: none; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="classroom-page">
+<section class="classroom-page" x-data="{ tab: '{% if para_fazer_hoje %}agora{% elif proximas %}aulas{% else %}turmas{% endif %}' }">
 
     <div class="page-hero">
         <div class="page-hero-copy">
@@ -53,11 +93,56 @@
             <span>Seu progresso nas aulas</span>
             <b>{{ progresso_pct }}%</b>
         </div>
-        <div class="progress"><i style="width: {{ progresso_pct }}%"></i></div>
+        <div class="progress" role="progressbar" aria-label="Progresso nas aulas"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progresso_pct }}">
+            <i style="width: {{ progresso_pct }}%"></i>
+        </div>
         <p class="muted">{{ total_concluidas }} de {{ total_disponiveis }} aula{{ total_disponiveis|pluralize }} concluída{{ total_concluidas|pluralize }} · {{ total_turmas }} turma{{ total_turmas|pluralize }}</p>
     </div>
 
-    <div class="focus-block">
+    <div class="dash-tabs" role="tablist" aria-label="Seções do painel">
+        <button id="dashboard-tab-agora" class="dash-tab" type="button" x-ref="agora"
+                :class="{ active: tab === 'agora' }" @click="tab = 'agora'"
+                @keydown.left.prevent="tab = 'turmas'; $refs.turmas.focus()"
+                @keydown.right.prevent="tab = 'aulas'; $refs.aulas.focus()"
+                @keydown.end.prevent="tab = 'turmas'; $refs.turmas.focus()"
+                role="tab" aria-controls="dashboard-panel-agora"
+                aria-selected="{% if para_fazer_hoje %}true{% else %}false{% endif %}"
+                :aria-selected="tab === 'agora'"
+                tabindex="{% if para_fazer_hoje %}0{% else %}-1{% endif %}"
+                :tabindex="tab === 'agora' ? 0 : -1">
+            Para fazer agora{% if para_fazer_hoje %}<span class="count">{{ para_fazer_hoje|length }}</span>{% endif %}
+        </button>
+        <button id="dashboard-tab-aulas" class="dash-tab" type="button" x-ref="aulas"
+                :class="{ active: tab === 'aulas' }" @click="tab = 'aulas'"
+                @keydown.left.prevent="tab = 'agora'; $refs.agora.focus()"
+                @keydown.right.prevent="tab = 'turmas'; $refs.turmas.focus()"
+                @keydown.home.prevent="tab = 'agora'; $refs.agora.focus()"
+                @keydown.end.prevent="tab = 'turmas'; $refs.turmas.focus()"
+                role="tab" aria-controls="dashboard-panel-aulas"
+                aria-selected="{% if not para_fazer_hoje and proximas %}true{% else %}false{% endif %}"
+                :aria-selected="tab === 'aulas'"
+                tabindex="{% if not para_fazer_hoje and proximas %}0{% else %}-1{% endif %}"
+                :tabindex="tab === 'aulas' ? 0 : -1">
+            Aulas{% if proximas %}<span class="count">{{ proximas|length }}</span>{% endif %}
+        </button>
+        <button id="dashboard-tab-turmas" class="dash-tab" type="button" x-ref="turmas"
+                :class="{ active: tab === 'turmas' }" @click="tab = 'turmas'"
+                @keydown.left.prevent="tab = 'aulas'; $refs.aulas.focus()"
+                @keydown.right.prevent="tab = 'agora'; $refs.agora.focus()"
+                @keydown.home.prevent="tab = 'agora'; $refs.agora.focus()"
+                role="tab" aria-controls="dashboard-panel-turmas"
+                aria-selected="{% if not para_fazer_hoje and not proximas %}true{% else %}false{% endif %}"
+                :aria-selected="tab === 'turmas'"
+                tabindex="{% if not para_fazer_hoje and not proximas %}0{% else %}-1{% endif %}"
+                :tabindex="tab === 'turmas' ? 0 : -1">
+            Turmas{% if turmas %}<span class="count">{{ turmas|length }}</span>{% endif %}
+        </button>
+    </div>
+
+    <div id="dashboard-panel-agora" x-show="tab === 'agora'" x-cloak role="tabpanel"
+         aria-labelledby="dashboard-tab-agora" tabindex="0">
+      <div class="focus-block">
         <div class="focus-block-head">
             <i data-lucide="target" aria-hidden="true"></i>
             <h2>Para fazer agora</h2>
@@ -96,84 +181,96 @@
             <div class="empty">
                 <i data-lucide="party-popper" aria-hidden="true"></i>
                 <h2>Tudo em dia por hoje!</h2>
-                <p>Nenhuma aula nova liberada hoje. Continue de onde parou nas suas aulas abaixo.</p>
+                {% if proximas %}
+                    <p>Nenhuma aula nova liberada hoje. Continue de onde parou na aba Aulas.</p>
+                {% else %}
+                    <p>Você concluiu todas as aulas disponíveis no momento.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div id="dashboard-panel-aulas" x-show="tab === 'aulas'" x-cloak role="tabpanel"
+         aria-labelledby="dashboard-tab-aulas" tabindex="0">
+        <div class="section-heading section-gap">
+            <div class="page-heading-row">
+                <div><h2>Continuar aulas</h2></div>
+            </div>
+        </div>
+        {% if proximas %}
+            <div class="feature-grid catalog-grid">
+                {% for publicada in proximas %}
+                    <article class="card lesson-card">
+                        <div class="card-cover">
+                            {% if publicada.aula.imagem %}
+                                <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">
+                            {% else %}
+                                <div class="card-cover-fallback">
+                                    <i data-lucide="book-open" aria-hidden="true"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-head">
+                            <span class="tag-disc">{{ publicada.turma.nome }}</span>
+                            {% if publicada.concluida %}
+                                <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
+                            {% else %}
+                                <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
+                            {% endif %}
+                        </div>
+                        <h3>{{ publicada.aula.titulo }}</h3>
+                        <p class="desc">{{ publicada.aula.disciplina.label }} · {{ publicada.aula.trilha.label }}</p>
+                        <div class="card-foot">
+                            <span class="date">
+                                <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m/Y' }}
+                            </span>
+                            <a class="btn btn-primary btn-sm student-card-action" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
+                                <i data-lucide="book-open" aria-hidden="true"></i> Estudar
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                <i data-lucide="party-popper" aria-hidden="true"></i>
+                <h2>Tudo concluído</h2>
+                <p>Você concluiu todas as aulas disponíveis no momento.</p>
             </div>
         {% endif %}
     </div>
 
-    <div class="section-heading section-gap">
-        <div class="page-heading-row">
-            <div><h2>Continuar aulas</h2></div>
+    <div id="dashboard-panel-turmas" x-show="tab === 'turmas'" x-cloak role="tabpanel"
+         aria-labelledby="dashboard-tab-turmas" tabindex="0">
+        <div class="section-heading section-gap">
+            <div class="page-heading-row">
+                <div><h2>Minhas turmas</h2></div>
+            </div>
         </div>
+        {% if turmas %}
+            <div class="feature-grid catalog-grid">
+                {% for turma in turmas %}
+                    <article class="card">
+                        <div class="card-head">
+                            <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                        </div>
+                        <h3>{{ turma.nome }}</h3>
+                        <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · Prof. {{ turma.professor.get_short_name }}</p>
+                        <div class="card-foot">
+                            <a class="btn btn-outline btn-sm" href="{% url 'classroom:aluno_turma_aulas' turma.pk %}"><i data-lucide="arrow-right" aria-hidden="true"></i> Ver aulas</a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                <i data-lucide="inbox" aria-hidden="true"></i>
+                <h2>Nenhuma turma ativa</h2>
+                <p>Quando você for matriculado em uma turma, ela aparecerá aqui.</p>
+            </div>
+        {% endif %}
     </div>
-    {% if proximas %}
-        <div class="feature-grid catalog-grid">
-            {% for publicada in proximas %}
-                <article class="card lesson-card">
-                    <div class="card-cover">
-                        {% if publicada.aula.imagem %}
-                            <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">
-                        {% else %}
-                            <div class="card-cover-fallback">
-                                <i data-lucide="book-open" aria-hidden="true"></i>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="card-head">
-                        <span class="tag-disc">{{ publicada.turma.nome }}</span>
-                        {% if publicada.concluida %}
-                            <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
-                        {% else %}
-                            <span class="badge badge-neutral"><i data-lucide="circle-dashed" aria-hidden="true"></i> Pendente</span>
-                        {% endif %}
-                    </div>
-                    <h3>{{ publicada.aula.titulo }}</h3>
-                    <p class="desc">{{ publicada.aula.disciplina.label }} · {{ publicada.aula.trilha.label }}</p>
-                    <div class="card-foot">
-                        <span class="date">
-                            <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> {{ publicada.disponivel_em|date:'d/m/Y' }}
-                        </span>
-                        <a class="btn btn-primary btn-sm student-card-action" href="{% url 'classroom:aluno_aula_detail' publicada.pk %}">
-                            <i data-lucide="book-open" aria-hidden="true"></i> Estudar
-                        </a>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="empty">
-            <i data-lucide="party-popper" aria-hidden="true"></i>
-            <h2>Tudo concluído</h2>
-            <p>Você concluiu todas as aulas disponíveis no momento.</p>
-        </div>
-    {% endif %}
-
-    <div class="section-heading section-gap">
-        <div class="page-heading-row">
-            <div><h2>Minhas turmas</h2></div>
-        </div>
-    </div>
-    {% if turmas %}
-        <div class="feature-grid catalog-grid">
-            {% for turma in turmas %}
-                <article class="card">                    <div class="card-head">
-                        <span class="tag-disc">{{ turma.disciplina.label }}</span>
-                    </div>
-                    <h3>{{ turma.nome }}</h3>
-                    <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · Prof. {{ turma.professor.get_short_name }}</p>
-                    <div class="card-foot">
-                        <a class="btn btn-outline btn-sm" href="{% url 'classroom:aluno_turma_aulas' turma.pk %}"><i data-lucide="arrow-right" aria-hidden="true"></i> Ver aulas</a>
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="empty">
-            <i data-lucide="inbox" aria-hidden="true"></i>
-            <h2>Nenhuma turma ativa</h2>
-            <p>Quando você for matriculado em uma turma, ela aparecerá aqui.</p>
-        </div>
-    {% endif %}
 
 </section>
 {% endblock %}

@@ -26,6 +26,14 @@ DANGEROUS_HTML_BLOCK_RE = re.compile(
     r'<\s*(script|style|iframe|object|embed|template)\b.*?<\s*/\s*\1\s*>',
     re.I | re.S,
 )
+THEAD_RE = re.compile(
+    r'(?P<open><thead\b[^>]*>)(?P<body>.*?)(?P<close></thead\s*>)',
+    re.I | re.S,
+)
+TH_WITHOUT_SCOPE_RE = re.compile(
+    r'<th\b(?![^>]*\bscope\s*=)(?P<attributes>[^>]*)>',
+    re.I,
+)
 
 CALLOUT_LABELS = {
     'conceito': 'Conceito',
@@ -175,6 +183,7 @@ def render_lesson_html(markdown_content):
         ],
         output_format='html5',
     )
+    rendered = normalize_table_header_scopes(rendered)
     return sanitize_lesson_html(rendered)
 
 
@@ -196,7 +205,19 @@ def render_teacher_notes_html(markdown_content):
         extensions=['extra', 'sane_lists'],
         output_format='html5',
     )
+    rendered = normalize_table_header_scopes(rendered)
     return sanitize_lesson_html(rendered)
+
+
+def normalize_table_header_scopes(html_content):
+    def replace_thead(match):
+        body = TH_WITHOUT_SCOPE_RE.sub(
+            r'<th scope="col"\g<attributes>>',
+            match.group('body'),
+        )
+        return ''.join((match.group('open'), body, match.group('close')))
+
+    return THEAD_RE.sub(replace_thead, html_content or '')
 
 
 def sanitize_lesson_html(html_content):

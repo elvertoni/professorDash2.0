@@ -9,23 +9,27 @@
         <h1>Aulas aprovadas do acervo</h1>
         <p>Consulte as aulas canônicas importadas do PROF-TONI por disciplina, trilha e ordem.</p>
         {% if user.is_superuser or user.is_admin_role %}
-            <div class="acervo-import">
+            <div class="acervo-import" id="importar-acervo">
                 <form method="post" action="{% url 'catalog:acervo_import_github' %}"
-                      onsubmit="return confirm('Importar/atualizar TODAS as matérias a partir do GitHub agora?');">
+                      aria-busy="false" data-import-form
+                      data-confirm-message="Importar/atualizar TODAS as matérias a partir do GitHub agora?"
+                      data-loading-label="Importando…">
                     {% csrf_token %}
-                    <button class="btn btn-outline" type="submit">
+                    <button class="btn btn-outline" type="submit" aria-disabled="false">
                         <i data-lucide="github" aria-hidden="true"></i>
-                        Importar tudo
+                        <span data-submit-label aria-live="polite">Importar tudo</span>
                     </button>
                 </form>
                 {% if selected_disciplina %}
                     <form method="post" action="{% url 'catalog:acervo_import_github' %}"
-                          onsubmit="return confirm('Atualizar só esta matéria a partir do GitHub agora?');">
+                          aria-busy="false" data-import-form
+                          data-confirm-message="Atualizar só esta matéria a partir do GitHub agora?"
+                          data-loading-label="Atualizando…">
                         {% csrf_token %}
                         <input type="hidden" name="disciplina" value="{{ selected_disciplina }}">
-                        <button class="btn btn-primary" type="submit">
+                        <button class="btn btn-primary" type="submit" aria-disabled="false">
                             <i data-lucide="refresh-cw" aria-hidden="true"></i>
-                            Atualizar esta matéria
+                            <span data-submit-label aria-live="polite">Atualizar esta matéria</span>
                         </button>
                     </form>
                 {% endif %}
@@ -78,9 +82,9 @@
                     </div>
                     <div class="card-head">
                         <span class="tag-disc">{{ aula.disciplina.label }}</span>
-                        <span class="badge badge-violet"><i data-lucide="layers" aria-hidden="true"></i> {{ aula.trilha.label }}</span>
                     </div>
-                    <h3>{{ aula.ordem|stringformat:'02d' }} · {{ aula.titulo }}</h3>
+                    <span class="badge badge-violet" title="{{ aula.trilha.label }}"><i data-lucide="layers" aria-hidden="true"></i> {{ aula.trilha.label|truncatechars:24 }}</span>
+                    <h2>{{ aula.ordem|stringformat:'02d' }} · {{ aula.titulo }}</h2>
                     <p class="desc">{{ aula.tema|default:aula.trilha.label }}</p>
                     <div class="card-foot">
                         <span></span>
@@ -94,8 +98,24 @@
     {% else %}
         <div class="empty">
             <i data-lucide="inbox" aria-hidden="true"></i>
-            <h2>Nenhuma aula encontrada</h2>
-            <p>Importe o acervo ou ajuste os filtros para navegar pelas aulas aprovadas.</p>
+            {% if selected_disciplina or selected_trilha %}
+                <h2>Nenhuma aula corresponde aos filtros</h2>
+                <p>Remova os filtros para voltar a ver todas as aulas disponíveis.</p>
+                <a class="btn btn-outline" href="{% url 'catalog:aula_list' %}">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                    Limpar filtros
+                </a>
+            {% elif user.is_superuser or user.is_admin_role %}
+                <h2>O catálogo ainda está vazio</h2>
+                <p>Importe as aulas aprovadas para começar a organizar as publicações.</p>
+                <a class="btn btn-primary" href="#importar-acervo">
+                    <i data-lucide="download" aria-hidden="true"></i>
+                    Ir para importação
+                </a>
+            {% else %}
+                <h2>Nenhuma aula disponível</h2>
+                <p>As aulas aparecerão aqui quando estiverem prontas para consulta.</p>
+            {% endif %}
         </div>
     {% endif %}
 
@@ -111,4 +131,27 @@
         </nav>
     {% endif %}
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (function () {
+        document.querySelectorAll('[data-import-form]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!window.confirm(form.dataset.confirmMessage)) {
+                    event.preventDefault();
+                    return;
+                }
+
+                var button = form.querySelector('button[type="submit"]');
+                var label = form.querySelector('[data-submit-label]');
+
+                form.setAttribute('aria-busy', 'true');
+                button.disabled = true;
+                button.setAttribute('aria-disabled', 'true');
+                label.textContent = form.dataset.loadingLabel;
+            });
+        });
+    }());
+</script>
 {% endblock %}

@@ -17,7 +17,8 @@
     </div>
 
     {% if materiais %}
-        <div class="feature-grid catalog-grid">
+        <h2 id="materiais-disponiveis-heading" class="sr-only">Materiais disponíveis</h2>
+        <div class="grid cols-3" aria-labelledby="materiais-disponiveis-heading">
             {% for material in materiais %}
                 <article class="card">
                     <div class="card-head">

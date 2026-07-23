@@ -3,28 +3,47 @@
     <div class="toast e" role="alert"><i data-lucide="alert-triangle" aria-hidden="true"></i><div>{{ form.non_field_errors }}</div></div>
 {% endif %}
 {% for field in form %}
-    <div class="field">
-        {% with input_type=field.field.widget.input_type multiple=field.field.widget.allow_multiple_selected %}
+    {% with input_type=field.field.widget.input_type multiple=field.field.widget.allow_multiple_selected %}
+        {% if input_type == 'checkbox' and multiple or input_type == 'radio' %}
+            <fieldset class="field">
+        {% else %}
+            <div class="field">
+        {% endif %}
             {% if input_type == 'checkbox' and not multiple %}
                 <label class="check" for="{{ field.id_for_label }}">
                     {{ field|aria_field }}
-                    <span>{{ field.label }}</span>
+                    <span>
+                        {{ field.label }}
+                        <span class="muted">({% if field.field.required %}obrigatório{% else %}opcional{% endif %})</span>
+                    </span>
                 </label>
             {% elif input_type == 'checkbox' or input_type == 'radio' %}
-                <span class="field-label">{{ field.label }}</span>
+                <legend class="field-label">
+                    {{ field.label }}
+                    <span class="muted">({% if field.field.required %}obrigatório{% else %}opcional{% endif %})</span>
+                </legend>
                 <div class="choice-group">
                     {{ field|aria_field }}
                 </div>
             {% else %}
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    <span class="muted">({% if field.field.required %}obrigatório{% else %}opcional{% endif %})</span>
+                </label>
                 {{ field|aria_field }}
             {% endif %}
-        {% endwith %}
-        {% if field.help_text %}
-            <div class="hint" id="hint_{{ field.id_for_label }}">{{ field.help_text }}</div>
+            {% if field.help_text %}
+                <div class="hint" id="hint_{{ field.id_for_label }}">{{ field.help_text }}</div>
+            {% elif field.name == upload_field_name and upload_help_text %}
+                <div class="hint" id="hint_{{ field.id_for_label }}">{{ upload_help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+                <div class="err" id="error_{{ field.id_for_label }}" role="alert">{{ field.errors }}</div>
+            {% endif %}
+        {% if input_type == 'checkbox' and multiple or input_type == 'radio' %}
+            </fieldset>
+        {% else %}
+            </div>
         {% endif %}
-        {% if field.errors %}
-            <div class="err" id="error_{{ field.id_for_label }}" role="alert">{{ field.errors }}</div>
-        {% endif %}
-    </div>
+    {% endwith %}
 {% endfor %}

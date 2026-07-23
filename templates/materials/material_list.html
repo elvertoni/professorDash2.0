@@ -27,8 +27,9 @@
         </a>
     </div>
 
+    <h2 id="materiais-cadastrados-heading" class="sr-only">Materiais cadastrados</h2>
     <div class="tbl-wrap">
-        <table class="tbl">
+        <table class="tbl" aria-labelledby="materiais-cadastrados-heading">
             <thead>
                 <tr>
                     <th scope="col">Material</th>
@@ -62,10 +63,12 @@
                         </td>
                         <td>
                             <div class="tbl-actions">
-                                <a class="icon-btn table-icon-btn" href="{% url 'materials:material_update' material.pk %}" title="Editar material">
+                                <a class="icon-btn table-icon-btn" href="{% url 'materials:material_update' material.pk %}"
+                                   title="Editar material" aria-label="Editar material {{ material.titulo }}">
                                     <i data-lucide="edit-3" aria-hidden="true"></i>
                                 </a>
-                                <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'materials:material_delete' material.pk %}" title="Excluir material">
+                                <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'materials:material_delete' material.pk %}"
+                                   title="Excluir material" aria-label="Excluir material {{ material.titulo }}">
                                     <i data-lucide="trash-2" aria-hidden="true"></i>
                                 </a>
                             </div>

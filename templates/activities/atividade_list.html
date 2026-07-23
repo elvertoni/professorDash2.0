@@ -21,7 +21,11 @@
     </div>
 
     {% if atividades %}
-        <form method="post" x-data="checkGrid()">
+        {% if grid_rows %}
+        <form method="post" x-data="checkGrid()"
+              @change="updatePending()"
+              @submit="submitGrid($event)"
+              :aria-busy="submitting.toString()">
             {% csrf_token %}
             <div class="tbl-wrap check-grid-wrap">
                 <table class="tbl check-grid">
@@ -32,16 +36,24 @@
                             {% for act in atividades %}
                                 <th scope="col" class="check-grid__col-act">
                                     <div class="check-grid__act-header">
-                                        <span class="check-grid__act-title" title="{{ act.titulo }}">{{ act.titulo }}</span>
+                                        <span class="check-grid__act-title" title="{{ act.titulo }}">
+                                            {{ act.titulo }}
+                                        </span>
                                         {% if act.data %}
                                             <span class="check-grid__act-date">{{ act.data|date:'d/m' }}</span>
                                         {% endif %}
                                     </div>
                                     <div class="check-grid__act-actions">
-                                        <a href="{% url 'activities:atividade_update' act.pk %}" title="Editar atividade" class="check-grid__act-btn">
+                                        <a href="{% url 'activities:atividade_update' act.pk %}"
+                                           title="Editar atividade"
+                                           aria-label="Editar atividade {{ act.titulo }}"
+                                           class="icon-btn">
                                             <i data-lucide="edit-3" aria-hidden="true"></i>
                                         </a>
-                                        <a href="{% url 'activities:atividade_delete' act.pk %}" title="Excluir atividade" class="check-grid__act-btn check-grid__act-btn--danger">
+                                        <a href="{% url 'activities:atividade_delete' act.pk %}"
+                                           title="Excluir atividade"
+                                           aria-label="Excluir atividade {{ act.titulo }}"
+                                           class="icon-btn btn-danger-outline">
                                             <i data-lucide="trash-2" aria-hidden="true"></i>
                                         </a>
                                     </div>
@@ -53,7 +65,7 @@
                         {% for row in grid_rows %}
                             <tr>
                                 <td class="check-grid__num mono">{{ row.counter }}</td>
-                                <td class="check-grid__name">
+                                <td class="check-grid__name check-grid__col-name">
                                     <span class="name">
                                         <span class="avatar sm" aria-hidden="true">{{ row.aluno.get_short_name|slice:':2'|upper }}</span>
                                         <span>{{ row.aluno.nome_completo }}</span>
@@ -62,20 +74,26 @@
                                 {% for item in row.checks %}
                                     <td class="check-grid__cell">
                                         <div class="check-grid__cell-inner">
-                                            <input type="checkbox"
-                                                   class="check"
-                                                   name="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
-                                                   id="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
-                                                   aria-label="Feito por {{ row.aluno.nome_completo }} em {{ item.atividade.titulo }}"
-                                                   {% if item.check and item.check.feito %}checked{% endif %}>
+                                            <label class="check"
+                                                   for="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                   title="Marcar {{ row.aluno.nome_completo }} em {{ item.atividade.titulo }}">
+                                                <input type="checkbox"
+                                                       name="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                       id="check_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                       data-tracked-field
+                                                       {% if item.check and item.check.feito %}checked{% endif %}>
+                                                <span class="sr-only">Feito por {{ row.aluno.nome_completo }} em {{ item.atividade.titulo }}</span>
+                                            </label>
                                             <input type="hidden"
                                                    name="obs_{{ row.aluno.id }}_{{ item.atividade.id }}"
                                                    id="obs_{{ row.aluno.id }}_{{ item.atividade.id }}"
+                                                   data-tracked-field
                                                    value="{{ item.check.observacao|default:'' }}">
                                             <button type="button"
-                                                    class="check-grid__obs-btn {% if item.check and item.check.observacao %}check-grid__obs-btn--active{% endif %}"
+                                                    class="icon-btn {% if item.check and item.check.observacao %}check-grid__obs-btn--active{% endif %}"
                                                     title="{% if item.check and item.check.observacao %}{{ item.check.observacao }}{% else %}Adicionar observação{% endif %}"
-                                                    @click="editObs('obs_{{ row.aluno.id }}_{{ item.atividade.id }}', '{{ row.aluno.nome_completo|escapejs }}', '{{ item.atividade.titulo|escapejs }}')">
+                                                    aria-label="{% if item.check and item.check.observacao %}Editar{% else %}Adicionar{% endif %} observação de {{ row.aluno.nome_completo }} em {{ item.atividade.titulo }}"
+                                                    @click="editObs('obs_{{ row.aluno.id }}_{{ item.atividade.id }}', '{{ row.aluno.nome_completo|escapejs }}', '{{ item.atividade.titulo|escapejs }}', $event)">
                                                 <i data-lucide="message-circle" aria-hidden="true"></i>
                                             </button>
                                         </div>
@@ -86,14 +104,58 @@
                     </tbody>
                 </table>
             </div>
-            <div class="form-actions">
+            <div class="form-actions check-grid__actionbar">
+                <span class="badge badge-warning" x-show="pendingCount > 0" x-cloak
+                      role="status" aria-live="polite">
+                    <i data-lucide="circle-alert" aria-hidden="true"></i>
+                    <span x-text="pendingLabel"></span>
+                </span>
                 <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Voltar</a>
-                <button class="btn btn-primary" type="submit">
-                    <i data-lucide="save" aria-hidden="true"></i>
-                    Salvar alterações
+                <button class="btn btn-primary" type="submit"
+                        :disabled="submitting || pendingCount === 0">
+                    <i data-lucide="save" aria-hidden="true" x-show="!submitting"></i>
+                    <i class="spinner" data-lucide="loader-circle" aria-hidden="true" x-show="submitting" x-cloak></i>
+                    <span x-text="submitting ? 'Salvando…' : 'Salvar alterações'">Salvar alterações</span>
                 </button>
             </div>
+
+            <dialog class="modal" x-ref="observationDialog"
+                    aria-labelledby="observation-dialog-title"
+                    @click.self="closeObservation()"
+                    @close="restoreObservationFocus()">
+                <h2 id="observation-dialog-title">Editar observação</h2>
+                <p class="muted">
+                    <span x-text="obsStudent"></span> · <span x-text="obsActivity"></span>
+                </p>
+                <div class="field">
+                    <label for="observation-text">Observação</label>
+                    <textarea class="textarea" id="observation-text" maxlength="280"
+                              aria-describedby="observation-counter"
+                              x-model="obsDraft"
+                              x-ref="observationText"></textarea>
+                    <p class="muted" id="observation-counter">
+                        <span x-text="obsDraft.length"></span>/280 caracteres
+                    </p>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-ghost" type="button" @click="closeObservation()">Cancelar</button>
+                    <button class="btn btn-primary" type="button" @click="saveObservation()">
+                        Salvar observação
+                    </button>
+                </div>
+            </dialog>
         </form>
+        {% else %}
+            <div class="empty">
+                <i data-lucide="users" aria-hidden="true"></i>
+                <h2>Nenhum aluno matriculado</h2>
+                <p>Matricule um aluno para usar a grade de acompanhamento.</p>
+                <a class="btn btn-primary" href="{% url 'classroom:matricula_create' turma.pk %}">
+                    <i data-lucide="user-plus" aria-hidden="true"></i>
+                    Matricular aluno
+                </a>
+            </div>
+        {% endif %}
     {% else %}
         <div class="empty">
             <i data-lucide="clipboard-list" aria-hidden="true"></i>
@@ -110,24 +172,123 @@
 <script>
 function checkGrid() {
     return {
-        editObs(fieldId, alunoName, atividadeTitulo) {
-            const field = document.getElementById(fieldId);
-            const currentVal = field.value || '';
-            const newVal = prompt(
-                `Observação para ${alunoName}\n${atividadeTitulo}`,
-                currentVal
-            );
-            if (newVal !== null) {
-                field.value = newVal.trim().substring(0, 280);
-                const btn = field.nextElementSibling;
-                if (newVal.trim()) {
-                    btn.classList.add('check-grid__obs-btn--active');
-                    btn.title = newVal.trim();
-                } else {
-                    btn.classList.remove('check-grid__obs-btn--active');
-                    btn.title = 'Adicionar observação';
-                }
+        initialState: {},
+        pendingCount: 0,
+        submitting: false,
+        beforeUnloadHandler: null,
+        obsFieldId: '',
+        obsStudent: '',
+        obsActivity: '',
+        obsDraft: '',
+        obsTrigger: null,
+
+        get pendingLabel() {
+            if (this.pendingCount === 1) {
+                return '1 alteração não salva';
             }
+            return `${this.pendingCount} alterações não salvas`;
+        },
+
+        init() {
+            this.$nextTick(() => {
+                this.captureInitialState();
+                this.beforeUnloadHandler = (event) => {
+                    if (this.pendingCount === 0 || this.submitting) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.returnValue = '';
+                };
+                window.addEventListener('beforeunload', this.beforeUnloadHandler);
+            });
+        },
+
+        destroy() {
+            if (this.beforeUnloadHandler) {
+                window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+            }
+        },
+
+        fieldValue(field) {
+            return field.type === 'checkbox' ? field.checked : field.value;
+        },
+
+        captureInitialState() {
+            this.initialState = {};
+            this.$root.querySelectorAll('[data-tracked-field]').forEach((field) => {
+                this.initialState[field.name] = this.fieldValue(field);
+            });
+            this.updatePending();
+        },
+
+        updatePending() {
+            let pending = 0;
+            this.$root.querySelectorAll('[data-tracked-field]').forEach((field) => {
+                if (this.fieldValue(field) !== this.initialState[field.name]) {
+                    pending += 1;
+                }
+            });
+            this.pendingCount = pending;
+        },
+
+        submitGrid(event) {
+            if (this.pendingCount === 0 || this.submitting) {
+                event.preventDefault();
+                return;
+            }
+            this.submitting = true;
+        },
+
+        editObs(fieldId, alunoName, atividadeTitulo, event) {
+            const field = document.getElementById(fieldId);
+            if (!field) {
+                return;
+            }
+
+            this.obsFieldId = fieldId;
+            this.obsStudent = alunoName;
+            this.obsActivity = atividadeTitulo;
+            this.obsDraft = field.value || '';
+            this.obsTrigger = event.currentTarget;
+            this.$nextTick(() => {
+                this.$refs.observationDialog.showModal();
+                this.$refs.observationText.focus();
+            });
+        },
+
+        saveObservation() {
+            const field = document.getElementById(this.obsFieldId);
+            if (!field) {
+                this.closeObservation();
+                return;
+            }
+
+            const value = this.obsDraft.trim().substring(0, 280);
+            field.value = value;
+            this.obsTrigger.classList.toggle('check-grid__obs-btn--active', Boolean(value));
+            this.obsTrigger.title = value || 'Adicionar observação';
+            this.obsTrigger.setAttribute(
+                'aria-label',
+                `${value ? 'Editar' : 'Adicionar'} observação de ${this.obsStudent} em ${this.obsActivity}`
+            );
+            this.updatePending();
+            this.closeObservation();
+        },
+
+        closeObservation() {
+            if (this.$refs.observationDialog.open) {
+                this.$refs.observationDialog.close();
+            }
+        },
+
+        restoreObservationFocus() {
+            const trigger = this.obsTrigger;
+            this.obsFieldId = '';
+            this.obsStudent = '';
+            this.obsActivity = '';
+            this.obsDraft = '';
+            this.obsTrigger = null;
+            this.$nextTick(() => trigger?.focus());
         }
     };
 }

@@ -17,36 +17,32 @@
             <p>Publique aulas do catálogo, defina a data de liberação e a ordem para os alunos.</p>
         </div>
         <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
-              onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
+              x-data="{ submitting: false }"
+              @submit="if (confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?')) { submitting = true } else { $event.preventDefault() }"
+              :aria-busy="submitting.toString()">
             {% csrf_token %}
-            <button class="btn btn-primary" type="submit">
-                <i data-lucide="refresh-cw" aria-hidden="true"></i>
-                Sincronizar aulas
+            <button class="btn btn-primary" type="submit" :disabled="submitting">
+                <i data-lucide="refresh-cw" aria-hidden="true" x-show="!submitting"></i>
+                <i class="spinner" data-lucide="loader-circle" aria-hidden="true" x-show="submitting" x-cloak></i>
+                <span x-text="submitting ? 'Sincronizando…' : 'Sincronizar aulas'">Sincronizar aulas</span>
             </button>
         </form>
     </div>
 
-    <div class="grid cols-4 action-grid">
-        <div class="kpi">
-            <div class="ico green"><i data-lucide="eye" aria-hidden="true"></i></div>
-            <div class="val">{{ stats.visiveis }}</div>
-            <div class="lab">Visíveis para alunos</div>
+    <div class="panel page-heading-row compact" role="region" aria-label="Resumo das aulas da turma">
+        <div class="status-row">
+            <span class="muted"><strong class="mono">{{ stats.total }}</strong> na turma</span>
+            <span class="muted"><strong class="mono">{{ stats.visiveis }}</strong> visíveis</span>
+            <span class="muted"><strong class="mono">{{ stats.agendadas }}</strong> agendadas</span>
         </div>
-        <div class="kpi">
-            <div class="ico yellow"><i data-lucide="clock" aria-hidden="true"></i></div>
-            <div class="val">{{ stats.agendadas }}</div>
-            <div class="lab">Agendadas</div>
-        </div>
-        <div class="kpi">
-            <div class="ico violet"><i data-lucide="eye-off" aria-hidden="true"></i></div>
-            <div class="val">{{ stats.ocultas }}</div>
-            <div class="lab">Ocultas</div>
-        </div>
-        <div class="kpi">
-            <div class="ico cyan"><i data-lucide="library" aria-hidden="true"></i></div>
-            <div class="val">{{ stats.total }}</div>
-            <div class="lab">Na turma</div>
-        </div>
+        {% if stats.ocultas %}
+            <span class="badge badge-warning">
+                <i data-lucide="eye-off" aria-hidden="true"></i>
+                {{ stats.ocultas }} aula{{ stats.ocultas|pluralize }} oculta{{ stats.ocultas|pluralize }} para publicar
+            </span>
+        {% else %}
+            <span class="muted">Nenhuma aula oculta</span>
+        {% endif %}
     </div>
 
     <div class="panel account-form">
@@ -55,14 +51,17 @@
             <p class="muted">Use quando quiser escolher uma aula específica. Para liberar a trilha inteira, use Sincronizar aulas.</p>
         </div>
         {% if stats.catalogo_disponivel %}
-            <form method="post">
+            <form method="post" x-data="{ submitting: false }"
+                  @submit="submitting = true"
+                  :aria-busy="submitting.toString()">
                 {% csrf_token %}
                 {% include 'accounts/partials/form_fields.html' %}
                 <div class="form-actions">
                     <a class="btn btn-outline" href="{{ turma.get_absolute_url }}">Voltar à turma</a>
-                    <button class="btn btn-primary" type="submit">
-                        <i data-lucide="send" aria-hidden="true"></i>
-                        Publicar aula
+                    <button class="btn btn-primary" type="submit" :disabled="submitting">
+                        <i data-lucide="send" aria-hidden="true" x-show="!submitting"></i>
+                        <i class="spinner" data-lucide="loader-circle" aria-hidden="true" x-show="submitting" x-cloak></i>
+                        <span x-text="submitting ? 'Publicando…' : 'Publicar aula'">Publicar aula</span>
                     </button>
                 </div>
             </form>
@@ -75,11 +74,14 @@
                 {% else %}
                     <p>Sincronize o acervo para importar e publicar as aulas de {{ turma.disciplina.label }}.</p>
                     <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
-                          onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
+                          x-data="{ submitting: false }"
+                          @submit="if (confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?')) { submitting = true } else { $event.preventDefault() }"
+                          :aria-busy="submitting.toString()">
                         {% csrf_token %}
-                        <button class="btn btn-primary" type="submit">
-                            <i data-lucide="refresh-cw" aria-hidden="true"></i>
-                            Sincronizar aulas
+                        <button class="btn btn-primary" type="submit" :disabled="submitting">
+                            <i data-lucide="refresh-cw" aria-hidden="true" x-show="!submitting"></i>
+                            <i class="spinner" data-lucide="loader-circle" aria-hidden="true" x-show="submitting" x-cloak></i>
+                            <span x-text="submitting ? 'Sincronizando…' : 'Sincronizar aulas'">Sincronizar aulas</span>
                         </button>
                     </form>
                 {% endif %}
@@ -108,14 +110,20 @@
                                     <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_reorder' turma.pk publicada.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="direction" value="up">
-                                        <button class="btn btn-outline btn-sm" type="submit" aria-label="Subir {{ publicada.aula.titulo }} na ordem" title="Subir">
+                                        <button class="btn btn-outline btn-sm" type="submit"
+                                                aria-label="Subir {{ publicada.aula.titulo }} na ordem"
+                                                title="{% if forloop.first %}Esta aula já é a primeira{% else %}Subir{% endif %}"
+                                                {% if forloop.first %}disabled{% endif %}>
                                             <i data-lucide="arrow-up" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                     <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_reorder' turma.pk publicada.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="direction" value="down">
-                                        <button class="btn btn-outline btn-sm" type="submit" aria-label="Descer {{ publicada.aula.titulo }} na ordem" title="Descer">
+                                        <button class="btn btn-outline btn-sm" type="submit"
+                                                aria-label="Descer {{ publicada.aula.titulo }} na ordem"
+                                                title="{% if forloop.last %}Esta aula já é a última{% else %}Descer{% endif %}"
+                                                {% if forloop.last %}disabled{% endif %}>
                                             <i data-lucide="arrow-down" aria-hidden="true"></i>
                                         </button>
                                     </form>
@@ -131,9 +139,10 @@
                             </span>
                         </td>
                         <td class="mono text-nowrap">{{ publicada.disponivel_em|date:'d/m/Y H:i' }}</td>
-                        <td class="text-nowrap">
+                        <td>
                             {% if publicada.aula.status != 'aprovada' %}
-                                <span class="badge badge-danger" title="Esta aula foi definida como {{ publicada.aula.get_status_display }} no catálogo. Alunos não conseguem visualizá-la."><i data-lucide="alert-circle" aria-hidden="true"></i> {{ publicada.aula.get_status_display }}</span>
+                                <span class="badge badge-danger"><i data-lucide="alert-circle" aria-hidden="true"></i> {{ publicada.aula.get_status_display }}</span>
+                                <small class="muted">Alunos não conseguem abrir esta aula até ela ser aprovada no catálogo.</small>
                             {% elif not publicada.publicada %}
                                 <span class="badge badge-neutral"><i data-lucide="eye-off" aria-hidden="true"></i> Despublicada</span>
                             {% elif publicada.is_scheduled %}
@@ -147,25 +156,33 @@
                                 <a class="btn btn-outline btn-sm" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" title="Ver aula (Prévia)">
                                     <i data-lucide="book-open" aria-hidden="true"></i> Ver aula
                                 </a>
-                                <a class="btn btn-primary btn-sm" href="{% url 'classroom:aula_apresentar' turma.pk publicada.pk %}" title="Projetar na sala (TV)">
+                                <a class="btn btn-ghost btn-sm" href="{% url 'classroom:aula_apresentar' turma.pk publicada.pk %}" title="Projetar na sala (TV)">
                                     <i data-lucide="monitor-play" aria-hidden="true"></i> Apresentar
                                 </a>
                                 {% if publicada.publicada %}
-                                    <a class="icon-btn table-icon-btn btn-warning-outline" href="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}" title="Despublicar (Ocultar dos alunos)">
+                                    <a class="icon-btn table-icon-btn btn-warning-outline" href="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}"
+                                       title="Despublicar (Ocultar dos alunos)"
+                                       aria-label="Despublicar {{ publicada.aula.titulo }} e ocultar dos alunos">
                                         <i data-lucide="eye-off" aria-hidden="true"></i>
                                     </a>
                                 {% else %}
                                     <form class="inline-form" method="post" action="{% url 'classroom:aula_publicada_toggle' turma.pk publicada.pk %}">
                                         {% csrf_token %}
-                                        <button class="icon-btn table-icon-btn btn-warning-outline" type="submit" title="Publicar (Tornar visível para alunos)">
+                                        <button class="icon-btn table-icon-btn btn-warning-outline" type="submit"
+                                                title="Publicar (Tornar visível para alunos)"
+                                                aria-label="Publicar {{ publicada.aula.titulo }} para os alunos">
                                             <i data-lucide="eye" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                 {% endif %}
-                                <a class="icon-btn table-icon-btn" href="{% url 'classroom:aula_publicada_update' turma.pk publicada.pk %}" title="Ajustar ordem ou liberação">
+                                <a class="icon-btn table-icon-btn" href="{% url 'classroom:aula_publicada_update' turma.pk publicada.pk %}"
+                                   title="Ajustar ordem ou liberação"
+                                   aria-label="Ajustar ordem ou liberação de {{ publicada.aula.titulo }}">
                                     <i data-lucide="edit-3" aria-hidden="true"></i>
                                 </a>
-                                <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'classroom:aula_publicada_delete' turma.pk publicada.pk %}" title="Remover da turma">
+                                <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'classroom:aula_publicada_delete' turma.pk publicada.pk %}"
+                                   title="Remover da turma"
+                                   aria-label="Remover {{ publicada.aula.titulo }} da turma">
                                     <i data-lucide="trash-2" aria-hidden="true"></i>
                                 </a>
                             </div>
@@ -174,16 +191,19 @@
                 {% empty %}
                     <tr>
                         <td colspan="5">
-                            <div class="empty">
+                            <div class="empty in-table">
                                 <i data-lucide="inbox" aria-hidden="true"></i>
                                 <h2>Nenhuma aula publicada</h2>
                                 <p>Sincronize o acervo para liberar as aulas de {{ turma.disciplina.label }} nesta turma.</p>
                                 <form method="post" action="{% url 'classroom:turma_aulas_sync' turma.pk %}"
-                                      onsubmit="return confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?');">
+                                      x-data="{ submitting: false }"
+                                      @submit="if (confirm('Sincronizar as aulas de {{ turma.disciplina.label|escapejs }} a partir do head e publicar todas na turma?')) { submitting = true } else { $event.preventDefault() }"
+                                      :aria-busy="submitting.toString()">
                                     {% csrf_token %}
-                                    <button class="btn btn-primary" type="submit">
-                                        <i data-lucide="refresh-cw" aria-hidden="true"></i>
-                                        Sincronizar aulas
+                                    <button class="btn btn-primary" type="submit" :disabled="submitting">
+                                        <i data-lucide="refresh-cw" aria-hidden="true" x-show="!submitting"></i>
+                                        <i class="spinner" data-lucide="loader-circle" aria-hidden="true" x-show="submitting" x-cloak></i>
+                                        <span x-text="submitting ? 'Sincronizando…' : 'Sincronizar aulas'">Sincronizar aulas</span>
                                     </button>
                                 </form>
                             </div>

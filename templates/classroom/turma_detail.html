@@ -41,9 +41,9 @@
     </div>
 
     <div class="grid cols-4 action-grid">
-        <div class="panel action-panel">
-            <div>
-                <span class="eyebrow">Conteúdo</span>
+        <div class="panel action-panel" role="region" aria-labelledby="conteudo-heading">
+            <div class="section-heading compact">
+                <h2 id="conteudo-heading">Conteúdo</h2>
                 <p class="desc">Gerenciar aulas, atividades e arquivos.</p>
             </div>
             <div class="stack">
@@ -70,9 +70,9 @@
             </div>
         </div>
 
-        <div class="panel action-panel">
-            <div>
-                <span class="eyebrow">Alunos</span>
+        <div class="panel action-panel" role="region" aria-labelledby="alunos-heading">
+            <div class="section-heading compact">
+                <h2 id="alunos-heading">Alunos</h2>
                 <p class="desc">Matricular novos alunos ou importar via CSV.</p>
             </div>
             <div class="stack">
@@ -87,9 +87,9 @@
             </div>
         </div>
 
-        <div class="panel action-panel" id="relatorios">
-            <div>
-                <span class="eyebrow">Relatórios</span>
+        <div class="panel action-panel" id="relatorios" role="region" aria-labelledby="relatorios-heading">
+            <div class="section-heading compact">
+                <h2 id="relatorios-heading">Relatórios</h2>
                 <p class="desc">Exportar boletins e relatórios consolidados.</p>
             </div>
             <div class="stack">
@@ -104,9 +104,9 @@
             </div>
         </div>
 
-        <div class="panel action-panel">
-            <div>
-                <span class="eyebrow">Configurações</span>
+        <div class="panel action-panel" role="region" aria-labelledby="configuracoes-heading">
+            <div class="section-heading compact">
+                <h2 id="configuracoes-heading">Configurações</h2>
                 <p class="desc">Configurações gerais do cadastro da turma.</p>
             </div>
             <div class="stack">
@@ -158,11 +158,15 @@
                                     <i data-lucide="file-text" aria-hidden="true"></i>
                                     Boletim
                                 </a>
-                                <a class="icon-btn table-icon-btn" href="{% url 'classroom:matricula_update' turma.pk matricula.pk %}" title="Editar matrícula">
+                                <a class="icon-btn table-icon-btn" href="{% url 'classroom:matricula_update' turma.pk matricula.pk %}"
+                                   title="Editar matrícula"
+                                   aria-label="Editar matrícula de {{ matricula.aluno.nome_completo }}">
                                     <i data-lucide="edit-3" aria-hidden="true"></i>
                                 </a>
                                 {% if matricula.status == 'ativa' %}
-                                    <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'classroom:matricula_delete' turma.pk matricula.pk %}" title="Desmatricular aluno">
+                                    <a class="icon-btn table-icon-btn btn-danger-outline" href="{% url 'classroom:matricula_delete' turma.pk matricula.pk %}"
+                                       title="Desmatricular aluno"
+                                       aria-label="Desmatricular {{ matricula.aluno.nome_completo }}">
                                         <i data-lucide="user-x" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
