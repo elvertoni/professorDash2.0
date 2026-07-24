@@ -2208,7 +2208,14 @@ table.tbl {
 }
 
 /* ── Lightbox (overlay fullscreen da imagem de capa) ──────────────────── */
-.lesson-lightbox {
+/* Ocultar dialog quando fechado (sem [open]) */
+dialog.lesson-lightbox:not([open]),
+dialog.deck-lightbox:not([open]) {
+    display: none !important;
+}
+
+.lesson-lightbox[open],
+.deck-lightbox[open] {
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -2219,6 +2226,12 @@ table.tbl {
     cursor: zoom-out;
     backdrop-filter: blur(8px);
     animation: lightbox-in .25s ease-out;
+    border: none;
+    padding: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100%;
+    height: 100%;
 }
 
 .lesson-lightbox img {
