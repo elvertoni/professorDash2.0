@@ -166,7 +166,7 @@
         fromTemplate(id) {
             const tpl = document.getElementById(id);
             if (!tpl) return null;
-            return tpl.content.firstElementChild.cloneNode(true);
+            return tpl.content.cloneNode(true);
         }
 
         renderSlideSpec(spec, index) {
