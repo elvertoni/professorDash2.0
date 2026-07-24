@@ -516,6 +516,22 @@
             const fsBtn = document.querySelector('[data-deck-fullscreen]');
             if (fsBtn) fsBtn.addEventListener('click', () => this.toggleFullscreen());
 
+            // Lightbox da Capa Ampliada
+            const lightboxDialog = document.querySelector('[data-deck-lightbox]');
+            if (lightboxDialog) {
+                document.addEventListener('click', (e) => {
+                    const trigger = e.target.closest('[data-deck-lightbox-open]');
+                    const closeBtn = e.target.closest('[data-deck-lightbox-close]');
+                    if (trigger) {
+                        e.preventDefault();
+                        lightboxDialog.showModal();
+                    } else if (closeBtn || (e.target === lightboxDialog)) {
+                        e.preventDefault();
+                        lightboxDialog.close();
+                    }
+                });
+            }
+
             // Gesture Swipe no Palco para Smartboards
             let touchStartX = 0;
             this.stage.addEventListener('touchstart', (e) => {
