@@ -28,7 +28,11 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
 from accounts.models import User
 from catalog.models import Aula
-from catalog.parser import render_teacher_notes_html, sanitize_lesson_html
+from catalog.parser import (
+    render_teacher_notes_html,
+    render_teacher_notes_map,
+    sanitize_lesson_html,
+)
 from catalog.services import AcervoDownloadError, download_acervo
 
 from .forms import (
@@ -601,6 +605,7 @@ class AulaPresentationView(AulaPublicadaActionMixin, View):
                 'aula': aula,
                 'lesson_html': sanitize_lesson_html(aula.conteudo_html),
                 'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md),
+                'teacher_notes_map': render_teacher_notes_map(aula.conteudo_md),
             },
         )
 

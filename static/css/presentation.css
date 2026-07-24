@@ -28,6 +28,7 @@
     --deck-content-fs: calc(var(--deck-fs) * 1.25);
     --deck-dense-fs: calc(var(--deck-fs) * 1.0);
     --deck-caption-fs: calc(var(--deck-fs) * 0.8);
+    --deck-scale-floor: 0.88;
 
     /* Transições GPU suaves */
     --deck-ease: cubic-bezier(.16, 1, .3, 1);
@@ -118,7 +119,7 @@ dialog.deck-lightbox img {
 /* ── Z-Index Map ───────────────────────────────────────────────────────── */
 .deck-spotlight { z-index: 10; }
 .deck-stage { z-index: 15; }
-.deck-rail { z-index: 25; }
+.deck-rail { z-index: 45; }
 .deck-progress { z-index: 30; }
 .deck-stage-nav { z-index: 40; }
 .deck-controls,
@@ -136,6 +137,57 @@ dialog.deck-lightbox img {
     opacity: 0;
     pointer-events: none;
     transform: translateY(10px);
+}
+
+.deck-body.is-idle:not(.is-laser-active) .deck-rail {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Trilho de navegação: pontos discretos à direita, recuam no idle. */
+.deck-rail {
+    position: fixed;
+    right: clamp(12px, 2vw, 28px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 8px;
+    transition: opacity .4s var(--deck-ease);
+}
+
+.deck-rail-dot {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    cursor: pointer;
+    transition: background .25s var(--deck-ease), transform .25s var(--deck-ease);
+}
+
+.deck-rail-dot:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.25);
+}
+
+.deck-rail-dot.is-active {
+    background: var(--deck-accent);
+    transform: scale(1.35);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.55);
+}
+
+.deck-rail-dot:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 3px;
+}
+
+.deck-notes-empty {
+    color: var(--fg-subtle);
+    font-style: italic;
 }
 
 /* ── Iluminação de Palco e Canvas Spotlight ────────────────────────────── */
@@ -212,6 +264,23 @@ dialog.deck-lightbox img {
     outline: none;
 }
 
+.deck-stage--measure {
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+.deck-stage--measure .deck-slide {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+.deck-stage--measure .deck-slide-inner {
+    transform: none !important;
+}
+
 .deck-slide {
     position: absolute;
     inset: 0;
@@ -239,6 +308,28 @@ dialog.deck-lightbox img {
     transform: translate3d(0, -16px, 0) scale(0.98);
 }
 
+/* Slide esparso: ancora no centro óptico em vez de boiar no topo. */
+.deck-slide.is-sparse {
+    align-items: center;
+}
+
+/* Bloco atômico rolável: fade inferior sinaliza "há mais conteúdo abaixo". */
+.deck-slide.is-overflowing::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: clamp(48px, 8vh, 96px);
+    background: linear-gradient(to bottom, transparent, #07080c);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.deck-slide .is-scrollable {
+    scrollbar-color: var(--border-strong) transparent;
+}
+
 .deck-slide-inner {
     width: 100%;
     max-width: 1280px;
@@ -246,6 +337,8 @@ dialog.deck-lightbox img {
     flex-direction: column;
     gap: var(--space-5);
     margin: 0 auto;
+    transform: scale(var(--slide-scale, 1));
+    transform-origin: top center;
 }
 
 .deck-slide-inner--center {
@@ -290,6 +383,47 @@ dialog.deck-lightbox img {
     color: var(--fg);
 }
 
+.deck-slide-segment {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.deck-slide-segment + .deck-slide-segment {
+    margin-top: var(--space-4);
+}
+
+.deck-prose-body.is-scrollable,
+.deck-points.is-scrollable,
+.deck-steps.is-scrollable,
+.deck-slide-inner.is-scrollable {
+    width: 100%;
+    max-width: var(--deck-scroll-max-width, 100%);
+    max-height: var(--deck-scroll-max-height, 70vh);
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+.deck-slide.is-overflowing .deck-prose-body.is-scrollable > pre {
+    max-height: none;
+    overflow: visible;
+}
+
+.deck-slide.is-overflowing .deck-prose-body.is-scrollable > .tbl-wrap {
+    overflow: visible;
+}
+
+.deck-prose-body.is-scrollable:focus-visible,
+.deck-points.is-scrollable:focus-visible,
+.deck-steps.is-scrollable:focus-visible,
+.deck-slide-inner.is-scrollable:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 4px;
+}
+
 /* Listas com Progressive Reveal (Build-in) */
 .deck-points,
 .deck-steps {
@@ -325,7 +459,7 @@ dialog.deck-lightbox img {
 }
 
 .deck-steps {
-    counter-reset: deck-step-counter;
+    counter-reset: deck-step-counter var(--deck-list-start, 0);
 }
 
 .deck-steps li {
@@ -368,6 +502,26 @@ dialog.deck-lightbox img {
 .deck-slide--code .deck-slide-inner,
 .deck-slide--table .deck-slide-inner {
     width: 100%;
+}
+
+.deck-slide--table .deck-slide-inner {
+    max-width: none;
+}
+
+.deck-slide--table .deck-prose-body {
+    display: flex;
+    min-width: 0;
+    justify-content: center;
+}
+
+.deck-slide--table .tbl-wrap {
+    width: fit-content;
+    max-width: none;
+    overflow: visible;
+}
+
+.deck-slide--table .deck-prose-body.is-scrollable {
+    justify-content: flex-start;
 }
 
 /* Callout em destaque */
@@ -431,8 +585,8 @@ dialog.deck-lightbox img {
 /* Código com caixa IDE */
 .deck-slide--code pre {
     width: 100%;
-    max-height: 60vh;
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
     padding: var(--space-6);
     background: #090c15;
     border: 1px solid rgba(255,255,255,0.12);
@@ -912,6 +1066,84 @@ dialog.deck-lightbox img {
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
 }
 
+/* ── Badge de auditoria (?test=true) ────────────────────────────────────── */
+.deck-audit-badge {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 95;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    line-height: 1.3;
+    font-family: 'Geist Mono', monospace;
+    color: #fff;
+    background: rgba(9, 12, 21, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+}
+
+.deck-audit-badge strong {
+    font-size: 0.85rem;
+    letter-spacing: .04em;
+}
+
+.deck-audit-badge.is-pass {
+    border-color: rgba(16, 185, 129, 0.6);
+}
+
+.deck-audit-badge.is-pass strong {
+    color: var(--deck-success);
+}
+
+.deck-audit-badge.is-fail {
+    border-color: rgba(248, 113, 113, 0.7);
+}
+
+.deck-audit-badge.is-fail strong {
+    color: #f87171;
+}
+
+/* ── Movimento reduzido ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .deck-slide,
+    .deck-slide-inner,
+    .deck-build,
+    .deck-controls,
+    .deck-hint,
+    .deck-rail,
+    .deck-rail-dot,
+    .deck-notes,
+    .deck-stage-nav,
+    .deck-progress span,
+    .deck-splash-dot {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ── Telas pequenas (smartboard portátil / preview) ─────────────────────── */
+@media (max-width: 640px) {
+    .deck-icon-btn,
+    .deck-stage-nav {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    .deck-notes {
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-height: 50vh;
+    }
+    .deck-rail {
+        right: 8px;
+    }
+}
+
 /* ── Regras de Impressão ────────────────────────────────────────────────── */
 @media print {
     .deck-html, .deck-body {
@@ -930,5 +1162,8 @@ dialog.deck-lightbox img {
         visibility: visible !important;
         transform: none !important;
         padding: 40px !important;
+    }
+    .deck-slide-inner {
+        transform: none !important;
     }
 }

@@ -56,8 +56,8 @@
         <div id="deck-source" class="prose">{{ lesson_html|safe }}</div>
     </article>
 
-    {# Roteiro global (:::roteiro) — deck.js anexa ao slide de capa. #}
-    <div id="deck-roteiro" class="prose" hidden>{{ teacher_notes_html|safe }}</div>
+    {# Roteiro do professor por slide (:::roteiro) — casado por heading no deck.js. #}
+    {{ teacher_notes_map|json_script:"deck-notes-data" }}
 
     {# Slide de capa (sempre o primeiro). #}
     <template id="deck-cover">
@@ -222,25 +222,6 @@
     </dialog>
     {% endif %}
 
-    <script>
-        (() => {
-            const fallback = document.getElementById('deck-fallback');
-            const source = document.getElementById('deck-source');
-            if (!fallback || !source || !window.MutationObserver) return;
-
-            const observer = new MutationObserver(() => {
-                if (!document.body.classList.contains('is-deck-loading')) {
-                    observer.disconnect();
-                    return;
-                }
-                if (!document.getElementById('deck-source')) {
-                    fallback.appendChild(source);
-                    observer.disconnect();
-                }
-            });
-            observer.observe(fallback, { childList: true });
-        })();
-    </script>
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{% static 'js/deck.js' %}"></script>
