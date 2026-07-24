@@ -78,6 +78,69 @@
     scroll-margin-top: 48px;
 }
 
+/* ── Escala uniforme de citações e callouts no modo apresentação ─────────── */
+.reader-doc blockquote {
+    font-size: 1em;
+    line-height: 1.7;
+    margin: clamp(28px, 4vh, 52px) 0;
+    padding: clamp(24px, 3.5vh, 40px) clamp(28px, 3.5vw, 48px);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    border-left: 4px solid var(--reader-support, #22d3ee);
+    background: rgba(255, 255, 255, 0.025);
+    border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) 0;
+    color: var(--fg);
+    font-style: italic;
+}
+
+.reader-doc blockquote p {
+    font-size: 1em;
+    line-height: 1.7;
+    color: var(--fg);
+}
+
+.reader-doc blockquote footer,
+.reader-doc blockquote cite {
+    display: block;
+    margin-top: 14px;
+    font-size: 0.9em;
+    color: var(--fg-muted, #b0adb5);
+    font-style: normal;
+    font-weight: 500;
+}
+
+.reader-doc .callout {
+    font-size: 1em;
+    grid-template-columns: 2.2em 1fr;
+    gap: clamp(16px, 2vw, 28px);
+    padding: clamp(24px, 3vh, 40px) clamp(28px, 3vw, 48px);
+    border-radius: var(--radius-lg, 16px);
+}
+
+.reader-doc .callout .ic {
+    width: 2.2em;
+    height: 2.2em;
+}
+
+.reader-doc .callout .ic svg {
+    width: 1.25em;
+    height: 1.25em;
+}
+
+.reader-doc .callout .ct b {
+    font-size: 0.85em;
+    margin-bottom: 8px;
+    letter-spacing: .1em;
+}
+
+.reader-doc .callout .ct p,
+.reader-doc .callout .ct ul,
+.reader-doc .callout .ct ol,
+.reader-doc .callout .ct li {
+    font-size: 1em;
+    line-height: 1.65;
+    color: var(--fg-muted, #b0adb5);
+}
+
 /* ── Capa editorial no topo do documento ────────────────────────────────── */
 .reader-cover {
     margin-bottom: clamp(40px, 6vh, 88px);

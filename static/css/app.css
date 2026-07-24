@@ -1951,13 +1951,14 @@ table.tbl {
     display: block;
     margin-bottom: 4px;
     color: var(--fg);
-    font-size: 14px;
+    font-size: 1em;
+    font-weight: 700;
 }
 
 .lesson-steps p {
     margin: 0;
     color: var(--fg-muted);
-    font-size: 14px;
+    font-size: 1em;
     line-height: 1.6;
 }
 
@@ -2528,15 +2529,49 @@ dialog.deck-lightbox:not([open]) {
     padding-left: var(--space-5);
 }
 
-.prose blockquote {
+.prose blockquote,
+blockquote {
+    position: relative;
     margin: var(--space-5) 0;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4) var(--space-5);
     border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-support, #22d3ee);
     border-radius: var(--radius-md);
-    color: var(--accent-text);
-    background: var(--surface-base);
-    font-size: var(--text-ui);
+    color: var(--fg);
+    background: color-mix(in srgb, var(--surface-base) 85%, transparent);
+    font-size: 1em;
+    line-height: 1.7;
     font-style: italic;
+}
+
+.prose blockquote p,
+blockquote p {
+    margin: 0;
+    color: inherit;
+    font-size: 1em;
+    line-height: 1.7;
+}
+
+.prose blockquote p + p,
+blockquote p + p {
+    margin-top: 12px;
+}
+
+.prose blockquote footer,
+.prose blockquote cite,
+blockquote footer,
+blockquote cite {
+    display: block;
+    margin-top: 12px;
+    font-size: 0.9em;
+    font-style: normal;
+    font-weight: 500;
+    color: var(--fg-muted);
+}
+
+.prose blockquote footer::before,
+blockquote footer::before {
+    content: '— ';
 }
 
 .prose img,
@@ -2551,47 +2586,54 @@ dialog.deck-lightbox:not([open]) {
 
 .callout {
     display: grid;
-    grid-template-columns: 32px 1fr;
+    grid-template-columns: 2.2em 1fr;
     gap: var(--space-3);
     max-width: 100%;
     margin: var(--space-4) 0;
-    padding: var(--space-4) var(--space-4);
+    padding: var(--space-4) var(--space-5);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface-base);
+    font-size: 1em;
 }
 
 .callout .ic {
     display: grid;
-    width: 32px;
-    height: 32px;
+    width: 2.2em;
+    height: 2.2em;
     place-items: center;
     flex: none;
     margin-top: 2px;
     border-radius: var(--radius-md);
+    font-size: 1em;
 }
 
 .callout .ic svg {
-    width: 18px;
-    height: 18px;
+    width: 1.25em;
+    height: 1.25em;
 }
 
 .callout .ct b {
     display: block;
-    margin-bottom: 4px;
-    font-size: var(--text-caption);
+    margin-bottom: 6px;
+    font-size: 0.85em;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .12em;
+    letter-spacing: .1em;
 }
 
 .callout .ct {
     min-width: 0;
+    font-size: 1em;
 }
 
-.callout .ct p {
+.callout .ct p,
+.callout .ct ul,
+.callout .ct ol,
+.callout .ct li {
     margin: 0;
-    color: var(--fg-muted);
-    font-size: 14px;
+    color: var(--fg);
+    font-size: 1em;
     line-height: 1.65;
 }
 
