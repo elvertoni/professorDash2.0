@@ -205,7 +205,12 @@
         return sec;
     }
 
-    /* ── FASE 4: Paginação por fronteira de bloco (caso raro de excesso) ──── */
+    /* ── FASE 4: Paginação por fronteira de bloco (tipografia estável) ─────
+       Texto NUNCA encolhe para caber: se a seção não cabe no palco em escala
+       cheia, ela vira mais slides (divisão em fronteira de bloco/item). A
+       escala fit-to-stage fica reservada aos blocos indivisíveis (tabela,
+       código, callout, mídia, parágrafo único gigante). É isso que mantém o
+       corpo do texto do deck inteiro no MESMO tamanho, slide após slide. */
     // Mede a razão conteúdo/altura útil de um spec usando o palco oculto.
     function measureRatio(spec, index) {
         const probe = renderSlide(spec, index);
@@ -234,7 +239,7 @@
     }
 
     function paginateSpecs(specs) {
-        const MAX = 1 / MIN_SCALE; // acima disso não cabe nem no piso de escala
+        const MAX = 1.02; // não coube em escala cheia (2% de tolerância) → pagina
         let guard = 60;
         for (let i = 0; i < specs.length && guard > 0; i++) {
             const spec = specs[i];
