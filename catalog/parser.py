@@ -15,10 +15,6 @@ TEACHER_NOTE_RE = re.compile(
     r'(?P<block>:::roteiro[^\n]*\n(?P<body>.*?)\n:::\s*)',
     re.S,
 )
-HEADING_RE = re.compile(
-    r'^#{1,6}\s+(?P<text>.+?)\s*#*\s*$',
-    re.M,
-)
 BLOCK_RE = re.compile(
     (
         r':::(?P<kind>conceito|atencao|atenção|dica|exemplo|importante|curiosidade)'
@@ -211,57 +207,6 @@ def render_teacher_notes_html(markdown_content):
     )
     rendered = normalize_table_header_scopes(rendered)
     return sanitize_lesson_html(rendered)
-
-
-def _normalize_heading_key(text):
-    return ' '.join((text or '').split()).lower()
-
-
-def render_teacher_notes_map(markdown_content):
-    '''Mapeia cada bloco :::roteiro ao heading que o precede.
-
-    Retorna dict {heading_normalizado: html}. Notas antes do primeiro heading
-    ficam sob a chave '' (capa). O cliente casa a chave com o texto do
-    heading do slide (section/sub) para exibir o roteiro no slide certo.
-    '''
-    content = markdown_content or ''
-    if not content:
-        return {}
-
-    headings = [
-        (match.start(), match.group('text').strip())
-        for match in HEADING_RE.finditer(content)
-    ]
-
-    grouped = {}
-    order = []
-    for match in TEACHER_NOTE_RE.finditer(content):
-        body = match.group('body').strip()
-        if not body:
-            continue
-        position = match.start()
-        heading = ''
-        for hpos, htext in headings:
-            if hpos < position:
-                heading = htext
-            else:
-                break
-        key = _normalize_heading_key(heading)
-        if key not in grouped:
-            grouped[key] = []
-            order.append(key)
-        grouped[key].append(body)
-
-    notes_map = {}
-    for key in order:
-        rendered = markdown.markdown(
-            '\n\n---\n\n'.join(grouped[key]),
-            extensions=['extra', 'sane_lists'],
-            output_format='html5',
-        )
-        rendered = normalize_table_header_scopes(rendered)
-        notes_map[key] = sanitize_lesson_html(rendered)
-    return notes_map
 
 
 def normalize_table_header_scopes(html_content):

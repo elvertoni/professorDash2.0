@@ -1,1169 +1,484 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   AtelierDeck v2 — Modo Apresentação Cinematográfica (Cinematic Stage)
-   Projeção em Sala de Aula / TV Educatron 42"+ (4-6 m de distância).
-   Design System v2: The Digital Atelier (Obsidian Dark, Emerald/Cyan Glow).
+   Modo Apresentação — Leitura Projetada ("Notion na TV")
+   A aula inteira rola em coluna única, com tipografia grande calibrada para
+   projeção em sala (TV/Educatron, 4-6 m). Nada é fatiado nem escalado por
+   medição: o conteúdo apenas rola, então nunca corta.
    ──────────────────────────────────────────────────────────────────────── */
 
-.deck-html {
+.reader-html {
     height: 100%;
     background: #07080c;
 }
 
-.deck-body {
-    min-height: 100%;
+.reader-body {
+    min-height: 100vh;
     margin: 0;
     color: var(--fg);
     background: #07080c;
-    overflow: hidden;
     font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    user-select: none;
 
-    /* Escala-mestre calibrada para projeção 1080p/4K à distância */
-    --deck-fs: clamp(24px, 1.2vw + 1.8vh, 42px);
-    --deck-pad-x: clamp(var(--space-6), 7vw, 180px);
-    --deck-pad-y: clamp(var(--space-6), 9vh, 130px);
-
-    /* Rampa tipográfica de alta legibilidade */
-    --deck-title-fs: calc(var(--deck-fs) * 1.6);
-    --deck-content-fs: calc(var(--deck-fs) * 1.25);
-    --deck-dense-fs: calc(var(--deck-fs) * 1.0);
-    --deck-caption-fs: calc(var(--deck-fs) * 0.8);
-    --deck-scale-floor: 0.88;
-
-    /* Transições GPU suaves */
-    --deck-ease: cubic-bezier(.16, 1, .3, 1);
-    --deck-dur: 0.4s;
-
-    /* Destaques de marca */
-    --deck-accent: var(--accent, #00f2fe);
-    --deck-success: var(--c-success, #10b981);
-    --deck-grad: linear-gradient(135deg, #10b981 0%, #00f2fe 100%);
-    --deck-glow: radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.08) 0%, rgba(0, 242, 254, 0.03) 50%, transparent 80%);
-
-    font-size: var(--deck-fs);
-    cursor: default;
+    /* Realces de marca (mesma linguagem do portal). */
+    --reader-accent: var(--accent, #10b981);
+    --reader-support: var(--accent-support, #22d3ee);
+    --reader-grad: linear-gradient(135deg, #10b981 0%, #22d3ee 100%);
+    --reader-ease: cubic-bezier(.16, 1, .3, 1);
 }
 
-/* Oculta cursor em inatividade */
-.deck-body.is-idle {
+.reader-body.is-idle {
     cursor: none;
 }
 
-/* Oculta o fallback de leitura linear quando o JS está ativo */
-#deck-fallback,
-.deck-fallback {
-    display: none !important;
-}
-
-.no-js #deck-fallback,
-.no-js .deck-fallback {
-    display: block !important;
-}
-
-/* ── Lightbox da Capa Ampliada ────────────────────────────────────────── */
-dialog.deck-lightbox:not([open]) {
-    display: none !important;
-}
-
-dialog.deck-lightbox[open] {
+/* ── Palco de rolagem ───────────────────────────────────────────────────── */
+.reader-stage {
     position: fixed;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
-    margin: 0;
-    padding: 0;
-    border: none;
-    background: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(16px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 95;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 60%),
+        #07080c;
 }
 
-dialog.deck-lightbox img {
-    max-width: 90vw;
-    max-height: 85vh;
-    object-fit: contain;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+.reader-stage::-webkit-scrollbar {
+    width: 12px;
 }
 
-.lesson-lightbox-close {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    font-size: 2rem;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all .2s var(--deck-ease);
-    z-index: 100;
+.reader-stage::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: content-box;
 }
 
-.lesson-lightbox-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-}
-
-/* ── Z-Index Map ───────────────────────────────────────────────────────── */
-.deck-spotlight { z-index: 10; }
-.deck-stage { z-index: 15; }
-.deck-rail { z-index: 45; }
-.deck-progress { z-index: 30; }
-.deck-stage-nav { z-index: 40; }
-.deck-controls,
-.deck-hint { z-index: 50; transition: opacity .4s var(--deck-ease), transform .4s var(--deck-ease); }
-.deck-notes { z-index: 60; }
-.deck-overview-dialog { z-index: 70; }
-.deck-blackout { z-index: 80; }
-.deck-lightbox { z-index: 90; }
-.deck-splash { z-index: 100; }
-
-/* Inatividade oculta os controles para projeção limpa */
-.deck-body.is-idle:not(.is-laser-active) .deck-controls,
-.deck-body.is-idle:not(.is-laser-active) .deck-hint,
-.deck-body.is-idle:not(.is-laser-active) .deck-stage-nav {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(10px);
-}
-
-.deck-body.is-idle:not(.is-laser-active) .deck-rail {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Trilho de navegação: pontos discretos à direita, recuam no idle. */
-.deck-rail {
-    position: fixed;
-    right: clamp(12px, 2vw, 28px);
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-    padding: 10px 8px;
-    transition: opacity .4s var(--deck-ease);
-}
-
-.deck-rail-dot {
-    width: 9px;
-    height: 9px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.22);
-    cursor: pointer;
-    transition: background .25s var(--deck-ease), transform .25s var(--deck-ease);
-}
-
-.deck-rail-dot:hover {
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(1.25);
-}
-
-.deck-rail-dot.is-active {
-    background: var(--deck-accent);
-    transform: scale(1.35);
-    box-shadow: 0 0 12px rgba(0, 242, 254, 0.55);
-}
-
-.deck-rail-dot:focus-visible {
-    outline: 2px solid var(--border-focus);
-    outline-offset: 3px;
-}
-
-.deck-notes-empty {
-    color: var(--fg-subtle);
-    font-style: italic;
-}
-
-/* ── Iluminação de Palco e Canvas Spotlight ────────────────────────────── */
-.deck-ambient-glow {
-    position: fixed;
-    inset: 0;
-    background: var(--deck-glow);
-    pointer-events: none;
-    z-index: 5;
-}
-
-.deck-spotlight {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-}
-
-.deck-body.is-laser-active {
-    cursor: crosshair !important;
-}
-
-/* ── Splash de Carregamento ────────────────────────────────────────────── */
-.deck-splash {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-4);
-    background: #07080c;
-    color: var(--fg-muted);
-    transition: opacity .4s var(--deck-ease), visibility .4s var(--deck-ease);
-}
-
-.deck-splash img {
-    width: 64px;
-    height: 64px;
-    filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.3));
-}
-
-.deck-splash-text {
-    font-size: var(--text-ui);
-    font-weight: 500;
-    letter-spacing: .02em;
-}
-
-.deck-splash-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--deck-grad);
-    animation: deck-pulse 1.2s var(--deck-ease) infinite;
-}
-
-@keyframes deck-pulse {
-    0%, 100% { opacity: .3; transform: scale(.8); }
-    50%      { opacity: 1;  transform: scale(1.2); }
-}
-
-.deck-body:not(.is-deck-loading) .deck-splash {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-/* ── Palco Principal & Slides ───────────────────────────────────────────── */
-.deck-stage {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
+.reader-stage:focus {
     outline: none;
 }
 
-.deck-stage--measure {
-    visibility: hidden !important;
-    pointer-events: none !important;
-    z-index: -1 !important;
-}
+/* ── Documento: escala os tokens de .prose para a TV ────────────────────── */
+.reader-doc {
+    /* Tipografia grande e responsiva à resolução da tela de projeção. */
+    --text-read: clamp(22px, 1.5vw + 1.4vh, 40px);
+    --text-h2: calc(var(--text-read) * 1.7);
+    --text-h3: calc(var(--text-read) * 1.3);
+    --measure: 60ch;
 
-.deck-stage--measure .deck-slide {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: none !important;
-    transition: none !important;
-}
-
-.deck-stage--measure .deck-slide-inner {
-    transform: none !important;
-}
-
-.deck-slide {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    overflow: hidden;
-    padding: clamp(var(--space-6), 12vh, 140px) var(--deck-pad-x) var(--deck-pad-y);
-    opacity: 0;
-    visibility: hidden;
-    transform: translate3d(0, 16px, 0) scale(0.98);
-    transition: opacity var(--deck-dur) var(--deck-ease),
-                transform var(--deck-dur) var(--deck-ease),
-                visibility var(--deck-dur);
-    scrollbar-width: thin;
-}
-
-.deck-slide.is-active {
-    opacity: 1;
-    visibility: visible;
-    transform: translate3d(0, 0, 0) scale(1);
-}
-
-.deck-slide.is-prev {
-    transform: translate3d(0, -16px, 0) scale(0.98);
-}
-
-/* Slide esparso: ancora no centro óptico em vez de boiar no topo. */
-.deck-slide.is-sparse {
-    align-items: center;
-}
-
-/* Bloco atômico rolável: fade inferior sinaliza "há mais conteúdo abaixo". */
-.deck-slide.is-overflowing::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: clamp(48px, 8vh, 96px);
-    background: linear-gradient(to bottom, transparent, #07080c);
-    pointer-events: none;
-    z-index: 2;
-}
-
-.deck-slide .is-scrollable {
-    scrollbar-color: var(--border-strong) transparent;
-}
-
-.deck-slide-inner {
     width: 100%;
-    max-width: 1280px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
+    max-width: 1400px;
     margin: 0 auto;
-    transform: scale(var(--slide-scale, 1));
-    transform-origin: top center;
+    padding: clamp(48px, 7vh, 120px) clamp(32px, 6vw, 160px) clamp(96px, 16vh, 220px);
+    font-size: var(--text-read);
+    line-height: 1.7;
 }
 
-.deck-slide-inner--center {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+/* Respiro extra entre blocos para leitura à distância. */
+.reader-doc > * {
+    scroll-margin-top: 48px;
 }
 
-/* Tipografia e Títulos de Slide */
-.deck-eyebrow-section {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--deck-caption-fs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--accent);
-    margin-bottom: -4px;
-}
-
-.deck-heading {
-    font-size: var(--deck-title-fs);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -.02em;
-    color: var(--fg);
-    max-width: 26ch;
-    margin: 0 0 var(--space-4) 0;
-    text-wrap: balance;
-}
-
-.deck-prose-body {
-    font-size: var(--deck-content-fs);
-    line-height: 1.6;
-    color: var(--fg-muted);
-}
-
-.deck-prose-body p {
-    margin-top: 0;
-    margin-bottom: var(--space-4);
-    color: var(--fg);
-}
-
-.deck-slide-segment {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.deck-slide-segment + .deck-slide-segment {
-    margin-top: var(--space-4);
-}
-
-.deck-prose-body.is-scrollable,
-.deck-points.is-scrollable,
-.deck-steps.is-scrollable,
-.deck-slide-inner.is-scrollable {
-    width: 100%;
-    max-width: var(--deck-scroll-max-width, 100%);
-    max-height: var(--deck-scroll-max-height, 70vh);
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
-}
-
-.deck-slide.is-overflowing .deck-prose-body.is-scrollable > pre {
-    max-height: none;
-    overflow: visible;
-}
-
-.deck-slide.is-overflowing .deck-prose-body.is-scrollable > .tbl-wrap {
-    overflow: visible;
-}
-
-.deck-prose-body.is-scrollable:focus-visible,
-.deck-points.is-scrollable:focus-visible,
-.deck-steps.is-scrollable:focus-visible,
-.deck-slide-inner.is-scrollable:focus-visible {
-    outline: 2px solid var(--border-focus);
-    outline-offset: 4px;
-}
-
-/* Listas com Progressive Reveal (Build-in) */
-.deck-points,
-.deck-steps {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin: var(--space-2) 0 0 0;
-    padding: 0;
-    list-style: none;
-    width: 100%;
-}
-
-.deck-points li,
-.deck-steps li {
-    position: relative;
-    padding-left: 2.2rem;
-    font-size: var(--deck-content-fs);
-    line-height: 1.5;
-    color: var(--fg);
-    transition: opacity .35s var(--deck-ease), transform .35s var(--deck-ease);
-}
-
-.deck-points li::before {
-    content: '';
-    position: absolute;
-    left: 0.4rem;
-    top: 0.65em;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--deck-grad);
-    box-shadow: 0 0 12px rgba(0, 242, 254, 0.5);
-}
-
-.deck-steps {
-    counter-reset: deck-step-counter var(--deck-list-start, 0);
-}
-
-.deck-steps li {
-    counter-increment: deck-step-counter;
-    padding-left: 3rem;
-}
-
-.deck-steps li::before {
-    content: counter(deck-step-counter);
-    position: absolute;
-    left: 0;
-    top: 0.1em;
-    width: 2rem;
-    height: 2rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    color: var(--c-success);
-    font-size: 0.9rem;
-    font-weight: 800;
-    border-radius: 8px;
-}
-
-/* Elementos com animação progressiva ao avançar */
-.deck-build {
-    opacity: 0.25;
-    transform: translateY(4px);
-}
-
-.deck-build.is-revealed {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* ── Hero Cards (Quizzes, Callouts, Código, Tabelas) ───────────────────── */
-.deck-slide--quiz .deck-slide-inner,
-.deck-slide--callout .deck-slide-inner,
-.deck-slide--code .deck-slide-inner,
-.deck-slide--table .deck-slide-inner {
-    width: 100%;
-}
-
-.deck-slide--table .deck-slide-inner {
+/* ── Capa editorial no topo do documento ────────────────────────────────── */
+.reader-cover {
+    margin-bottom: clamp(40px, 6vh, 88px);
+    padding-bottom: clamp(32px, 5vh, 64px);
+    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
     max-width: none;
 }
 
-.deck-slide--table .deck-prose-body {
-    display: flex;
-    min-width: 0;
-    justify-content: center;
-}
-
-.deck-slide--table .tbl-wrap {
-    width: fit-content;
-    max-width: none;
-    overflow: visible;
-}
-
-.deck-slide--table .deck-prose-body.is-scrollable {
-    justify-content: flex-start;
-}
-
-/* Callout em destaque */
-.deck-slide--callout .callout,
-.deck-slide--callout .lesson-callout {
-    width: 100%;
-    padding: var(--space-6) var(--space-8);
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid var(--border-strong);
-    border-left: 6px solid var(--accent);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    text-align: left;
-    font-size: var(--deck-content-fs);
-}
-
-/* Quiz Hero em tela cheia */
-.deck-slide--quiz .lesson-quiz {
-    width: 100%;
-    max-width: 900px;
-    padding: var(--space-8);
-    background: rgba(13, 17, 26, 0.85);
-    border: 1px solid rgba(0, 242, 254, 0.2);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.08);
-    backdrop-filter: blur(16px);
-    margin: 0 auto;
-}
-
-.deck-slide--quiz .quiz-question {
-    font-size: calc(var(--deck-title-fs) * 0.9);
-    font-weight: 700;
-    color: var(--fg);
-    margin-bottom: var(--space-6);
-}
-
-.deck-slide--quiz .quiz-options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.deck-slide--quiz .quiz-option {
-    padding: var(--space-4) var(--space-5);
-    font-size: var(--deck-content-fs);
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--radius-md);
-    color: var(--fg);
-    transition: all .2s var(--deck-ease);
-    text-align: left;
-    cursor: pointer;
-}
-
-.deck-slide--quiz .quiz-option:hover {
-    background: rgba(0, 242, 254, 0.1);
-    border-color: var(--accent);
-}
-
-/* Código com caixa IDE */
-.deck-slide--code pre {
-    width: 100%;
-    max-height: none;
-    overflow: visible;
-    padding: var(--space-6);
-    background: #090c15;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: var(--radius-lg);
-    font-family: 'Geist Mono', monospace;
-    font-size: var(--deck-dense-fs);
-    line-height: 1.6;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-}
-
-/* ── Slide de Capa Cinematográfica ──────────────────────────────────────── */
-.deck-slide--cover {
-    align-items: center;
-    justify-content: center;
-    padding: var(--deck-pad-y) var(--deck-pad-x);
-}
-
-.deck-cover {
-    position: relative;
-    width: 100%;
-    max-width: 1200px;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-8);
-    align-items: center;
-}
-
-.deck-cover.has-cover {
-    grid-template-columns: 1.2fr 0.8fr;
-}
-
-.deck-cover-bg {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    opacity: 0.18;
-    filter: blur(40px) saturate(1.5);
-    pointer-events: none;
-}
-
-.deck-cover-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.deck-cover-meta {
+.reader-cover-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
-}
-
-.deck-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-}
-
-.deck-badge-p {
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--c-success);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.deck-badge-s {
-    background: rgba(0, 242, 254, 0.12);
-    color: var(--accent);
-    border: 1px solid rgba(0, 242, 254, 0.3);
-}
-
-.deck-badge-ord {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--fg-muted);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.deck-cover-title {
-    font-size: calc(var(--deck-title-fs) * 1.3);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -.03em;
-    color: var(--fg);
-    margin: 0 0 var(--space-4) 0;
-    text-wrap: balance;
-}
-
-.deck-cover-dek {
-    font-size: var(--deck-content-fs);
-    color: var(--fg-muted);
-    margin-bottom: var(--space-6);
-}
-
-.deck-cover-goals {
-    padding: var(--space-5) var(--space-6);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-6);
-}
-
-.deck-cover-goals-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    color: var(--c-success);
-    margin-bottom: var(--space-3);
-    text-transform: uppercase;
-    letter-spacing: .04em;
-}
-
-.deck-cover-goals ul {
-    margin: 0;
-    padding-left: 1.2rem;
-    font-size: var(--deck-dense-fs);
-    color: var(--fg);
-}
-
-.deck-cover-foot {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: 0.9rem;
-    color: var(--fg-subtle);
-}
-
-.deck-cover-figure {
-    position: relative;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.1);
-    transition: transform .3s var(--deck-ease);
-}
-
-.deck-cover-figure:hover {
-    transform: scale(1.02);
-}
-
-.deck-cover-figure img {
-    width: 100%;
-    max-height: 50vh;
-    object-fit: cover;
-    display: block;
-}
-
-.deck-cover-figure-caption {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(8px);
-    color: #fff;
-    font-size: 0.8rem;
-    border-radius: var(--radius-pill);
-}
-
-/* ── Slide de Encerramento ──────────────────────────────────────────────── */
-.deck-slide--end {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.deck-end {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-4);
-    max-width: 700px;
-}
-
-.deck-end-icon {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: var(--c-success);
-    border-radius: 50%;
-    font-size: 2.5rem;
-    margin-bottom: var(--space-2);
-}
-
-.deck-end-title {
-    font-size: calc(var(--deck-title-fs) * 1.4);
-    font-weight: 800;
-    margin: 0;
-}
-
-.deck-end-sub {
-    font-size: var(--deck-content-fs);
-    color: var(--fg-muted);
-}
-
-/* ── HUD de Controles Flutuantes ───────────────────────────────────────── */
-.deck-controls {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
     gap: 12px;
-    padding: 6px 14px;
-    background: rgba(15, 20, 32, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--radius-pill);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0,0,0,0.4);
-    backdrop-filter: blur(16px);
+    margin-bottom: clamp(20px, 3vh, 36px);
 }
 
-.deck-controls-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.deck-divider {
-    width: 1px;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.deck-icon-btn {
-    width: 40px;
-    height: 40px;
+.reader-badge {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--fg-muted);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all .2s var(--deck-ease);
+    gap: 10px;
+    padding: 8px 18px;
+    border-radius: var(--radius-pill, 999px);
+    font-size: calc(var(--text-read) * 0.6);
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    color: var(--fg-muted, #b0adb5);
 }
 
-.deck-icon-btn:hover {
+.reader-badge i {
+    width: 1em;
+    height: 1em;
+}
+
+.reader-badge-p {
+    color: #04222b;
+    background: var(--reader-grad);
+    border-color: transparent;
+}
+
+.reader-badge-s {
+    color: var(--reader-support);
+    border-color: color-mix(in srgb, var(--reader-support) 45%, transparent);
+}
+
+.reader-cover-title {
+    margin: 0 0 clamp(16px, 2.4vh, 28px);
+    font-size: clamp(40px, 4vw + 2vh, 88px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    text-wrap: balance;
     color: var(--fg);
-    background: rgba(255, 255, 255, 0.1);
+    max-width: none;
 }
 
-.deck-icon-btn.is-active {
-    color: var(--accent);
-    background: rgba(0, 242, 254, 0.15);
+.reader-cover-dek {
+    margin: 0 0 clamp(24px, 3.5vh, 40px);
+    font-size: calc(var(--text-read) * 1.15);
+    color: var(--fg-muted, #b0adb5);
+    max-width: 46ch;
 }
 
-.deck-position {
-    display: flex;
+.reader-cover-goals {
+    padding: clamp(20px, 3vh, 32px) clamp(24px, 3vw, 40px);
+    border-radius: var(--radius-lg, 16px);
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid color-mix(in srgb, var(--reader-accent) 30%, transparent);
+    max-width: none;
+}
+
+.reader-cover-goals-title {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 12px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--radius-pill);
-    color: var(--fg);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: calc(var(--text-read) * 0.72);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--reader-accent);
 }
 
-.deck-position:hover {
-    background: rgba(255,255,255,0.1);
+.reader-cover-goals ul {
+    margin: 0;
+    padding-left: 1.4em;
+    max-width: none;
 }
 
-.deck-hint {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
+.reader-cover-goals li {
+    margin-bottom: 8px;
+}
+
+.reader-cover-foot {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: var(--radius-pill);
-    color: var(--fg-subtle);
-    font-size: 0.75rem;
-    backdrop-filter: blur(8px);
+    gap: 14px;
+    margin-top: clamp(20px, 3vh, 32px);
+    font-size: calc(var(--text-read) * 0.72);
+    color: var(--fg-subtle, #84808c);
 }
 
-.deck-hint kbd {
-    padding: 2px 6px;
-    background: rgba(255,255,255,0.12);
-    border-radius: 4px;
-    color: var(--fg);
-    font-family: monospace;
+.reader-cover-foot i {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.1em;
 }
 
-/* ── Pausa Pedagógica (Blackout B) ─────────────────────────────────────── */
-.deck-blackout[hidden] {
-    display: none !important;
+.reader-dot-sep {
+    opacity: 0.5;
 }
 
-.deck-blackout {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    cursor: pointer;
-}
-
-.deck-blackout-brand {
+/* ── Marcador de fim ────────────────────────────────────────────────────── */
+.reader-end {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    margin-top: clamp(64px, 10vh, 140px);
+    padding-top: clamp(40px, 6vh, 80px);
+    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
     text-align: center;
-    opacity: 0.7;
+    max-width: none;
 }
 
-/* ── Matriz Overview Dialog (Tecla O) ──────────────────────────────────── */
-.deck-overview-dialog {
-    width: 90vw;
-    max-width: 1400px;
-    height: 85vh;
-    padding: var(--space-6);
-    background: #0d111a;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: var(--radius-xl);
-    color: var(--fg);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-}
-
-.deck-overview-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-6);
-}
-
-.deck-overview-grid {
+.reader-end-icon {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--space-4);
-    max-height: calc(85vh - 100px);
-    overflow-y: auto;
-}
-
-.deck-thumb {
-    aspect-ratio: 16 / 9;
-    padding: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 2px solid rgba(255,255,255,0.08);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: all .2s var(--deck-ease);
-}
-
-.deck-thumb:hover {
-    border-color: var(--accent);
-    background: rgba(0, 242, 254, 0.08);
-}
-
-.deck-thumb.is-current {
-    border-color: var(--c-success);
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
     background: rgba(16, 185, 129, 0.12);
+    color: var(--reader-accent);
 }
 
-/* ── Teleprompter / Roteiro Docente (Tecla N) ──────────────────────────── */
-.deck-notes {
-    position: fixed;
-    right: 24px;
-    bottom: 84px;
-    width: 420px;
-    max-height: 480px;
-    display: flex;
-    flex-direction: column;
-    background: #0d121f;
-    border: 1px solid rgba(0, 242, 254, 0.3);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-    backdrop-filter: blur(16px);
-    transition: all .3s var(--deck-ease);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(20px);
+.reader-end-icon i {
+    width: 40px;
+    height: 40px;
 }
 
-.deck-notes.is-open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-}
-
-.deck-notes-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.02);
-}
-
-.deck-notes-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
+.reader-end-title {
+    font-size: calc(var(--text-read) * 1.1);
     font-weight: 700;
-    color: var(--accent);
+    color: var(--fg-muted, #b0adb5);
 }
 
-.deck-notes-body {
-    padding: 16px;
-    overflow-y: auto;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: var(--fg);
-}
-
-/* ── Zonas Laterais de Navegação ───────────────────────────────────────── */
-.deck-stage-nav {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 64px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.2);
-    border: none;
-    color: rgba(255,255,255,0.4);
-    cursor: pointer;
-    transition: all .2s var(--deck-ease);
-}
-
-.deck-stage-nav:hover:not(:disabled) {
-    background: rgba(0,0,0,0.6);
-    color: var(--fg);
-}
-
-.deck-stage-nav--previous { left: 0; border-radius: 0 16px 16px 0; }
-.deck-stage-nav--next { right: 0; border-radius: 16px 0 0 16px; }
-
-/* ── Progresso e Trilho ────────────────────────────────────────────────── */
-.deck-progress {
+/* ── Barra de progresso de leitura ──────────────────────────────────────── */
+.reader-progress {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     height: 4px;
-    background: rgba(255,255,255,0.08);
-}
-
-.deck-progress span {
-    display: block;
-    height: 100%;
-    background: var(--deck-grad);
-    transition: width .3s var(--deck-ease);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
-}
-
-/* ── Badge de auditoria (?test=true) ────────────────────────────────────── */
-.deck-audit-badge {
-    position: fixed;
-    left: 16px;
-    bottom: 16px;
-    z-index: 95;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 10px 14px;
-    border-radius: var(--radius-md);
-    font-size: 0.8rem;
-    line-height: 1.3;
-    font-family: 'Geist Mono', monospace;
-    color: #fff;
-    background: rgba(9, 12, 21, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    z-index: 40;
+    background: rgba(255, 255, 255, 0.06);
     pointer-events: none;
 }
 
-.deck-audit-badge strong {
+.reader-progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--reader-grad);
+    transition: width .12s linear;
+}
+
+/* ── HUD de controles flutuantes ────────────────────────────────────────── */
+.reader-controls {
+    position: fixed;
+    bottom: clamp(16px, 3vh, 32px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: var(--radius-pill, 999px);
+    background: rgba(9, 12, 21, 0.85);
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    transition: opacity .4s var(--reader-ease), transform .4s var(--reader-ease);
+}
+
+.reader-icon-btn {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fg-muted, #b0adb5);
+    cursor: pointer;
+    transition: background .2s var(--reader-ease), color .2s var(--reader-ease);
+}
+
+.reader-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--fg);
+}
+
+.reader-icon-btn:focus-visible {
+    outline: 2px solid var(--border-focus, var(--reader-accent));
+    outline-offset: 2px;
+}
+
+.reader-icon-btn.is-active {
+    color: var(--reader-accent);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.reader-icon-btn i {
+    width: 22px;
+    height: 22px;
+}
+
+.reader-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border, rgba(255, 255, 255, 0.1));
+    margin: 0 4px;
+}
+
+/* ── Dica de atalhos ────────────────────────────────────────────────────── */
+.reader-hint {
+    position: fixed;
+    top: clamp(12px, 2vh, 24px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill, 999px);
     font-size: 0.85rem;
-    letter-spacing: .04em;
+    color: var(--fg-subtle, #84808c);
+    background: rgba(9, 12, 21, 0.7);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    backdrop-filter: blur(12px);
+    transition: opacity .4s var(--reader-ease);
 }
 
-.deck-audit-badge.is-pass {
-    border-color: rgba(16, 185, 129, 0.6);
+.reader-hint i {
+    width: 16px;
+    height: 16px;
 }
 
-.deck-audit-badge.is-pass strong {
-    color: var(--deck-success);
+.reader-hint kbd {
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.78em;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
 }
 
-.deck-audit-badge.is-fail {
-    border-color: rgba(248, 113, 113, 0.7);
+/* Inatividade oculta os controles para projeção limpa. */
+.reader-body.is-idle .reader-controls,
+.reader-body.is-idle .reader-hint {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(10px);
 }
 
-.deck-audit-badge.is-fail strong {
-    color: #f87171;
+/* ── Pausa Pedagógica (tela preta) ──────────────────────────────────────── */
+.reader-blackout {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    background: #04040a;
+    cursor: pointer;
+}
+
+.reader-blackout[hidden] {
+    display: none;
+}
+
+.reader-blackout-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--fg-subtle, #84808c);
+    text-align: center;
+}
+
+.reader-blackout-brand span {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--fg-muted, #b0adb5);
+}
+
+.reader-blackout-brand kbd {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    font-family: 'Geist Mono', monospace;
+}
+
+/* ── Roteiro docente (painel) ───────────────────────────────────────────── */
+.reader-notes {
+    position: fixed;
+    right: clamp(16px, 2vw, 32px);
+    bottom: clamp(88px, 12vh, 120px);
+    z-index: 60;
+    width: min(92vw, 440px);
+    max-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    background: #0d121f;
+    border: 1px solid color-mix(in srgb, var(--reader-support) 30%, transparent);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(16px);
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity .3s var(--reader-ease), transform .3s var(--reader-ease);
+}
+
+.reader-notes.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.reader-notes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.reader-notes-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--reader-support);
+}
+
+.reader-notes-title i {
+    width: 18px;
+    height: 18px;
+}
+
+.reader-notes-body {
+    padding: 16px 18px;
+    overflow-y: auto;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 /* ── Movimento reduzido ─────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-    .deck-slide,
-    .deck-slide-inner,
-    .deck-build,
-    .deck-controls,
-    .deck-hint,
-    .deck-rail,
-    .deck-rail-dot,
-    .deck-notes,
-    .deck-stage-nav,
-    .deck-progress span,
-    .deck-splash-dot {
+    .reader-stage {
+        scroll-behavior: auto;
+    }
+    .reader-controls,
+    .reader-hint,
+    .reader-notes,
+    .reader-progress span {
         transition: none !important;
-        animation: none !important;
     }
 }
 
-/* ── Telas pequenas (smartboard portátil / preview) ─────────────────────── */
+/* ── Telas pequenas (preview em notebook / smartboard) ──────────────────── */
 @media (max-width: 640px) {
-    .deck-icon-btn,
-    .deck-stage-nav {
-        min-width: 44px;
-        min-height: 44px;
+    .reader-doc {
+        padding: 32px 20px 80px;
     }
-    .deck-notes {
-        right: 12px;
+    .reader-notes {
         left: 12px;
+        right: 12px;
         width: auto;
-        max-height: 50vh;
-    }
-    .deck-rail {
-        right: 8px;
     }
 }
 
-/* ── Regras de Impressão ────────────────────────────────────────────────── */
+/* ── Impressão ──────────────────────────────────────────────────────────── */
 @media print {
-    .deck-html, .deck-body {
-        overflow: visible !important;
+    .reader-controls,
+    .reader-hint,
+    .reader-progress,
+    .reader-blackout,
+    .reader-notes {
+        display: none !important;
+    }
+    .reader-html,
+    .reader-body {
         background: #fff !important;
         color: #000 !important;
     }
-    .deck-controls, .deck-hint, .deck-rail, .deck-stage-nav, .deck-splash, .deck-ambient-glow, .deck-spotlight {
-        display: none !important;
-    }
-    .deck-stage { position: static !important; }
-    .deck-slide {
-        position: relative !important;
-        page-break-after: always;
-        opacity: 1 !important;
-        visibility: visible !important;
-        transform: none !important;
-        padding: 40px !important;
-    }
-    .deck-slide-inner {
-        transform: none !important;
+    .reader-stage {
+        position: static !important;
+        overflow: visible !important;
     }
 }
