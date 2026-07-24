@@ -1,6 +1,6 @@
 # Design
 
-> Canonical source of truth is `design_system/design-system.html` (DS v2 "The Digital Atelier", ~828 lines, ~180 selectors). This file is a summary index for design agents; when in doubt, open the HTML. Tokens below mirror `static/css/app.css` `:root` / `[data-theme='light']`.
+> Canonical source of truth is `design_system/design-system.html` (DS v2 "The Digital Atelier", ~828 lines, ~180 selectors). This file is a summary index for design agents; when in doubt, open the HTML. The `--shell-*` tokens documented below are the **DS canonical** names (visual source of truth). The **runtime** `static/css/app.css` (`:root` / `[data-theme='light']`) carries the same brand values under a **parallel namespace** — `--accent*` / `--fg-*` / `--surface-*` / `--c-*`. Names differ, brand agrees; the bridge is the mapping table in ["Runtime token namespace"](#runtime-token-namespace-appcss--ds).
 
 ## Theme
 
@@ -24,6 +24,33 @@ Dark-first (`color-scheme: dark`), with a fully-supported light theme (`[data-th
 `--grad-primary` (emerald→cyan 135°), `--grad-cta` (emerald→cyan 45°), `--grad-brand` (mint→violet→cyan 120°). Stripe utilities: `.stripe-cta/.stripe-violet/.stripe-warning/.stripe-cyan/.stripe-success`. Text: `.text-brand/.text-success/.text-warning/.text-info/.text-strong`. Gradientes ficam em superfícies e CTAs, nunca em texto.
 
 **Color has function**: green=action/progress, yellow=deadline/attention, red=risk, violet/cyan=support only.
+
+### Runtime token namespace (app.css ↔ DS)
+
+The DS canonical (`design-system.html`) names its tokens `--shell-*`. The runtime `static/css/app.css` does **not** use those names — it exposes a parallel namespace (`--accent` / `--fg-*` / `--surface-*` / `--border*` / `--c-*` / `--grad-cta`) holding the **same brand values**. There was a historical token fork; both namespaces now agree on the mark (emerald → cyan, cyan = support), differing only in token name. The table below is the authoritative bridge — values are verified against `app.css` `:root` (dark) and `[data-theme='light']`.
+
+> **Decisão Leva 2 (2026-07)**: o namespace `--accent*` foi ratificado como o runtime; os valores foram realinhados ao emerald canônico do Atelier. Ciano é suporte, esmeralda é a ação. `.btn-primary` usa `--grad-cta` (`color: var(--accent-ink)` sobre `background: var(--grad-cta)`). Não renomear tokens do app.css para `--shell-*` — usar esta tabela como ponte.
+
+| DS canônico (`--shell-*`) | Runtime (app.css) | Dark (`:root`) | Light (`[data-theme='light']`) |
+|---|---|---|---|
+| `--shell-primary` (emerald / ação) | `--accent` | `#10b981` | `#047857` |
+| `--shell-primary-200` | `--accent-text` | `#6ee7b7` | `#047857` |
+| `--shell-tertiary` (cyan / suporte) | `--accent-support` | `#22d3ee` | `#0e7490` |
+| `--shell-text` | `--fg` | `#ece8e7` | `#0f172a` |
+| `--shell-muted` | `--fg-muted` | `#b0adb5` | `#475569` |
+| `--shell-soft` | `--fg-subtle` | `#84808c` | `#57647a` |
+| `--shell-surface` / `-elev` | `--surface-base` | `#0b0b0d` | `#eff1f5` |
+| `--shell-surface-*` (raised) | `--surface-raised` | `#141417` | `#f8f9fc` |
+| `--shell-surface-*` (overlay) | `--surface-overlay` | `#1c1c21` | `#ffffff` |
+| `--shell-border` | `--border` | `rgba(255,255,255,.08)` | `rgba(15,23,42,.10)` |
+| `--shell-border-strong` | `--border-strong` | `rgba(255,255,255,.14)` | `rgba(15,23,42,.16)` |
+| `--grad-cta` (existe em ambos) | `--grad-cta` | `linear-gradient(45deg, #10b981, #06b6d4 130%)` | `linear-gradient(45deg, #047857, #0e7490 130%)` |
+| `--shell-success` | `--c-success` | `#34d399` | `#047857` |
+| `--shell-warning` | `--c-warning` | `#fbbf24` | `#b45309` |
+| `--shell-danger` (`-hover`) | `--c-danger` (`--c-danger-hover`) | `#f87171` (`#dc2626`) | `#b91c1c` (`#b91c1c`) |
+| `--shell-info` | `--c-info` | `#38bdf8` | `#0369a1` |
+
+Notes: (1) cyan appears twice — as the standalone support token `--accent-support` (`#22d3ee` dark) and as the terminal stop of `--grad-cta` (`#06b6d4` dark, the DS `--shell-tertiary` value); both are "suporte", never a primary action surface. (2) `--accent-ink` (`#04222B`) is the on-emerald ink used by `.btn-primary`; `--fg-on-accent` resolves to it. (3) Runtime-only tokens with no `--shell-*` twin: `--accent-tint`, `--border-focus`, the `--c-*-tint` fills, and `--c-warning-ink` — treat them as app.css extensions, not new brand directions.
 
 ## Typography
 

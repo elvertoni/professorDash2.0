@@ -3,12 +3,14 @@
 }
 
 :root {
-    /* ── Brand accent (cyan único #00B4D8, uso restrito) ── */
-    --accent: #00B4D8;
+    /* ── Brand accent (emerald canônico, ciano vira suporte) ── */
+    --accent: #10b981;
     --accent-ink: #04222B;
-    --accent-tint: rgba(0, 180, 216, .14);
-    --accent-text: #34CDEC;
-    --primary-hsl: 190 100% 42.4%;
+    --accent-tint: rgba(16, 185, 129, .14);
+    --accent-text: #6ee7b7;
+    --accent-support: #22d3ee;
+    --grad-cta: linear-gradient(45deg, #10b981, #06b6d4 130%);
+    --primary-hsl: 160 84% 39%;
 
     /* ── Foreground (3 níveis + on-accent) ── */
     --fg: #ece8e7;
@@ -24,7 +26,7 @@
     /* ── Borders ── */
     --border: rgba(255, 255, 255, .08);
     --border-strong: rgba(255, 255, 255, .14);
-    --border-focus: #34CDEC;
+    --border-focus: #6ee7b7;
 
     /* ── Semantic + tints (emerald rebaixado p/ success) ── */
     --c-success: #34d399;
@@ -33,6 +35,7 @@
     --c-warning-tint: rgba(251, 191, 36, .14);
     --c-danger: #f87171;
     --c-danger-tint: rgba(248, 113, 113, .14);
+    --c-danger-hover: #dc2626;
     --c-info: #38bdf8;
     --c-info-tint: rgba(56, 189, 248, .14);
     --c-warning-ink: #1a1206;
@@ -81,9 +84,11 @@
 
 [data-theme='light'] {
     /* Override só dos novos tokens; tudo resolve via var() e segue o tema. */
-    --accent: #00B4D8;
-    --accent-text: #0E7490;
-    --border-focus: #0E7490;
+    --accent: #047857;
+    --accent-text: #047857;
+    --accent-support: #0e7490;
+    --grad-cta: linear-gradient(45deg, #047857, #0e7490 130%);
+    --border-focus: #047857;
 
     --fg: #0f172a;
     --fg-muted: #475569;
@@ -99,6 +104,7 @@
     --c-success: #047857;
     --c-warning: #b45309;
     --c-danger: #b91c1c;
+    --c-danger-hover: #b91c1c;
     --c-info: #0369a1;
     --c-warning-ink: #ffffff;
 
@@ -531,7 +537,7 @@ button {
 }
 
 .account-panel-email {
-    color: var(--fg-subtle);
+    color: var(--fg-muted);
     font-size: 12px;
     font-family: var(--font-mono);
     overflow: hidden;
@@ -619,25 +625,28 @@ button {
 
 .btn-primary {
     color: var(--accent-ink);
-    background: var(--accent);
+    background: var(--grad-cta);
 }
 
 .btn-primary:not(:disabled):not([disabled]):hover {
-    background: var(--accent-text);
+    filter: brightness(1.05);
     transform: scale(.97);
 }
 
-[data-theme='light'] .btn-primary:not(:disabled):not([disabled]):hover {
+/* Light: gradiente CTA usa emerald-700/cyan-700 (escuros) → texto branco p/ AA */
+[data-theme='light'] .btn-primary {
     color: #fff;
 }
 
 .btn-secondary {
-    color: #fff;
-    background: var(--accent);
+    color: var(--fg);
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-strong);
 }
 
 .btn-secondary:not(:disabled):not([disabled]):hover {
-    filter: brightness(1.1);
+    background: var(--surface-raised);
+    border-color: var(--accent);
 }
 
 .btn-outline {
@@ -674,7 +683,8 @@ button {
 
 .btn-danger:not(:disabled):not([disabled]):hover {
     color: #fff;
-    background: var(--c-danger);
+    background: var(--c-danger-hover);
+    border-color: var(--c-danger-hover);
 }
 
 .btn:disabled,
@@ -978,8 +988,8 @@ summary:focus-visible,
 
 .badge-info {
     color: var(--c-info);
-    border-color: rgba(56, 189, 248, .3);
-    background: rgba(56, 189, 248, .14);
+    border-color: var(--c-info);
+    background: var(--c-info-tint);
 }
 
 .badge-warning {
