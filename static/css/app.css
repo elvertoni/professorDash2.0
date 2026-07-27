@@ -1620,6 +1620,12 @@ table.tbl {
     padding: 48px 0 72px;
 }
 
+/* A leitura de aula é a única superfície longa do portal: ganha mais largura e
+   uma goteira que cede em telas médias em vez de manter 28px fixos. */
+.lesson-page {
+    width: min(1320px, calc(100% - clamp(32px, 5vw, 88px)));
+}
+
 .narrow-page {
     width: min(760px, calc(100% - 56px));
 }
@@ -1901,9 +1907,12 @@ table.tbl {
     color: var(--c-success);
 }
 
+/* <figure> carrega margin-inline: 40px do user-agent: o diagrama perdia 80px de
+   largura, o que no celular sobrava 159px úteis para o bloco de código. */
 .lesson-diagram {
     max-width: 100%;
     min-width: 0;
+    margin: var(--space-4) 0;
     padding: var(--space-4);
     border-radius: var(--radius-md);
     background: var(--surface-base);
@@ -1919,6 +1928,7 @@ table.tbl {
 .lesson-steps {
     display: grid;
     gap: 12px;
+    max-width: var(--block-width, 100%);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -1963,6 +1973,7 @@ table.tbl {
 }
 
 .lesson-quiz {
+    max-width: var(--block-width, 100%);
     margin: var(--space-4) 0;
     padding: var(--space-4);
     border: 1px solid var(--border);
@@ -2013,7 +2024,7 @@ table.tbl {
     margin: 0;
     padding-left: var(--space-5);
     color: var(--fg-muted);
-    font-size: 14px;
+    font-size: 0.94em;
     line-height: 1.55;
 }
 
@@ -2035,7 +2046,7 @@ table.tbl {
     border-radius: var(--radius-md);
     background: var(--surface-base);
     color: var(--fg);
-    font-size: var(--text-read);
+    font-size: var(--reader-size, var(--text-read));
     line-height: 1.5;
     text-align: left;
     cursor: pointer;
@@ -2186,11 +2197,13 @@ table.tbl {
     margin-top: 24px;
 }
 
+/* A capa do acervo é infográfico com texto, não foto de apoio: recortar em
+   16/9 comia as legendas de cima e de baixo. Mostra inteira, com teto de
+   altura para não empurrar o início da aula para fora da tela. */
 .lesson-hero {
+    display: block;
     margin: 0 0 var(--space-5);
     overflow: hidden;
-    aspect-ratio: 16 / 9;
-    max-height: 460px;
     border-radius: var(--radius-md);
     background: var(--surface-base);
     box-shadow: var(--shadow-pop);
@@ -2200,12 +2213,14 @@ table.tbl {
 .lesson-hero img {
     display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    max-height: 72vh;
+    object-fit: contain;
 }
 
 @media (max-width: 720px) {
-    .lesson-hero { aspect-ratio: 16 / 9; }
+    /* No celular a capa inteira ocuparia a tela toda antes do título. */
+    .lesson-hero img { max-height: 48vh; }
 }
 
 /* ── Lightbox (overlay fullscreen da imagem de capa) ──────────────────── */
@@ -2274,7 +2289,20 @@ dialog.deck-lightbox:not([open]) {
     to   { opacity: 1; }
 }
 
+/* Escala de leitura própria do leitor de aula. O corpo do portal é 16px porque
+   serve telas de gestão; uma aula inteira é lida em sequência e pede 17-19px.
+   `--measure` cai de 68ch para 61ch: com a fonte maior, 68ch levava a linha a
+   ~83 caracteres — acima da faixa 65-75. A 61ch/19px a linha fica em ~74 e
+   ainda assim mais larga em pixels do que os 721px antigos. */
 .atelier {
+    --reader-size: clamp(17px, 0.42vw + 15.6px, 19px);
+    --reader-h2: clamp(24px, 0.6vw + 21px, 30px);
+    --reader-h3: clamp(20px, 0.3vw + 18.5px, 23px);
+    --measure: 61ch;
+    /* Largura das caixas da aula (callout, quiz, passos): a medida do texto mais
+       o ícone e o respiro interno, para a borda direita acompanhar a leitura.
+       Tabela, código, imagem e capa continuam usando a largura toda. */
+    --block-width: min(100%, calc(var(--measure) + 2.2em + var(--space-3) + 2 * var(--space-5)));
     max-width: 100%;
     overflow: hidden;
     border-radius: var(--radius-xl);
@@ -2335,11 +2363,26 @@ dialog.deck-lightbox:not([open]) {
     background: var(--surface-raised);
 }
 
+/* Sem teto fixo: o texto já é contido por `--measure`, e o teto de 880px só
+   sobrava como faixa morta à direita. Quem ganha a largura extra são capa,
+   tabelas, código, callouts e bento — os blocos que não seguem a medida. */
 .atelier-body {
     width: 100%;
-    max-width: 880px;
     min-width: 0;
-    padding: var(--space-6) var(--space-8) var(--space-8);
+    padding: var(--space-6) clamp(24px, 3.2vw, 64px) var(--space-8);
+}
+
+/* Entre 921px e 1080px o trilho de 220px espremia a linha para ~58 caracteres,
+   abaixo da faixa de leitura. Nessa janela a aula vira coluna única — o trilho
+   só repete turma e trilha, que o breadcrumb já mostra. */
+@media (max-width: 1080px) {
+    .atelier-rail {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .atelier-side {
+        display: none;
+    }
 }
 
 .atelier-meta {
@@ -2393,17 +2436,30 @@ dialog.deck-lightbox:not([open]) {
 .atelier .dek {
     max-width: 48ch;
     color: var(--fg-muted);
-    font-size: var(--text-h3);
+    font-size: var(--reader-h3, var(--text-h3));
     font-weight: 300;
     line-height: 1.5;
+    text-wrap: pretty;
+}
+
+/* Objetivos herdavam o 16px do shell e ficavam menores que o corpo da aula. */
+.lesson-goals ul {
+    max-width: var(--measure);
+    font-size: var(--reader-size, var(--text-read));
+    line-height: 1.7;
+}
+
+.lesson-goals li + li {
+    margin-top: var(--space-2);
 }
 
 .prose {
     max-width: 100%;
     min-width: 0;
     color: var(--fg);
-    font-size: var(--text-read);
-    line-height: 1.7;
+    font-size: var(--reader-size, var(--text-read));
+    line-height: 1.72;
+    text-wrap: pretty;
     overflow-wrap: break-word;
 }
 
@@ -2419,20 +2475,24 @@ dialog.deck-lightbox:not([open]) {
 }
 
 .prose h2 {
-    margin: var(--space-6) 0 var(--space-3);
-    font-size: var(--text-h2);
+    margin: var(--space-8) 0 var(--space-3);
+    font-size: var(--reader-h2, var(--text-h2));
     font-weight: 700;
+    line-height: 1.2;
     letter-spacing: 0;
+    text-wrap: balance;
 }
 
 .prose h3 {
     margin: var(--space-6) 0 var(--space-2);
-    font-size: var(--text-h3);
+    font-size: var(--reader-h3, var(--text-h3));
     font-weight: 600;
+    line-height: 1.3;
+    text-wrap: balance;
 }
 
 .prose p {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     color: var(--fg);
 }
 
@@ -2529,19 +2589,34 @@ dialog.deck-lightbox:not([open]) {
     padding-left: var(--space-5);
 }
 
+/* A barra lateral de 4px é banida pelo DS. A citação se distingue pelo recuo,
+   pelo itálico e pela aspa marcada — sem faixa colorida. */
 .prose blockquote,
 blockquote {
     position: relative;
     margin: var(--space-5) 0;
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-4) var(--space-5) var(--space-4) var(--space-8);
     border: 1px solid var(--border);
-    border-left: 4px solid var(--accent-support, #22d3ee);
     border-radius: var(--radius-md);
     color: var(--fg);
     background: color-mix(in srgb, var(--surface-base) 85%, transparent);
     font-size: 1em;
     line-height: 1.7;
     font-style: italic;
+}
+
+.prose blockquote::before,
+blockquote::before {
+    content: '\201C';
+    position: absolute;
+    top: calc(var(--space-3) * -1 + var(--space-4));
+    left: var(--space-4);
+    color: var(--fg-subtle);
+    font-family: var(--font-body);
+    font-size: 2.4em;
+    font-style: normal;
+    line-height: 1;
+    pointer-events: none;
 }
 
 .prose blockquote p,
@@ -2584,11 +2659,14 @@ blockquote footer::before {
     height: auto;
 }
 
+/* A caixa acompanha a coluna de texto: sem isso o callout ia até a borda do
+   corpo e a aula ficava com duas margens direitas concorrentes (texto em
+   ~768px, caixa em ~1000px). */
 .callout {
     display: grid;
     grid-template-columns: 2.2em 1fr;
     gap: var(--space-3);
-    max-width: 100%;
+    max-width: var(--block-width, 100%);
     margin: var(--space-4) 0;
     padding: var(--space-4) var(--space-5);
     border: 1px solid var(--border);
@@ -3333,7 +3411,7 @@ blockquote footer::before {
     .atelier-body {
         max-width: none;
         min-width: 0;
-        padding: var(--space-5) var(--space-5) var(--space-6);
+        padding: var(--space-5) clamp(20px, 4.5vw, 32px) var(--space-6);
     }
 
     .atelier-meta .date {
@@ -3439,19 +3517,24 @@ blockquote footer::before {
         font-size: 16px;
     }
 
+    /* O aluno lê no celular: manter 17px aqui, nunca cair para os 14px do shell. */
     .prose {
-        font-size: var(--text-ui);
+        font-size: var(--reader-size, var(--text-read));
         line-height: 1.72;
     }
 
     .prose h2 {
         margin-top: var(--space-6);
-        font-size: var(--text-h2);
+        font-size: var(--reader-h2, var(--text-h2));
     }
 
+    /* No celular a coluna do ícone custava ~40px de uma linha que já era curta:
+       o texto caía para ~30 caracteres e virava escada. Ícone sobe para cima
+       do rótulo e o texto usa a largura inteira do bloco. */
     .callout {
-        grid-template-columns: 28px minmax(0, 1fr);
-        padding: var(--space-3);
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
     }
 
     .callout .ic {
