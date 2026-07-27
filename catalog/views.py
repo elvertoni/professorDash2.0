@@ -4,6 +4,7 @@ from io import StringIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
+from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -132,6 +133,30 @@ class AcervoGithubImportView(AdminRequiredMixin, View):
         if target.startswith('/'):
             return redirect(target)
         return redirect(target)
+
+
+class AulaSlugRedirectView(LoginRequiredMixin, View):
+    '''Resolve uma aula pelo slug do acervo e redireciona para a URL canônica.
+
+    Existe para que sistemas externos (Notion, planilhas, links em material de
+    aula) montem o endereço a partir do slug do `manifesto.json`, sem precisar
+    conhecer o pk do banco. O slug é único no acervo — `gerar_manifesto.py`
+    reprova duplicata —, mas o modelo só o exige único junto de
+    disciplina/trilha/ordem, daí a ordenação determinística no desempate.
+
+    A visibilidade é a mesma do detalhe: aluno sem a aula publicada recebe 404.
+    '''
+
+    def get(self, request, slug, *args, **kwargs):
+        aula = (
+            visible_aulas_for_user(request.user)
+            .filter(slug=slug)
+            .order_by('disciplina__slug', 'trilha__slug', 'ordem')
+            .first()
+        )
+        if aula is None:
+            raise Http404('Nenhuma aula visível com o slug "{0}".'.format(slug))
+        return redirect(aula.get_absolute_url())
 
 
 class AulaDetailView(LoginRequiredMixin, DetailView):
