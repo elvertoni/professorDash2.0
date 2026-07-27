@@ -32,7 +32,9 @@ class Turma(TimeStampedModel):
         verbose_name='professor',
         on_delete=models.PROTECT,
         related_name='turmas_lecionadas',
-        limit_choices_to={'role': 'professor'},
+        # Admin entra porque quem administra o portal também leciona. Restringir a
+        # `professor` fazia `ForeignKey.validate()` reprovar a turma no full_clean.
+        limit_choices_to={'role__in': ('professor', 'admin')},
     )
     codigo_convite = models.CharField(
         'código de convite',

@@ -41,6 +41,7 @@
                 {% else %}
                     <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
                     <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
+                    <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Acervo</a>
                 {% endif %}
             </nav>
         </details>
@@ -53,6 +54,7 @@
             {% else %}
                 <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
                 <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
+                <a href="{% url 'catalog:aula_list' %}" class="{% if '/catalogo/' in request.path %}active{% endif %}">Acervo</a>
             {% endif %}
         </nav>
         <div class="header-actions">

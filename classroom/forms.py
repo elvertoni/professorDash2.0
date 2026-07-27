@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone
 
 from accounts.forms import StyledFormMixin
 from accounts.models import AlunoProfile, User
@@ -8,9 +9,11 @@ from .models import AulaPublicada, Matricula, Turma
 
 
 class TurmaForm(StyledFormMixin, forms.ModelForm):
+    '''Campos na ordem da decisão: disciplina -> série -> nome -> ano.'''
+
     class Meta:
         model = Turma
-        fields = ('nome', 'disciplina', 'serie', 'ano_letivo', 'ativa')
+        fields = ('disciplina', 'serie', 'nome', 'ano_letivo', 'ativa')
         labels = {
             'nome': 'Nome da turma',
             'disciplina': 'Disciplina',
@@ -18,30 +21,53 @@ class TurmaForm(StyledFormMixin, forms.ModelForm):
             'ano_letivo': 'Ano letivo',
             'ativa': 'Turma ativa',
         }
+        help_texts = {
+            'disciplina': 'Cada turma atende uma disciplina só. '
+                          'É ela que define quais aulas o botão "Sincronizar aulas" importa.',
+            'serie': 'Como a série aparece no diário. Ex.: 3º A',
+            'nome': 'Nome exibido para você e para o aluno. Ex.: 3º A — TCC',
+            'ativa': 'Turma inativa some do painel do aluno e não recebe novas matrículas.',
+        }
         widgets = {
+            'nome': forms.TextInput(attrs={'placeholder': 'Ex.: 3º A — TCC'}),
+            'serie': forms.TextInput(attrs={'placeholder': 'Ex.: 3º A'}),
             'ano_letivo': forms.NumberInput(attrs={'min': 2024, 'max': 2100}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['disciplina'].queryset = Disciplina.objects.order_by('label')
+
+        if not self.instance.pk and not self.initial.get('ano_letivo'):
+            self.fields['ano_letivo'].initial = timezone.localdate().year
+
         self.apply_design_system_classes()
 
 
 class TurmaAdminForm(TurmaForm):
     class Meta(TurmaForm.Meta):
-        fields = ('nome', 'disciplina', 'serie', 'ano_letivo', 'professor', 'ativa')
+        fields = ('disciplina', 'serie', 'nome', 'ano_letivo', 'professor', 'ativa')
         labels = {
             **TurmaForm.Meta.labels,
             'professor': 'Professor responsável',
         }
+        help_texts = {
+            **TurmaForm.Meta.help_texts,
+            'professor': 'Quem gerencia a turma no painel. '
+                         'Admins também aparecem na lista — é o caso de quem leciona e administra.',
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Admin entra na lista porque quem administra o portal também leciona:
+        # filtrar só por `professor` deixava o campo obrigatório sem opção válida.
         self.fields['professor'].queryset = User.objects.filter(
-            role=User.Role.PROFESSOR,
+            role__in=(User.Role.PROFESSOR, User.Role.ADMIN),
             is_active=True,
-        ).order_by('nome_completo')
+        ).order_by('nome_completo', 'email')
+        self.fields['professor'].label_from_instance = (
+            lambda user: '{0} · {1}'.format(user.nome_completo or user.email, user.get_role_display())
+        )
 
 
 class StudentEnrollmentForm(StyledFormMixin, forms.Form):

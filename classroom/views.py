@@ -193,6 +193,14 @@ class TurmaFormMixin(TurmaQuerysetMixin):
             return TurmaAdminForm
         return TurmaForm
 
+    def get_initial(self):
+        initial = super().get_initial()
+        # Só na criação: no update, `initial` venceria os dados da instância e
+        # trocaria silenciosamente o professor da turma.
+        if getattr(self, 'object', None) is None and can_manage_all(self.request.user):
+            initial.setdefault('professor', self.request.user.pk)
+        return initial
+
     def form_valid(self, form):
         if not can_manage_all(self.request.user):
             form.instance.professor = self.request.user
