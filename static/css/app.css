@@ -2002,11 +2002,14 @@ table.tbl {
     letter-spacing: .08em;
 }
 
+/* Cada item já se anuncia como "Questão N." no texto — o marcador da lista
+   numerava duas vezes ("1. Questão 1."). */
 .lesson-quiz-list {
     display: grid;
     gap: var(--space-3);
     margin: 0;
-    padding-left: var(--space-5);
+    padding-left: 0;
+    list-style: none;
 }
 
 .lesson-quiz-question {
@@ -2580,8 +2583,9 @@ dialog.deck-lightbox:not([open]) {
 
 .prose .lesson-quiz-list {
     margin: 0;
-    padding-left: var(--space-5);
+    padding-left: 0;
     color: inherit;
+    list-style: none;
 }
 
 .prose .lesson-quiz-question ol {

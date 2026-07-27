@@ -44,6 +44,27 @@ class Trilha(TimeStampedModel):
         return f'{self.disciplina} · {self.label}'
 
 
+class Conceito(TimeStampedModel):
+    '''Nome de exibição dos conceitos do acervo, espelhado do manifesto.
+
+    Serve para resolver os `[[slug]]` que as aulas usam: o slug não carrega
+    acento e derivar o texto dele entregaria "aprendizado de maquina" ao aluno.
+    Espelho somente-leitura — o grafo de conceitos vive no acervo.
+    '''
+
+    slug = models.SlugField('slug', max_length=120, unique=True)
+    nome = models.CharField('nome', max_length=180)
+    disciplina_slug = models.SlugField('disciplina', max_length=120, blank=True)
+
+    class Meta:
+        verbose_name = 'conceito'
+        verbose_name_plural = 'conceitos'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
 class Aula(TimeStampedModel):
     class Status(models.TextChoices):
         APROVADA = 'aprovada', 'Aprovada'

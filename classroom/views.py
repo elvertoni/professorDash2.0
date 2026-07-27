@@ -27,7 +27,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
 from accounts.models import User
-from catalog.models import Aula
+from catalog.models import Aula, Conceito
 from catalog.parser import render_teacher_notes_html, sanitize_lesson_html
 from catalog.services import AcervoDownloadError, download_acervo
 
@@ -45,6 +45,15 @@ from .services import import_students_from_csv
 
 def can_manage_all(user):
     return user.is_superuser or user.role == User.Role.ADMIN
+
+
+def concept_labels():
+    '''slug -> nome dos conceitos do acervo, para resolver `[[slug]]`.
+
+    O corpo da aula já chega resolvido do import; o roteiro do professor é
+    extraído do markdown em runtime e precisa do mapa aqui.
+    '''
+    return dict(Conceito.objects.values_list('slug', 'nome'))
 
 
 class TurmaQuerysetMixin(ProfessorRequiredMixin):
@@ -584,7 +593,7 @@ class AulaPublicadaPreviewView(AulaPublicadaActionMixin, View):
                 'publicada': publicada,
                 'aula': aula,
                 'lesson_html': sanitize_lesson_html(aula.conteudo_html),
-                'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md),
+                'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md, concept_labels()),
                 'previous_aula': previous_aula,
                 'next_aula': next_aula,
             },
@@ -608,7 +617,7 @@ class AulaPresentationView(AulaPublicadaActionMixin, View):
                 'publicada': publicada,
                 'aula': aula,
                 'lesson_html': sanitize_lesson_html(aula.conteudo_html),
-                'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md),
+                'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md, concept_labels()),
             },
         )
 

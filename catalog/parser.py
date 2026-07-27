@@ -1,4 +1,6 @@
 import html
+import json
+import logging
 import re
 from dataclasses import dataclass
 
@@ -8,7 +10,12 @@ import yaml
 from django.utils.html import escape
 
 
+logger = logging.getLogger(__name__)
+
+
 FRONTMATTER_RE = re.compile(r'\A---\s*\n(?P<yaml>.*?)\n---\s*\n(?P<body>.*)\Z', re.S)
+WIKILINK_RE = re.compile(r'\[\[(?P<slug>[^\]|\n]+?)(?:\|(?P<label>[^\]\n]+?))?\]\]')
+STEP_NUMBER_PREFIX_RE = re.compile(r'^\s*\d{1,2}\s*[.)\-–]\s+')
 DIAGRAM_FENCE_RE = re.compile(r'```(?P<kind>diagrama[\w-]*)\n(?P<body>.*?)\n```', re.S)
 QUIZ_FENCE_RE = re.compile(r'```quiz\n(?P<body>.*?)\n```', re.S)
 TEACHER_NOTE_RE = re.compile(
@@ -149,10 +156,34 @@ class ParsedLesson:
     html: str
 
 
-def parse_lesson_markdown(content):
+def parse_lesson_markdown(content, concept_labels=None):
     frontmatter, body = split_frontmatter(content)
-    html_content = render_lesson_html(body)
+    html_content = render_lesson_html(body, concept_labels=concept_labels)
     return ParsedLesson(frontmatter=frontmatter, body=body, html=html_content)
+
+
+def resolve_wikilinks(markdown_content, concept_labels=None):
+    '''Troca `[[slug]]` / `[[slug|rótulo]]` do acervo pelo nome de exibição.
+
+    Os conceitos vivem no grafo do acervo e não têm página no portal — um link
+    apontaria para lugar nenhum, e o destaque seria redundante porque o autor
+    já marca esses termos em negrito. Fica só o texto.
+
+    Sem rótulo explícito, o nome sai de `manifesto.json` (`conceitos[]`), que
+    carrega a grafia correta. O último recurso troca hífen por espaço, e é aí
+    que aparece "aprendizado de maquina" sem acento — por isso o mapa vem do
+    acervo em vez de ser derivado aqui.
+    '''
+    labels = concept_labels or {}
+
+    def replace(match):
+        label = (match.group('label') or '').strip()
+        if label:
+            return label
+        slug = match.group('slug').strip()
+        return labels.get(slug) or slug.replace('-', ' ')
+
+    return WIKILINK_RE.sub(replace, markdown_content or '')
 
 
 def split_frontmatter(content):
@@ -167,8 +198,9 @@ def split_frontmatter(content):
     return data, match.group('body')
 
 
-def render_lesson_html(markdown_content):
+def render_lesson_html(markdown_content, concept_labels=None):
     prepared = strip_teacher_notes(markdown_content)
+    prepared = resolve_wikilinks(prepared, concept_labels)
     prepared = render_quiz_fences(prepared)
     prepared = render_diagram_fences(prepared)
     prepared = render_custom_blocks(prepared)
@@ -191,7 +223,7 @@ def strip_teacher_notes(markdown_content):
     return TEACHER_NOTE_RE.sub('', markdown_content or '')
 
 
-def render_teacher_notes_html(markdown_content):
+def render_teacher_notes_html(markdown_content, concept_labels=None):
     notes = [
         match.group('body').strip()
         for match in TEACHER_NOTE_RE.finditer(markdown_content or '')
@@ -201,7 +233,7 @@ def render_teacher_notes_html(markdown_content):
         return ''
 
     rendered = markdown.markdown(
-        '\n\n---\n\n'.join(notes),
+        resolve_wikilinks('\n\n---\n\n'.join(notes), concept_labels),
         extensions=['extra', 'sane_lists'],
         output_format='html5',
     )
@@ -248,7 +280,10 @@ def render_diagram_fences(markdown_content):
             for index, layer in enumerate(data['camadas'], start=1):
                 if not isinstance(layer, dict):
                     continue
-                title = escape(str(layer.get('rotulo') or f'Etapa {index}'))
+                # O componente já mostra o índice na bolinha: "1. LGPD" viraria
+                # "1 · 1. LGPD".
+                raw_title = str(layer.get('rotulo') or f'Etapa {index}')
+                title = escape(STEP_NUMBER_PREFIX_RE.sub('', raw_title, count=1))
                 content = escape(str(layer.get('conteudo') or ''))
                 items.append(
                     '<li>'
@@ -403,11 +438,66 @@ def render_quiz_fences(markdown_content):
     return QUIZ_FENCE_RE.sub(replace, markdown_content)
 
 
+SCALAR_LINE_RE = re.compile(
+    r'^(?P<prefix>\s*(?:-\s+)?)(?P<key>[A-Za-z_][\w-]*):[ \t]+(?P<value>\S.*?)\s*$'
+)
+YAML_INDICATORS = ('|', '>', '[', '{', '&', '*', '!', '#', '%', '@', '`')
+
+
+def needs_quoting(value):
+    '''Diz se um escalar YAML quebraria o parse sem aspas.
+
+    Os dois casos que aparecem no acervo: dois-pontos no meio da frase
+    ("A ideia central (inspirada na lei europeia): quanto maior o risco")
+    e aspas abrindo o valor sem fechá-lo ('"Quanto?" é a resposta').
+    '''
+    if value[:1] in YAML_INDICATORS:
+        return False
+    if value[:1] in ('"', "'"):
+        return not (len(value) > 1 and value.endswith(value[0]))
+    return ': ' in value or value.endswith(':')
+
+
+def repair_yaml_block(raw_body):
+    '''Cita escalares que o autor escreveu sem aspas.
+
+    Aulas são escritas à mão em Markdown; exigir YAML impecável do professor
+    faria o aluno pagar o erro com um bloco cru na tela. Só toca em linhas
+    `chave: valor` cujo valor quebraria o parse — números e booleanos (o
+    índice da alternativa correta, por exemplo) passam intactos.
+    '''
+    repaired = []
+    for line in (raw_body or '').splitlines():
+        match = SCALAR_LINE_RE.match(line)
+        if match and needs_quoting(match.group('value')):
+            value = json.dumps(match.group('value'), ensure_ascii=False)
+            repaired.append(f'{match.group("prefix")}{match.group("key")}: {value}')
+        else:
+            repaired.append(line)
+    return '\n'.join(repaired)
+
+
 def parse_yaml_block(raw_body):
     try:
         return yaml.safe_load(raw_body) or {}
     except yaml.YAMLError:
+        pass
+
+    try:
+        parsed = yaml.safe_load(repair_yaml_block(raw_body)) or {}
+    except yaml.YAMLError:
+        logger.warning(
+            'Bloco YAML da aula não parseia nem após reparo; será exibido cru. '
+            'Trecho: %s',
+            (raw_body or '')[:120].replace('\n', ' '),
+        )
         return None
+
+    logger.info(
+        'Bloco YAML da aula precisou de reparo (escalar sem aspas). Trecho: %s',
+        (raw_body or '')[:120].replace('\n', ' '),
+    )
+    return parsed
 
 
 def render_custom_blocks(markdown_content):

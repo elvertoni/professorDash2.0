@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.text import slugify
 
-from catalog.models import Aula, Disciplina, Trilha
+from catalog.models import Aula, Conceito, Disciplina, Trilha
 from catalog.parser import parse_lesson_markdown
 
 
@@ -84,8 +84,32 @@ class Command(BaseCommand):
                 for raw_trilha in self.as_list(raw_disciplina.get('trilhas')):
                     self.upsert_trilha(disciplina, raw_trilha)
 
+    def load_concept_labels(self, manifest):
+        '''Espelha `conceitos[]` do manifesto e devolve slug -> nome.
+
+        Alimenta a resolução de `[[slug]]` nas aulas. Fica também no banco
+        porque o roteiro do professor é renderizado em runtime, fora do import.
+        Manifesto antigo, sem a chave `conceitos`, devolve vazio e o parser cai
+        no fallback.
+        '''
+        labels = {}
+        for raw in self.as_list(manifest.get('conceitos')):
+            slug = self.get_value(raw, 'slug')
+            nome = self.get_value(raw, 'nome', 'conceito', 'label')
+            if slug and nome:
+                labels[slug] = nome
+                Conceito.objects.update_or_create(
+                    slug=slug,
+                    defaults={
+                        'nome': nome,
+                        'disciplina_slug': self.get_value(raw, 'disciplina') or '',
+                    },
+                )
+        return labels
+
     def import_lessons(self, root_path, manifest, disciplina_filter, force):
         report = {'created': 0, 'updated': 0, 'skipped': 0}
+        concept_labels = self.load_concept_labels(manifest)
 
         for raw_lesson in self.as_list(manifest.get('lessons')):
             disciplina_slug = self.get_value(raw_lesson, 'disciplina')
@@ -99,7 +123,10 @@ class Command(BaseCommand):
                 continue
 
             try:
-                parsed = parse_lesson_markdown(canonical_path.read_text(encoding='utf-8'))
+                parsed = parse_lesson_markdown(
+                    canonical_path.read_text(encoding='utf-8'),
+                    concept_labels=concept_labels,
+                )
             except Exception as exc:
                 self.stderr.write(f'Erro ao processar {canonical_path}: {exc}')
                 report['skipped'] += 1
