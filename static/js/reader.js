@@ -59,7 +59,7 @@
             if (!this.progressEl) return;
             const max = this.stage.scrollHeight - this.stage.clientHeight;
             const pct = max > 0 ? (this.stage.scrollTop / max) * 100 : 0;
-            this.progressEl.style.width = `${pct}%`;
+            this.progressEl.style.transform = `scaleX(${Math.min(1, Math.max(0, pct / 100))})`;
         }
 
         /* ── Pausa Pedagógica ────────────────────────────────────────────── */
@@ -95,22 +95,48 @@
         }
 
         /* ── Tela cheia ──────────────────────────────────────────────────── */
+        isFullscreen() {
+            return Boolean(
+                document.fullscreenElement
+                || document.webkitFullscreenElement
+                || document.msFullscreenElement
+            );
+        }
+
+        requestFullscreen() {
+            const root = document.documentElement;
+            const req = root.requestFullscreen
+                || root.webkitRequestFullscreen
+                || root.msRequestFullscreen;
+            if (!req) return Promise.resolve();
+            return Promise.resolve(req.call(root)).catch(() => {});
+        }
+
+        exitFullscreen() {
+            const exit = document.exitFullscreen
+                || document.webkitExitFullscreen
+                || document.msExitFullscreen;
+            if (!exit) return Promise.resolve();
+            return Promise.resolve(exit.call(document)).catch(() => {});
+        }
+
         toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
+            if (!this.isFullscreen()) {
+                this.requestFullscreen();
             } else {
-                document.exitFullscreen().catch(() => {});
+                this.exitFullscreen();
             }
         }
 
         syncFullscreenButton() {
             const btn = document.querySelector('[data-reader-fullscreen]');
             if (!btn) return;
-            const active = Boolean(document.fullscreenElement);
+            const active = this.isFullscreen();
             btn.setAttribute('aria-pressed', String(active));
             btn.setAttribute('aria-label', active ? 'Sair da tela cheia' : 'Entrar em tela cheia');
             btn.setAttribute('title', active ? 'Sair da tela cheia (F)' : 'Tela cheia (F)');
             btn.classList.toggle('is-active', active);
+            this.body.classList.toggle('is-fullscreen', active);
         }
 
         handleEscape() {
@@ -122,8 +148,8 @@
                 this.toggleBlackout();
                 return;
             }
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(() => {});
+            if (this.isFullscreen()) {
+                this.exitFullscreen();
                 return;
             }
             const exit = document.querySelector('[data-reader-exit]');
@@ -202,7 +228,10 @@
             if (this.blackoutEl) {
                 this.blackoutEl.addEventListener('click', () => this.toggleBlackout());
             }
-            document.addEventListener('fullscreenchange', () => this.syncFullscreenButton());
+            const onFs = () => this.syncFullscreenButton();
+            document.addEventListener('fullscreenchange', onFs);
+            document.addEventListener('webkitfullscreenchange', onFs);
+            this.syncFullscreenButton();
         }
 
         bindScroll() {

@@ -1,55 +1,69 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   Modo Apresentação — Leitura Projetada ("Notion na TV")
-   A aula inteira rola em coluna única, com tipografia grande calibrada para
-   projeção em sala (TV/Educatron, 4-6 m). Nada é fatiado nem escalado por
-   medição: o conteúdo apenas rola, então nunca corta.
+   Modo Apresentação — Projeção full-bleed ("Atelier na TV")
+   Superfície standalone de projeção: ocupa 100% do viewport, tipografia
+   grande para 4–6 m, coluna de leitura larga o bastante para preencher a
+   tela sem deixar faixas mortas nas laterais. Conteúdo rola inteiro (nunca
+   corta). HUD some em idle.
    ──────────────────────────────────────────────────────────────────────── */
 
+html.reader-html,
 .reader-html {
     height: 100%;
+    width: 100%;
     background: #07080c;
 }
 
 .reader-body {
-    min-height: 100vh;
+    height: 100%;
+    min-height: 100dvh;
+    width: 100%;
     margin: 0;
+    overflow: hidden;
     color: var(--fg);
     background: #07080c;
     font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-    /* Realces de marca (mesma linguagem do portal). */
     --reader-accent: var(--accent, #10b981);
     --reader-support: var(--accent-support, #22d3ee);
-    --reader-grad: linear-gradient(135deg, #10b981 0%, #22d3ee 100%);
+    --reader-grad: var(--grad-cta, linear-gradient(45deg, #10b981, #06b6d4 130%));
     --reader-ease: cubic-bezier(.16, 1, .3, 1);
+    --reader-safe-top: max(12px, env(safe-area-inset-top, 0px));
+    --reader-safe-right: max(16px, env(safe-area-inset-right, 0px));
+    --reader-safe-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    --reader-safe-left: max(16px, env(safe-area-inset-left, 0px));
+    --reader-hud-h: 72px;
 }
 
 .reader-body.is-idle {
     cursor: none;
 }
 
-/* ── Palco de rolagem ───────────────────────────────────────────────────── */
+/* ── Palco: viewport inteiro ─────────────────────────────────────────────── */
 .reader-stage {
     position: fixed;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
     overflow-y: auto;
     overflow-x: hidden;
     scroll-behavior: smooth;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
     background:
-        radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(16, 185, 129, 0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
         #07080c;
 }
 
 .reader-stage::-webkit-scrollbar {
-    width: 12px;
+    width: 10px;
 }
 
 .reader-stage::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.18);
     border-radius: 8px;
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     background-clip: content-box;
 }
 
@@ -57,52 +71,142 @@
     outline: none;
 }
 
-/* ── Documento: escala os tokens de .prose para a TV ────────────────────── */
+.reader-stage:focus-visible {
+    outline: 2px solid var(--border-focus, var(--reader-accent));
+    outline-offset: -2px;
+}
+
+/* ── Documento: preenche a largura útil da TV ───────────────────────────── */
 .reader-doc {
-    /* Tipografia grande e responsiva à resolução da tela de projeção. */
-    --text-read: clamp(22px, 1.5vw + 1.4vh, 40px);
-    --text-h2: calc(var(--text-read) * 1.7);
-    --text-h3: calc(var(--text-read) * 1.3);
-    --measure: 60ch;
+    /* Escala tipográfica pela menor dimensão — legível a metros de distância. */
+    --text-read: clamp(26px, 1.35vw + 1.5vh, 44px);
+    --text-h2: clamp(40px, 2.4vw + 2vh, 76px);
+    --text-h3: clamp(30px, 1.7vw + 1.4vh, 54px);
+    /* Coluna larga: em fonte de projeção, ~80–90ch ≈ quase full HD. */
+    --measure: min(88ch, 100%);
+    --block-width: 100%;
 
+    box-sizing: border-box;
     width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: clamp(48px, 7vh, 120px) clamp(32px, 6vw, 160px) clamp(96px, 16vh, 220px);
+    max-width: none;
+    min-height: 100%;
+    margin: 0;
+    padding:
+        calc(var(--reader-safe-top) + clamp(28px, 4vh, 56px))
+        calc(var(--reader-safe-right) + clamp(28px, 4.5vw, 80px))
+        calc(var(--reader-safe-bottom) + var(--reader-hud-h) + clamp(48px, 8vh, 120px))
+        calc(var(--reader-safe-left) + clamp(28px, 4.5vw, 80px));
     font-size: var(--text-read);
-    line-height: 1.7;
+    line-height: 1.65;
 }
 
-/* Respiro extra entre blocos para leitura à distância. */
 .reader-doc > * {
-    scroll-margin-top: 48px;
+    scroll-margin-top: clamp(24px, 4vh, 56px);
 }
 
-/* ── Escala uniforme de citações e callouts no modo apresentação ─────────── */
+/* Prosa herda measure largo; blocos estruturais usam 100% da largura útil. */
+.reader-doc.prose p,
+.reader-doc.prose ul,
+.reader-doc.prose ol,
+.reader-doc.prose h2,
+.reader-doc.prose h3,
+.reader-doc.prose blockquote {
+    max-width: var(--measure);
+}
+
+.reader-doc.prose h2 {
+    font-size: var(--text-h2);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin-top: clamp(48px, 7vh, 96px);
+    margin-bottom: clamp(16px, 2.2vh, 28px);
+    text-wrap: balance;
+}
+
+.reader-doc.prose h3 {
+    font-size: var(--text-h3);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-top: clamp(32px, 4.5vh, 56px);
+    margin-bottom: clamp(12px, 1.6vh, 20px);
+    text-wrap: balance;
+}
+
+.reader-doc.prose p {
+    margin-bottom: clamp(16px, 2vh, 28px);
+}
+
+.reader-doc.prose li + li {
+    margin-top: 0.45em;
+}
+
+/* Blocos de destaque e mídia: largura total do palco (não da measure). */
+.reader-doc.prose .callout,
+.reader-doc.prose pre,
+.reader-doc.prose table,
+.reader-doc.prose .bento,
+.reader-doc.prose .exercise,
+.reader-doc.prose .lesson-steps,
+.reader-doc.prose .lesson-quiz-list,
+.reader-doc.prose figure,
+.reader-doc.prose img,
+.reader-doc.prose iframe,
+.reader-doc.prose video,
+.reader-doc.prose svg {
+    max-width: 100%;
+    width: 100%;
+}
+
+.reader-doc.prose pre {
+    font-size: 0.85em;
+    line-height: 1.55;
+    padding: clamp(20px, 2.5vh, 36px) clamp(22px, 2.5vw, 40px);
+    border-radius: var(--radius-lg, 16px);
+    overflow-x: auto;
+}
+
+.reader-doc.prose table {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.9em;
+}
+
+.reader-doc.prose th,
+.reader-doc.prose td {
+    padding: 0.7em 1em;
+}
+
+/* ── Citações e callouts (borda completa — sem side-stripe) ──────────────── */
 .reader-doc blockquote {
     font-size: 1em;
-    line-height: 1.7;
+    line-height: 1.65;
     margin: clamp(28px, 4vh, 52px) 0;
-    padding: clamp(24px, 3.5vh, 40px) clamp(28px, 3.5vw, 48px);
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-    border-left: 4px solid var(--reader-support, #22d3ee);
-    background: rgba(255, 255, 255, 0.025);
-    border-radius: 0 var(--radius-lg, 16px) var(--radius-lg, 16px) 0;
+    padding: clamp(24px, 3.2vh, 40px) clamp(28px, 3.2vw, 48px);
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    border-radius: var(--radius-lg, 16px);
+    background: rgba(34, 211, 238, 0.05);
     color: var(--fg);
     font-style: italic;
+    max-width: var(--measure);
+    box-sizing: border-box;
+}
+
+.reader-doc blockquote::before {
+    display: none;
 }
 
 .reader-doc blockquote p {
     font-size: 1em;
-    line-height: 1.7;
+    line-height: 1.65;
     color: var(--fg);
+    max-width: none;
 }
 
 .reader-doc blockquote footer,
 .reader-doc blockquote cite {
     display: block;
     margin-top: 14px;
-    font-size: 0.9em;
+    font-size: 0.88em;
     color: var(--fg-muted, #b0adb5);
     font-style: normal;
     font-weight: 500;
@@ -110,26 +214,28 @@
 
 .reader-doc .callout {
     font-size: 1em;
-    grid-template-columns: 2.2em 1fr;
+    grid-template-columns: 2.4em 1fr;
     gap: clamp(16px, 2vw, 28px);
     padding: clamp(24px, 3vh, 40px) clamp(28px, 3vw, 48px);
     border-radius: var(--radius-lg, 16px);
+    margin: clamp(28px, 4vh, 48px) 0;
+    box-sizing: border-box;
 }
 
 .reader-doc .callout .ic {
-    width: 2.2em;
-    height: 2.2em;
+    width: 2.4em;
+    height: 2.4em;
 }
 
 .reader-doc .callout .ic svg {
-    width: 1.25em;
-    height: 1.25em;
+    width: 1.3em;
+    height: 1.3em;
 }
 
 .reader-doc .callout .ct b {
-    font-size: 0.85em;
-    margin-bottom: 8px;
-    letter-spacing: .1em;
+    font-size: 0.82em;
+    margin-bottom: 10px;
+    letter-spacing: 0.08em;
 }
 
 .reader-doc .callout .ct p,
@@ -137,14 +243,23 @@
 .reader-doc .callout .ct ol,
 .reader-doc .callout .ct li {
     font-size: 1em;
-    line-height: 1.65;
+    line-height: 1.6;
     color: var(--fg-muted, #b0adb5);
+    max-width: none;
 }
 
-/* ── Capa editorial no topo do documento ────────────────────────────────── */
+/* ── Capa: primeiro “slide” ocupa o viewport inteiro ─────────────────────── */
 .reader-cover {
-    margin-bottom: clamp(40px, 6vh, 88px);
-    padding-bottom: clamp(32px, 5vh, 64px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100dvh - var(--reader-safe-top) - var(--reader-safe-bottom) - 8px);
+    margin: 0 0 clamp(48px, 8vh, 120px);
+    padding:
+        clamp(24px, 4vh, 48px)
+        0
+        clamp(48px, 8vh, 96px);
     border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
     max-width: none;
 }
@@ -153,18 +268,18 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: clamp(20px, 3vh, 36px);
+    margin-bottom: clamp(24px, 3.5vh, 40px);
 }
 
 .reader-badge {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 18px;
+    padding: 10px 20px;
     border-radius: var(--radius-pill, 999px);
-    font-size: calc(var(--text-read) * 0.6);
+    font-size: clamp(14px, 0.55em, 22px);
     font-weight: 700;
-    letter-spacing: .04em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
     color: var(--fg-muted, #b0adb5);
@@ -176,7 +291,7 @@
 }
 
 .reader-badge-p {
-    color: #04222b;
+    color: var(--accent-ink, #04222b);
     background: var(--reader-grad);
     border-color: transparent;
 }
@@ -186,52 +301,65 @@
     border-color: color-mix(in srgb, var(--reader-support) 45%, transparent);
 }
 
+.reader-badge-ord {
+    color: var(--fg-muted, #b0adb5);
+}
+
 .reader-cover-title {
-    margin: 0 0 clamp(16px, 2.4vh, 28px);
-    font-size: clamp(40px, 4vw + 2vh, 88px);
+    margin: 0 0 clamp(18px, 2.6vh, 32px);
+    font-size: clamp(48px, 5.2vw + 2vh, 104px);
     font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -.02em;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
     text-wrap: balance;
     color: var(--fg);
-    max-width: none;
+    max-width: 22ch;
 }
 
 .reader-cover-dek {
-    margin: 0 0 clamp(24px, 3.5vh, 40px);
-    font-size: calc(var(--text-read) * 1.15);
+    margin: 0 0 clamp(28px, 4vh, 48px);
+    font-size: calc(var(--text-read) * 1.2);
+    line-height: 1.45;
     color: var(--fg-muted, #b0adb5);
-    max-width: 46ch;
+    max-width: min(52ch, 100%);
+    text-wrap: pretty;
 }
 
 .reader-cover-goals {
-    padding: clamp(20px, 3vh, 32px) clamp(24px, 3vw, 40px);
+    width: 100%;
+    max-width: min(72ch, 100%);
+    padding: clamp(22px, 3.2vh, 36px) clamp(26px, 3.2vw, 44px);
     border-radius: var(--radius-lg, 16px);
-    background: rgba(16, 185, 129, 0.06);
-    border: 1px solid color-mix(in srgb, var(--reader-accent) 30%, transparent);
-    max-width: none;
+    background: rgba(16, 185, 129, 0.07);
+    border: 1px solid color-mix(in srgb, var(--reader-accent) 32%, transparent);
+    box-sizing: border-box;
 }
 
 .reader-cover-goals-title {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     font-size: calc(var(--text-read) * 0.72);
     font-weight: 700;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--reader-accent);
 }
 
 .reader-cover-goals ul {
     margin: 0;
-    padding-left: 1.4em;
+    padding-left: 1.35em;
     max-width: none;
 }
 
 .reader-cover-goals li {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    max-width: none;
+}
+
+.reader-cover-goals li:last-child {
+    margin-bottom: 0;
 }
 
 .reader-cover-foot {
@@ -239,7 +367,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 14px;
-    margin-top: clamp(20px, 3vh, 32px);
+    margin-top: clamp(28px, 4vh, 48px);
     font-size: calc(var(--text-read) * 0.72);
     color: var(--fg-subtle, #84808c);
 }
@@ -259,9 +387,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: 20px;
+    min-height: min(70dvh, 640px);
     margin-top: clamp(64px, 10vh, 140px);
-    padding-top: clamp(40px, 6vh, 80px);
+    padding: clamp(48px, 8vh, 96px) 0;
     border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
     text-align: center;
     max-width: none;
@@ -270,25 +400,31 @@
 .reader-end-icon {
     display: grid;
     place-items: center;
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: rgba(16, 185, 129, 0.12);
     color: var(--reader-accent);
 }
 
 .reader-end-icon i {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
 }
 
 .reader-end-title {
-    font-size: calc(var(--text-read) * 1.1);
+    font-size: calc(var(--text-read) * 1.15);
     font-weight: 700;
     color: var(--fg-muted, #b0adb5);
 }
 
-/* ── Barra de progresso de leitura ──────────────────────────────────────── */
+.reader-end .btn {
+    font-size: 1rem;
+    min-height: 48px;
+    padding: 0 28px;
+}
+
+/* ── Barra de progresso ─────────────────────────────────────────────────── */
 .reader-progress {
     position: fixed;
     top: 0;
@@ -303,15 +439,18 @@
 .reader-progress span {
     display: block;
     height: 100%;
-    width: 0;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
     background: var(--reader-grad);
-    transition: width .12s linear;
+    transition: transform 0.12s linear;
+    will-change: transform;
 }
 
-/* ── HUD de controles flutuantes ────────────────────────────────────────── */
+/* ── HUD de controles ───────────────────────────────────────────────────── */
 .reader-controls {
     position: fixed;
-    bottom: clamp(16px, 3vh, 32px);
+    bottom: calc(var(--reader-safe-bottom) + clamp(12px, 2.5vh, 28px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 50;
@@ -320,11 +459,11 @@
     gap: 6px;
     padding: 8px;
     border-radius: var(--radius-pill, 999px);
-    background: rgba(9, 12, 21, 0.85);
+    background: rgba(9, 12, 21, 0.88);
     border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(16px);
-    transition: opacity .4s var(--reader-ease), transform .4s var(--reader-ease);
+    transition: opacity 0.4s var(--reader-ease), transform 0.4s var(--reader-ease);
 }
 
 .reader-icon-btn {
@@ -337,7 +476,8 @@
     background: transparent;
     color: var(--fg-muted, #b0adb5);
     cursor: pointer;
-    transition: background .2s var(--reader-ease), color .2s var(--reader-ease);
+    text-decoration: none;
+    transition: background 0.2s var(--reader-ease), color 0.2s var(--reader-ease);
 }
 
 .reader-icon-btn:hover {
@@ -370,26 +510,32 @@
 /* ── Dica de atalhos ────────────────────────────────────────────────────── */
 .reader-hint {
     position: fixed;
-    top: clamp(12px, 2vh, 24px);
+    top: calc(var(--reader-safe-top) + clamp(10px, 1.8vh, 20px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 45;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 16px;
+    max-width: min(96vw, 920px);
+    padding: 10px 18px;
     border-radius: var(--radius-pill, 999px);
-    font-size: 0.85rem;
+    font-size: clamp(12px, 0.85rem, 15px);
     color: var(--fg-subtle, #84808c);
-    background: rgba(9, 12, 21, 0.7);
+    background: rgba(9, 12, 21, 0.75);
     border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
     backdrop-filter: blur(12px);
-    transition: opacity .4s var(--reader-ease);
+    transition: opacity 0.4s var(--reader-ease), transform 0.4s var(--reader-ease);
 }
 
 .reader-hint i {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
+}
+
+.reader-hint span {
+    text-wrap: balance;
 }
 
 .reader-hint kbd {
@@ -401,15 +547,29 @@
     border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
 }
 
-/* Inatividade oculta os controles para projeção limpa. */
+/* Idle: HUD some; foco/hover devolve. */
 .reader-body.is-idle .reader-controls,
 .reader-body.is-idle .reader-hint {
     opacity: 0;
     pointer-events: none;
-    transform: translateX(-50%) translateY(10px);
 }
 
-/* ── Pausa Pedagógica (tela preta) ──────────────────────────────────────── */
+.reader-body.is-idle .reader-controls {
+    transform: translateX(-50%) translateY(12px);
+}
+
+.reader-body.is-idle .reader-hint {
+    transform: translateX(-50%) translateY(-8px);
+}
+
+.reader-body.is-idle .reader-controls:focus-within,
+.reader-body.is-idle .reader-hint:focus-within {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%);
+}
+
+/* ── Pausa Pedagógica ───────────────────────────────────────────────────── */
 .reader-blackout {
     position: fixed;
     inset: 0;
@@ -428,15 +588,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     color: var(--fg-subtle, #84808c);
     text-align: center;
+    padding: 24px;
 }
 
 .reader-blackout-brand span {
-    font-size: 1.4rem;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
     font-weight: 700;
     color: var(--fg-muted, #b0adb5);
+}
+
+.reader-blackout-brand small {
+    font-size: 0.95rem;
 }
 
 .reader-blackout-brand kbd {
@@ -446,25 +611,25 @@
     font-family: 'Geist Mono', monospace;
 }
 
-/* ── Roteiro docente (painel) ───────────────────────────────────────────── */
+/* ── Roteiro docente ────────────────────────────────────────────────────── */
 .reader-notes {
     position: fixed;
-    right: clamp(16px, 2vw, 32px);
-    bottom: clamp(88px, 12vh, 120px);
+    right: calc(var(--reader-safe-right) + clamp(12px, 2vw, 28px));
+    bottom: calc(var(--reader-safe-bottom) + var(--reader-hud-h) + clamp(12px, 2vh, 28px));
     z-index: 60;
-    width: min(92vw, 440px);
-    max-height: 60vh;
+    width: min(92vw, 460px);
+    max-height: min(62vh, 720px);
     display: flex;
     flex-direction: column;
-    background: #0d121f;
+    background: rgba(13, 18, 31, 0.96);
     border: 1px solid color-mix(in srgb, var(--reader-support) 30%, transparent);
     border-radius: var(--radius-lg, 16px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(16px);
     opacity: 0;
     transform: translateY(12px);
     pointer-events: none;
-    transition: opacity .3s var(--reader-ease), transform .3s var(--reader-ease);
+    transition: opacity 0.3s var(--reader-ease), transform 0.3s var(--reader-ease);
 }
 
 .reader-notes.is-open {
@@ -477,6 +642,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     padding: 14px 16px;
     border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
 }
@@ -501,11 +667,26 @@
     line-height: 1.6;
 }
 
+.reader-notes-body.prose p,
+.reader-notes-body.prose ul,
+.reader-notes-body.prose ol {
+    max-width: none;
+}
+
+/* ── Fullscreen nativo: zera qualquer respiro residual ──────────────────── */
+:fullscreen .reader-stage,
+.reader-html:fullscreen .reader-stage {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
 /* ── Movimento reduzido ─────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     .reader-stage {
         scroll-behavior: auto;
     }
+
     .reader-controls,
     .reader-hint,
     .reader-notes,
@@ -514,15 +695,49 @@
     }
 }
 
-/* ── Telas pequenas (preview em notebook / smartboard) ──────────────────── */
-@media (max-width: 640px) {
+/* ── Notebook / smartboard estreito ─────────────────────────────────────── */
+@media (max-width: 900px) {
     .reader-doc {
-        padding: 32px 20px 80px;
+        --text-read: clamp(20px, 2.8vw + 1vh, 28px);
+        --measure: 100%;
+        padding-inline: calc(var(--reader-safe-left) + 20px) calc(var(--reader-safe-right) + 20px);
     }
+
+    .reader-cover {
+        min-height: auto;
+        padding-top: 12px;
+    }
+
+    .reader-cover-title {
+        font-size: clamp(32px, 8vw, 48px);
+        max-width: none;
+    }
+
+    .reader-hint {
+        max-width: calc(100vw - 24px);
+        font-size: 0.75rem;
+    }
+
     .reader-notes {
         left: 12px;
         right: 12px;
         width: auto;
+    }
+}
+
+/* ── Telas ultra-wide / 4K: tipografia sobe, measure acompanha ───────────── */
+@media (min-width: 1920px) {
+    .reader-doc {
+        --text-read: clamp(32px, 1.1vw + 1.4vh, 48px);
+        --measure: min(92ch, 100%);
+        padding-inline:
+            calc(var(--reader-safe-left) + clamp(48px, 5vw, 120px))
+            calc(var(--reader-safe-right) + clamp(48px, 5vw, 120px));
+    }
+
+    .reader-cover-title {
+        font-size: clamp(64px, 4.5vw + 1.5vh, 120px);
+        max-width: 24ch;
     }
 }
 
@@ -535,13 +750,23 @@
     .reader-notes {
         display: none !important;
     }
+
     .reader-html,
     .reader-body {
         background: #fff !important;
         color: #000 !important;
+        height: auto;
+        overflow: visible;
     }
+
     .reader-stage {
         position: static !important;
         overflow: visible !important;
+        height: auto !important;
+        background: #fff !important;
+    }
+
+    .reader-cover {
+        min-height: auto;
     }
 }
