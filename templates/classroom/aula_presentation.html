@@ -116,39 +116,54 @@
 
     {# HUD de Controles Flutuantes #}
     <nav class="reader-controls" aria-label="Controles da apresentação">
-        <a class="reader-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" data-reader-exit
-           title="Sair (Esc)" aria-label="Sair da apresentação" aria-keyshortcuts="Escape">
-            <i data-lucide="x" aria-hidden="true"></i>
-        </a>
+        <div class="reader-control-group" role="group" aria-label="Saída">
+            <a class="reader-icon-btn" href="{% url 'classroom:aula_publicada_preview' turma.pk publicada.pk %}" data-reader-exit
+               title="Sair (Esc)" aria-label="Sair da apresentação" aria-keyshortcuts="Escape">
+                <i data-lucide="x" aria-hidden="true"></i>
+            </a>
+        </div>
         <div class="reader-divider" aria-hidden="true"></div>
-        <button class="reader-icon-btn" type="button" data-reader-up title="Subir (↑)" aria-label="Rolar para cima">
-            <i data-lucide="chevron-up" aria-hidden="true"></i>
-        </button>
-        <button class="reader-icon-btn" type="button" data-reader-down title="Avançar (Espaço / ↓)" aria-label="Rolar para baixo">
-            <i data-lucide="chevron-down" aria-hidden="true"></i>
-        </button>
+        <div class="reader-control-group" role="group" aria-label="Navegação da aula">
+            <button class="reader-icon-btn" type="button" data-reader-up
+                    title="Subir (↑)" aria-label="Rolar para cima"
+                    aria-keyshortcuts="ArrowUp PageUp Home">
+                <i data-lucide="chevron-up" aria-hidden="true"></i>
+            </button>
+            <button class="reader-icon-btn" type="button" data-reader-down
+                    title="Avançar (Espaço / ↓)" aria-label="Rolar para baixo"
+                    aria-keyshortcuts="Space ArrowDown PageDown End">
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+        </div>
         <div class="reader-divider" aria-hidden="true"></div>
-        <button class="reader-icon-btn" type="button" data-reader-blackout title="Pausa Pedagógica (B)"
-                aria-label="Pausa pedagógica" aria-keyshortcuts="B" aria-pressed="false">
-            <i data-lucide="eye-off" aria-hidden="true"></i>
-        </button>
-        {% if teacher_notes_html %}
-        <button class="reader-icon-btn" type="button" data-reader-notes title="Roteiro Docente (N)"
-                aria-label="Abrir roteiro docente" aria-keyshortcuts="N"
-                aria-controls="reader-notes" aria-expanded="false">
-            <i data-lucide="notebook-pen" aria-hidden="true"></i>
-        </button>
-        {% endif %}
-        <button class="reader-icon-btn" type="button" data-reader-fullscreen title="Tela cheia (F)"
-                aria-label="Entrar em tela cheia" aria-keyshortcuts="F" aria-pressed="false">
-            <i data-lucide="maximize" aria-hidden="true"></i>
-        </button>
+        <div class="reader-control-group" role="group" aria-label="Recursos da apresentação">
+            <button class="reader-icon-btn" type="button" data-reader-reveal
+                    title="Revelar resposta (R)" aria-label="Revelar resposta"
+                    aria-keyshortcuts="R">
+                <i data-lucide="eye" aria-hidden="true"></i>
+            </button>
+            <button class="reader-icon-btn" type="button" data-reader-blackout title="Pausa Pedagógica (B)"
+                    aria-label="Pausa pedagógica" aria-keyshortcuts="B" aria-pressed="false">
+                <i data-lucide="eye-off" aria-hidden="true"></i>
+            </button>
+            {% if teacher_notes_html %}
+            <button class="reader-icon-btn" type="button" data-reader-notes title="Roteiro Docente (N)"
+                    aria-label="Abrir roteiro docente" aria-keyshortcuts="N"
+                    aria-controls="reader-notes" aria-expanded="false">
+                <i data-lucide="notebook-pen" aria-hidden="true"></i>
+            </button>
+            {% endif %}
+            <button class="reader-icon-btn" type="button" data-reader-fullscreen title="Tela cheia (F)"
+                    aria-label="Entrar em tela cheia" aria-keyshortcuts="F" aria-pressed="false">
+                <i data-lucide="maximize" aria-hidden="true"></i>
+            </button>
+        </div>
     </nav>
 
     {# Dica de Atalhos de Teclado #}
     <div class="reader-hint" data-reader-hint>
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        <span>Tela cheia: <kbd>F</kbd> · Avançar: <kbd>Espaço</kbd> <kbd>↓</kbd> · Voltar: <kbd>↑</kbd>{% if aula.imagem %} · Capa: <kbd>C</kbd>{% endif %} · Pausa: <kbd>B</kbd>{% if teacher_notes_html %} · Roteiro: <kbd>N</kbd>{% endif %} · Sair: <kbd>Esc</kbd></span>
+        <span>Avançar: <kbd>Espaço</kbd> <kbd>↓</kbd> · Voltar: <kbd>↑</kbd> · Revelar: <kbd>R</kbd>{% if aula.imagem %} · Capa: <kbd>C</kbd>{% endif %} · Pausa: <kbd>B</kbd>{% if teacher_notes_html %} · Roteiro: <kbd>N</kbd>{% endif %} · Tela cheia: <kbd>F</kbd> · Ajuda: <kbd>?</kbd> · Sair: <kbd>Esc</kbd></span>
     </div>
 
     <script src="{% static 'js/quiz.js' %}"></script>

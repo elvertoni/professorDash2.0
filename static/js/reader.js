@@ -21,8 +21,12 @@
             this.notesEl = document.getElementById('reader-notes');
             this.lightboxEl = document.getElementById('reader-cover-dialog');
             this.lightboxOpenBtn = document.querySelector('[data-reader-lightbox-open]');
+            this.hintEl = document.querySelector('[data-reader-hint]');
+            this.revealBtn = document.querySelector('[data-reader-reveal]');
             this.lightboxReturnFocus = null;
             this.idleTimer = null;
+            this.helpTimer = null;
+            this.keyActiveTimers = new WeakMap();
             this.progressScheduled = false;
 
             this.init();
@@ -32,6 +36,7 @@
             this.bindKeys();
             this.bindControls();
             this.bindLightbox();
+            this.bindQuizReveal();
             this.bindScroll();
             this.setupIdleDetection();
             this.updateProgress();
@@ -61,6 +66,30 @@
                 top: top,
                 behavior: this.motionOk() ? 'smooth' : 'auto'
             });
+        }
+
+        pulseControl(selector, duration = 220) {
+            const control = document.querySelector(selector);
+            if (!control) return;
+
+            const previousTimer = this.keyActiveTimers.get(control);
+            if (previousTimer) clearTimeout(previousTimer);
+            control.classList.add('is-key-active');
+            const timer = setTimeout(() => {
+                control.classList.remove('is-key-active');
+                this.keyActiveTimers.delete(control);
+            }, duration);
+            this.keyActiveTimers.set(control, timer);
+        }
+
+        showHelp() {
+            if (!this.hintEl) return;
+            clearTimeout(this.helpTimer);
+            this.body.classList.remove('is-idle');
+            this.hintEl.classList.add('is-help-visible');
+            this.helpTimer = setTimeout(() => {
+                this.hintEl.classList.remove('is-help-visible');
+            }, 12000);
         }
 
         updateProgress() {
@@ -226,19 +255,113 @@
                 return;
             }
             if (this.notesEl && this.notesEl.classList.contains('is-open')) {
+                this.pulseControl('[data-reader-notes]');
                 this.toggleNotes();
                 return;
             }
             if (this.blackoutEl && !this.blackoutEl.hasAttribute('hidden')) {
+                this.pulseControl('[data-reader-blackout]');
                 this.toggleBlackout();
                 return;
             }
             if (this.isFullscreen()) {
+                this.pulseControl('[data-reader-fullscreen]');
                 this.exitFullscreen();
                 return;
             }
             const exit = document.querySelector('[data-reader-exit]');
-            if (exit && exit.href) window.location.href = exit.href;
+            if (exit && exit.href) {
+                this.pulseControl('[data-reader-exit]');
+                window.location.href = exit.href;
+            }
+        }
+
+        /* ── Quiz projetado ─────────────────────────────────────────────── */
+        revealQuiz(source) {
+            window.dispatchEvent(new CustomEvent('reader:reveal-quiz', {
+                detail: { source: source }
+            }));
+        }
+
+        bringQuizIntoContext(target) {
+            if (!(target instanceof HTMLElement)) return;
+            const stageRect = this.stage.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const inset = Math.min(64, this.stage.clientHeight * 0.08);
+            const isVisible = targetRect.top >= stageRect.top + inset
+                && targetRect.bottom <= stageRect.bottom - inset;
+            if (isVisible) return;
+
+            target.scrollIntoView({
+                block: targetRect.height > this.stage.clientHeight * 0.8
+                    ? 'start'
+                    : 'center',
+                inline: 'nearest',
+                behavior: this.motionOk() ? 'smooth' : 'auto'
+            });
+        }
+
+        syncRevealButton(remaining, statusMessage = '') {
+            if (!this.revealBtn) return;
+
+            const hasRemaining = Number(remaining) > 0;
+            const actionLabel = hasRemaining
+                ? 'Revelar próxima resposta'
+                : 'Não há respostas pendentes';
+            this.revealBtn.disabled = !hasRemaining;
+            this.revealBtn.setAttribute(
+                'aria-label',
+                statusMessage ? `${statusMessage} ${actionLabel}` : actionLabel
+            );
+            this.revealBtn.setAttribute(
+                'title',
+                hasRemaining
+                    ? 'Revelar próxima resposta (R)'
+                    : 'Não há respostas pendentes'
+            );
+        }
+
+        handleQuizRevealed(event) {
+            const detail = event.detail || {};
+            const target = detail.question || detail.quiz;
+            const questionNumber = Number(detail.questionNumber);
+            const hasQuestionNumber = Number.isInteger(questionNumber)
+                && questionNumber > 0;
+            const message = hasQuestionNumber
+                ? `Resposta da questão ${questionNumber} revelada.`
+                : 'Resposta revelada.';
+
+            this.pulseControl('[data-reader-reveal]', 1200);
+            if (this.revealBtn) {
+                this.syncRevealButton(detail.remaining, message);
+                this.revealBtn.classList.add('is-active');
+                setTimeout(() => {
+                    this.revealBtn.classList.remove('is-active');
+                }, 1600);
+            }
+            this.bringQuizIntoContext(target);
+        }
+
+        handleQuizStateChanged(event) {
+            const detail = event.detail || {};
+            // Disponibilidade não é resultado: source='answer' nunca recebe
+            // texto de "resposta revelada".
+            this.syncRevealButton(detail.remaining);
+        }
+
+        bindQuizReveal() {
+            if (this.revealBtn
+                && !document.querySelector('.lesson-quiz--interactive .quiz-option')) {
+                this.syncRevealButton(0);
+            }
+            window.addEventListener(
+                'reader:quiz-revealed',
+                (event) => this.handleQuizRevealed(event)
+            );
+            window.addEventListener(
+                'reader:quiz-state-changed',
+                (event) => this.handleQuizStateChanged(event)
+            );
         }
 
         /* ── Eventos ─────────────────────────────────────────────────────── */
@@ -247,6 +370,13 @@
                 if (e.target.tagName === 'INPUT'
                     || e.target.tagName === 'TEXTAREA'
                     || e.target.isContentEditable) {
+                    return;
+                }
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                if (e.repeat && [
+                    'Escape', 'b', 'B', 'n', 'N', 'c', 'C',
+                    'f', 'F', 'r', 'R', '?'
+                ].includes(e.key)) {
                     return;
                 }
                 const interactive = e.target.closest
@@ -261,32 +391,45 @@
                         // Espaço sobre um controle/opção ativa o próprio elemento.
                         if (interactive) return;
                         e.preventDefault();
+                        this.pulseControl(
+                            e.shiftKey ? '[data-reader-up]' : '[data-reader-down]'
+                        );
                         this.scrollByScreen(e.shiftKey ? -1 : 1);
                         break;
                     case 'ArrowDown':
                     case 'PageDown':
+                        if (interactive) return;
                         e.preventDefault();
+                        this.pulseControl('[data-reader-down]');
                         this.scrollByScreen(1);
                         break;
                     case 'ArrowUp':
                     case 'PageUp':
+                        if (interactive) return;
                         e.preventDefault();
+                        this.pulseControl('[data-reader-up]');
                         this.scrollByScreen(-1);
                         break;
                     case 'Home':
+                        if (interactive) return;
                         e.preventDefault();
+                        this.pulseControl('[data-reader-up]');
                         this.scrollToEdge(0);
                         break;
                     case 'End':
+                        if (interactive) return;
                         e.preventDefault();
+                        this.pulseControl('[data-reader-down]');
                         this.scrollToEdge(this.stage.scrollHeight);
                         break;
                     case 'b':
                     case 'B':
+                        this.pulseControl('[data-reader-blackout]');
                         this.toggleBlackout();
                         break;
                     case 'n':
                     case 'N':
+                        this.pulseControl('[data-reader-notes]');
                         this.toggleNotes();
                         break;
                     case 'c':
@@ -295,7 +438,20 @@
                         break;
                     case 'f':
                     case 'F':
+                        this.pulseControl('[data-reader-fullscreen]');
                         this.toggleFullscreen();
+                        break;
+                    case 'r':
+                    case 'R':
+                        if (this.revealBtn && !this.revealBtn.disabled) {
+                            e.preventDefault();
+                            this.pulseControl('[data-reader-reveal]');
+                            this.revealQuiz('shortcut');
+                        }
+                        break;
+                    case '?':
+                        e.preventDefault();
+                        this.showHelp();
                         break;
                     case 'Escape':
                         e.preventDefault();
@@ -317,6 +473,7 @@
             on('[data-reader-notes]', () => this.toggleNotes());
             on('[data-reader-notes-close]', () => this.toggleNotes());
             on('[data-reader-fullscreen]', () => this.toggleFullscreen());
+            on('[data-reader-reveal]', () => this.revealQuiz('button'));
 
             if (this.blackoutEl) {
                 this.blackoutEl.addEventListener('click', () => this.toggleBlackout());

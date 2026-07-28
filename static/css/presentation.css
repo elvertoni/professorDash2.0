@@ -1,9 +1,8 @@
 /* ──────────────────────────────────────────────────────────────────────────
    Modo Apresentação — Projeção full-bleed ("Atelier na TV")
    Superfície standalone de projeção: ocupa 100% do viewport, tipografia
-   grande para 4–6 m, coluna de leitura larga o bastante para preencher a
-   tela sem deixar faixas mortas nas laterais. Conteúdo rola inteiro (nunca
-   corta). HUD some em idle.
+   grande para 4–6 m, coluna de leitura focada e blocos didáticos em largura
+   ampliada. Conteúdo rola inteiro (nunca corta). HUD some em idle.
    ──────────────────────────────────────────────────────────────────────── */
 
 html.reader-html,
@@ -32,6 +31,8 @@ html.reader-html,
     --reader-safe-bottom: max(16px, env(safe-area-inset-bottom, 0px));
     --reader-safe-left: max(16px, env(safe-area-inset-left, 0px));
     --reader-hud-h: 72px;
+    --reader-scale: clamp(26px, 1.35vw + 1.5vh, 44px);
+    --text-read: var(--reader-scale);
 }
 
 .reader-body.is-idle {
@@ -79,11 +80,10 @@ html.reader-html,
 /* ── Documento: preenche a largura útil da TV ───────────────────────────── */
 .reader-doc {
     /* Escala tipográfica pela menor dimensão — legível a metros de distância. */
-    --text-read: clamp(26px, 1.35vw + 1.5vh, 44px);
     --text-h2: clamp(40px, 2.4vw + 2vh, 76px);
     --text-h3: clamp(30px, 1.7vw + 1.4vh, 54px);
-    /* Coluna larga: em fonte de projeção, ~80–90ch ≈ quase full HD. */
-    --measure: min(88ch, 100%);
+    /* A faixa obsidian lateral funciona como funil de foco para a turma. */
+    --measure: min(64ch, 100%);
     --block-width: 100%;
 
     box-sizing: border-box;
@@ -104,7 +104,7 @@ html.reader-html,
     scroll-margin-top: clamp(24px, 4vh, 56px);
 }
 
-/* Prosa herda measure largo; blocos estruturais usam 100% da largura útil. */
+/* Prosa usa measure focado; blocos estruturais usam 100% da largura útil. */
 .reader-doc.prose p,
 .reader-doc.prose ul,
 .reader-doc.prose ol,
@@ -114,12 +114,18 @@ html.reader-html,
     max-width: var(--measure);
 }
 
+.reader-doc > :is(p, ul, ol, h2, h3, blockquote) {
+    margin-inline: auto;
+}
+
 .reader-doc.prose h2 {
     font-size: var(--text-h2);
     line-height: 1.12;
     letter-spacing: -0.02em;
-    margin-top: clamp(48px, 7vh, 96px);
+    margin-top: clamp(56px, 9vh, 120px);
     margin-bottom: clamp(16px, 2.2vh, 28px);
+    padding-top: clamp(24px, 3.5vh, 48px);
+    border-top: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
     text-wrap: balance;
 }
 
@@ -176,11 +182,208 @@ html.reader-html,
     padding: 0.7em 1em;
 }
 
+/* ── Escala dos microcomponentes didáticos ──────────────────────────────── */
+.reader-doc .lesson-diagram {
+    margin-block: 1em;
+    padding: 0.8em;
+}
+
+.reader-doc .lesson-diagram figcaption {
+    margin-bottom: 0.55em;
+    font-size: calc(var(--text-read) * 0.6);
+    line-height: 1.45;
+    text-wrap: balance;
+}
+
+.reader-doc .lesson-steps {
+    gap: 0.65em;
+}
+
+.reader-doc .lesson-steps li {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.7em;
+    padding: 0.75em;
+}
+
+.reader-doc .lesson-step-index {
+    width: calc(var(--text-read) * 1.8);
+    height: calc(var(--text-read) * 1.8);
+    border-radius: var(--radius-md, 10px);
+    font-size: max(20px, calc(var(--text-read) * 0.5));
+    line-height: 1;
+}
+
+.reader-doc .lesson-steps strong {
+    margin-bottom: 0.18em;
+}
+
+.reader-doc .lesson-quiz {
+    margin-block: 1em;
+    padding: 0.85em;
+}
+
+.reader-doc .lesson-quiz-head {
+    gap: 0.65em;
+    margin-bottom: 0.75em;
+}
+
+.reader-doc .lesson-quiz-head strong {
+    font-size: calc(var(--text-read) * 0.78);
+    line-height: 1.3;
+}
+
+.reader-doc .lesson-quiz-head span {
+    font-size: calc(var(--text-read) * 0.5);
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+}
+
+.reader-doc .lesson-quiz-list {
+    gap: 1.15em;
+}
+
+.reader-doc .lesson-quiz-question {
+    padding-left: 0;
+}
+
+.reader-doc .lesson-quiz-question > p {
+    margin-bottom: 0.55em;
+}
+
+.reader-doc .lesson-quiz-question ol {
+    gap: 0.45em;
+    padding-left: 1.4em;
+    font-size: calc(var(--text-read) * 0.88);
+}
+
+.reader-doc .quiz-options {
+    gap: 0.45em;
+}
+
+.reader-doc .quiz-option {
+    gap: 0.65em;
+    min-height: 2.5em;
+    padding: 0.55em 0.72em;
+    font-size: calc(var(--text-read) * 0.88);
+    line-height: 1.45;
+}
+
+.reader-doc .quiz-option-letter {
+    width: calc(var(--text-read) * 1.6);
+    height: calc(var(--text-read) * 1.6);
+    font-size: max(20px, calc(var(--text-read) * 0.5));
+    line-height: 1;
+}
+
+.reader-doc .quiz-option-icon {
+    display: grid;
+    width: 1.1em;
+    height: 1.1em;
+    place-items: center;
+}
+
+.reader-doc .quiz-option.is-correct .quiz-option-icon::after,
+.reader-doc .quiz-option.is-wrong .quiz-option-icon::after,
+.reader-doc .quiz-option.is-revealed .quiz-option-icon::after {
+    font-size: calc(var(--text-read) * 0.68);
+    line-height: 1;
+}
+
+.reader-doc .quiz-feedback {
+    margin-top: 0.5em;
+    font-size: calc(var(--text-read) * 0.68);
+    line-height: 1.45;
+}
+
+.reader-doc .quiz-result {
+    margin-top: 0.8em;
+    padding: 0.65em 0.8em;
+    font-size: calc(var(--text-read) * 0.72);
+    line-height: 1.4;
+}
+
+/* Reveal docente: o quiz projetado funciona sem clique da audiência. */
+.reader-doc .reader-quiz-reveal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    min-height: 2.35em;
+    margin-top: 0.65em;
+    padding: 0.5em 0.85em;
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    border-radius: var(--radius-md, 10px);
+    background: var(--surface-raised);
+    color: var(--fg);
+    font: inherit;
+    font-size: calc(var(--text-read) * 0.62);
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+        border-color 0.2s var(--reader-ease),
+        background 0.2s var(--reader-ease),
+        color 0.2s var(--reader-ease),
+        transform 0.2s var(--reader-ease);
+}
+
+.reader-doc .reader-quiz-reveal:hover:not(:disabled) {
+    border-color: var(--reader-accent);
+    background: color-mix(in srgb, var(--reader-accent) 12%, var(--surface-raised));
+}
+
+.reader-doc .reader-quiz-reveal:focus-visible {
+    outline: 2px solid var(--border-focus, var(--reader-accent));
+    outline-offset: 3px;
+}
+
+.reader-doc .reader-quiz-reveal:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.reader-doc .reader-quiz-reveal[aria-pressed='true'],
+.reader-doc .reader-quiz-reveal:disabled {
+    border-color: color-mix(in srgb, var(--c-success) 42%, transparent);
+    background: color-mix(in srgb, var(--c-success) 10%, var(--surface-base));
+    color: var(--c-success);
+    cursor: default;
+}
+
+.reader-doc .reader-quiz-reveal-status {
+    display: block;
+    min-height: 1.45em;
+    margin-top: 0.45em;
+    color: var(--c-success);
+    font-size: calc(var(--text-read) * 0.62);
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.reader-doc .reader-quiz-reveal-status:empty {
+    display: none;
+}
+
+.reader-doc .lesson-quiz-question.is-reader-revealed .quiz-option:not(.is-revealed):not(.is-correct),
+.reader-doc .is-reader-revealed .quiz-option:not(.is-revealed):not(.is-correct),
+.reader-doc [data-reader-quiz-revealed='true'] .quiz-option:not(.is-revealed):not(.is-correct) {
+    opacity: 0.52;
+}
+
+.reader-doc .lesson-quiz-question.is-reader-revealed .quiz-option.is-revealed,
+.reader-doc .is-reader-revealed .quiz-option.is-revealed,
+.reader-doc [data-reader-quiz-revealed='true'] .quiz-option.is-revealed,
+.reader-doc .quiz-option.is-reader-revealed {
+    border-color: var(--c-success);
+    background: color-mix(in srgb, var(--c-success) 9%, var(--surface-base));
+    opacity: 1;
+}
+
 /* ── Citações e callouts (borda completa — sem side-stripe) ──────────────── */
 .reader-doc blockquote {
     font-size: 1em;
     line-height: 1.65;
-    margin: clamp(28px, 4vh, 52px) 0;
+    margin-block: clamp(28px, 4vh, 52px);
+    margin-inline: auto;
     padding: clamp(24px, 3.2vh, 40px) clamp(28px, 3.2vw, 48px);
     border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
     border-radius: var(--radius-lg, 16px);
@@ -669,6 +872,19 @@ html.reader-html,
     transition: opacity 0.4s var(--reader-ease), transform 0.4s var(--reader-ease);
 }
 
+.reader-control-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.reader-control-group + .reader-control-group {
+    margin-left: 4px;
+    padding-left: 8px;
+    border-left: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+}
+
 .reader-icon-btn {
     display: grid;
     place-items: center;
@@ -680,12 +896,21 @@ html.reader-html,
     color: var(--fg-muted, #b0adb5);
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.2s var(--reader-ease), color 0.2s var(--reader-ease);
+    transition:
+        background 0.2s var(--reader-ease),
+        color 0.2s var(--reader-ease),
+        box-shadow 0.2s var(--reader-ease),
+        transform 0.2s var(--reader-ease);
 }
 
-.reader-icon-btn:hover {
+.reader-icon-btn:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.08);
     color: var(--fg);
+}
+
+.reader-icon-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
 }
 
 .reader-icon-btn:focus-visible {
@@ -696,6 +921,13 @@ html.reader-html,
 .reader-icon-btn.is-active {
     color: var(--reader-accent);
     background: rgba(16, 185, 129, 0.12);
+}
+
+.reader-icon-btn.is-key-active {
+    color: var(--fg);
+    background: color-mix(in srgb, var(--reader-accent) 22%, var(--surface-overlay));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--reader-accent) 48%, transparent);
+    transform: scale(0.92);
 }
 
 .reader-icon-btn i {
@@ -720,10 +952,16 @@ html.reader-html,
     display: flex;
     align-items: center;
     gap: 10px;
-    max-width: min(96vw, 920px);
-    padding: 10px 18px;
-    border-radius: var(--radius-pill, 999px);
-    font-size: clamp(12px, 0.85rem, 15px);
+    justify-content: center;
+    max-width: min(
+        calc(100vw - var(--reader-safe-left) - var(--reader-safe-right) - 32px),
+        1520px
+    );
+    padding: 0.5em 0.9em;
+    border-radius: var(--radius-lg, 16px);
+    font-size: max(20px, calc(var(--text-read) * 0.45));
+    line-height: 1.45;
+    text-align: center;
     color: var(--fg-subtle, #84808c);
     background: rgba(9, 12, 21, 0.75);
     border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
@@ -732,8 +970,8 @@ html.reader-html,
 }
 
 .reader-hint i {
-    width: 16px;
-    height: 16px;
+    width: 1em;
+    height: 1em;
     flex-shrink: 0;
 }
 
@@ -742,10 +980,10 @@ html.reader-html,
 }
 
 .reader-hint kbd {
-    padding: 2px 7px;
+    padding: 0.08em 0.38em;
     border-radius: 6px;
     font-family: 'Geist Mono', monospace;
-    font-size: 0.78em;
+    font-size: 0.8em;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
 }
@@ -763,6 +1001,13 @@ html.reader-html,
 
 .reader-body.is-idle .reader-hint {
     transform: translateX(-50%) translateY(-8px);
+}
+
+.reader-hint.is-help-visible,
+.reader-body.is-idle .reader-hint.is-help-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%);
 }
 
 .reader-body.is-idle .reader-controls:focus-within,
@@ -894,8 +1139,15 @@ html.reader-html,
     .reader-hint,
     .reader-notes,
     .reader-progress span,
-    .reader-cover-zoom {
+    .reader-cover-zoom,
+    .reader-icon-btn,
+    .reader-doc .reader-quiz-reveal {
         transition: none !important;
+    }
+
+    .reader-icon-btn.is-key-active,
+    .reader-doc .reader-quiz-reveal:active:not(:disabled) {
+        transform: none;
     }
 
     .reader-cover-zoom {
@@ -928,9 +1180,12 @@ html.reader-html,
 }
 
 @media (max-width: 900px) {
+    .reader-body {
+        --reader-scale: clamp(20px, 2.8vw + 1vh, 28px);
+    }
+
     .reader-doc {
-        --text-read: clamp(20px, 2.8vw + 1vh, 28px);
-        --measure: 100%;
+        --measure: min(64ch, 100%);
         padding-inline: calc(var(--reader-safe-left) + 20px) calc(var(--reader-safe-right) + 20px);
     }
 
@@ -946,7 +1201,7 @@ html.reader-html,
 
     .reader-hint {
         max-width: calc(100vw - 24px);
-        font-size: 0.75rem;
+        font-size: max(20px, calc(var(--text-read) * 0.45));
     }
 
     .reader-notes {
@@ -956,11 +1211,14 @@ html.reader-html,
     }
 }
 
-/* ── Telas ultra-wide / 4K: tipografia sobe, measure acompanha ───────────── */
+/* ── Telas ultra-wide / 4K: tipografia sobe, measure permanece focado ───── */
 @media (min-width: 1920px) {
+    .reader-body {
+        --reader-scale: clamp(32px, 1.1vw + 1.4vh, 48px);
+    }
+
     .reader-doc {
-        --text-read: clamp(32px, 1.1vw + 1.4vh, 48px);
-        --measure: min(92ch, 100%);
+        --measure: min(64ch, 100%);
         padding-inline:
             calc(var(--reader-safe-left) + clamp(48px, 5vw, 120px))
             calc(var(--reader-safe-right) + clamp(48px, 5vw, 120px));

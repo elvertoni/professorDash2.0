@@ -500,6 +500,8 @@ Use esta secao para registrar decisoes tomadas durante as sprints. Nao deixe dec
 
 - [x] D.9. Decisao concluida: polish Impeccable do modo apresentacao consolida slides semanticos discretos como modelo de conducao em sala e refina a decisao D.7. O primeiro slide inicia ativo; clique no palco corresponde à instrucao exibida; blocos indivisiveis longos rolam dentro do slide em vez de serem truncados; builds ocultos saem da arvore acessivel; roteiro e lightbox isolam a navegacao de teclado e devolvem foco; rail/controles permanecem visiveis quando focados. A suite de teste visual embarcada por `?test=true` foi removida por ser debug de producao e contrariar a regra de nao criar testes automatizados.
 
+- [x] D.10. Decisao concluida: critique Impeccable do modo apresentacao consolidada por avaliacao heuristica e detector independente. A implementacao vigente refina D.7 como artigo continuo de projecao e substitui a referencia residual de D.9 ao deck discreto nesta rota. O corpo usa measure de `64ch`, landmarks neutros em `<h2>` e microcomponentes escalados por `--text-read`; o HUD foi agrupado por intencao e espelha atalhos; `?` recupera a ajuda. Quizzes projetados ganharam revelacao docente por `R`/controle visivel, sempre na proxima questao pendente relevante, sem contaminar o placar ou o quiz normal. Validacao manual em palco isolado cobriu 1366x768, 1920x1080 e 3840x2160, fluxo por teclado, resposta manual, revelacao e regressao fora da apresentacao. O detector manteve apenas avisos de Geist/Geist Mono, aceitos por serem tipografia obrigatoria da marca.
+
 ### Nota de auditoria complementar — UI/UX
 
 - Auditoria feita com agentes especialistas em jornada do aluno, jornada do professor e design system/acessibilidade.
