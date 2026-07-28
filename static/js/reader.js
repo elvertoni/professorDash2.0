@@ -1318,7 +1318,7 @@
                     && !this.hintEl.classList.contains('is-help-visible')) {
                     this.hintEl.hidden = true;
                 }
-            }, 3500);
+            }, 2000);
         }
 
         setupIdleDetection() {
