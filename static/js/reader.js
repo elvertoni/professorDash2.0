@@ -275,11 +275,11 @@
         refreshLandmarks() {
             if (!this.docEl) return;
 
-            const selector = '.reader-cover, h2, h3, .conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure, p, ul, ol, .reader-end';
+            const selector = '.reader-cover, h2, h3, .conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure, .reader-end';
             const elements = Array.from(this.docEl.querySelectorAll(selector)).filter((element) => {
                 if (!(element instanceof HTMLElement) || element.closest('[hidden], [inert]')) return false;
                 // Evitar que filhos de blocos atômicos virem landmarks duplicados
-                if (element.parentElement && element.parentElement.closest('.conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure')) {
+                if (element.parentElement && element.parentElement.closest('.conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure, article')) {
                     return false;
                 }
                 return true;
@@ -369,21 +369,23 @@
         }
 
         nearestLandmarkTarget(rawTarget, direction) {
-            if (!this.landmarks.length) return rawTarget;
+            if (!this.landmarks.length) return null;
 
             const current = this.stage.scrollTop;
             const offset = this.contextOffset();
 
             if (direction > 0) {
-                const candidate = this.landmarks.find((lm) => (lm.top - offset) > (current + 16));
-                return candidate ? Math.max(0, candidate.top - offset) : this.maxScrollTop();
+                // Procura o próximo landmark cujo topo ajustado está ABAIXO da posição atual
+                const candidate = this.landmarks.find((lm) => (lm.top - offset) > (current + 24));
+                return candidate ? Math.max(0, candidate.top - offset) : null;
             } else {
-                const candidates = this.landmarks.filter((lm) => (lm.top - offset) < (current - 16));
+                // Procura o landmark anterior cujo topo ajustado está ACIMA da posição atual
+                const candidates = this.landmarks.filter((lm) => (lm.top - offset) < (current - 24));
                 if (candidates.length > 0) {
                     const last = candidates[candidates.length - 1];
                     return Math.max(0, last.top - offset);
                 }
-                return 0;
+                return null;
             }
         }
 
@@ -460,15 +462,17 @@
                 return;
             }
 
-            const rawTarget = this.clampScrollTop(
-                current
-                + (this.readingViewportHeight()
-                    * SCROLL_FRACTION
-                    * direction)
-            );
-            this.scrollToPosition(
-                this.nearestLandmarkTarget(rawTarget, direction)
-            );
+            const target = this.nearestLandmarkTarget(null, direction);
+            if (target !== null) {
+                this.scrollToPosition(target);
+            } else {
+                // Fallback: rola 90% da tela se não há mais landmarks
+                const rawTarget = this.clampScrollTop(
+                    current
+                    + (this.readingViewportHeight() * SCROLL_FRACTION * direction)
+                );
+                this.scrollToPosition(rawTarget);
+            }
         }
 
         scrollToEdge(top) {
