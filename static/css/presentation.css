@@ -112,7 +112,18 @@
 }
 
 .reader-doc > * {
-    scroll-margin-top: clamp(24px, 4vh, 56px);
+    scroll-margin-top: clamp(64px, 8vh, 100px);
+}
+
+.conceito-box,
+.atencao-box,
+.dica-box,
+.quiz-card,
+.tbl-wrap,
+figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    scroll-margin-top: clamp(70px, 9vh, 110px);
 }
 
 /* Prosa usa measure focado; blocos estruturais usam 100% da largura útil. */

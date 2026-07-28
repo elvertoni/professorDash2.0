@@ -275,34 +275,39 @@
         refreshLandmarks() {
             if (!this.docEl) return;
 
-            const elements = Array.from(this.docEl.querySelectorAll(
-                '.reader-cover, h2, .reader-end'
-            )).filter((element) => (
-                element instanceof HTMLElement
-                && !element.closest('[hidden], [inert]')
-            ));
+            const selector = '.reader-cover, h2, h3, .conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure, p, ul, ol, .reader-end';
+            const elements = Array.from(this.docEl.querySelectorAll(selector)).filter((element) => {
+                if (!(element instanceof HTMLElement) || element.closest('[hidden], [inert]')) return false;
+                // Evitar que filhos de blocos atômicos virem landmarks duplicados
+                if (element.parentElement && element.parentElement.closest('.conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure')) {
+                    return false;
+                }
+                return true;
+            });
+
             const sectionCount = elements.filter(
                 (element) => element.tagName === 'H2'
             ).length;
             let sectionIndex = 0;
 
             this.landmarks = elements.map((element) => {
+                const isH2 = element.tagName === 'H2';
                 const kind = element.classList.contains('reader-cover')
                     ? 'cover'
                     : (
                         element.classList.contains('reader-end')
                             ? 'end'
-                            : 'section'
+                            : (isH2 ? 'section' : 'block')
                     );
                 const landmark = {
                     element: element,
                     kind: kind,
                     label: this.landmarkLabel(element),
                     sectionCount: sectionCount,
-                    sectionIndex: kind === 'section' ? sectionIndex : -1,
+                    sectionIndex: isH2 ? sectionIndex : -1,
                     top: this.elementScrollTop(element)
                 };
-                if (kind === 'section') sectionIndex += 1;
+                if (isH2) sectionIndex += 1;
                 return landmark;
             }).sort((first, second) => first.top - second.top);
             this.prepareScrollableRegions();
@@ -356,7 +361,9 @@
             let activeIndex = 0;
 
             this.landmarks.forEach((landmark, index) => {
-                if (landmark.top <= readingLine) activeIndex = index;
+                if (landmark.kind === 'section' && landmark.top <= readingLine) {
+                    activeIndex = index;
+                }
             });
             return activeIndex;
         }
@@ -365,24 +372,19 @@
             if (!this.landmarks.length) return rawTarget;
 
             const current = this.stage.scrollTop;
-            const snapDistance = this.stage.clientHeight
-                * LANDMARK_SNAP_FRACTION;
-            const candidates = this.landmarks.filter((landmark) => {
-                const isAhead = direction > 0
-                    ? landmark.top > current + 24
-                    : landmark.top < current - 24;
-                return isAhead
-                    && Math.abs(landmark.top - rawTarget) <= snapDistance;
-            });
+            const offset = this.contextOffset();
 
-            if (!candidates.length) return rawTarget;
-            const landmark = candidates.reduce((closest, candidate) => (
-                Math.abs(candidate.top - rawTarget)
-                    < Math.abs(closest.top - rawTarget)
-                    ? candidate
-                    : closest
-            ));
-            return Math.max(0, landmark.top - this.contextOffset());
+            if (direction > 0) {
+                const candidate = this.landmarks.find((lm) => (lm.top - offset) > (current + 16));
+                return candidate ? Math.max(0, candidate.top - offset) : this.maxScrollTop();
+            } else {
+                const candidates = this.landmarks.filter((lm) => (lm.top - offset) < (current - 16));
+                if (candidates.length > 0) {
+                    const last = candidates[candidates.length - 1];
+                    return Math.max(0, last.top - offset);
+                }
+                return 0;
+            }
         }
 
         maxScrollTop() {

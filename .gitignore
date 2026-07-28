@@ -28,6 +28,8 @@ Thumbs.db
 .claude/
 .codex/
 .cursor/
+.impeccable/
+.playwright-mcp/
 /scratch/
 
 # Docs build
