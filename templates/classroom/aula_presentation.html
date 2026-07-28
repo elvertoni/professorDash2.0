@@ -17,14 +17,14 @@
     <script>document.documentElement.classList.remove('no-js');</script>
 </head>
 <body class="reader-body">
-    <a class="skip-link sr-only" href="#reader-doc">Pular para o conteúdo</a>
+    <a class="skip-link sr-only" href="#reader-content">Pular para o conteúdo</a>
 
     {# Barra de progresso de leitura (posição do scroll). #}
     <div class="reader-progress" aria-hidden="true"><span data-reader-progress></span></div>
 
     {# Palco de leitura: rola a aula inteira, tipografia grande para a TV. #}
     <main id="reader" class="reader-stage" tabindex="0" aria-label="Aula em modo apresentação">
-        <article id="reader-doc" class="reader-doc prose">
+        <article id="reader-doc" class="reader-doc prose" aria-labelledby="reader-title">
             <header class="reader-cover{% if aula.imagem %} reader-cover--has-media{% endif %}">
                 <div class="reader-cover-copy">
                     <div class="reader-cover-meta">
@@ -32,19 +32,25 @@
                         <span class="reader-badge reader-badge-s">{{ aula.trilha.label }}</span>
                         <span class="reader-badge reader-badge-ord">Aula {{ aula.ordem|stringformat:'02d' }}</span>
                     </div>
-                    <h1 class="reader-cover-title">{{ aula.titulo }}</h1>
+                    <h1 id="reader-title" class="reader-cover-title">{{ aula.titulo }}</h1>
                     {% if aula.tema %}<p class="reader-cover-dek">{{ aula.tema }}</p>{% endif %}
                     {% if aula.objetivos %}
                         <div class="reader-cover-goals">
-                            <strong class="reader-cover-goals-title"><i data-lucide="target" aria-hidden="true"></i> Ao final desta aula</strong>
+                            <strong class="reader-cover-goals-title"><i data-lucide="target" aria-hidden="true"></i> Hoje vamos</strong>
                             <ul>
-                                {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
+                                {% for objetivo in aula.objetivos|slice:':2' %}<li>{{ objetivo }}</li>{% endfor %}
                             </ul>
                         </div>
                     {% endif %}
+                    <button class="btn btn-primary reader-start-btn" type="button"
+                            data-reader-start-fullscreen aria-keyshortcuts="F">
+                        <i data-lucide="presentation" aria-hidden="true"></i>
+                        <span data-reader-start-label>Começar em tela cheia</span>
+                        <kbd>F</kbd>
+                    </button>
                     <div class="reader-cover-foot">
                         <span><i data-lucide="users" aria-hidden="true"></i> {{ turma.nome }}</span>
-                        <span class="reader-dot-sep">•</span>
+                        <span class="reader-dot-sep" aria-hidden="true">•</span>
                         <span><i data-lucide="user-check" aria-hidden="true"></i> Prof. Toni Coimbra</span>
                     </div>
                 </div>
@@ -80,6 +86,7 @@
             </dialog>
             {% endif %}
 
+            <div id="reader-content" class="reader-content-start" tabindex="-1"></div>
             {{ lesson_html|safe }}
 
             <footer class="reader-end">
@@ -101,11 +108,14 @@
         </div>
     </div>
 
-    {# Roteiro do professor (Tecla N) — visível só para quem apresenta. #}
+    {# Roteiro auxiliar no próprio projetor (Tecla N). #}
     {% if teacher_notes_html %}
-    <aside id="reader-notes" class="reader-notes" aria-label="Roteiro do professor" inert>
+    <aside id="reader-notes" class="reader-notes"
+           role="dialog" aria-modal="false"
+           aria-labelledby="reader-notes-title"
+           aria-hidden="true" inert>
         <div class="reader-notes-head">
-            <span class="reader-notes-title"><i data-lucide="notebook-pen" aria-hidden="true"></i> Roteiro Docente</span>
+            <span id="reader-notes-title" class="reader-notes-title"><i data-lucide="notebook-pen" aria-hidden="true"></i> Roteiro no projetor</span>
             <button class="reader-icon-btn" type="button" data-reader-notes-close aria-label="Fechar roteiro">
                 <i data-lucide="x" aria-hidden="true"></i>
             </button>
@@ -113,6 +123,12 @@
         <div class="reader-notes-body prose">{{ teacher_notes_html|safe }}</div>
     </aside>
     {% endif %}
+
+    {# Contexto do ato atual. JS mantém oculto durante a capa. #}
+    <div class="reader-context" data-reader-context hidden>
+        <span class="reader-context-count" data-reader-section-count></span>
+        <span class="reader-context-title" data-reader-section-title></span>
+    </div>
 
     {# HUD de Controles Flutuantes #}
     <nav class="reader-controls" aria-label="Controles da apresentação">
@@ -124,15 +140,20 @@
         </div>
         <div class="reader-divider" aria-hidden="true"></div>
         <div class="reader-control-group" role="group" aria-label="Navegação da aula">
-            <button class="reader-icon-btn" type="button" data-reader-up
+            <button class="reader-icon-btn reader-icon-btn--labeled" type="button" data-reader-up
                     title="Subir (↑)" aria-label="Rolar para cima"
                     aria-keyshortcuts="ArrowUp PageUp Home">
                 <i data-lucide="chevron-up" aria-hidden="true"></i>
+                <span>Voltar</span>
+                <kbd>↑</kbd>
             </button>
-            <button class="reader-icon-btn" type="button" data-reader-down
+            <button class="reader-icon-btn reader-icon-btn--labeled reader-icon-btn--primary"
+                    type="button" data-reader-down
                     title="Avançar (Espaço / ↓)" aria-label="Rolar para baixo"
                     aria-keyshortcuts="Space ArrowDown PageDown End">
                 <i data-lucide="chevron-down" aria-hidden="true"></i>
+                <span>Avançar</span>
+                <kbd>Espaço</kbd>
             </button>
         </div>
         <div class="reader-divider" aria-hidden="true"></div>
@@ -147,8 +168,8 @@
                 <i data-lucide="eye-off" aria-hidden="true"></i>
             </button>
             {% if teacher_notes_html %}
-            <button class="reader-icon-btn" type="button" data-reader-notes title="Roteiro Docente (N)"
-                    aria-label="Abrir roteiro docente" aria-keyshortcuts="N"
+            <button class="reader-icon-btn" type="button" data-reader-notes title="Roteiro no projetor (N)"
+                    aria-label="Abrir roteiro exibido no projetor" aria-keyshortcuts="N"
                     aria-controls="reader-notes" aria-expanded="false">
                 <i data-lucide="notebook-pen" aria-hidden="true"></i>
             </button>
@@ -160,11 +181,38 @@
         </div>
     </nav>
 
-    {# Dica de Atalhos de Teclado #}
-    <div class="reader-hint" data-reader-hint>
+    {# Microdica de descoberta; desaparece definitivamente no primeiro avanço. #}
+    <div class="reader-discovery" data-reader-discovery aria-hidden="true">
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        <span>Avançar: <kbd>Espaço</kbd> <kbd>↓</kbd> · Voltar: <kbd>↑</kbd> · Revelar: <kbd>R</kbd>{% if aula.imagem %} · Capa: <kbd>C</kbd>{% endif %} · Pausa: <kbd>B</kbd>{% if teacher_notes_html %} · Roteiro: <kbd>N</kbd>{% endif %} · Tela cheia: <kbd>F</kbd> · Ajuda: <kbd>?</kbd> · Sair: <kbd>Esc</kbd></span>
+        <span><kbd>Espaço</kbd> avança · <kbd>?</kbd> mostra comandos</span>
     </div>
+
+    {# Ajuda completa: só aparece quando o professor pressiona ?. #}
+    <div class="reader-hint" data-reader-hint hidden role="region"
+         aria-label="Comandos da apresentação">
+        <div class="reader-hint-head">
+            <span><i data-lucide="keyboard" aria-hidden="true"></i> Comandos da apresentação</span>
+            <small>Esta ajuda fecha automaticamente</small>
+        </div>
+        <dl class="reader-shortcuts">
+            <div><dt>Avançar</dt><dd><kbd>Espaço</kbd> <kbd>↓</kbd> <kbd>PageDown</kbd></dd></div>
+            <div><dt>Voltar</dt><dd><kbd>Shift</kbd> + <kbd>Espaço</kbd> <kbd>↑</kbd> <kbd>PageUp</kbd></dd></div>
+            <div><dt>Início / fim</dt><dd><kbd>Home</kbd> <kbd>End</kbd></dd></div>
+            <div><dt>Revelar resposta</dt><dd><kbd>R</kbd></dd></div>
+            {% if aula.imagem %}<div><dt>Ampliar capa</dt><dd><kbd>C</kbd></dd></div>{% endif %}
+            <div><dt>Pausa pedagógica</dt><dd><kbd>B</kbd></dd></div>
+            {% if teacher_notes_html %}<div><dt>Roteiro no projetor</dt><dd><kbd>N</kbd></dd></div>{% endif %}
+            <div><dt>Tela cheia</dt><dd><kbd>F</kbd></dd></div>
+            <div><dt>Fechar recurso / sair</dt><dd><kbd>Esc</kbd></dd></div>
+        </dl>
+    </div>
+
+    <noscript>
+        <div class="reader-hint reader-hint--noscript">
+        <i data-lucide="keyboard" aria-hidden="true"></i>
+            <span>Use a barra de rolagem para conduzir a aula.</span>
+        </div>
+    </noscript>
 
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
