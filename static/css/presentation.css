@@ -1056,6 +1056,12 @@
     backdrop-filter: blur(12px);
 }
 
+.reader-context[hidden],
+.reader-discovery[hidden],
+.reader-hint[hidden] {
+    display: none;
+}
+
 .reader-context {
     top: calc(var(--reader-safe-top) + clamp(10px, 1.8vh, 20px));
     left: calc(var(--reader-safe-left) + clamp(12px, 2vw, 36px));
