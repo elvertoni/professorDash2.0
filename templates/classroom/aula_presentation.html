@@ -25,28 +25,60 @@
     {# Palco de leitura: rola a aula inteira, tipografia grande para a TV. #}
     <main id="reader" class="reader-stage" tabindex="0" aria-label="Aula em modo apresentação">
         <article id="reader-doc" class="reader-doc prose">
-            <header class="reader-cover">
-                <div class="reader-cover-meta">
-                    <span class="reader-badge reader-badge-p"><i data-lucide="book-open" aria-hidden="true"></i> {{ turma.disciplina.label }}</span>
-                    <span class="reader-badge reader-badge-s">{{ aula.trilha.label }}</span>
-                    <span class="reader-badge reader-badge-ord">Aula {{ aula.ordem|stringformat:'02d' }}</span>
-                </div>
-                <h1 class="reader-cover-title">{{ aula.titulo }}</h1>
-                {% if aula.tema %}<p class="reader-cover-dek">{{ aula.tema }}</p>{% endif %}
-                {% if aula.objetivos %}
-                    <div class="reader-cover-goals">
-                        <strong class="reader-cover-goals-title"><i data-lucide="target" aria-hidden="true"></i> Ao final desta aula</strong>
-                        <ul>
-                            {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
-                        </ul>
+            <header class="reader-cover{% if aula.imagem %} reader-cover--has-media{% endif %}">
+                <div class="reader-cover-copy">
+                    <div class="reader-cover-meta">
+                        <span class="reader-badge reader-badge-p"><i data-lucide="book-open" aria-hidden="true"></i> {{ turma.disciplina.label }}</span>
+                        <span class="reader-badge reader-badge-s">{{ aula.trilha.label }}</span>
+                        <span class="reader-badge reader-badge-ord">Aula {{ aula.ordem|stringformat:'02d' }}</span>
                     </div>
-                {% endif %}
-                <div class="reader-cover-foot">
-                    <span><i data-lucide="users" aria-hidden="true"></i> {{ turma.nome }}</span>
-                    <span class="reader-dot-sep">•</span>
-                    <span><i data-lucide="user-check" aria-hidden="true"></i> Prof. Toni Coimbra</span>
+                    <h1 class="reader-cover-title">{{ aula.titulo }}</h1>
+                    {% if aula.tema %}<p class="reader-cover-dek">{{ aula.tema }}</p>{% endif %}
+                    {% if aula.objetivos %}
+                        <div class="reader-cover-goals">
+                            <strong class="reader-cover-goals-title"><i data-lucide="target" aria-hidden="true"></i> Ao final desta aula</strong>
+                            <ul>
+                                {% for objetivo in aula.objetivos %}<li>{{ objetivo }}</li>{% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="reader-cover-foot">
+                        <span><i data-lucide="users" aria-hidden="true"></i> {{ turma.nome }}</span>
+                        <span class="reader-dot-sep">•</span>
+                        <span><i data-lucide="user-check" aria-hidden="true"></i> Prof. Toni Coimbra</span>
+                    </div>
                 </div>
+                {% if aula.imagem %}
+                <figure class="reader-cover-media">
+                    <button class="reader-cover-fig" type="button"
+                            data-reader-lightbox-open
+                            aria-haspopup="dialog"
+                            aria-controls="reader-cover-dialog"
+                            aria-expanded="false"
+                            aria-label="Ampliar capa da aula {{ aula.titulo }}">
+                        <img src="{{ aula.imagem.url }}"
+                             alt="Capa da aula: {{ aula.titulo }}"
+                             width="1600" height="900"
+                             loading="eager" decoding="async" fetchpriority="high">
+                        <span class="reader-cover-zoom" aria-hidden="true">
+                            <i data-lucide="zoom-in"></i>
+                            <span>Ampliar</span>
+                        </span>
+                    </button>
+                </figure>
+                {% endif %}
             </header>
+            {% if aula.imagem %}
+            <dialog id="reader-cover-dialog" class="reader-lightbox"
+                    aria-label="Capa ampliada da aula {{ aula.titulo }}">
+                <button class="reader-lightbox-close" type="button"
+                        data-reader-lightbox-close aria-label="Fechar capa ampliada">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                </button>
+                <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}">
+                <p class="reader-lightbox-hint">Clique ou <kbd>Esc</kbd> para fechar</p>
+            </dialog>
+            {% endif %}
 
             {{ lesson_html|safe }}
 
@@ -116,7 +148,7 @@
     {# Dica de Atalhos de Teclado #}
     <div class="reader-hint" data-reader-hint>
         <i data-lucide="keyboard" aria-hidden="true"></i>
-        <span>Tela cheia: <kbd>F</kbd> · Avançar: <kbd>Espaço</kbd> <kbd>↓</kbd> · Voltar: <kbd>↑</kbd> · Pausa: <kbd>B</kbd>{% if teacher_notes_html %} · Roteiro: <kbd>N</kbd>{% endif %} · Sair: <kbd>Esc</kbd></span>
+        <span>Tela cheia: <kbd>F</kbd> · Avançar: <kbd>Espaço</kbd> <kbd>↓</kbd> · Voltar: <kbd>↑</kbd>{% if aula.imagem %} · Capa: <kbd>C</kbd>{% endif %} · Pausa: <kbd>B</kbd>{% if teacher_notes_html %} · Roteiro: <kbd>N</kbd>{% endif %} · Sair: <kbd>Esc</kbd></span>
     </div>
 
     <script src="{% static 'js/quiz.js' %}"></script>

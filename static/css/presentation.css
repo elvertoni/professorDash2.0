@@ -264,6 +264,209 @@ html.reader-html,
     max-width: none;
 }
 
+/* Com capa do acervo: grade editorial texto | infográfico (full-bleed TV). */
+.reader-cover--has-media {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+    gap: clamp(28px, 4vw, 72px);
+    align-items: center;
+    padding-block: clamp(16px, 3vh, 40px) clamp(32px, 5vh, 64px);
+}
+
+.reader-cover-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.reader-cover-media {
+    margin: 0;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Infográfico do acervo: inteiro (contain), nunca cropa legendas. */
+.reader-cover-fig {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    border-radius: var(--radius-lg, 16px);
+    background:
+        radial-gradient(ellipse 70% 60% at 50% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 70%),
+        rgba(8, 10, 16, 0.9);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+    cursor: zoom-in;
+    overflow: hidden;
+    color: inherit;
+    text-align: left;
+}
+
+.reader-cover-fig:focus-visible {
+    outline: 2px solid var(--border-focus, var(--reader-accent));
+    outline-offset: 3px;
+}
+
+.reader-cover-fig img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - var(--reader-safe-top) - var(--reader-safe-bottom) - 96px);
+    object-fit: contain;
+    object-position: center;
+}
+
+.reader-cover-zoom {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill, 999px);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--fg);
+    background: rgba(9, 12, 21, 0.82);
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.25s var(--reader-ease), transform 0.25s var(--reader-ease);
+    pointer-events: none;
+}
+
+.reader-cover-zoom i {
+    width: 16px;
+    height: 16px;
+}
+
+.reader-cover-fig:hover .reader-cover-zoom,
+.reader-cover-fig:focus-visible .reader-cover-zoom {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reader-cover--has-media .reader-cover-title {
+    max-width: 16ch;
+    font-size: clamp(40px, 3.6vw + 1.6vh, 84px);
+}
+
+.reader-cover--has-media .reader-cover-dek {
+    max-width: min(36ch, 100%);
+}
+
+.reader-cover--has-media .reader-cover-goals {
+    max-width: 100%;
+}
+
+.reader-cover--has-media .reader-cover-foot {
+    margin-top: clamp(20px, 3vh, 32px);
+}
+
+/* Lightbox fullscreen da capa (projeção de detalhe do infográfico). */
+.reader-lightbox {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    max-height: none;
+    background: rgba(4, 4, 10, 0.96);
+    color: var(--fg);
+}
+
+.reader-lightbox:not([open]) {
+    display: none;
+}
+
+.reader-lightbox[open] {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: clamp(16px, 3vh, 40px);
+    box-sizing: border-box;
+    cursor: zoom-out;
+}
+
+.reader-lightbox::backdrop {
+    background: rgba(0, 0, 0, 0.92);
+}
+
+.reader-lightbox img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(96vw, 1800px);
+    max-height: calc(100dvh - 96px);
+    object-fit: contain;
+    border-radius: var(--radius-md, 12px);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.65);
+    cursor: zoom-out;
+}
+
+.reader-lightbox-close {
+    position: absolute;
+    top: calc(var(--reader-safe-top) + 16px);
+    right: calc(var(--reader-safe-right) + 16px);
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+    border-radius: 50%;
+    background: rgba(9, 12, 21, 0.85);
+    color: var(--fg-muted, #b0adb5);
+    cursor: pointer;
+    z-index: 2;
+}
+
+.reader-lightbox-close:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.reader-lightbox-close:focus-visible {
+    outline: 2px solid var(--border-focus, var(--reader-accent));
+    outline-offset: 2px;
+}
+
+.reader-lightbox-close i {
+    width: 22px;
+    height: 22px;
+}
+
+.reader-lightbox-hint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--fg-subtle, #84808c);
+}
+
+.reader-lightbox-hint kbd {
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 0.85em;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+}
+
 .reader-cover-meta {
     display: flex;
     flex-wrap: wrap;
@@ -690,12 +893,40 @@ html.reader-html,
     .reader-controls,
     .reader-hint,
     .reader-notes,
-    .reader-progress span {
+    .reader-progress span,
+    .reader-cover-zoom {
         transition: none !important;
+    }
+
+    .reader-cover-zoom {
+        opacity: 1;
+        transform: none;
     }
 }
 
 /* ── Notebook / smartboard estreito ─────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .reader-cover--has-media {
+        grid-template-columns: 1fr;
+        gap: clamp(24px, 4vh, 40px);
+        min-height: auto;
+    }
+
+    .reader-cover--has-media .reader-cover-title {
+        max-width: none;
+        font-size: clamp(36px, 6vw, 64px);
+    }
+
+    .reader-cover-fig img {
+        max-height: min(56vh, 640px);
+    }
+
+    .reader-cover-zoom {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 @media (max-width: 900px) {
     .reader-doc {
         --text-read: clamp(20px, 2.8vw + 1vh, 28px);
@@ -739,6 +970,15 @@ html.reader-html,
         font-size: clamp(64px, 4.5vw + 1.5vh, 120px);
         max-width: 24ch;
     }
+
+    .reader-cover--has-media .reader-cover-title {
+        max-width: 18ch;
+        font-size: clamp(48px, 3.2vw + 1.2vh, 92px);
+    }
+
+    .reader-cover-fig img {
+        max-height: calc(100dvh - 120px);
+    }
 }
 
 /* ── Impressão ──────────────────────────────────────────────────────────── */
@@ -747,7 +987,9 @@ html.reader-html,
     .reader-hint,
     .reader-progress,
     .reader-blackout,
-    .reader-notes {
+    .reader-notes,
+    .reader-lightbox,
+    .reader-cover-zoom {
         display: none !important;
     }
 
