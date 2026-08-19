@@ -781,25 +781,13 @@ summary:focus-visible,
 }
 
 .hero {
-    position: relative;
-    display: grid;
-    min-height: calc(100vh - var(--topbar-h));
-    align-items: end;
-    padding: var(--space-6) var(--space-5) var(--space-8);
-    overflow: hidden;
-}
-
-.hero-preview {
-    position: absolute;
-    inset: var(--space-5);
-    opacity: .48;
-    transform: translateY(12px) scale(.98);
+    width: min(1180px, calc(100% - 56px));
+    margin: 0 auto;
+    padding: var(--space-8) 0 var(--space-6);
 }
 
 .hero-copy {
-    position: relative;
     width: min(760px, 100%);
-    padding: var(--space-6) 0;
 }
 
 .hero h1 {
@@ -3586,23 +3574,6 @@ blockquote footer::before {
 
     .mobile-nav {
         display: block;
-    }
-
-    .hero {
-        min-height: auto;
-        padding-top: 48px;
-    }
-
-    .hero-preview {
-        position: relative;
-        inset: auto;
-        opacity: 1;
-        transform: none;
-        margin-bottom: 24px;
-    }
-
-    .hero-copy {
-        padding: 0;
     }
 
     .shell-preview {
