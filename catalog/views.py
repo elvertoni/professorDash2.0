@@ -15,7 +15,7 @@ from accounts.mixins import AdminRequiredMixin
 from classroom.models import Matricula
 
 from .models import Aula, Disciplina
-from .parser import sanitize_lesson_html
+from .parser import render_stored_lesson_html
 from .services import AcervoDownloadError, download_acervo
 
 
@@ -177,7 +177,9 @@ class AulaDetailView(LoginRequiredMixin, DetailView):
             disciplina=aula.disciplina,
             trilha=aula.trilha,
         )
-        context['lesson_html'] = sanitize_lesson_html(aula.conteudo_html)
+        context['lesson_html'] = render_stored_lesson_html(
+            aula, diagnostics=user_can_view_full_catalog(self.request.user)
+        )
         context['previous_aula'] = (
             base_queryset.filter(ordem__lt=aula.ordem).order_by('-ordem').first()
         )

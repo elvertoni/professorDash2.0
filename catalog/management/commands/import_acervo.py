@@ -3,18 +3,22 @@ from pathlib import Path
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.text import slugify
 
-from catalog.models import Aula, Conceito, Disciplina, Trilha
-from catalog.parser import parse_lesson_markdown
+from catalog.models import Aula, AulaImagem, Conceito, Disciplina, Trilha
+from catalog.parser import parse_lesson_markdown, split_frontmatter
 
 
 class Command(BaseCommand):
     help = 'Importa aulas canônicas do acervo PROF-TONI.'
 
     COVER_NAMES = ('capa.png', 'capa.jpg', 'capa.jpeg', 'capa.webp')
+    # Figuras do corpo da aula: pasta `img/` ao lado da canonica.md.
+    BODY_IMAGE_DIRNAME = 'img'
+    BODY_IMAGE_SUFFIXES = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
 
     def add_arguments(self, parser):
         parser.add_argument('--path', required=True, help='Caminho para o repositório PROF-TONI.')
@@ -122,28 +126,36 @@ class Command(BaseCommand):
                 report['skipped'] += 1
                 continue
 
+            # Só o frontmatter aqui. A conversão markdown -> HTML acontece
+            # dentro de upsert_lesson, depois que as imagens do corpo já estão
+            # no banco (ver ORDEM CRÍTICA lá).
             try:
-                parsed = parse_lesson_markdown(
-                    canonical_path.read_text(encoding='utf-8'),
-                    concept_labels=concept_labels,
+                content = canonical_path.read_text(encoding='utf-8')
+                frontmatter, body = split_frontmatter(content)
+            except Exception as exc:
+                self.stderr.write(f'Erro ao ler {canonical_path}: {exc}')
+                report['skipped'] += 1
+                continue
+
+            lesson_data = {**raw_lesson, **frontmatter}
+            try:
+                imported = self.upsert_lesson(
+                    canonical_path,
+                    lesson_data,
+                    content,
+                    body,
+                    concept_labels,
+                    force,
                 )
             except Exception as exc:
                 self.stderr.write(f'Erro ao processar {canonical_path}: {exc}')
-                report['skipped'] += 1
-                continue
-            lesson_data = {**raw_lesson, **parsed.frontmatter}
-            imported = self.upsert_lesson(
-                canonical_path,
-                lesson_data,
-                parsed.body,
-                parsed.html,
-                force,
-            )
+                imported = 'skipped'
             report[imported] += 1
 
         return report
 
-    def upsert_lesson(self, canonical_path, data, body, html_content, force=False):
+    @transaction.atomic
+    def upsert_lesson(self, canonical_path, data, content, body, concept_labels, force=False):
         disciplina_slug = self.get_value(data, 'disciplina')
         trilha_slug = self.get_value(data, 'trilha')
         slug = self.get_value(data, 'slug') or slugify(self.get_value(data, 'titulo') or '')
@@ -193,15 +205,29 @@ class Command(BaseCommand):
             # Conteúdo inalterado: ainda assim faz backfill da capa se faltar.
             if self.apply_cover_image(aula, canonical_path, data):
                 aula.save(update_fields=['imagem', 'updated_at'])
+            # As figuras do corpo também são sincronizadas aqui: a pasta `img/`
+            # pode ter aparecido sem bump de versão, e na primeira execução
+            # depois desta feature toda aula já importada cairia neste caminho.
+            # Se algo mudou, o HTML precisa ser refeito para apontar para os
+            # arquivos novos.
+            if self.sync_body_images(aula, canonical_path):
+                aula.conteudo_html = parse_lesson_markdown(
+                    content, concept_labels=concept_labels
+                ).html
+                aula.conteudo_md = body
+                aula.save(update_fields=['conteudo_html', 'conteudo_md', 'updated_at'])
+                return 'updated'
             return 'skipped'
 
+        # `conteudo_html` fica de fora: é preenchido depois da ingestão das
+        # imagens. Em atualização, o HTML antigo sobrevive até lá, então uma
+        # falha de renderização (rollback da transação) não zera a aula.
         defaults = {
             'titulo': self.get_value(data, 'titulo', 'title') or slug.replace('-', ' ').title(),
             'tema': self.get_value(data, 'tema') or '',
             'objetivos': self.ensure_list(self.get_value(data, 'objetivos')),
             'prerequisitos': self.ensure_list(self.get_value(data, 'prerequisitos')),
             'modo_origem': self.get_value(data, 'modo_origem') or 'canonica_md',
-            'conteudo_html': html_content,
             'conteudo_md': body,
             'status': self.get_value(data, 'status') or Aula.Status.APROVADA,
             'versao': versao,
@@ -210,22 +236,96 @@ class Command(BaseCommand):
         }
 
         if aula:
+            outcome = 'updated'
             for field, value in defaults.items():
                 setattr(aula, field, value)
-            self.apply_cover_image(aula, canonical_path, data)
-            aula.save()
-            return 'updated'
+        else:
+            outcome = 'created'
+            aula = Aula(
+                disciplina=disciplina,
+                trilha=trilha,
+                ordem=ordem,
+                slug=slug,
+                **defaults,
+            )
 
-        aula = Aula(
-            disciplina=disciplina,
-            trilha=trilha,
-            ordem=ordem,
-            slug=slug,
-            **defaults,
-        )
         self.apply_cover_image(aula, canonical_path, data)
         aula.save()
-        return 'created'
+
+        # ORDEM CRÍTICA: as figuras do corpo precisam estar no banco ANTES da
+        # conversão markdown -> HTML. O parser resolve `![alt](img/arquivo.png)`
+        # consultando `aula.imagens`, então renderizar antes produziria links
+        # quebrados. Não inverta estas duas linhas.
+        self.sync_body_images(aula, canonical_path)
+        aula.conteudo_html = parse_lesson_markdown(
+            content, concept_labels=concept_labels
+        ).html
+        aula.save(update_fields=['conteudo_html', 'updated_at'])
+        return outcome
+
+    def find_body_image_sources(self, canonical_path):
+        '''Mapeia `nome do arquivo -> Path` da pasta `img/` da aula.'''
+        source_dir = canonical_path.parent / self.BODY_IMAGE_DIRNAME
+        if not source_dir.is_dir():
+            return {}
+        # O nome é o caminho relativo a `img/`, exatamente como o markdown
+        # escreve em `![alt](img/...)` — inclusive com subpasta.
+        return {
+            entry.relative_to(source_dir).as_posix(): entry
+            for entry in sorted(source_dir.rglob('*'))
+            if entry.is_file() and entry.suffix.lower() in self.BODY_IMAGE_SUFFIXES
+        }
+
+    def sync_body_images(self, aula, canonical_path):
+        '''Sincroniza `img/` com `AulaImagem`. Devolve True se algo mudou.
+
+        Idempotente pelo mesmo critério da capa: arquivo já presente com o mesmo
+        tamanho não é re-salvo. Registro sem arquivo correspondente na origem é
+        removido, junto com o arquivo em media.
+        '''
+        sources = self.find_body_image_sources(canonical_path)
+        existing = {imagem.nome: imagem for imagem in aula.imagens.all()}
+        changed = False
+
+        for nome, source in sources.items():
+            imagem = existing.get(nome)
+            if imagem is None:
+                imagem = AulaImagem(aula=aula, nome=nome)
+            elif imagem.arquivo:
+                try:
+                    if imagem.arquivo.size == source.stat().st_size:
+                        continue
+                except (OSError, ValueError):
+                    pass
+                # Conteúdo trocou: descarta o arquivo antigo para o media não
+                # acumular versões órfãs a cada reimport.
+                imagem.arquivo.delete(save=False)
+
+            target = self.body_image_target_name(aula, nome)
+            # O nome de destino é determinístico. Um arquivo remanescente em
+            # media (banco recriado, import anterior) faria o storage inventar
+            # um sufixo aleatório e a URL deixaria de ser previsível.
+            storage = imagem.arquivo.storage
+            stored_name = imagem.arquivo.field.generate_filename(imagem, target)
+            if storage.exists(stored_name):
+                storage.delete(stored_name)
+
+            imagem.arquivo.save(target, ContentFile(source.read_bytes()), save=False)
+            imagem.save()
+            changed = True
+
+        for nome, imagem in existing.items():
+            if nome in sources:
+                continue
+            imagem.arquivo.delete(save=False)
+            imagem.delete()
+            changed = True
+
+        return changed
+
+    def body_image_target_name(self, aula, nome):
+        flat = nome.lower().replace('/', '-')
+        return f'{aula.disciplina.slug}-{aula.slug}-{flat}'
 
     def find_cover_path(self, canonical_path, data):
         lesson_dir = canonical_path.parent
@@ -255,7 +355,19 @@ class Command(BaseCommand):
                     return False
             except (OSError, ValueError):
                 pass
+            # Capa trocou: descarta o arquivo antigo para o media não acumular
+            # versões órfãs a cada reimport.
+            aula.imagem.delete(save=False)
+
         target_name = f'{aula.disciplina.slug}-{aula.slug}{source.suffix.lower()}'
+        # O nome de destino é determinístico. Um arquivo remanescente em media
+        # (banco recriado, import anterior) faria o storage inventar um sufixo
+        # aleatório, e a capa antiga ficaria para sempre sem dono.
+        storage = aula.imagem.storage
+        stored_name = aula.imagem.field.generate_filename(aula, target_name)
+        if storage.exists(stored_name):
+            storage.delete(stored_name)
+
         aula.imagem.save(target_name, ContentFile(source.read_bytes()), save=False)
         return True
 

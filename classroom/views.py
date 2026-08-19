@@ -28,7 +28,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
 from accounts.models import User
 from catalog.models import Aula, Conceito
-from catalog.parser import render_teacher_notes_html, sanitize_lesson_html
+from catalog.parser import render_stored_lesson_html, render_teacher_notes_html
 from catalog.services import AcervoDownloadError, download_acervo
 
 from .forms import (
@@ -592,7 +592,7 @@ class AulaPublicadaPreviewView(AulaPublicadaActionMixin, View):
                 'turma': turma,
                 'publicada': publicada,
                 'aula': aula,
-                'lesson_html': sanitize_lesson_html(aula.conteudo_html),
+                'lesson_html': render_stored_lesson_html(aula, diagnostics=True),
                 'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md, concept_labels()),
                 'previous_aula': previous_aula,
                 'next_aula': next_aula,
@@ -616,7 +616,7 @@ class AulaPresentationView(AulaPublicadaActionMixin, View):
                 'turma': turma,
                 'publicada': publicada,
                 'aula': aula,
-                'lesson_html': sanitize_lesson_html(aula.conteudo_html),
+                'lesson_html': render_stored_lesson_html(aula),
                 'teacher_notes_html': render_teacher_notes_html(aula.conteudo_md, concept_labels()),
             },
         )
@@ -851,7 +851,7 @@ class AlunoAulaDetailView(AlunoTurmasMixin, View):
             'turma': turma,
             'publicada': publicada,
             'aula': publicada.aula,
-            'lesson_html': sanitize_lesson_html(publicada.aula.conteudo_html),
+            'lesson_html': render_stored_lesson_html(publicada.aula),
             'progresso': progresso,
             'previous_aula': previous_aula,
             'next_aula': next_aula,

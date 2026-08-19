@@ -18,6 +18,17 @@ WIKILINK_RE = re.compile(r'\[\[(?P<slug>[^\]|\n]+?)(?:\|(?P<label>[^\]\n]+?))?\]
 STEP_NUMBER_PREFIX_RE = re.compile(r'^\s*\d{1,2}\s*[.)\-–]\s+')
 DIAGRAM_FENCE_RE = re.compile(r'```(?P<kind>diagrama[\w-]*)\n(?P<body>.*?)\n```', re.S)
 QUIZ_FENCE_RE = re.compile(r'```quiz\n(?P<body>.*?)\n```', re.S)
+# Figura de miolo do acervo: `![alt](img/arquivo.png)` sozinha na linha.
+LESSON_FIGURE_RE = re.compile(
+    r'^[ \t]*!\[(?P<alt>[^\]]*)\]\((?P<src>img/(?P<name>[^)\s"]+))\)[ \t]*$',
+    re.M,
+)
+LESSON_FIGURE_BLOCK_RE = re.compile(
+    r'<figure class="lesson-figure"(?P<attributes>[^>]*)>(?P<body>.*?)</figure>',
+    re.S,
+)
+FIGURE_FILE_ATTR_RE = re.compile(r'data-figure-file="(?P<name>[^"]*)"')
+LESSON_IMG_TAG_RE = re.compile(r'<img\b[^>]*\bsrc="img/(?P<name>[^"]+)"[^>]*>')
 TEACHER_NOTE_RE = re.compile(
     r'(?P<block>:::roteiro[^\n]*\n(?P<body>.*?)\n:::\s*)',
     re.S,
@@ -123,7 +134,8 @@ _BASE_ATTRIBUTES = {
     '*': ['aria-hidden', 'aria-label', 'class', 'id', 'role', 'title'],
     'a': ['href', 'title'],
     'button': ['type', 'disabled'],
-    'figure': ['class', 'data-diagram-type'],
+    'details': ['class', 'open'],
+    'figure': ['class', 'data-diagram-type', 'data-figure-file'],
     'i': ['aria-hidden', 'class', 'data-lucide'],
     'img': ['alt', 'decoding', 'height', 'loading', 'src', 'title', 'width'],
     'ol': ['class', 'start', 'type'],
@@ -203,6 +215,7 @@ def render_lesson_html(markdown_content, concept_labels=None):
     prepared = resolve_wikilinks(prepared, concept_labels)
     prepared = render_quiz_fences(prepared)
     prepared = render_diagram_fences(prepared)
+    prepared = render_lesson_figures(prepared)
     prepared = render_custom_blocks(prepared)
 
     rendered = markdown.markdown(
@@ -520,3 +533,157 @@ def render_custom_blocks(markdown_content):
         )
 
     return BLOCK_RE.sub(replace, markdown_content)
+
+
+# ── Figuras do corpo da aula ──────────────────────────────────────────────
+# O acervo referencia a arte como caminho relativo à pasta da aula
+# (`![alt](img/arquivo.png)`), que não existe no portal. A conversão é feita
+# em dois tempos de propósito:
+#
+# 1. `render_lesson_figures` (import) monta a figura e **preserva** o caminho
+#    do acervo — o HTML guardado continua independente de MEDIA_URL e de onde
+#    o arquivo foi parar;
+# 2. `resolve_lesson_images` (render) troca o caminho pela URL real de
+#    `aula.imagens`, então reimportar a imagem conserta a página sem precisar
+#    reprocessar o Markdown.
+#
+# O `alt` do acervo é longo por regra pedagógica: nenhum passo do raciocínio
+# pode existir só dentro da imagem. Ele vai inteiro para o atributo `alt` (é
+# conteúdo de acessibilidade, não rótulo) e reaparece numa `<details>`
+# recolhida — despejado como legenda visível, viraria um parágrafo cinza
+# empurrando a aula para baixo.
+
+
+def render_lesson_figures(markdown_content):
+    '''Envolve `![alt](img/arquivo.png)` na figura do leitor de aula.'''
+
+    def replace(match):
+        alt = escape(' '.join(match.group('alt').split()))
+        src = escape(match.group('src'))
+        name = escape(match.group('name'))
+        caption = ''
+        if alt:
+            caption = (
+                '<figcaption class="lesson-figure-caption">'
+                '<details class="lesson-figure-desc">'
+                '<summary>'
+                '<i data-lucide="chevron-right" aria-hidden="true"></i>'
+                'Descrição da figura'
+                '</summary>'
+                f'<p>{alt}</p>'
+                '</details>'
+                '</figcaption>\n'
+            )
+        return (
+            f'\n<figure class="lesson-figure" data-figure-file="{name}">\n'
+            '<div class="lesson-figure-frame">'
+            f'<img class="lesson-figure-img" src="{src}" alt="{alt}"'
+            ' loading="lazy" decoding="async">'
+            '</div>\n'
+            f'{caption}'
+            '</figure>\n'
+        )
+
+    return LESSON_FIGURE_RE.sub(replace, markdown_content or '')
+
+
+def lesson_image_urls(aula):
+    '''Mapa `{nome do arquivo: URL pública}` das imagens ingeridas da aula.
+
+    Tolera a ausência do relacionamento para que o leitor continue de pé
+    enquanto a ingestão de imagens não estiver disponível — sem imagens o
+    corpo degrada para o aviso de figura indisponível, nunca para erro 500.
+    '''
+    manager = getattr(aula, 'imagens', None)
+    if manager is None:
+        return {}
+
+    urls = {}
+    for imagem in manager.all():
+        nome = (getattr(imagem, 'nome', '') or '').strip()
+        arquivo = getattr(imagem, 'arquivo', None)
+        if not nome or not arquivo:
+            continue
+        try:
+            urls[nome] = arquivo.url
+        except ValueError:
+            continue
+    return urls
+
+
+def resolve_lesson_images(html_content, image_urls, diagnostics=False):
+    '''Troca `img/arquivo.png` pela URL real; degrada o que não existe.
+
+    `diagnostics` liga a linha com o nome do arquivo faltante: é recado de
+    manutenção do acervo, útil para o professor e ruído para o aluno.
+    '''
+    if not html_content:
+        return html_content or ''
+
+    urls = image_urls or {}
+
+    def replace_figure(match):
+        attributes = match.group('attributes')
+        body = match.group('body')
+        name_match = FIGURE_FILE_ATTR_RE.search(attributes)
+        name = html.unescape(name_match.group('name')) if name_match else ''
+        if name and name in urls:
+            return f'<figure class="lesson-figure"{attributes}>{body}</figure>'
+
+        # Sem a arte, a descrição deixa de ser complemento e passa a ser o
+        # único portador do raciocínio — por isso abre sozinha.
+        body = body.replace(
+            '<details class="lesson-figure-desc">',
+            '<details class="lesson-figure-desc" open>',
+            1,
+        )
+        return (
+            '<figure class="lesson-figure lesson-figure--missing"'
+            f'{attributes}>{body}</figure>'
+        )
+
+    resolved = LESSON_FIGURE_BLOCK_RE.sub(replace_figure, html_content)
+    return _swap_image_sources(resolved, urls, diagnostics=diagnostics)
+
+
+def _swap_image_sources(html_content, urls, diagnostics=False):
+    def replace(match):
+        raw_name = match.group('name')
+        url = urls.get(html.unescape(raw_name))
+        if url:
+            return match.group(0).replace(
+                f'src="img/{raw_name}"',
+                'src="{0}"'.format(escape(url)),
+                1,
+            )
+        return _missing_image_note(raw_name, diagnostics)
+
+    return LESSON_IMG_TAG_RE.sub(replace, html_content or '')
+
+
+def _missing_image_note(name, diagnostics=False):
+    detail = ''
+    if diagnostics:
+        detail = (
+            '<span class="lesson-figure-missing-file">'
+            f'Arquivo <code>img/{escape(name)}</code> ainda não importado do '
+            'acervo.</span>'
+        )
+    return (
+        '<span class="lesson-figure-missing" role="note">'
+        '<i data-lucide="image-off" aria-hidden="true"></i>'
+        '<span class="lesson-figure-missing-label">Figura indisponível</span>'
+        f'{detail}'
+        '</span>'
+    )
+
+
+def render_stored_lesson_html(aula, diagnostics=False):
+    '''HTML da aula pronto para exibir: imagens resolvidas e sanitizadas.'''
+    return sanitize_lesson_html(
+        resolve_lesson_images(
+            aula.conteudo_html,
+            lesson_image_urls(aula),
+            diagnostics=diagnostics,
+        )
+    )

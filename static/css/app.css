@@ -43,6 +43,10 @@
     /* ── Elevation (neutra, só overlay flutuante) ── */
     --shadow-pop: 0 8px 24px rgba(0, 0, 0, .24);
 
+    /* ── Moldura da figura de aula (arte do acervo é navy #050810) ── */
+    --figure-mat: var(--surface-raised);
+    --figure-edge: var(--border);
+
     /* ── Radius scale ── */
     --radius-xs: 4px;
     --radius-sm: 6px;
@@ -109,6 +113,10 @@
     --c-warning-ink: #ffffff;
 
     --shadow-pop: 0 8px 24px rgba(15, 23, 42, .10);
+
+    /* No claro a arte escura precisa de passe-partout, não de recorte. */
+    --figure-mat: color-mix(in srgb, var(--fg) 94%, var(--surface-base));
+    --figure-edge: color-mix(in srgb, var(--fg) 70%, var(--surface-base));
 }
 
 * {
@@ -179,6 +187,12 @@ a:focus-visible,
 
     .lesson-lightbox {
         animation: none !important;
+    }
+
+    .lesson-figure-frame.is-zoomable,
+    .lesson-figure-zoom,
+    .lesson-figure-desc > summary svg {
+        transition: none !important;
     }
 
     .spinner {
@@ -2237,6 +2251,7 @@ dialog.deck-lightbox:not([open]) {
 .deck-lightbox[open] {
     position: fixed;
     inset: 0;
+    margin: 0;
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -2290,6 +2305,227 @@ dialog.deck-lightbox:not([open]) {
 @keyframes lightbox-in {
     from { opacity: 0; }
     to   { opacity: 1; }
+}
+
+/* ── Figura do corpo da aula ──────────────────────────────────────────── */
+/* A arte do acervo é infográfico denso sobre fundo navy (#050810). No tema
+   escuro ela encosta na página sem costura; no claro, colada ao quase-branco,
+   viraria um buraco preto no meio do texto. A moldura (passe-partout) resolve
+   os dois casos: no escuro é a camada raised do tonal layering, no claro é a
+   tinta do próprio tema. A figura passa a ser um objeto montado na página,
+   não um recorte. */
+.lesson-figure {
+    min-width: 0;
+    max-width: var(--block-width, 100%);
+    /* <figure> traz margin-inline: 40px do user-agent — no celular isso comia
+       80px da largura útil. */
+    margin: var(--space-6) 0;
+    margin-inline: 0;
+}
+
+.lesson-figure-frame {
+    display: block;
+    width: 100%;
+    padding: var(--space-2);
+    border: 1px solid var(--figure-edge);
+    border-radius: var(--radius-lg);
+    background: var(--figure-mat);
+    box-shadow: var(--shadow-pop);
+}
+
+/* Atalho de mouse/toque; o controle acessível é o botão "Ampliar" da
+   legenda. A classe entra pelo app.js, só onde o <dialog> realmente abre —
+   a imagem nunca vira o rótulo de um botão, senão o alt (que é a descrição
+   pedagógica inteira) sumiria do leitor de tela. */
+.lesson-figure-frame.is-zoomable {
+    cursor: zoom-in;
+    transition: border-color .16s ease-out;
+}
+
+.lesson-figure-frame.is-zoomable:hover {
+    border-color: var(--accent);
+}
+
+.lesson-figure-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: calc(var(--radius-lg) - var(--space-2));
+}
+
+.lesson-figure-caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.lesson-figure-desc {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Criado pelo app.js. Fica na legenda, em superfície de tema — sobre a arte
+   (navy fixo) exigiria uma cor fora do sistema de tokens. */
+.lesson-figure-zoom {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--fg-subtle);
+    font: inherit;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    cursor: zoom-in;
+    transition: color .16s ease-out, border-color .16s ease-out;
+}
+
+.lesson-figure-zoom:hover {
+    border-color: var(--border-strong);
+    color: var(--fg-muted);
+}
+
+.lesson-figure-zoom:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.lesson-figure-zoom svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+}
+
+/* O alt do acervo é a descrição pedagógica inteira: vai no atributo alt e
+   fica disponível aqui sob demanda. Aberto por padrão, seria um parágrafo
+   cinza empurrando a aula para baixo em toda figura. */
+.lesson-figure-desc > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 4px 0;
+    border-radius: var(--radius-sm);
+    color: var(--fg-subtle);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+}
+
+.lesson-figure-desc > summary::-webkit-details-marker {
+    display: none;
+}
+
+.lesson-figure-desc > summary:hover {
+    color: var(--fg-muted);
+}
+
+.lesson-figure-desc > summary:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.lesson-figure-desc > summary svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    transition: transform .16s ease-out;
+}
+
+.lesson-figure-desc[open] > summary svg {
+    transform: rotate(90deg);
+}
+
+.lesson-figure-desc > p {
+    max-width: 62ch;
+    /* alinha com o rótulo do summary, não com o ícone */
+    margin: 0 0 0 20px;
+    color: var(--fg-muted);
+    font-size: var(--text-ui);
+    line-height: 1.6;
+}
+
+/* Arte ainda não importada: nunca uma imagem quebrada na tela do aluno. */
+.lesson-figure--missing .lesson-figure-frame {
+    padding: var(--space-4);
+    border-style: dashed;
+    border-color: var(--border-strong);
+    background: var(--surface-base);
+    box-shadow: none;
+}
+
+.lesson-figure-missing {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--fg-muted);
+    font-size: var(--text-ui);
+}
+
+.lesson-figure-missing svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--c-warning);
+}
+
+.lesson-figure-missing-label {
+    font-weight: 600;
+}
+
+/* Só o professor/admin recebe o nome do arquivo — é recado de manutenção
+   do acervo, ruído na tela do aluno. */
+.lesson-figure-missing-file {
+    flex-basis: 100%;
+    font-size: var(--text-caption);
+}
+
+/* `.prose code` vem depois no arquivo e pinta esmeralda: verde é ação e
+   progresso, não arquivo faltando. */
+.lesson-figure-missing .lesson-figure-missing-file code {
+    padding: 0;
+    background: none;
+    color: inherit;
+    font-family: var(--font-mono);
+    word-break: break-all;
+}
+
+/* Ampliar precisa significar ampliar: no celular a arte do acervo continua
+   ilegível se couber inteira na tela. A overlay abre a figura a ~2x e rola
+   nos dois eixos — o dedo faz o resto. */
+@media (max-width: 700px) {
+    .lesson-figure-lightbox[open] {
+        /* `safe` evita o corte clássico do flex centralizado quando o
+           conteúdo é maior que o contêiner. */
+        align-items: safe center;
+        justify-content: safe center;
+        overflow: auto;
+        overscroll-behavior: contain;
+        cursor: default;
+    }
+
+    .lesson-figure-lightbox img {
+        /* sem isto o flex encolhe a figura de volta para a largura da tela */
+        flex: none;
+        width: 190vw;
+        min-width: 100%;
+        max-width: none;
+        height: auto;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .lesson-figure-lightbox .lesson-lightbox-close {
+        position: fixed;
+    }
 }
 
 /* Escala de leitura própria do leitor de aula. O corpo do portal é 16px porque

@@ -135,3 +135,45 @@ class Aula(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('catalog:aula_detail', kwargs={'pk': self.pk})
+
+
+class AulaImagem(TimeStampedModel):
+    '''Figura do corpo da aula: um arquivo de `img/` ao lado da `canonica.md`.
+
+    Diferente da capa (`Aula.imagem`), estas ilustram o texto e são
+    referenciadas no markdown como `![alt](img/arquivo.png)`. Ficam públicas em
+    `MEDIA_ROOT`, igual à capa (regra inviolável 12) — arte de aula não é
+    material protegido.
+
+    `nome` guarda o arquivo exatamente como o markdown escreve, para o parser
+    resolver a referência relativa pelo `related_name='imagens'`.
+    '''
+
+    aula = models.ForeignKey(
+        Aula,
+        verbose_name='aula',
+        on_delete=models.CASCADE,
+        related_name='imagens',
+    )
+    nome = models.CharField('nome do arquivo', max_length=180)
+    # max_length folgado: o nome de destino carrega disciplina + aula + arquivo
+    # e, no default de 100, o storage truncava e colava sufixo aleatório.
+    arquivo = models.ImageField(
+        'arquivo',
+        upload_to='catalog/imagens/',
+        max_length=255,
+    )
+
+    class Meta:
+        verbose_name = 'imagem da aula'
+        verbose_name_plural = 'imagens da aula'
+        ordering = ['aula', 'nome']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['aula', 'nome'],
+                name='unique_imagem_por_aula',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.aula} · {self.nome}'

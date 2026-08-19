@@ -44,6 +44,8 @@
   /* sombras — "tinted", nunca preto puro */
   --shell-shadow:0 24px 80px rgba(0,0,0,.40); --shell-shadow-soft:0 16px 40px rgba(0,0,0,.24);
   --shell-shadow-tint:0 20px 48px rgba(16,185,129,.16);
+  /* moldura da figura de aula — a arte do acervo é navy #050810 */
+  --shell-figure-mat:var(--shell-surface-high); --shell-figure-edge:var(--shell-border-strong);
   /* raios — arquitetural, nunca "bubbly" */
   --radius-xl:1.25rem; --radius-lg:1rem; --radius-md:.625rem; --radius-sm:.375rem; --radius-pill:999px;
   --font-body:'Geist',ui-sans-serif,system-ui,-apple-system,sans-serif;
@@ -70,6 +72,8 @@
   --shell-warning:#b45309; --shell-danger:#b91c1c; --shell-danger-hover:#991b1b; --shell-info:#0369a1;
   --shell-shadow:0 22px 60px rgba(15,23,42,.10); --shell-shadow-soft:0 12px 30px rgba(15,23,42,.06);
   --shell-shadow-tint:0 16px 40px rgba(16,185,129,.10);
+  --shell-figure-mat:color-mix(in srgb,var(--shell-text) 94%,var(--shell-bg));
+  --shell-figure-edge:color-mix(in srgb,var(--shell-text) 70%,var(--shell-bg));
 }
 *{box-sizing:border-box}
 html{background:var(--shell-bg);scroll-behavior:smooth;color-scheme:dark}
@@ -410,6 +414,33 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 .callout.conceito .ic{background:rgba(56,189,248,.16);color:var(--shell-info)} .callout.conceito .ct b{color:var(--shell-info)}
 .callout.atencao .ic{background:rgba(251,191,36,.16);color:var(--shell-warning)} .callout.atencao .ct b{color:var(--shell-warning)}
 .callout.dica .ic{background:rgba(16,185,129,.16);color:var(--shell-success)} .callout.dica .ct b{color:var(--shell-success)}
+/* figura do corpo da aula — arte do acervo (`![alt](img/arquivo.png)`) */
+.lesson-figure{min-width:0;max-width:100%;margin:32px 0;margin-inline:0}
+.lesson-figure-frame{display:block;width:100%;padding:8px;border:1px solid var(--shell-figure-edge);border-radius:var(--radius-lg);background:var(--shell-figure-mat);box-shadow:var(--shell-shadow-soft)}
+.lesson-figure-frame.is-zoomable{cursor:zoom-in;transition:border-color .16s ease-out}
+.lesson-figure-frame.is-zoomable:hover{border-color:var(--shell-primary)}
+.lesson-figure-img{display:block;width:100%;height:auto;border-radius:calc(var(--radius-lg) - 8px)}
+.lesson-figure-caption{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin-top:8px}
+.lesson-figure-desc{flex:1 1 auto;min-width:0}
+.lesson-figure-desc>summary{display:inline-flex;align-items:center;gap:6px;width:fit-content;padding:4px 0;border-radius:var(--radius-sm);color:var(--shell-text-soft);font-size:12px;font-weight:600;list-style:none;cursor:pointer}
+.lesson-figure-desc>summary::-webkit-details-marker{display:none}
+.lesson-figure-desc>summary:hover{color:var(--shell-text-muted)}
+.lesson-figure-desc>summary svg{width:14px;height:14px;flex:none;transition:transform .16s ease-out}
+.lesson-figure-desc[open]>summary svg{transform:rotate(90deg)}
+.lesson-figure-desc>p{max-width:62ch;margin:0 0 0 20px;color:var(--shell-text-muted);font-size:14px;line-height:1.6}
+.lesson-figure-zoom{display:inline-flex;flex:none;align-items:center;gap:6px;margin-left:auto;padding:4px 10px;border:1px solid var(--shell-border);border-radius:var(--radius-pill);background:none;color:var(--shell-text-soft);font:inherit;font-size:12px;font-weight:600;cursor:zoom-in;transition:color .16s ease-out,border-color .16s ease-out}
+.lesson-figure-zoom:hover{border-color:var(--shell-border-strong);color:var(--shell-text-muted)}
+.lesson-figure-zoom svg{width:14px;height:14px;flex:none}
+/* arte ainda não importada — nunca uma imagem quebrada na tela do aluno */
+.lesson-figure--missing .lesson-figure-frame{padding:16px;border-style:dashed;border-color:var(--shell-border-strong);background:var(--shell-surface-low);box-shadow:none}
+.lesson-figure-missing{display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--shell-text-muted);font-size:14px}
+.lesson-figure-missing svg{width:18px;height:18px;flex:none;color:var(--shell-warning)}
+.lesson-figure-missing-label{font-weight:600}
+.lesson-figure-missing-file{flex-basis:100%;font-size:12px}
+.lesson-figure-missing .lesson-figure-missing-file code{padding:0;background:none;color:inherit;font-family:var(--font-mono);word-break:break-all}
+@media(prefers-reduced-motion:reduce){
+  .lesson-figure-frame.is-zoomable,.lesson-figure-zoom,.lesson-figure-desc>summary svg{transition:none!important}
+}
 /* bento assimétrico */
 .bento{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin:22px 0}
 .bento .b{background:var(--shell-surface-low);border-radius:var(--radius-md);padding:22px;transition:.2s}
@@ -730,6 +761,36 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 
             <blockquote>"O design não é apenas o que parece e o que se sente. Design é como funciona." — Steve Jobs, reinterpretado para a era do Atelier Digital.</blockquote>
 
+
+            <figure class="lesson-figure" data-figure-file="losango-tem-duas-saidas.png">
+              <div class="lesson-figure-frame is-zoomable">
+                <img class="lesson-figure-img" alt="Fluxograma com um losango de decisão no centro e duas setas de saída rotuladas sim e não, mostrando que todo desvio precisa declarar os dois caminhos." decoding="async" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 320'%3E%3Crect width='640' height='320' fill='%23050810'/%3E%3Cpath d='M320 70 L400 140 L320 210 L240 140 Z' fill='none' stroke='%236ee7b7' stroke-width='3'/%3E%3Cpath d='M400 140 h130' stroke='%2367e8f9' stroke-width='3'/%3E%3Cpath d='M240 140 h-130' stroke='%2367e8f9' stroke-width='3'/%3E%3Crect x='40' y='115' width='70' height='50' rx='8' fill='none' stroke='%23ece8e7' stroke-width='3'/%3E%3Crect x='530' y='115' width='70' height='50' rx='8' fill='none' stroke='%23ece8e7' stroke-width='3'/%3E%3Ctext x='320' y='275' fill='%2384808c' font-family='sans-serif' font-size='19' text-anchor='middle'%3Earte-base do acervo (exemplo)%3C/text%3E%3C/svg%3E">
+              </div>
+              <figcaption class="lesson-figure-caption">
+                <details class="lesson-figure-desc">
+                  <summary><i data-lucide="chevron-right" aria-hidden="true"></i>Descrição da figura</summary>
+                  <p>Fluxograma com um losango de decisão no centro e duas setas de saída rotuladas sim e não, mostrando que todo desvio precisa declarar os dois caminhos.</p>
+                </details>
+                <button class="lesson-figure-zoom" type="button"><i data-lucide="maximize-2" aria-hidden="true"></i>Ampliar</button>
+              </figcaption>
+            </figure>
+
+            <figure class="lesson-figure lesson-figure--missing" data-figure-file="limite-de-wip.png">
+              <div class="lesson-figure-frame">
+                <span class="lesson-figure-missing" role="note">
+                  <i data-lucide="image-off" aria-hidden="true"></i>
+                  <span class="lesson-figure-missing-label">Figura indisponível</span>
+                  <span class="lesson-figure-missing-file">Arquivo <code>img/limite-de-wip.png</code> ainda não importado do acervo.</span>
+                </span>
+              </div>
+              <figcaption class="lesson-figure-caption">
+                <details class="lesson-figure-desc" open>
+                  <summary><i data-lucide="chevron-right" aria-hidden="true"></i>Descrição da figura</summary>
+                  <p>Quadro Kanban com três colunas e um limite de WIP escrito no topo da coluna do meio, mostrando a fila parada enquanto o limite não é liberado.</p>
+                </details>
+              </figcaption>
+            </figure>
+
             <div class="bento">
               <div class="b p"><i data-lucide="grid-view"></i><h4>Grades assimétricas</h4><p>Romper a simetria cria tensão visual e guia o olhar do estudante para os pontos de conversão mais importantes.</p></div>
               <div class="b t"><i data-lucide="sparkles"></i><h4>Micro-interações</h4><p>Pequenos movimentos que validam a ação do usuário, transformando uma aula passiva em uma experiência tátil.</p></div>
@@ -772,6 +833,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
       </div>
     </div>
     <p class="note">Este é o componente que diferencia o Prof. Toni Coimbra de um LMS genérico. Callouts mapeiam 1:1 para os blocos <span class="mono">:::conceito / :::atencao / :::dica</span> do acervo PROF-TONI (ver <span class="mono">catalog/parser.py</span>).</p>
+    <p class="note"><b>Figura de aula</b> (<span class="mono">.lesson-figure</span>): a arte do acervo é infográfico denso sobre fundo navy, então ela é montada sobre uma moldura (<span class="mono">--shell-figure-mat</span>) — no tema escuro é a camada raised, no claro é a tinta do tema, para a figura não virar um buraco preto na página do aluno. O <span class="mono">alt</span> do acervo é a descrição pedagógica inteira: vai integral no atributo e reaparece numa <span class="mono">&lt;details&gt;</span> recolhida, nunca como legenda visível. O botão <b>Ampliar</b> é criado pelo <span class="mono">app.js</span> apenas onde o lightbox abre.</p>
   </section>
 
   <!-- 8 · STATUS -->
