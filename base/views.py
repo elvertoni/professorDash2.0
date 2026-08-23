@@ -17,15 +17,15 @@ def health(request):
 
 @require_GET
 def public_media(request, path):
-    """Serve arquivos públicos de MEDIA_ROOT, como capas de aulas."""
+    """Serve arquivos públicos de MEDIA_ROOT, como capas e figuras de aulas."""
     parts = Path(path).parts
-    is_catalog_cover = (
+    is_catalog_media = (
         len(parts) >= 3
         and parts[0] == 'catalog'
-        and parts[1] == 'capas'
+        and parts[1] in ('capas', 'imagens')
     )
     is_avatar = len(parts) >= 2 and parts[0] == 'avatars'
-    if not (is_catalog_cover or is_avatar):
+    if not (is_catalog_media or is_avatar):
         raise Http404
 
     try:
