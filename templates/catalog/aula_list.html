@@ -16,7 +16,10 @@
                       data-loading-label="Importando…">
                     {% csrf_token %}
                     <button class="btn btn-outline" type="submit" aria-disabled="false">
-                        <i data-lucide="github" aria-hidden="true"></i>
+                        {# "github" foi removido do Lucide na 1.34.0 (icones de marca sairam),
+                           entao este botao ja renderizava sem icone. "download" descreve a acao
+                           real — puxar o acervo — melhor que a marca da origem. #}
+                        <i data-lucide="download" aria-hidden="true"></i>
                         <span data-submit-label aria-live="polite">Importar tudo</span>
                     </button>
                 </form>

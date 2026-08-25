@@ -43,6 +43,13 @@
     /* ── Elevation (neutra, só overlay flutuante) ── */
     --shadow-pop: 0 8px 24px rgba(0, 0, 0, .24);
 
+    /* ── Tinted shadow (identidade Atelier) — espelha --shell-shadow-tint(-raised)
+       do design_system/design-system.html. Sombra DIRECIONAL (offset 20px,
+       blur 48px), não halo zero-offset: é a profundidade do CTA, não glow.
+       O tint é esmeralda nos DOIS temas, por decisão do DS. ── */
+    --shadow-tint: 0 20px 48px rgba(16, 185, 129, .16);
+    --shadow-tint-raised: 0 26px 56px rgba(16, 185, 129, .20);
+
     /* ── Moldura da figura de aula (arte do acervo é navy #050810) ── */
     --figure-mat: var(--surface-raised);
     --figure-edge: var(--border);
@@ -113,6 +120,8 @@
     --c-warning-ink: #ffffff;
 
     --shadow-pop: 0 8px 24px rgba(15, 23, 42, .10);
+    --shadow-tint: 0 16px 40px rgba(16, 185, 129, .10);
+    --shadow-tint-raised: 0 22px 48px rgba(16, 185, 129, .14);
 
     /* No claro a arte escura precisa de passe-partout, não de recorte. */
     --figure-mat: color-mix(in srgb, var(--fg) 94%, var(--surface-base));
@@ -220,7 +229,7 @@ a:focus-visible,
     }
 
     .btn:not(:disabled):not([disabled]):active,
-    .btn-primary:not(:disabled):not([disabled]):hover,
+    .btn-primary:not(:disabled):not([disabled]):active,
     .quiz-option:hover:not(:disabled),
     .kpi:hover,
     .card:hover,
@@ -637,14 +646,49 @@ button {
     transform: translateY(1px);
 }
 
+/* Repouso COM sombra tintada: é a assinatura de profundidade do Atelier,
+   declarada no DS (.btn-primary box-shadow:var(--shell-shadow-tint)) e em
+   DESIGN.md/PRODUCT.md. O runtime rodava sem ela — divergência reconciliada
+   na direção do DS (fonte de verdade).
+   box-shadow é declarado UMA vez, em (0,1,0); os estados só trocam o token
+   --btn-shadow. Dois motivos:
+   1. mantém a regra de sombra fraca o bastante para que qualquer componente
+      mais específico continue sobrescrevendo por cascata normal — sem isso,
+      .reader-start-btn.is-active (0,2,0, presentation.css) perderia seu anel
+      inset no hover para um seletor :hover de (0,4,0);
+   2. permite neutralizar repouso+hover+active de uma vez onde a sombra é
+      recortada, só redefinindo os tokens (ver regra logo abaixo).
+   .btn:disabled{box-shadow:none} (0,1,1) e mais tarde no arquivo continua
+   ganhando desta regra. */
 .btn-primary {
+    --btn-shadow: var(--shadow-tint);
     color: var(--accent-ink);
     background: var(--grad-cta);
+    box-shadow: var(--btn-shadow);
 }
 
+/* Hover = o objeto SOBE (offset/blur crescem). Encolher é feedback de
+   pressionar, não de apontar — o scale desceu para :active. */
 .btn-primary:not(:disabled):not([disabled]):hover {
-    filter: brightness(1.05);
-    transform: scale(.97);
+    --btn-shadow: var(--shadow-tint-raised);
+    filter: brightness(1.08);
+}
+
+/* transform não é cumulativo: o translateY(1px) genérico de .btn:active
+   precisa ser reescrito junto com o scale nesta mesma declaração. Pressionar
+   também devolve a sombra ao repouso (o :hover ainda casa no mouse). */
+.btn-primary:not(:disabled):not([disabled]):active {
+    --btn-shadow: var(--shadow-tint);
+    transform: translateY(1px) scale(.98);
+}
+
+/* .card{overflow:hidden} e .tbl-wrap{overflow-y:hidden} recortariam a sombra
+   (offset 20px + blur 48px) numa poça esmeralda cortada na borda. Onde ela não
+   cabe, não existe — e a profundidade do CTA já é dada pelo próprio card.
+   Zerar os tokens cobre os três estados sem !important. */
+:is(.card, .tbl-wrap) .btn-primary {
+    --shadow-tint: none;
+    --shadow-tint-raised: none;
 }
 
 /* Light: gradiente CTA usa emerald-700/cyan-700 (escuros) → texto branco p/ AA */
@@ -3128,23 +3172,28 @@ blockquote footer::before {
     font-size: 12px;
 }
 
+/* Trilho: --surface-base valia ~1.07:1 contra o .panel/.card que hospeda a
+   barra (light: #eff1f5 sobre #f8f9fc) — a 0% o componente sumia. O trilho é
+   translúcido de propósito: .progress aparece sobre --surface-base (page-hero),
+   --surface-raised (.panel/.card) e --surface-overlay (.card:hover), e um valor
+   fixo só serviria a um desses. 32% é o teto: acima disso o preenchimento
+   #047857 do light cai abaixo de 3:1 contra o próprio trilho. */
 .progress {
     height: 4px;
     overflow: hidden;
     border-radius: var(--radius-pill);
-    background: var(--surface-base);
+    background: var(--border-strong);
+    background: color-mix(in srgb, var(--fg-subtle) 32%, transparent);
 }
 
+/* --accent já resolve para #047857 no light (mesmo valor de --accent-text),
+   então o override de tema que existia aqui era no-op. Quem garante o piso
+   de 3:1 agora é o trilho acima. */
 .progress i {
     display: block;
     height: 100%;
     border-radius: var(--radius-pill);
     background: var(--accent);
-}
-
-/* piso UI ≥3:1 no light: cyan escuro no fill (DIRETRIZ §2.3) */
-[data-theme='light'] .progress i {
-    background: var(--accent-text);
 }
 
 /* ============ ATELIER PAGE LAYOUT (editorial & consolidated) ============ */
@@ -3379,7 +3428,15 @@ blockquote footer::before {
     gap: 8px;
 }
 
-.card .card-foot a {
+/* Link textual do rodape do card. Exclui .btn: sem a exclusao, esta regra
+   (0,2,1) vence [data-theme='light'] .btn-primary (0,2,0) e pinta o rotulo
+   do CTA com --accent-text sobre o proprio gradiente esmeralda (~1.1:1).
+   :where() mantem a especificidade em (0,2,1) — :not(.btn) puro subiria
+   para (0,3,1) e dificultaria sobrescrever o link textual depois.
+   Efeito na .btn alem da cor: gap volta a 8px, transition e svg (16px)
+   voltam aos valores do componente. Intencional — restaura a .btn inteira.
+   Espelhado em design_system/design-system.html (.card-foot a). */
+.card .card-foot a:not(:where(.btn)) {
     color: var(--accent-text);
     font-weight: 600;
     display: inline-flex;
@@ -3388,22 +3445,41 @@ blockquote footer::before {
     transition: color .16s;
 }
 
-.card .card-foot a:hover {
+.card .card-foot a:not(:where(.btn)):hover {
     color: var(--accent-text);
 }
 
-.card .card-foot a svg {
+.card .card-foot a:not(:where(.btn)) svg {
     width: 15px;
     height: 15px;
 }
 
-/* Empty State (Consolidado) */
+/* Empty State (Consolidado)
+   Antes: background --surface-base = o MESMO valor de body{background} nos dois
+   temas, e sem borda — o estado vazio virava texto solto em 96px de vazio.
+   Agora tem moldura própria. Tanto o fundo quanto a borda são translúcidos
+   porque .empty mora em três hospedeiros diferentes (página --surface-base,
+   .panel/.tbl-wrap --surface-raised, <td> de tabela): um valor fixo empataria
+   com pelo menos um deles. Borda tracejada = idioma de placeholder já canônico
+   no DS (.dropzone, .card-cover-fallback), não invenção nova.
+   Padding mobile-first: 96px a 360px empurrava o CTA para fora da dobra. */
 .empty {
     text-align: center;
-    padding: var(--space-12) 24px;
+    padding: var(--space-6) var(--space-4);
     border-radius: var(--radius-lg);
+    /* 1ª declaração = fallback para engines sem color-mix() (< Safari 16.2 /
+       Chrome 111): degradam para a borda tokenizada, nunca para "sem moldura". */
     background: var(--surface-base);
+    background: color-mix(in srgb, var(--fg) 4%, transparent);
+    border: 1px dashed var(--border-strong);
+    border-color: color-mix(in srgb, var(--fg-subtle) 75%, transparent);
     color: var(--fg-muted);
+}
+
+@media (min-width: 640px) {
+    .empty {
+        padding: var(--space-10) var(--space-5);
+    }
 }
 
 .empty svg,
@@ -4103,7 +4179,9 @@ blockquote footer::before {
 }
 
 /* ── Inline-extraction utilities (P2 #3) ── */
-.empty p { margin-bottom: var(--space-4); }
+/* .empty p{margin-bottom:16px} foi removido: somava com .empty .btn{margin-top:24px}
+   (sem colapso — .btn é inline-flex) e dava 40px entre a frase e o CTA dentro de
+   uma caixa que agora tem moldura e padding menor. Quem espaça é .empty .btn. */
 .empty.in-table { padding: var(--space-8) var(--space-5); }
 .danger-panel .badge { margin-bottom: var(--space-2); }
 .danger-panel p { margin-bottom: var(--space-4); }

@@ -27,7 +27,7 @@ Ambiente: `.venv` na raiz, Python >3.13, Django 6.0. Use **`uv`** para instalar 
 uv pip install --python .\.venv\Scripts\python.exe -r requirements.txt
 ```
 
-Setup inicial: copie `.env.example` → `.env` e preencha `DATABASE_URL` (**PostgreSQL obrigatório** — settings não suporta SQLite).
+Setup inicial: copie `.env.example` → `.env` e preencha `DATABASE_URL` (**PostgreSQL obrigatório** — `core/settings.py` usa `env.db('DATABASE_URL')` sem fallback, então sem `.env` válido o projeto não sobe). O `settings.py` lê o `.env` da raiz quando o arquivo existe, e o `db.sqlite3` na raiz é artefato morto — não é usado.
 
 ```powershell
 python manage.py migrate
@@ -39,7 +39,11 @@ docker compose up -d                # dev: app + Postgres 17 (exige Docker insta
 
 Management commands custom:
 - `base/seed_demo` — dados fake de demonstração (`--password`, `--reset-passwords`).
-- `catalog/import_acervo --path ../PROF-TONI [--only-aprovada] [--disciplina <slug>] [--force]` — idempotente por `(disciplina,trilha,ordem,slug)`; lê `manifesto.json` + `aulas/**/canonica.md`, converte blocos `:::conceito/:::atencao/:::dica`, diagramas e capa (`imagem:` ou `capa.{png,jpg,jpeg,webp}`). Detalhe na seção 6 do PRD.
+- `base/test_email <dest>` — testa o SMTP configurado (usar em produção).
+- `catalog/import_acervo --path ../PROF-TONI [--only-aprovada] [--disciplina <slug>] [--force]` — `--path` é **obrigatório**; idempotente por `(disciplina,trilha,ordem,slug)`; lê `manifesto.json` + `aulas/**/canonica.md`, converte blocos `:::conceito/:::atencao/:::dica`, diagramas e capa (`imagem:` ou `capa.{png,jpg,jpeg,webp}`). Detalhe na seção 6 do PRD.
+- `classroom/import_students <arquivo.xlsx> [--dry-run]` — cria turmas e matricula alunos a partir de planilha (openpyxl). O dict `DISCIPLINA_MAP` no topo do arquivo traduz rótulos da planilha → slugs de `Disciplina`.
+- `classroom/ensure_ai_turma [--professor-email ...]` — garante a turma de Inteligência Artificial em produção.
+- `classroom/setup_tcc` — cria turmas de TCC do 3º ano, matricula os mesmos alunos e publica as aulas. Exige `import_acervo` antes.
 
 Produção:
 - Sistema em produção: `https://prof.tonicoimbra.com` via Easypanel (`projectName='work'`, `serviceName='professordash'`).
@@ -61,15 +65,16 @@ Decisão do projeto (PRD proíbe). **NÃO** tente rodar `pytest`, `manage.py tes
 9. **Media protegida**: `PROTECTED_MEDIA_ROOT` (raiz/`protected_media`) é separada de `MEDIA_ROOT` e **não tem URL pública**. Materiais servidos só por view com checagem de permissão (aluno da turma ou professor). Ver `base/storage.py`.
 10. **SINGLE-TENANT**: sem campos/middleware de tenant. Escopo de visibilidade por `Matricula`/turma.
 11. Frontend fixo: Django Templates + HTMX + Alpine.js + CSS do design system. Sem framework frontend pesado.
-12. `Aula.imagem` (capa da aula) é pública em `MEDIA_ROOT`; materiais continuam protegidos. A capa vem do pipeline/import do acervo, não de IA dentro do portal.
+12. **Media pública tem allowlist**: capa (`Aula.imagem`) e figuras de miolo das aulas ficam em `MEDIA_ROOT` e vêm do pipeline/import do acervo, não de IA dentro do portal; materiais continuam protegidos. Em produção **não há servidor de arquivos para `/media/`** — quem serve é `base.views.public_media`, que só aceita os prefixos `catalog/capas/`, `catalog/imagens/` e `avatars/` e responde 404 para o resto. Novo tipo de asset público exige atualizar essa allowlist (foi o bug do commit `e535cf6`).
 
 ## UI/UX obrigatório
 - Identidade: Design System v2 **The Digital Atelier** — crafted, focused, editorial. Obsidian dark surfaces, tonal layering, glass sutil, Geist, Lucide icons, CTA emerald→cyan.
 - Tema por papel: `base.html` renderiza `data-theme` por role (`aluno=light`, `professor/admin/anônimo=dark`). O toggle em `localStorage` pode sobrescrever como preferência do usuário.
 - `Alpine.js 3.14.1` é dependência real do shell; `x-data`, `x-show`, `@click` e `[x-cloak]` dependem dele.
 - Aluno é mobile-first: telas devem funcionar sem scroll horizontal a 360px, com cards escaneáveis, progresso visível e CTA inequívoco.
+- **Modo apresentação é exceção ao mobile-first** (alvo é TV de sala). O design vigente é a **"Leitura Projetada"**: a aula rola em coluna única — sem fatiar em slides, sem medir, sem escalar — servida por `AulaPresentationView` com `static/js/reader.js` + `static/css/presentation.css`. Setas/Espaço/PageDown rolam ~90% da tela e pousam em um landmark próximo. O deck fatiado com fit-to-stage (`deck.js`, `--slide-scale`, auditor `?test=true`) foi **removido** no commit `18feb21`; não reintroduza.
 - Professor é desktop/denso: priorize trabalho em lote, accordions por série/disciplina, tabelas densas com `.tbl-wrap` quando necessário e ações agrupadas por intenção.
-- Padrões ADHD-focus documentados em `DESIGN.md`: `serie-section`, `dash-collapsible`, `dash-tabs`, `aluno-progress`, `lesson-actionbar`. Objetivo: uma decisão por tela e próximo passo sempre visível.
+- Padrões ADHD-focus documentados em `DESIGN.md`: `serie-section`, `dash-collapsible`, `dash-tabs`, `dash-hero`, `today-card`, `turma-progress`, `lesson-actionbar`. Objetivo: uma decisão por tela e próximo passo sempre visível. `aluno-progress` (progresso agregado no topo do painel do aluno) foi **removido** — era hero-metric banido e inacionável; o progresso vive no card da turma.
 - Componentes recorrentes devem existir no `design_system/design-system.html` antes de uso amplo. Proibido reintroduzir duplicatas `*-atelier`/`kpi-card` já unificadas.
 - Cores têm função: verde = ação/progresso; amarelo = prazo/atenção; vermelho = risco; violeta/ciano = apoio.
 - Acessibilidade mínima: contraste WCAG AA, foco visível, `scope="col"` em tabelas, erros com `aria-invalid`/`aria-describedby`/`role="alert"`, ícones decorativos com `aria-hidden="true"`, `prefers-reduced-motion`.
@@ -77,15 +82,15 @@ Decisão do projeto (PRD proíbe). **NÃO** tente rodar `pytest`, `manage.py tes
 
 ## Apps (todos na raiz, mesmo nível de `manage.py`)
 - `core` — config do projeto (único `settings.py`, `urls.py`, view `/health/`).
-- `base` — `TimeStampedModel` (abstract, herdado por todos), mixins de permissão, storage protegido, `HomeView`/`health`.
-- `accounts` — `User` custom (login por email, `role`), `ProfessorProfile`, `AlunoProfile`, `signals.py`.
-- `catalog` — `Disciplina`, `Trilha`, `Aula` (`conteudo_html`/`conteudo_md`/`imagem`); `import_acervo`, `parser.py`. Catálogo é depósito interno do acervo, não navegação principal do aluno/professor.
-- `classroom` — `Turma`, `Matricula`, `AulaPublicada` (`disponivel_em`), `ProgressoAula`; `services.py`, `reports.py`; sincronização de aulas por turma/disciplina.
+- `base` — `TimeStampedModel` (abstract, herdado por todos), storage protegido (`storage.py`), `HomeView`/`health`/`public_media` (`views.py`), `templatetags/form_extras.py` (`aria_field`).
+- `accounts` — `User` custom (login por email, `role`), `ProfessorProfile`, `AlunoProfile`, `signals.py` e os **mixins de permissão** (`mixins.py`: `RoleRequiredMixin`, `ProfessorRequiredMixin`, `AlunoRequiredMixin`, `AdminRequiredMixin`). Toda rota privada usa esses mixins — não estão em `base`.
+- `catalog` — `Disciplina`, `Trilha`, `Aula` (`conteudo_html`/`conteudo_md`/`imagem`); `import_acervo`, `parser.py`, `services.py`. Catálogo é depósito interno do acervo, não navegação principal do aluno/professor. Além do import local, `AcervoGithubImportView` (em `/catalogo/`, só admin) baixa o tarball do repo via `services.download_acervo` (`ACERVO_GITHUB_REPO`, `ACERVO_GITHUB_REF`, `ACERVO_GITHUB_TOKEN`). O HTML da aula é produzido por `parser.py` (fences customizados → figuras → sanitização com bleach); as views entram por `render_stored_lesson_html(aula)`, que re-resolve os caminhos de imagem sobre o HTML já armazenado.
+- `classroom` — `Turma`, `Matricula`, `AulaPublicada` (`disponivel_em`), `ProgressoAula`; `services.py`, `reports.py` (PDF via reportlab + CSV); sincronização de aulas por turma/disciplina; modo apresentação (`AulaPresentationView`).
 - `materials` — `Material` (FileField protegido ou link).
 - `activities` — controle do professor (estilo Notion), **não entrega**: `Atividade` (`titulo`/`descricao`/`data`) + `AtividadeCheck` (`feito`+`observacao` por aluno). Entregas oficiais ficam no Google Classroom; `Entrega`/`EntregaArquivo` removidos.
 - `notifications` — `Notificacao` (sino no header); `signals.py`, `context_processors.notification_summary` registrado em `settings.TEMPLATES`. Disparo ativo: aula publicada; eventos de entrega/correção não existem mais no fluxo do produto.
 
-URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` `/notificacoes/` `/health/`.
+URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` `/notificacoes/` `/health/` `/media/<path>`.
 
 ## Proibido
 - Multi-tenant, Celery, RabbitMQ, Redis-broker, Docker Swarm, Traefik.
@@ -97,6 +102,7 @@ URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` 
 - Inventar design system fora de `design_system/design-system.html`.
 - Recriar fluxo de entrega/correção/nota no portal. Atividades são checks do professor; entrega oficial é Google Classroom.
 - Recolocar `/catalogo/` como fluxo principal quando a jornada correta é sincronizar aulas dentro da turma.
+- Reintroduzir o deck fatiado no modo apresentação (fit-to-stage, `--slide-scale`, paginação de slide). O motor vigente é o `reader.js` de leitura projetada.
 
 ## Fluxo de trabalho
 - SPRINT-DRIVEN (seção 9 do PRD). Uma sprint por vez, em ordem. Definition of done = `[x]` no PRD.

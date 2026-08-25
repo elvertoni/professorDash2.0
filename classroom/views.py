@@ -734,6 +734,14 @@ class AlunoTurmasMixin(AlunoRequiredMixin):
 
 
 class AlunoDashboardView(AlunoTurmasMixin, View):
+    '''Painel do aluno: o que fazer hoje, e as turmas.
+
+    Todo contador exibido é o número real, nunca o tamanho de uma lista
+    truncada. O progresso vive no card da turma que o possui
+    (`turma.progresso_pct`), e o backlog aparece por turma
+    (`turma.total_pendentes`), que é quem sabe a lista inteira e ordenada.
+    '''
+
     template_name = 'classroom/aluno_dashboard.html'
 
     def get(self, request):
@@ -750,23 +758,27 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
         disponiveis = list(
             AulaPublicada.objects.available(now)
             .filter(turma__in=turmas)
-            .select_related('aula', 'turma', 'aula__disciplina')
+            .select_related(
+                'aula', 'turma', 'aula__disciplina', 'aula__trilha'
+            )
             .order_by('-disponivel_em')
         )
 
-        total_disponiveis = len(disponiveis)
-        disponivel_ids = {d.id for d in disponiveis}
-        total_concluidas = sum(
-            1 for p in progressos.values()
-            if p.aula_publicada_id in disponivel_ids and p.concluido
-        )
-
+        aulas_por_turma = defaultdict(int)
+        concluidas_por_turma = defaultdict(int)
         para_fazer_hoje = []
-        proximas = []
+        total_concluidas = 0
+
         for publicada in disponiveis:
             progresso = progressos.get(publicada.id)
-            if progresso and progresso.concluido:
+            publicada.concluida = bool(progresso and progresso.concluido)
+
+            aulas_por_turma[publicada.turma_id] += 1
+            if publicada.concluida:
+                concluidas_por_turma[publicada.turma_id] += 1
+                total_concluidas += 1
                 continue
+
             local_disp = timezone.localtime(publicada.disponivel_em)
             if today_start <= local_disp < today_end:
                 para_fazer_hoje.append({
@@ -774,25 +786,33 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
                     'obj': publicada,
                     'data': local_disp,
                 })
-            if len(proximas) < 6:
-                publicada.concluida = False
-                proximas.append(publicada)
 
         para_fazer_hoje.sort(key=lambda x: x['data'] if x['data'] else now)
 
-        progresso_pct = (
-            round(total_concluidas * 100 / total_disponiveis)
-            if total_disponiveis else 0
-        )
+        # A aba intermediária de aulas foi removida: ela era um recorte
+        # cross-turma limitado a 6 itens, e o corte pegava as pendentes mais
+        # RECENTES — escondendo justamente as antigas, que a turma já cobriu e
+        # que o aluno mais precisa. Quem responde "e o resto?" é a turma, que
+        # tem a lista inteira e ordenada (AlunoTurmaAulasView). Aqui cada turma
+        # carrega o próprio backlog para que o painel aponte para o lugar certo.
+        for turma in turmas:
+            turma.total_aulas = aulas_por_turma[turma.pk]
+            turma.total_concluidas = concluidas_por_turma[turma.pk]
+            turma.total_pendentes = turma.total_aulas - turma.total_concluidas
+            turma.progresso_pct = (
+                round(turma.total_concluidas * 100 / turma.total_aulas)
+                if turma.total_aulas else 0
+            )
+
+        total_disponiveis = len(disponiveis)
 
         context = {
             'turmas': turmas,
-            'proximas': proximas,
             'para_fazer_hoje': para_fazer_hoje,
             'total_turmas': len(turmas),
             'total_disponiveis': total_disponiveis,
             'total_concluidas': total_concluidas,
-            'progresso_pct': progresso_pct,
+            'total_pendentes': total_disponiveis - total_concluidas,
         }
         return render(request, self.template_name, context)
 

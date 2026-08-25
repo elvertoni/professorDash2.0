@@ -44,6 +44,8 @@
   /* sombras — "tinted", nunca preto puro */
   --shell-shadow:0 24px 80px rgba(0,0,0,.40); --shell-shadow-soft:0 16px 40px rgba(0,0,0,.24);
   --shell-shadow-tint:0 20px 48px rgba(16,185,129,.16);
+  /* hover: o objeto sobe — offset e blur crescem, alpha quase igual. Nao e glow. */
+  --shell-shadow-tint-raised:0 26px 56px rgba(16,185,129,.20);
   /* moldura da figura de aula — a arte do acervo é navy #050810 */
   --shell-figure-mat:var(--shell-surface-high); --shell-figure-edge:var(--shell-border-strong);
   /* raios — arquitetural, nunca "bubbly" */
@@ -72,6 +74,7 @@
   --shell-warning:#b45309; --shell-danger:#b91c1c; --shell-danger-hover:#991b1b; --shell-info:#0369a1;
   --shell-shadow:0 22px 60px rgba(15,23,42,.10); --shell-shadow-soft:0 12px 30px rgba(15,23,42,.06);
   --shell-shadow-tint:0 16px 40px rgba(16,185,129,.10);
+  --shell-shadow-tint-raised:0 22px 48px rgba(16,185,129,.14);
   --shell-figure-mat:color-mix(in srgb,var(--shell-text) 94%,var(--shell-bg));
   --shell-figure-edge:color-mix(in srgb,var(--shell-text) 70%,var(--shell-bg));
 }
@@ -199,8 +202,18 @@ p{margin:0}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:600;font-size:14px;padding:10px 18px;border-radius:var(--radius-md);border:1px solid transparent;cursor:pointer;transition:.18s;white-space:nowrap}
 .btn svg{width:16px;height:16px}
 .btn:not(:disabled):not([disabled]):active{transform:translateY(1px)}
-.btn-primary{background:var(--grad-cta);color:#04110b;box-shadow:var(--shell-shadow-tint)}
-.btn-primary:not(:disabled):not([disabled]):hover{filter:brightness(1.08);box-shadow:0 12px 32px rgba(16,185,129,.32)}
+/* box-shadow declarado UMA vez em (0,1,0); os estados so trocam --btn-shadow.
+   Assim qualquer componente mais especifico (ex.: .reader-start-btn.is-active,
+   0,2,0) continua sobrescrevendo a sombra por cascata normal, e da para
+   neutralizar repouso+hover+active de uma vez so redefinindo os tokens. */
+.btn-primary{--btn-shadow:var(--shell-shadow-tint);background:var(--grad-cta);color:#04110b;box-shadow:var(--btn-shadow)}
+.btn-primary:not(:disabled):not([disabled]):hover{--btn-shadow:var(--shell-shadow-tint-raised);filter:brightness(1.08)}
+/* pressionar encolhe; apontar so eleva. transform nao e cumulativo, entao o
+   translateY(1px) de .btn:active precisa ser reescrito junto com o scale. */
+.btn-primary:not(:disabled):not([disabled]):active{--btn-shadow:var(--shell-shadow-tint);transform:translateY(1px) scale(.98)}
+/* .card{overflow:hidden} e .tbl-wrap{overflow-y:hidden} recortariam a sombra
+   (offset 20px + blur 48px) numa poca esmeralda cortada na borda do container. */
+:is(.card,.tbl-wrap) .btn-primary{--shell-shadow-tint:none;--shell-shadow-tint-raised:none}
 .btn-secondary{background:var(--shell-secondary);color:#fff}
 .btn-secondary:not(:disabled):not([disabled]):hover{filter:brightness(1.1)}
 .btn-outline{background:transparent;border-color:var(--shell-border-strong);color:var(--shell-text)}
@@ -263,9 +276,11 @@ p{margin:0}
 .card .metric-row{display:flex;justify-content:space-between;font-size:12px;color:var(--shell-text-soft)}
 .card .metric-row b{color:var(--shell-text);font-weight:600}
 .card-foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);padding-top:16px;margin-top:6px;flex-wrap:wrap;gap:8px}
-.card-foot a{color:var(--shell-primary-200);font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:color .16s}
-.card-foot a:hover{color:var(--shell-primary)}
-.card-foot a svg{width:15px;height:15px}
+/* :where(.btn) exclui os botoes sem elevar a especificidade — sem isso a regra
+   sequestra a cor do .btn-primary dentro do rodape do card. Vale o mesmo em app.css. */
+.card-foot a:not(:where(.btn)){color:var(--shell-primary-200);font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:color .16s}
+.card-foot a:not(:where(.btn)):hover{color:var(--shell-primary)}
+.card-foot a:not(:where(.btn)) svg{width:15px;height:15px}
 .card-cover-fallback{aspect-ratio:16/9;display:grid;place-items:center;background:var(--shell-surface-low);border:1px dashed var(--shell-border-strong);border-radius:var(--radius-md);color:var(--shell-text-muted);transition:border-color .2s,background-color .2s}
 .card-cover-fallback svg{width:32px;height:32px;opacity:.5;transition:opacity .2s,transform .2s}
 .card:hover .card-cover-fallback{background:var(--shell-ghost);border-color:var(--shell-primary)}
@@ -275,8 +290,12 @@ p{margin:0}
 .stack-faces{display:flex}
 .stack-faces .avatar{margin-left:-8px;box-shadow:0 0 0 2px var(--shell-surface-high)}
 .stack-faces .avatar:first-child{margin-left:0}
-/* progress: linha fina 2px (regra Atelier) */
-.progress{height:2px;background:var(--shell-border-strong);overflow:hidden}
+/* progress: linha fina 2px (regra Atelier).
+   Trilho translucido: a barra aparece sobre surface-low, -high e -highest, e
+   --shell-border-strong (.12 no light) empatava com a superficie hospedeira —
+   a 0% o componente sumia. 32% e o teto: acima disso o preenchimento escuro do
+   tema light cai abaixo de 3:1 contra o proprio trilho. */
+.progress{height:2px;background:var(--shell-border-strong);background:color-mix(in srgb,var(--shell-text-soft) 32%,transparent);overflow:hidden}
 .progress>i{display:block;height:100%;background:var(--grad-cta)}
 .progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--shell-text-soft);margin-bottom:8px}
 
@@ -332,7 +351,13 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 .correction-response,.correction-form{min-width:0}
 .attachment-list{display:grid;gap:8px;margin:var(--space-4) 0 0;padding-left:18px}
 .attachment-list a{color:var(--shell-primary-200);font-weight:600}
-.empty{text-align:center;padding:var(--space-12) 24px;border-radius:var(--radius-lg);background:var(--shell-surface-low);color:var(--shell-text-muted)}
+/* empty state: precisa de moldura propria. Fundo e borda sao translucidos
+   porque .empty mora em tres hospedeiros (pagina, .panel/.tbl-wrap e <td>) e
+   um valor fixo empataria com pelo menos um deles. Tracejado = idioma de
+   placeholder ja canonico aqui (.dropzone, .card-cover-fallback).
+   Padding mobile-first: 96px a 360px empurra o CTA para fora da dobra. */
+.empty{text-align:center;padding:var(--space-6) var(--space-4);border-radius:var(--radius-lg);background:var(--shell-surface-low);background:color-mix(in srgb,var(--shell-text) 4%,transparent);border:1px dashed var(--shell-border-strong);border-color:color-mix(in srgb,var(--shell-text-soft) 75%,transparent);color:var(--shell-text-muted)}
+@media(min-width:640px){.empty{padding:var(--space-10) var(--space-5)}}
 .empty svg,.empty i[data-lucide]{width:44px;height:44px;color:var(--shell-text-soft);opacity:.55;margin-bottom:14px}
 .empty h2{font-size:20px;font-weight:700;color:var(--shell-text);margin:0 0 8px}
 .empty p{font-size:14px;color:var(--shell-text-muted);margin:0}
@@ -736,9 +761,9 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
           <div class="course">Editorial Intelligence</div>
           <h4>Masterclass Portal</h4>
           <div class="mod"><i data-lucide="book"></i> Visão geral</div>
-          <div class="mod active"><i data-lucide="architecture"></i> Módulo 1 · Fundamentos</div>
-          <div class="mod"><i data-lucide="psychology"></i> Módulo 2 · Sintaxe avançada</div>
-          <div class="mod"><i data-lucide="local-library"></i> Biblioteca</div>
+          <div class="mod active"><i data-lucide="layers"></i> Módulo 1 · Fundamentos</div>
+          <div class="mod"><i data-lucide="atom"></i> Módulo 2 · Sintaxe avançada</div>
+          <div class="mod"><i data-lucide="library"></i> Biblioteca</div>
           <div class="mod"><i data-lucide="group"></i> Entregas</div>
         </aside>
         <article class="atelier-body">
@@ -792,7 +817,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
             </figure>
 
             <div class="bento">
-              <div class="b p"><i data-lucide="grid-view"></i><h4>Grades assimétricas</h4><p>Romper a simetria cria tensão visual e guia o olhar do estudante para os pontos de conversão mais importantes.</p></div>
+              <div class="b p"><i data-lucide="layout-grid"></i><h4>Grades assimétricas</h4><p>Romper a simetria cria tensão visual e guia o olhar do estudante para os pontos de conversão mais importantes.</p></div>
               <div class="b t"><i data-lucide="sparkles"></i><h4>Micro-interações</h4><p>Pequenos movimentos que validam a ação do usuário, transformando uma aula passiva em uma experiência tátil.</p></div>
             </div>
 

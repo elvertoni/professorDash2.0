@@ -17,7 +17,58 @@
         })();
     </script>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script>
+        // Rede de seguranca do shell: se o Alpine nao carregar ou nao
+        // inicializar (arquivo ausente num deploy quebrado, script bloqueado),
+        // o conteudo com [x-cloak] ficaria invisivel para sempre e a pagina
+        // pareceria vazia. Marcamos o documento e o CSS abaixo revela os
+        // paineis de aba. O estado e reversivel: se o Alpine chegar atrasado,
+        // a marca sai e a navegacao por abas volta ao normal.
+        (function () {
+            var root = document.documentElement;
+
+            function check() {
+                root.classList.toggle('alpine-failed', !window.Alpine);
+            }
+
+            // DOMContentLoaded so dispara depois que todo script defer executou:
+            // e o momento exato para decidir se o Alpine existe ou nao.
+            document.addEventListener('DOMContentLoaded', check);
+            // Erro de rede no <script>: decide na hora, sem esperar.
+            window.addEventListener('error', function (event) {
+                if (event.target && event.target.id === 'alpine-script') check();
+            }, true);
+            // Se o Alpine aparecer depois (rede muito lenta), desfaz a marca.
+            document.addEventListener('alpine:init', check);
+            document.addEventListener('alpine:initialized', check);
+            // Ultimo recurso para conexao que nunca resolve nem falha.
+            setTimeout(check, 10000);
+        }());
+    </script>
+    <script id="alpine-script" defer src="{% static 'js/vendor/alpine-3.14.1.min.js' %}"></script>
+    <style>
+        /* Sem Alpine as abas nao trocam: escondemos a barra de abas e mostramos
+           os paineis empilhados (mesma leitura de uma pagina sem JS). Spinners e
+           badges com [x-cloak] continuam ocultos — so [role="tabpanel"] volta.
+           `display: block` em vez de `revert` porque WebView Android antigo
+           ignora `revert` e o painel continuaria invisivel — justamente o
+           aparelho que mais precisa do fallback. */
+        html.alpine-failed [x-cloak][role="tabpanel"] { display: block !important; }
+        html.alpine-failed [role="tablist"] { display: none !important; }
+    </style>
+    <noscript>
+        <style>
+            [x-cloak][role="tabpanel"] { display: block !important; }
+            [role="tablist"] { display: none !important; }
+            /* Sem JS o aviso nao pode ser dispensado: sai do overlay fixo e
+               entra no fluxo, na mesma goteira das paginas internas. */
+            .message-stack.is-static {
+                position: static;
+                width: min(1180px, calc(100% - 56px));
+                margin: var(--space-4) auto 0;
+            }
+        </style>
+    </noscript>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -161,6 +212,14 @@
         </div>
     </header>
 
+    <noscript>
+        <div class="message-stack is-static">
+            <div class="toast i" role="status">
+                <div>O JavaScript está desativado neste navegador. O portal continua funcionando: o conteúdo aparece todo na mesma página, sem as abas e sem os ícones.</div>
+            </div>
+        </div>
+    </noscript>
+
     {% if messages %}
         <div class="message-stack">
             {% for message in messages %}
@@ -182,7 +241,7 @@
         <span class="muted">Portal do Prof. Toni para publicar aulas, atividades e materiais por turma.</span>
     </footer>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{% static 'js/vendor/lucide-subset.js' %}"></script>
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="{% static 'js/app.js' %}"></script>
     <script>
