@@ -147,6 +147,11 @@
 
     <div id="dashboard-panel-agora" x-show="tab === 'agora'"{% if not para_fazer_hoje %} x-cloak{% endif %} role="tabpanel"
          aria-labelledby="dashboard-tab-agora" tabindex="0">
+        {# Sem este h2 o documento saltava de h1 (saudação) para h3 (título de card)
+           e, no fallback `html.alpine-failed` — onde a faixa de abas some e os dois
+           painéis aparecem empilhados —, nada dizia onde uma seção terminava e a
+           outra começava. Texto igual ao rótulo da aba. #}
+        <h2 class="sr-only">Hoje</h2>
         {% if para_fazer_hoje %}
             <div class="feature-grid catalog-grid">
                 {% for item in para_fazer_hoje %}
@@ -177,11 +182,16 @@
                 <i data-lucide="list-todo" aria-hidden="true"></i>
                 <h2>{{ total_pendentes }} aula{{ total_pendentes|pluralize }} pendente{{ total_pendentes|pluralize }}</h2>
                 <p>Nada foi liberado hoje. Continue de onde você parou.</p>
-                <button class="btn btn-primary" type="button"
-                        @click="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
+                {# Âncora, não <button>: em `html.alpine-failed` a faixa de abas some,
+                   mas este CTA continua visível — como <button> o @click não existia e
+                   o toque não fazia nada. Com Alpine, .prevent cancela a navegação e a
+                   troca de aba é idêntica à de antes; sem Alpine, o href rola até o
+                   painel de turmas, que nesse modo já está visível e empilhado. #}
+                <a class="btn btn-primary" href="#dashboard-panel-turmas"
+                   @click.prevent="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
                     <i data-lucide="play" aria-hidden="true"></i>
                     Ver o que está pendente
-                </button>
+                </a>
             </div>
         {% elif total_disponiveis %}
             {# O aluno que zerou o backlog aterrissa AQUI, não numa lista do que já fez:
@@ -193,11 +203,11 @@
                    substantivo: "as N aulas disponíveis" fixo rendia "as 1 aula
                    disponíveis" quando o aluno tinha uma só. #}
                 <p>Você concluiu {{ total_disponiveis }} aula{{ total_disponiveis|pluralize }} disponíve{{ total_disponiveis|pluralize:"l,is" }}. Nada pendente.</p>
-                <button class="btn btn-outline" type="button"
-                        @click="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
+                <a class="btn btn-outline" href="#dashboard-panel-turmas"
+                   @click.prevent="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
                     <i data-lucide="rotate-ccw" aria-hidden="true"></i>
                     Revisar por turma
-                </button>
+                </a>
             </div>
         {% else %}
             <div class="empty">
@@ -205,11 +215,11 @@
                 <h2>Nenhuma aula publicada ainda</h2>
                 <p>Assim que o professor publicar a primeira aula, ela aparece aqui.</p>
                 {% if turmas %}
-                    <button class="btn btn-outline" type="button"
-                            @click="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
+                    <a class="btn btn-outline" href="#dashboard-panel-turmas"
+                       @click.prevent="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
                         <i data-lucide="users" aria-hidden="true"></i>
                         Ver minhas turmas
-                    </button>
+                    </a>
                 {% endif %}
             </div>
         {% endif %}
@@ -217,6 +227,7 @@
 
     <div id="dashboard-panel-turmas" x-show="tab === 'turmas'"{% if para_fazer_hoje %} x-cloak{% endif %} role="tabpanel"
          aria-labelledby="dashboard-tab-turmas" tabindex="0">
+        <h2 class="sr-only">Minhas turmas</h2>
         {% if turmas %}
             <div class="feature-grid catalog-grid">
                 {% for turma in turmas %}

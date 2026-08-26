@@ -70,7 +70,7 @@
                     <p class="desc">{{ publicada.aula.tema|default:publicada.aula.trilha.label }}</p>
                     
                     <div class="card-foot">
-                        <span class="date">
+                        <span class="muted">
                             <i class="icon-inline" data-lucide="calendar" aria-hidden="true"></i> Liberada: {{ publicada.disponivel_em|date:'d/m/Y' }}
                         </span>
                         {% if publicada.concluida %}
