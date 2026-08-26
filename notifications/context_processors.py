@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.db.models import Count, Window
 
 from .models import Notificacao
 from .services import ensure_timed_notifications_for_user
@@ -14,8 +15,13 @@ def notification_summary(request):
         ensure_timed_notifications_for_user(user)
         cache.set(cache_key, True, 300)
 
-    unread = Notificacao.objects.filter(usuario=user, lida=False)
+    unread = list(
+        Notificacao.objects.filter(usuario=user, lida=False)
+        .only('pk', 'titulo', 'mensagem', 'link')
+        .annotate(unread_count=Window(expression=Count('pk')))
+        .order_by('-created_at')[:5]
+    )
     return {
-        'notifications_unread_count': unread.count(),
-        'notifications_preview': list(unread.order_by('-created_at')[:5]),
+        'notifications_unread_count': unread[0].unread_count if unread else 0,
+        'notifications_preview': unread,
     }

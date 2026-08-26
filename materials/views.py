@@ -1,12 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
 
 from accounts.mixins import AlunoRequiredMixin, ProfessorRequiredMixin
+from catalog.models import Aula
 from classroom.models import Matricula, Turma
 from classroom.views import can_manage_all
 
@@ -123,7 +125,10 @@ class MaterialDeleteView(ProfessorTurmaMixin, View):
 class MaterialDownloadView(LoginRequiredMixin, View):
     def get(self, request, pk):
         material = get_object_or_404(
-            Material.objects.select_related('turma', 'aula_publicada'), pk=pk
+            Material.objects.select_related(
+                'turma', 'aula_publicada', 'aula_publicada__aula'
+            ),
+            pk=pk,
         )
         if not material.arquivo:
             raise PermissionDenied('Este material não possui arquivo para download.')
@@ -170,13 +175,19 @@ class AlunoMaterialListView(AlunoRequiredMixin, View):
                 matriculas__status=Matricula.Status.ATIVA,
             ).select_related('disciplina', 'professor')
         )
-        materiais = [
-            material
-            for material in Material.objects.filter(turma=turma)
+        materiais = (
+            Material.objects.filter(turma=turma)
+            .filter(
+                Q(aula_publicada__isnull=True)
+                | Q(
+                    aula_publicada__publicada=True,
+                    aula_publicada__disponivel_em__lte=timezone.now(),
+                    aula_publicada__aula__status=Aula.Status.APROVADA,
+                )
+            )
             .select_related('aula_publicada', 'aula_publicada__aula')
             .order_by('-created_at')
-            if material.aula_publicada is None or material.aula_publicada.is_available
-        ]
+        )
         return render(
             request,
             self.template_name,

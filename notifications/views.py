@@ -16,8 +16,18 @@ class NotificacaoListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Notificacao.objects.filter(usuario=self.request.user).order_by(
-            '-created_at'
+        return (
+            Notificacao.objects.filter(usuario=self.request.user)
+            .only(
+                'pk',
+                'titulo',
+                'mensagem',
+                'link',
+                'lida',
+                'tipo',
+                'created_at',
+            )
+            .order_by('-created_at')
         )
 
 

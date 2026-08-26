@@ -52,6 +52,10 @@ class Turma(TimeStampedModel):
         indexes = [
             models.Index(fields=['professor', 'ativa']),
             models.Index(fields=['codigo_convite']),
+            models.Index(
+                fields=['-ano_letivo', 'nome'],
+                name='classroom_turma_year_name_idx',
+            ),
         ]
 
     def __str__(self):
@@ -180,6 +184,10 @@ class AulaPublicada(TimeStampedModel):
         ]
         indexes = [
             models.Index(fields=['turma', 'publicada', 'disponivel_em']),
+            models.Index(
+                fields=['turma', 'ordem_na_turma'],
+                name='classroom_pub_turma_order_idx',
+            ),
         ]
 
     def __str__(self):
@@ -229,6 +237,10 @@ class ProgressoAula(TimeStampedModel):
         ]
         indexes = [
             models.Index(fields=['aluno', 'concluido']),
+            models.Index(
+                fields=['aula_publicada', 'concluido'],
+                name='classroom_prog_pub_done_idx',
+            ),
         ]
 
     def __str__(self):

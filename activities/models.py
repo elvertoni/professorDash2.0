@@ -23,7 +23,7 @@ class Atividade(TimeStampedModel):
         verbose_name_plural = 'atividades'
         ordering = ['-data', '-created_at']
         indexes = [
-            models.Index(fields=['turma']),
+            models.Index(fields=['turma', 'data', 'created_at']),
         ]
 
     def __str__(self):

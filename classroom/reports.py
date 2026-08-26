@@ -30,7 +30,7 @@ def aluno_check_rows(turma, aluno):
         check.atividade_id: check
         for check in AtividadeCheck.objects.filter(
             atividade__turma=turma, aluno=aluno
-        )
+        ).order_by()
     }
     rows = []
     feitos = 0
@@ -52,7 +52,10 @@ def aluno_check_rows(turma, aluno):
 def aluno_progress(turma, aluno):
     """(concluídas, total, percentual) de aulas disponíveis da turma."""
     disponiveis = list(
-        AulaPublicada.objects.available().filter(turma=turma).values_list('id', flat=True)
+        AulaPublicada.objects.available()
+        .filter(turma=turma)
+        .order_by()
+        .values_list('id', flat=True)
     )
     total = len(disponiveis)
     if not total:
@@ -76,7 +79,10 @@ def turma_report_rows(turma):
     aluno_ids = [m.aluno_id for m in matriculas]
 
     disponiveis = list(
-        AulaPublicada.objects.available().filter(turma=turma).values_list('id', flat=True)
+        AulaPublicada.objects.available()
+        .filter(turma=turma)
+        .order_by()
+        .values_list('id', flat=True)
     )
     total_aulas = len(disponiveis)
 
@@ -94,7 +100,9 @@ def turma_report_rows(turma):
         )
 
     atividade_ids = list(
-        Atividade.objects.filter(turma=turma).values_list('id', flat=True)
+        Atividade.objects.filter(turma=turma)
+        .order_by()
+        .values_list('id', flat=True)
     )
     total_atividades = len(atividade_ids)
 

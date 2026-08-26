@@ -103,6 +103,7 @@ class Material(TimeStampedModel):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['turma', 'aula_publicada']),
+            models.Index(fields=['turma', '-created_at']),
         ]
 
     def __str__(self):

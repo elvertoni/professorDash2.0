@@ -488,10 +488,13 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
             import_error = 'Erro inesperado ao atualizar do GitHub: {0}'.format(exc)
 
         now = timezone.now()
-        aulas = Aula.objects.filter(
-            disciplina=disciplina, status=Aula.Status.APROVADA
+        aulas = list(
+            Aula.objects.filter(
+                disciplina=disciplina,
+                status=Aula.Status.APROVADA,
+            ).order_by()
         )
-        if not aulas.exists():
+        if not aulas:
             if import_error:
                 messages.error(request, import_error)
             messages.error(
@@ -504,17 +507,23 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
 
         novas = 0
         atualizadas = 0
-        for aula in aulas:
-            publicada, created = AulaPublicada.objects.get_or_create(
+        publicadas_por_aula = {
+            publicada.aula_id: publicada
+            for publicada in AulaPublicada.objects.filter(
                 turma=turma,
-                aula=aula,
-                defaults={
-                    'disponivel_em': now,
-                    'ordem_na_turma': aula.ordem,
-                    'publicada': True,
-                },
-            )
-            if created:
+                aula_id__in=[aula.pk for aula in aulas],
+            ).select_related('aula', 'turma').order_by()
+        }
+        for aula in aulas:
+            publicada = publicadas_por_aula.get(aula.pk)
+            if publicada is None:
+                AulaPublicada.objects.create(
+                    turma=turma,
+                    aula=aula,
+                    disponivel_em=now,
+                    ordem_na_turma=aula.ordem,
+                    publicada=True,
+                )
                 novas += 1
                 continue
 
@@ -543,7 +552,7 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
                 'Aulas sincronizadas: {0} disponíveis na turma '
                 '({1} novas, {2} reativadas/agora liberadas).'
             ).format(
-                aulas.count(), novas, atualizadas
+                len(aulas), novas, atualizadas
             ),
         )
         return redirect('classroom:turma_aulas', turma_pk=turma.pk)
@@ -753,7 +762,10 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
 
         progressos = {
             progresso.aula_publicada_id: progresso
-            for progresso in ProgressoAula.objects.filter(aluno=request.user)
+            for progresso in ProgressoAula.objects.filter(
+                aluno=request.user,
+                aula_publicada__turma__in=turmas,
+            ).order_by()
         }
         disponiveis = list(
             AulaPublicada.objects.available(now)
@@ -824,7 +836,10 @@ class AlunoTurmaAulasView(AlunoTurmasMixin, View):
         turma = self.get_turma_for_aluno(turma_pk)
         progressos = {
             progresso.aula_publicada_id: progresso
-            for progresso in ProgressoAula.objects.filter(aluno=request.user)
+            for progresso in ProgressoAula.objects.filter(
+                aluno=request.user,
+                aula_publicada__turma=turma,
+            ).order_by()
         }
         publicadas = list(
             AulaPublicada.objects.available()

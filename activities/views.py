@@ -44,11 +44,29 @@ class AtividadeListView(ProfessorTurmaMixin, View):
 
     def get(self, request, turma_pk):
         turma = self.get_turma(turma_pk)
-        active_students = self.active_matriculas(turma)
-        atividades = list(Atividade.objects.filter(turma=turma).order_by('data', 'created_at'))
+        active_students = list(
+            self.active_matriculas(turma).only(
+                'pk',
+                'aluno_id',
+                'aluno__id',
+                'aluno__nome_completo',
+                'aluno__email',
+            )
+        )
+        atividades = list(
+            Atividade.objects.filter(turma=turma)
+            .only('pk', 'titulo', 'data')
+            .order_by('data', 'created_at')
+        )
 
         # Fetch all checks for these activities
-        checks = AtividadeCheck.objects.filter(atividade__in=atividades)
+        aluno_ids = [matricula.aluno_id for matricula in active_students]
+        checks = AtividadeCheck.objects.filter(
+            atividade__in=atividades,
+            aluno_id__in=aluno_ids,
+        ).only(
+            'atividade_id', 'aluno_id', 'feito', 'observacao'
+        ).order_by()
         # Create a mapping: (aluno_id, atividade_id) -> check
         checks_map = {
             (check.aluno_id, check.atividade_id): check
@@ -85,9 +103,37 @@ class AtividadeListView(ProfessorTurmaMixin, View):
 
     def post(self, request, turma_pk):
         turma = self.get_turma(turma_pk)
-        active_students = self.active_matriculas(turma)
-        atividades = Atividade.objects.filter(turma=turma)
+        active_students = list(
+            self.active_matriculas(turma).only(
+                'pk',
+                'aluno_id',
+                'aluno__id',
+                'aluno__nome_completo',
+                'aluno__email',
+            )
+        )
+        atividades = list(
+            Atividade.objects.filter(turma=turma).only('pk').order_by()
+        )
+        aluno_ids = [matricula.aluno_id for matricula in active_students]
+        checks = AtividadeCheck.objects.filter(
+            atividade__in=atividades,
+            aluno_id__in=aluno_ids,
+        ).only(
+            'pk',
+            'atividade_id',
+            'aluno_id',
+            'feito',
+            'feito_em',
+            'observacao',
+        ).order_by()
+        checks_map = {
+            (check.aluno_id, check.atividade_id): check
+            for check in checks
+        }
         now = timezone.now()
+        checks_to_create = []
+        checks_to_update = []
 
         with transaction.atomic():
             for matricula in active_students:
@@ -101,21 +147,49 @@ class AtividadeListView(ProfessorTurmaMixin, View):
                     obs_name = f'obs_{aluno.id}_{act.id}'
                     observacao = (request.POST.get(obs_name) or '').strip()[:280]
 
-                    check, _ = AtividadeCheck.objects.get_or_create(
-                        atividade=act, aluno=aluno
-                    )
+                    check = checks_map.get((aluno.id, act.id))
+                    if check is None:
+                        checks_to_create.append(
+                            AtividadeCheck(
+                                atividade_id=act.id,
+                                aluno_id=aluno.id,
+                                feito=feito,
+                                feito_em=now if feito else None,
+                                observacao=observacao,
+                            )
+                        )
+                        continue
 
-                    campos = []
+                    changed = False
                     if check.feito != feito:
                         check.feito = feito
                         check.feito_em = now if feito else None
-                        campos += ['feito', 'feito_em']
+                        changed = True
                     if check.observacao != observacao:
                         check.observacao = observacao
-                        campos.append('observacao')
+                        changed = True
 
-                    if campos:
-                        check.save(update_fields=[*campos, 'updated_at'])
+                    if changed:
+                        check.updated_at = now
+                        checks_to_update.append(check)
+
+            if checks_to_create:
+                AtividadeCheck.objects.bulk_create(
+                    checks_to_create,
+                    update_conflicts=True,
+                    update_fields=[
+                        'feito',
+                        'feito_em',
+                        'observacao',
+                        'updated_at',
+                    ],
+                    unique_fields=['atividade', 'aluno'],
+                )
+            if checks_to_update:
+                AtividadeCheck.objects.bulk_update(
+                    checks_to_update,
+                    ['feito', 'feito_em', 'observacao', 'updated_at'],
+                )
 
         messages.success(request, 'Controle de atividades atualizado com sucesso.')
         return redirect('activities:atividade_list', turma_pk=turma.pk)

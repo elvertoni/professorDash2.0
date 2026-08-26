@@ -4,6 +4,7 @@ from io import StringIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
+from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -14,7 +15,7 @@ from django.views.generic import DetailView, ListView
 from accounts.mixins import AdminRequiredMixin
 from classroom.models import Matricula
 
-from .models import Aula, Disciplina
+from .models import Aula, AulaImagem, Disciplina, Trilha
 from .parser import render_stored_lesson_html
 from .services import AcervoDownloadError, download_acervo
 
@@ -51,6 +52,17 @@ class AulaListView(LoginRequiredMixin, ListView):
         queryset = (
             visible_aulas_for_user(self.request.user)
             .select_related('disciplina', 'trilha')
+            .only(
+                'pk',
+                'disciplina_id',
+                'disciplina__label',
+                'trilha_id',
+                'trilha__label',
+                'ordem',
+                'titulo',
+                'tema',
+                'imagem',
+            )
             .order_by('disciplina__label', 'trilha__label', 'ordem')
         )
 
@@ -66,7 +78,18 @@ class AulaListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        disciplinas = Disciplina.objects.prefetch_related('trilhas').order_by('label')
+        disciplinas = (
+            Disciplina.objects.only('pk', 'slug', 'label')
+            .prefetch_related(
+                Prefetch(
+                    'trilhas',
+                    queryset=Trilha.objects.only(
+                        'pk', 'disciplina_id', 'slug', 'label'
+                    ).order_by('label'),
+                )
+            )
+            .order_by('label')
+        )
         if not user_can_view_full_catalog(self.request.user):
             visible_aulas = visible_aulas_for_user(self.request.user)
             disciplinas = disciplinas.filter(aulas__in=visible_aulas).distinct()
@@ -151,6 +174,7 @@ class AulaSlugRedirectView(LoginRequiredMixin, View):
         aula = (
             visible_aulas_for_user(request.user)
             .filter(slug=slug)
+            .only('pk')
             .order_by('disciplina__slug', 'trilha__slug', 'ordem')
             .first()
         )
@@ -168,6 +192,25 @@ class AulaDetailView(LoginRequiredMixin, DetailView):
         return (
             visible_aulas_for_user(self.request.user)
             .select_related('disciplina', 'trilha')
+            .prefetch_related(
+                Prefetch(
+                    'imagens',
+                    queryset=AulaImagem.objects.only('aula_id', 'nome', 'arquivo'),
+                )
+            )
+            .only(
+                'pk',
+                'disciplina_id',
+                'disciplina__label',
+                'trilha_id',
+                'trilha__label',
+                'ordem',
+                'titulo',
+                'tema',
+                'objetivos',
+                'conteudo_html',
+                'versao',
+            )
         )
 
     def get_context_data(self, **kwargs):
@@ -176,7 +219,7 @@ class AulaDetailView(LoginRequiredMixin, DetailView):
         base_queryset = visible_aulas_for_user(self.request.user).filter(
             disciplina=aula.disciplina,
             trilha=aula.trilha,
-        )
+        ).only('pk', 'titulo')
         context['lesson_html'] = render_stored_lesson_html(
             aula, diagnostics=user_can_view_full_catalog(self.request.user)
         )
@@ -194,6 +237,8 @@ class AulaDetailView(LoginRequiredMixin, DetailView):
             queryset = Turma.objects.filter(ativa=True)
             if not can_manage_all(self.request.user):
                 queryset = queryset.filter(professor=self.request.user)
-            context['minhas_turmas'] = queryset.order_by('nome')
+            context['minhas_turmas'] = queryset.only(
+                'pk', 'nome', 'serie'
+            ).order_by('nome')
 
         return context
