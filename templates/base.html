@@ -7,8 +7,27 @@
     <meta name="color-scheme" content="dark light">
     <title>{% block title %}Prof. Toni Coimbra{% endblock %}</title>
     <link rel="icon" href="{% static 'logo.svg' %}" type="image/svg+xml">
+    <link rel="preload" href="{% static 'fonts/archivo-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/jetbrains-mono-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/geist-latin-variable.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/geist-mono-latin-variable.woff2' %}" as="font" type="font/woff2" crossorigin>
     <style>
+        @font-face {
+            font-family: 'Archivo';
+            font-style: normal;
+            font-weight: 700 800;
+            font-display: swap;
+            src: url("{% static 'fonts/archivo-latin.woff2' %}") format('woff2');
+        }
+
+        @font-face {
+            font-family: 'JetBrains Mono';
+            font-style: normal;
+            font-weight: 400 500;
+            font-display: swap;
+            src: url("{% static 'fonts/jetbrains-mono-latin.woff2' %}") format('woff2');
+        }
+
         @font-face {
             font-family: 'Geist';
             font-style: normal;
@@ -86,12 +105,14 @@
     </noscript>
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="site-body" data-ui-shell>
     <a class="skip-link sr-only" href="#conteudo">Pular para o conteúdo</a>
+    <div class="scroll-progress" aria-hidden="true"><i></i></div>
     <header class="site-header">
-        <a class="brand" href="{% url 'home' %}" aria-label="Página inicial do Prof. Toni Coimbra">
+        <a class="brand mark" href="{% url 'home' %}" aria-label="Página inicial do Prof. Toni Coimbra">
             {% include 'partials/_brand.html' %}
             <span>Prof. Toni Coimbra</span>
+            <i></i>
         </a>
         <details class="mobile-nav">
             <summary class="icon-btn" aria-label="Abrir menu de navegação" title="Menu">
@@ -111,7 +132,7 @@
                 {% endif %}
             </nav>
         </details>
-        <nav class="site-nav" aria-label="Navegação principal">
+        <nav class="site-nav navchain" aria-label="Navegação principal">
             {% if not user.is_authenticated %}
                 <a href="{% url 'home' %}#jornada">Jornada</a>
                 <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
@@ -247,13 +268,14 @@
         </div>
     {% endif %}
 
-    <main id="conteudo">
+    <main id="conteudo" data-motion-root>
         {% block content %}{% endblock %}
     </main>
 
     <footer class="site-footer">
-        <span>Prof. Toni Coimbra</span>
-        <span class="muted">Portal do Prof. Toni para publicar aulas, atividades e materiais por turma.</span>
+        <span class="site-footer-mark">Prof. Toni Coimbra</span>
+        <span class="site-footer-line" aria-hidden="true"></span>
+        <span class="muted">Aulas, atividades e materiais organizados por turma.</span>
     </footer>
 
     <script src="{% static 'js/vendor/lucide-subset.js' %}"></script>

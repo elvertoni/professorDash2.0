@@ -2,109 +2,7 @@
 
 {% block title %}Início · Prof. Toni Coimbra{% endblock %}
 
-{% block extra_head %}
-<style>
-/* Hero compacto (padrão ADHD-focus D.6: primeira ação acima da dobra).
-   A 360x640 o header sticky já consome ~169px; um eyebrow + h1 de 32px +
-   dek de 20px somavam ~185px e empurravam o primeiro CTA para fora da tela.
-   Aqui a saudação vira uma linha só. */
-.page-hero.dash-hero {
-    margin-bottom: var(--space-5);
-}
-.page-hero.dash-hero h1 {
-    font-size: var(--text-h2);
-    line-height: 1.2;
-    /* get_short_name() cai para o email completo quando o aluno não tem
-       nome_completo (acontece na importação por planilha). As regras de wrap
-       do projeto são escopadas em .prose/.atelier, então o email precisa
-       quebrar aqui — senão estoura os 328px úteis de um viewport de 360px. */
-    overflow-wrap: anywhere;
-}
-.dash-tabs {
-    display: flex;
-    gap: 2px;
-    margin: 0 0 var(--space-5);
-    overflow-x: auto;
-    border-bottom: 1px solid var(--border);
-}
-.dash-tab {
-    min-height: 44px;
-    flex-shrink: 0;
-    margin-bottom: -1px;
-    padding: 11px 18px;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    color: var(--fg-muted);
-    font-family: inherit;
-    font-size: var(--text-ui);
-    font-weight: 600;
-    cursor: pointer;
-    transition: color .15s ease-out, border-color .15s ease-out;
-}
-.dash-tab:hover { color: var(--fg); }
-.dash-tab.active {
-    border-bottom-color: var(--accent);
-    color: var(--accent-text);
-}
-.dash-tab:focus-visible {
-    border-radius: var(--radius-sm);
-    outline: 2px solid var(--border-focus);
-    outline-offset: 2px;
-}
-.dash-tab .count {
-    margin-left: 6px;
-    font-size: var(--text-caption);
-    opacity: .8;
-}
-/* "Hoje" é lista de decisão, não vitrine. A capa 16:9 custa ~170px por card
-   e só repete o título que vem logo abaixo; sem ela o primeiro CTA cabe na
-   dobra a 360x640. A vitrine com capa continua na página da turma. */
-.today-card .card-foot {
-    margin-top: var(--space-3);
-    padding-top: 0;
-}
-/* Progresso mora onde tem dono: no card da turma. O painel agregado do topo
-   era hero-metric (banido no DESIGN.md) e inacionável — não dizia qual turma
-   estava atrasada nem o que fazer a respeito. */
-.turma-progress {
-    display: grid;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-}
-.turma-progress .progress {
-    height: 6px;
-}
-.turma-progress p {
-    margin: 0;
-    font-size: var(--text-caption);
-}
-.dash-lead {
-    margin: 0 0 var(--space-4);
-    font-size: var(--text-ui);
-}
-.dash-note {
-    margin: var(--space-4) 0 0;
-    font-size: var(--text-caption);
-}
-/* Um email de escola (local-part longo + domínio gov) estoura os ~296px úteis
-   dentro do .empty a 360px. Mesma razão do wrap no h1 do hero. */
-.dash-break-any {
-    overflow-wrap: anywhere;
-}
-@media (prefers-reduced-motion: reduce) {
-    .dash-tab { transition: none; }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-{# Duas abas, não três. A antiga "Aulas" era um recorte cross-turma limitado a
-   6 itens: o contador exibia o tamanho da lista (<=6) enquanto o painel ao lado
-   dizia o backlog real, e o corte pegava as pendentes mais RECENTES, escondendo
-   as antigas — as que a turma já cobriu. Quem responde "e o resto?" é a turma,
-   que tem a lista inteira e ordenada. Sem ela, o default de aba também deixa de
-   poder cair numa lista de aulas já feitas quando o aluno zera o backlog. #}
 <section class="classroom-page" x-data="{ tab: '{% if para_fazer_hoje %}agora{% else %}turmas{% endif %}' }">
 
     <div class="page-hero dash-hero">
@@ -147,10 +45,6 @@
 
     <div id="dashboard-panel-agora" x-show="tab === 'agora'"{% if not para_fazer_hoje %} x-cloak{% endif %} role="tabpanel"
          aria-labelledby="dashboard-tab-agora" tabindex="0">
-        {# Sem este h2 o documento saltava de h1 (saudação) para h3 (título de card)
-           e, no fallback `html.alpine-failed` — onde a faixa de abas some e os dois
-           painéis aparecem empilhados —, nada dizia onde uma seção terminava e a
-           outra começava. Texto igual ao rótulo da aba. #}
         <h2 class="sr-only">Hoje</h2>
         {% if para_fazer_hoje %}
             <div class="feature-grid catalog-grid">
@@ -173,20 +67,10 @@
                 {% endfor %}
             </div>
         {% elif total_pendentes %}
-            {# Estado da maioria dos dias: o professor não publica todo dia. O 🎉 antigo
-               disparava aqui e dava um falso "tudo certo" a quem tinha backlog — causa
-               direta do "professor, sumiu a aula". O backlog vira o TÍTULO, não uma
-               ressalva de 14px sob uma festa. O número é o real e o botão pode repeti-lo,
-               porque o destino agora é a lista completa por turma, não um recorte de 6. #}
             <div class="empty">
                 <i data-lucide="list-todo" aria-hidden="true"></i>
                 <h2>{{ total_pendentes }} aula{{ total_pendentes|pluralize }} pendente{{ total_pendentes|pluralize }}</h2>
                 <p>Nada foi liberado hoje. Continue de onde você parou.</p>
-                {# Âncora, não <button>: em `html.alpine-failed` a faixa de abas some,
-                   mas este CTA continua visível — como <button> o @click não existia e
-                   o toque não fazia nada. Com Alpine, .prevent cancela a navegação e a
-                   troca de aba é idêntica à de antes; sem Alpine, o href rola até o
-                   painel de turmas, que nesse modo já está visível e empilhado. #}
                 <a class="btn btn-primary" href="#dashboard-panel-turmas"
                    @click.prevent="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
                     <i data-lucide="play" aria-hidden="true"></i>
@@ -194,14 +78,9 @@
                 </a>
             </div>
         {% elif total_disponiveis %}
-            {# O aluno que zerou o backlog aterrissa AQUI, não numa lista do que já fez:
-               esta aba é o default sempre que não há aula de hoje. #}
             <div class="empty">
                 <i data-lucide="party-popper" aria-hidden="true"></i>
                 <h2>Tudo em dia!</h2>
-                {# Artigo e adjetivo precisam concordar com a mesma variável do
-                   substantivo: "as N aulas disponíveis" fixo rendia "as 1 aula
-                   disponíveis" quando o aluno tinha uma só. #}
                 <p>Você concluiu {{ total_disponiveis }} aula{{ total_disponiveis|pluralize }} disponíve{{ total_disponiveis|pluralize:"l,is" }}. Nada pendente.</p>
                 <a class="btn btn-outline" href="#dashboard-panel-turmas"
                    @click.prevent="tab = 'turmas'; $nextTick(() => $refs.turmas.focus())">
@@ -234,8 +113,6 @@
                     <article class="card">
                         <div class="card-head">
                             <span class="tag-disc">{{ turma.disciplina.label }}</span>
-                            {# O backlog vive aqui, na turma que tem a lista inteira e
-                               ordenada — não num recorte cross-turma truncado em 6. #}
                             {% if turma.total_pendentes %}
                                 <span class="badge badge-warning"><i data-lucide="circle-dashed" aria-hidden="true"></i> {{ turma.total_pendentes }} pendente{{ turma.total_pendentes|pluralize }}</span>
                             {% elif turma.total_aulas %}
@@ -252,8 +129,6 @@
                                      aria-valuenow="{{ turma.progresso_pct }}">
                                     <i style="width: {{ turma.progresso_pct }}%"></i>
                                 </div>
-                                {# "concluída" concorda com "aula", não com a contagem de concluídas:
-                                   pluralizar pelas duas variáveis rende "1 de 5 aulas concluída". #}
                                 <p class="muted">{{ turma.total_concluidas }} de {{ turma.total_aulas }} aula{{ turma.total_aulas|pluralize }} concluída{{ turma.total_aulas|pluralize }} · {{ turma.progresso_pct }}%</p>
                             {% else %}
                                 <p class="muted">Nenhuma aula publicada nesta turma ainda.</p>
@@ -270,9 +145,6 @@
                 {% endfor %}
             </div>
         {% else %}
-            {# Dia um do aluno. Não existe auto-matrícula em classroom/urls.py, então a
-               única rota honesta de ajuda é conferir o email da conta: a causa real
-               mais comum é ter entrado com um email diferente do da planilha. #}
             <div class="empty">
                 <i data-lucide="inbox" aria-hidden="true"></i>
                 <h2>Você ainda não está em nenhuma turma</h2>

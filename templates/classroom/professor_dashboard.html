@@ -2,126 +2,6 @@
 
 {% block title %}Painel do professor · Prof. Toni Coimbra{% endblock %}
 
-{% block extra_head %}
-<style>
-.serie-section { margin-bottom: var(--space-6); }
-
-.serie-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-5);
-    background: var(--surface-raised);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    user-select: none;
-    transition: background 150ms ease-out, border-color 150ms ease-out;
-}
-.serie-header:hover { background: var(--surface-overlay); }
-.serie-header:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
-
-.serie-header-title {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-}
-.serie-header-title h2 {
-    margin: 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    color: var(--fg);
-}
-
-.serie-header-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    color: var(--fg-muted);
-    font-size: 0.875rem;
-    flex-shrink: 0;
-}
-
-.serie-chevron {
-    flex-shrink: 0;
-    transition: transform 200ms ease-out;
-    color: var(--fg-subtle);
-}
-.serie-chevron.is-collapsed { transform: rotate(-90deg); }
-
-.serie-turmas { padding-top: var(--space-4); }
-
-.urgency-strip {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    background: rgba(251, 191, 36, 0.07);
-    border: 1px solid rgba(251, 191, 36, 0.22);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-6);
-    color: var(--c-warning);
-}
-.urgency-strip .urgency-msg {
-    flex: 1;
-    font-weight: 500;
-    font-size: 0.9375rem;
-}
-
-/* Painel secundário colapsável (Prazos) — fechado por default */
-.dash-collapsible {
-    margin-top: var(--space-6);
-}
-.dash-collapsible > summary {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4) var(--space-5);
-    background: var(--surface-raised);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    user-select: none;
-    list-style: none;
-    font-weight: 600;
-    color: var(--fg);
-    transition: background 150ms ease-out;
-}
-.dash-collapsible > summary:hover { background: var(--surface-overlay); }
-.dash-collapsible > summary::-webkit-details-marker { display: none; }
-.dash-collapsible > summary:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
-.dash-collapsible[open] > summary {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-.dash-chevron {
-    margin-left: auto;
-    color: var(--fg-subtle);
-    transition: transform 200ms ease-out;
-}
-.dash-collapsible[open] .dash-chevron { transform: rotate(180deg); }
-
-@media (max-width: 600px) {
-    .serie-header-meta span { display: none; }
-    .serie-header-title h2 { font-size: 1rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .serie-chevron,
-    .serie-header,
-    .dash-chevron { transition: none; }
-}
-</style>
-{% endblock %}
-
 {% block content %}
 <section class="classroom-page">
 
@@ -175,7 +55,8 @@
                  x-transition:leave-end="opacity-0">
                 <div class="feature-grid catalog-grid">
                     {% for turma in serie.turmas %}
-                    <article class="card">                        <div class="card-head">
+                    <article class="card">
+                        <div class="card-head">
                             <span class="tag-disc">{{ turma.disciplina.label }}</span>
                             <span class="badge badge-neutral">
                                 <i data-lucide="users" aria-hidden="true"></i>

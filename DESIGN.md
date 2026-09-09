@@ -1,88 +1,83 @@
-# Design
+# Design — Volta Atelier
 
-> Canonical source of truth is `design_system/design-system.html` (DS v2 "The Digital Atelier", ~828 lines, ~180 selectors). This file is a summary index for design agents; when in doubt, open the HTML. The `--shell-*` tokens documented below are the **DS canonical** names (visual source of truth). The **runtime** `static/css/app.css` (`:root` / `[data-theme='light']`) carries the same brand values under a **parallel namespace** — `--accent*` / `--fg-*` / `--surface-*` / `--c-*`. Names differ, brand agrees; the bridge is the mapping table in ["Runtime token namespace"](#runtime-token-namespace-appcss--ds).
+> Fonte canônica de verdade: `design_system/design-system.html` (DS v3 "Volta Atelier"). Este documento é o índice de referência para o design e para os agentes. O runtime `static/css/app.css` integra os tokens do Volta Atelier (`--ink`, `--bone`, `--signal`, `--panel`, `--line`) mapeados de forma retrocompatível para o shell educacional.
 
-## Theme
+## Identidade & Estética
 
-Dark-first (`color-scheme: dark`), with a fully-supported light theme (`[data-theme='light']`). Obsidian surfaces, tonal layering, subtle glass, tinted shadows, radial brand glows on the body background. Both themes are first-class and must be verified on every change.
+Brutalismo editorial refinado, alto contraste, texturas e superfícies calculadas, tipografia de estúdio (**Archivo** para títulos e displays, **JetBrains Mono** para metadados, corpo e labels). Botões em formato pílula com wipe hover em `--signal`, chips circulares flutuantes e foco radical em legibilidade e hierarquia.
 
-## Color (OKLCH-equivalent hex tokens)
+## Temas (Dark & Light)
 
-### Dark (default)
-- Backgrounds: `--shell-bg #040405`, `--shell-bg-2 #09090b`
-- Surfaces: `--shell-surface rgba(17,17,20,.92)`, `-strong`, `-soft`, `-elev #111114`, `-low`, `-high`, `-highest`
-- Borders: `--shell-border rgba(255,255,255,.06)`, `-strong .12`, `--shell-ghost .04`
-- Text: `--shell-text #ece8e7` (never pure #fff), `-muted #b0adb5`, `-soft #84808c`
-- Brand: `--shell-primary #10b981` (emerald), `-200 #6ee7b7`; `--shell-secondary #8b5cf6` (violet); `--shell-tertiary #06b6d4` (cyan)
-- Semantic: `--shell-success #10b981`, `--shell-warning #fbbf24`, `--shell-danger #f87171` (`-hover #dc2626`), `--shell-info #38bdf8`
+- **Professor / Admin:** Dark mode por padrão (`:root`), simulando superfície de trabalho noturna de ateliê.
+- **Aluno:** Light mode por padrão (`[data-theme='light']`), priorizando conforto visual em telas móveis e sala de aula (fundo off-white editorial de alta legibilidade, não branco puro ofuscante).
+- O toggle do usuário (`localStorage`) continua permitindo alternância manual.
 
-### Light
-- Bg `#f4f5f9`/`#ebedf3`, surfaces near-white, text `--shell-text #0f172a` / muted `#475569` / soft `#64748b`
-- Brand darkened for contrast: primary `#047857`, secondary `#7c3aed`; semantic warning `#b45309`, danger `#b91c1c`, info `#0369a1`
+## Paleta de Cores e Tokens
 
-### Gradients (tokens only — no literal gradients in templates)
-`--grad-primary` (emerald→cyan 135°), `--grad-cta` (emerald→cyan 45°), `--grad-brand` (mint→violet→cyan 120°). Stripe utilities: `.stripe-cta/.stripe-violet/.stripe-warning/.stripe-cyan/.stripe-success`. Text: `.text-brand/.text-success/.text-warning/.text-info/.text-strong`. Gradientes ficam em superfícies e CTAs, nunca em texto.
+### Tokens Oficiais Volta Atelier
 
-**Color has function**: green=action/progress, yellow=deadline/attention, red=risk, violet/cyan=support only.
-
-### Runtime token namespace (app.css ↔ DS)
-
-The DS canonical (`design-system.html`) names its tokens `--shell-*`. The runtime `static/css/app.css` does **not** use those names — it exposes a parallel namespace (`--accent` / `--fg-*` / `--surface-*` / `--border*` / `--c-*` / `--grad-cta`) holding the **same brand values**. There was a historical token fork; both namespaces now agree on the mark (emerald → cyan, cyan = support), differing only in token name. The table below is the authoritative bridge — values are verified against `app.css` `:root` (dark) and `[data-theme='light']`.
-
-> **Decisão Leva 2 (2026-07)**: o namespace `--accent*` foi ratificado como o runtime; os valores foram realinhados ao emerald canônico do Atelier. Ciano é suporte, esmeralda é a ação. `.btn-primary` usa `--grad-cta` (`color: var(--accent-ink)` sobre `background: var(--grad-cta)`). Não renomear tokens do app.css para `--shell-*` — usar esta tabela como ponte.
-
-| DS canônico (`--shell-*`) | Runtime (app.css) | Dark (`:root`) | Light (`[data-theme='light']`) |
+| Token Volta | Dark (`:root`) | Light (`[data-theme='light']`) | Função / Aplicação |
 |---|---|---|---|
-| `--shell-primary` (emerald / ação) | `--accent` | `#10b981` | `#047857` |
-| `--shell-primary-200` | `--accent-text` | `#6ee7b7` | `#047857` |
-| `--shell-tertiary` (cyan / suporte) | `--accent-support` | `#22d3ee` | `#0e7490` |
-| `--shell-text` | `--fg` | `#ece8e7` | `#0f172a` |
-| `--shell-muted` | `--fg-muted` | `#b0adb5` | `#475569` |
-| `--shell-soft` | `--fg-subtle` | `#84808c` | `#57647a` |
-| `--shell-surface` / `-elev` | `--surface-base` | `#0b0b0d` | `#eff1f5` |
-| `--shell-surface-*` (raised) | `--surface-raised` | `#141417` | `#f8f9fc` |
-| `--shell-surface-*` (overlay) | `--surface-overlay` | `#1c1c21` | `#ffffff` |
-| `--shell-border` | `--border` | `rgba(255,255,255,.08)` | `rgba(15,23,42,.10)` |
-| `--shell-border-strong` | `--border-strong` | `rgba(255,255,255,.14)` | `rgba(15,23,42,.16)` |
-| `--grad-cta` (existe em ambos) | `--grad-cta` | `linear-gradient(45deg, #10b981, #06b6d4 130%)` | `linear-gradient(45deg, #047857, #0e7490 130%)` |
-| `--shell-shadow-tint` (repouso do CTA) | `--shadow-tint` | `0 20px 48px rgba(16,185,129,.16)` | `0 16px 40px rgba(16,185,129,.10)` |
-| `--shell-shadow-tint-raised` (hover do CTA) | `--shadow-tint-raised` | `0 26px 56px rgba(16,185,129,.20)` | `0 22px 48px rgba(16,185,129,.14)` |
-| `--shell-success` | `--c-success` | `#34d399` | `#047857` |
-| `--shell-warning` | `--c-warning` | `#fbbf24` | `#b45309` |
-| `--shell-danger` (`-hover`) | `--c-danger` (`--c-danger-hover`) | `#f87171` (`#dc2626`) | `#b91c1c` (`#b91c1c`) |
-| `--shell-info` | `--c-info` | `#38bdf8` | `#0369a1` |
+| `--ink` | `#141414` | `#f6f5f2` | Fundo principal da página |
+| `--ink-deep` | `#0d0d0d` | `#eceae5` | Poços, rodapé e fundos recuados |
+| `--panel` | `#1c1c1e` | `#ffffff` | Superfície primária de cards e modais |
+| `--panel-2` | `#232326` | `#faf9f7` | Cards elevados, tabelas e dropdowns |
+| `--line` | `rgba(255, 255, 255, .11)` | `rgba(20, 20, 20, .10)` | Divisores e bordas sutis |
+| `--line-2` | `rgba(255, 255, 255, .20)` | `rgba(20, 20, 20, .18)` | Bordas ativas e contornos interativos |
+| `--bone` | `#f4f3f0` | `#141414` | Texto primário (alto contraste) |
+| `--muted` | `#8e8e95` | `#5c5c63` | Texto secundário e legendas |
+| `--dim` | `#5c5c63` | `#8e8e95` | Texto terciário e metadados discretos |
+| `--signal` | `#fb3732` | `#fb3732` | Acento vibrante, hover de botões e alertas |
+| `--amber` | `#ffa31a` | `#d97706` | Prazos próximos e atenção |
+| `--volt` | `#3b49e4` | `#2563eb` | Apoio, links complementares e 3D |
+| `--emerald` | `#10b981` | `#059669` | Conclusão, checks de aula e progresso |
 
-Notes: (1) cyan appears twice — as the standalone support token `--accent-support` (`#22d3ee` dark) and as the terminal stop of `--grad-cta` (`#06b6d4` dark, the DS `--shell-tertiary` value); both are "suporte", never a primary action surface. (2) `--accent-ink` (`#04222B`) is the on-emerald ink used by `.btn-primary`; `--fg-on-accent` resolves to it. (3) Runtime-only tokens with no `--shell-*` twin: `--accent-tint`, `--border-focus`, the `--c-*-tint` fills, and `--c-warning-ink` — treat them as app.css extensions, not new brand directions.
+### Mapeamento de Runtime (`app.css` ↔ Volta Atelier)
 
-## Typography
+Para garantir compatibilidade com todo o ecossistema Django, HTMX e Alpine.js existente:
 
-- Body: `--font-body` 'Geist' (sans). Mono: `--font-mono` 'Geist Mono'.
-- Editorial signatures: `.eyebrow` and `.tag-disc` carry deliberate tracking — do not flatten. One kicker as brand system ≠ eyebrow on every section (banned).
-- `text-wrap: balance` on headings, `pretty` on prose; line length 65–75ch.
+| Variável Runtime (`app.css`) | Mapeamento Volta | Descrição |
+|---|---|---|
+| `--surface-base` | `var(--ink)` | Fundo da aplicação |
+| `--surface-raised` | `var(--panel)` | Superfície de cards |
+| `--surface-overlay` | `var(--panel-2)` | Modais, menus e dropdowns |
+| `--fg` | `var(--bone)` | Cor principal de tipografia |
+| `--fg-muted` | `var(--muted)` | Textos secundários |
+| `--fg-subtle` | `var(--dim)` | Textos terciários |
+| `--border` | `var(--line)` | Borda padrão |
+| `--border-strong` | `var(--line-2)` | Borda enfatizada |
+| `--accent` | `var(--signal)` | Cor de ação primária |
+| `--accent-text` | `#ffffff` | Texto sobre superfícies de destaque |
 
-## Layout & spacing
+## Tipografia
 
-- Shell: horizontal site chrome (`site-header`/`site-nav`/`mobile-nav`) — **not** a fixed sidebar (decision D.1). `--topbar-h 68px`.
-- Spacing scale: `--space-1..12` (4,8,12,16,24,32,48,64,96px). Radii: `--radius-sm/md/lg/xl/pill`.
-- Mobile-first; no horizontal scroll on student screens at 360px. Dense professor tables may scroll-x under `.tbl-wrap` (decision D.4).
-- Responsive grids: `repeat(auto-fit, minmax(...))`; flex for 1D, grid for 2D.
+- **Display / Títulos:** `'Archivo', sans-serif` (pesos 600, 700, 800, 900).
+- **Corpo / Metadados / Mono:** `'JetBrains Mono', monospace` (pesos 400, 500, 600).
+- As fontes do sistema ficam versionadas em `static/fonts/archivo-latin.woff2` e `static/fonts/jetbrains-mono-latin.woff2`; Geist permanece disponível para a apresentação de aulas.
 
-## Components (canonical, in design-system.html)
+## Componentes Chave
 
-Buttons `.btn` (primary/secondary/outline/ghost/danger + disabled), `.icon-btn`; `.card`, `.kpi`, `.panel`; badges `.badge` + `.tag-disc`; forms `.field/.input/.select/.textarea/.check/.switch/.dropzone`; nav `.nav-item`, `.lesson-nav`; tables `.tbl` (+`.tbl-wrap`); states `.empty/.empty-state`, `.toast`, `.modal`, `.tooltip`, `.skel`; `.avatar`, `.progress`, `.eyebrow`, `.stripe-*`, `.text-*` utilities; lesson reader `.atelier/.atelier-rail/.atelier-body/.prose/.callout (conceito|atencao|dica)/.bento/.exercise/.present`.
+- **Botão `.btn`:** Arredondamento pílula (`border-radius: 999px`), preenchimento `--bone` e texto `--ink`, com micro-interação de subida de camada `::before` em `--signal` no hover.
+- **Navegação `.navchain`:** Pílula encadeada flutuante com blur de fundo e indicador `.on` com borda `--signal`.
+- **Chips `.chip`:** Pílulas compactas mono para tags, séries e disciplinas.
+- **Formulários:** Inputs e selects com fundo `--panel`, borda `--line-2`, texto `--bone`, foco com outline/borda `--signal`.
+- **Tabelas densas:** `.tbl` com cabeçalhos mono em caixa-alta e separadores `--line`.
 
-App-specific documented wrappers: site chrome (`site-header/site-nav/site-footer/mobile-nav`), header dropdowns (`notification-menu`/`notification-panel` and `account-menu`/`account-panel`/`account-link` — same `details/summary` + glass-panel pattern, avatar-triggered), page wrappers (`classroom-page/catalog-page/lesson-page/narrow-page`), auth (`auth-*`), account page (`account-shell/account-sidebar/account-nav/account-content/account-grid`), notifications (`notification-*`). `*-atelier`/`kpi-card` duplicates were unified into core components (decision D.2) — do not reintroduce them.
+## Direção de Movimento — Atelier Cinético
 
-**Theme by role** (decision D.5): default `data-theme` is server-rendered per role in `base.html` — aluno = `light`, professor/admin/anônimo = `dark`. The `localStorage` toggle still overrides as a personal preference.
+O movimento é uma camada funcional do Volta Atelier: orienta entrada, continuidade espacial e confirmação de estado. Não é decoração independente.
 
-**ADHD-focus patterns** (decision D.6, template-scoped `<style>` in the dashboard/reader templates, tokens `shell-*`): `serie-section`/`serie-header` (professor série→disciplina accordion, Alpine), `dash-collapsible` (native `<details>` secondary panel, closed by default — e.g. Prazos), `dash-tabs`/`dash-tab` (Alpine tab switcher on the aluno dashboard — **two tabs: Hoje / Minhas turmas**), `dash-hero` (compact one-line greeting; replaced the tall hero so the first CTA clears the fold at 360×640), `today-card` (cover-less lesson card for the Hoje panel), `turma-progress` (per-turma progress inside the turma card), `lesson-actionbar` (sticky single-CTA bar on the lesson reader). **`aluno-progress` was removed**: the aggregate cross-turma percentage was the banned hero-metric template and was unactionable — progress now lives on the turma card that owns it. **The middle "Aulas" tab was removed too** (decision D.12): it was a cross-turma slice capped at 6, whose badge showed the list size while the panel beside it showed the real backlog, and whose cut kept the *newest* pending lessons while hiding the oldest. The turma card carries `turma.total_pendentes` and links to the full ordered list. Goal: one decision per screen, next action always reachable. **Alpine.js (3.14.1) is loaded in `base.html`** (was missing before; `x-data`/`x-show`/`@click` depend on it); `[x-cloak]{display:none!important}` in `app.css` prevents tab flash.
+- **Momento autoral:** a página entra como uma composição editorial única por `opacity + blur + clip-path + translate`, com stagger curto entre blocos. O conteúdo permanece visível sem JavaScript e há fallback de 2,2 s.
+- **Navegação:** header sticky ganha profundidade somente após scroll; o indicador ativo desenha a régua `--signal`; View Transitions conectam páginas e troca de tema quando suportadas.
+- **Superfícies:** cards, KPIs e painéis recebem luz tonal localizada pelo ponteiro em desktop. Em touch, o layout permanece estático e completo.
+- **Estado:** barras de progresso crescem da origem; menus, details, dialog e toast usam entrada física própria. Botões mantêm o wipe canônico.
+- **Performance:** eventos de scroll e ponteiro compartilham atualizações via `requestAnimationFrame`; observers se desconectam após a entrada.
+- **Acessibilidade:** `prefers-reduced-motion: reduce` desativa loops, reveals, deslocamentos e transições de navegação. Foco visível e semântica não dependem de animação.
 
-**Modo apresentação**: superfície standalone de projeção, escura e de alto contraste. `reader.js` conduz a aula como artigo contínuo, sem truncar ou redimensionar blocos: coluna textual de `64ch`, landmarks neutros em `<h2>` e largura ampliada para callouts, figuras, tabelas e quizzes. A microtipografia de passos, legendas e alternativas escala por `--text-read` para leitura a 4–6 m. Controles funcionam por clique, teclado/controle remoto e foco visível; `R` revela a próxima resposta pendente sem alterar o placar, `?` recupera a ajuda, e roteiro (`N`), Pausa Pedagógica (`B`), tela cheia (`F`) e saída (`Esc`) preservam estados e feedback.
+### Primitivas Canônicas
 
-## Motion
-
-Intentional only. Ease-out (quart/quint/expo), no bounce/elastic. Every animation needs a `prefers-reduced-motion: reduce` fallback. Don't gate content visibility on class-triggered transitions.
-
-## Absolute bans (impeccable + project)
-
-Side-stripe borders (>1px colored left/right accent), gradient text (`background-clip:text`), glassmorphism-as-default, hero-metric template, identical card grids, tiny uppercase tracked eyebrow on every section, numbered `01/02/03` section markers as scaffolding, text overflowing its container at any breakpoint. New parallel design system. Literal gradients/hex in templates when a token exists.
+- `.scroll-progress` — régua fixa de leitura.
+- `[data-motion][data-motion-state]` — reveal progressivo com fallback visível.
+- `.kinetic-surface` / `.has-pointer` — luz tonal responsiva a ponteiro fino.
+- `.kinetic-hero` e `.journey-track` — assinatura da página pública e fluxo acervo → turma → aluno.
+- `.lesson-actionbar` — ação persistente do leitor, agora centralizada no runtime.

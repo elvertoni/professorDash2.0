@@ -229,13 +229,6 @@
         </div>
     </noscript>
 
-    {# Esta rota nao estende base.html, entao o self-host do shell nao chegava
-       aqui: o deck da TV continuava dependendo do unpkg. Wifi de escola com
-       filtro derrubava os icones e os quizzes na frente da turma.
-       Alpine e necessario apesar de nao haver x-data no template: os quizzes
-       vem do HTML renderizado da aula (catalog/parser.py emite quizQuestion()
-       e quizSection()). Ordem preservada — quiz.js registra o listener de
-       alpine:init antes do Alpine (defer) executar. #}
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="{% static 'js/vendor/lucide-subset.js' %}"></script>
     <script src="{% static 'js/reader.js' %}"></script>
