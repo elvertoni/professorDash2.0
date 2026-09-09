@@ -120,7 +120,7 @@
                             {% endif %}
                         </div>
                         <h3>{{ turma.nome }}</h3>
-                        <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · Prof. {{ turma.professor.get_short_name }}</p>
+                        <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
                         <div class="turma-progress">
                             {% if turma.total_aulas %}
                                 <div class="progress" role="progressbar"

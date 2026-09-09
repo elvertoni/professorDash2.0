@@ -134,6 +134,22 @@
         bar.classList.add('progress-fill');
     });
 
+    /* Registros antigos podem apontar para capas que já não existem no
+       volume de media. Mantemos o card íntegro e trocamos a imagem quebrada
+       pelo fallback canônico sem atrasar o carregamento da página. */
+    document.querySelectorAll('[data-cover-image]').forEach((image) => {
+        const fallback = image.parentElement.querySelector('[data-cover-fallback]');
+        if (!fallback) return;
+
+        const showFallback = () => {
+            image.hidden = true;
+            fallback.hidden = false;
+        };
+
+        image.addEventListener('error', showFallback, { once: true });
+        if (image.complete && image.naturalWidth === 0) showFallback();
+    });
+
     if (finePointer.matches && !reducedMotion.matches) {
         document.querySelectorAll('.card, .kpi, .action-panel, .journey-step').forEach((surface) => {
             let pointerFrame = null;

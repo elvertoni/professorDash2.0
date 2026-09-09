@@ -6,6 +6,8 @@
 
 Brutalismo editorial refinado, alto contraste, texturas e superfícies calculadas, tipografia de estúdio (**Archivo** para títulos e displays, **JetBrains Mono** para metadados, corpo e labels). Botões em formato pílula com wipe hover em `--signal`, chips circulares flutuantes e foco radical em legibilidade e hierarquia.
 
+A marca oficial é a ligadura **TC** de `static/logo.svg`, sincronizada com `portifolio_tc/assets/logo.svg`. O favicon usa o corte óptico próprio de `static/favicon.svg`; não derive o favicon reduzindo a marca horizontal.
+
 ## Temas (Dark & Light)
 
 - **Professor / Admin:** Dark mode por padrão (`:root`), simulando superfície de trabalho noturna de ateliê.

@@ -1247,8 +1247,8 @@ figure {
 }
 
 .reader-blackout-brand img {
-    width: clamp(72px, calc(var(--text-read) * 2.4), 144px);
-    height: clamp(72px, calc(var(--text-read) * 2.4), 144px);
+    width: clamp(113px, calc(var(--text-read) * 3.75), 225px);
+    height: auto;
 }
 
 .reader-blackout-brand span {

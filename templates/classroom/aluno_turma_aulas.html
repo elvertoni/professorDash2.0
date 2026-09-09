@@ -16,7 +16,7 @@
         <div>
             <span class="eyebrow">{{ turma.disciplina.label }}</span>
             <h1>{{ turma.nome }}</h1>
-            <p>{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.get_short_name }}</p>
+            <p>{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
             <div class="status-row">
                 <span class="badge badge-violet"><i data-lucide="book-open" aria-hidden="true"></i> {{ total }} aulas disponíveis</span>
                 <span class="badge badge-success"><i data-lucide="check-check" aria-hidden="true"></i> {{ concluidas }} concluídas</span>
@@ -49,7 +49,10 @@
                 <article class="card lesson-card">
                     <div class="card-cover">
                         {% if publicada.aula.imagem %}
-                            <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async">
+                            <img src="{{ publicada.aula.imagem.url }}" alt="Capa da aula: {{ publicada.aula.titulo }}" loading="lazy" decoding="async" data-cover-image>
+                            <div class="card-cover-fallback" data-cover-fallback hidden>
+                                <i data-lucide="book-open" aria-hidden="true"></i>
+                            </div>
                         {% else %}
                             <div class="card-cover-fallback">
                                 <i data-lucide="book-open" aria-hidden="true"></i>

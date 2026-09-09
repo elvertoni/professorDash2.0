@@ -5914,11 +5914,33 @@ body.site-body::after {
     font-weight: 800;
 }
 
+.brand-mark {
+    width: 50px;
+    height: 32px;
+    overflow: visible;
+    border-radius: 0;
+}
+
+.brand-mark img {
+    width: 50px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.brand-label,
+.brand-label-full {
+    display: inline;
+}
+
+.brand-label-compact {
+    display: none;
+}
+
 .brand.mark > i {
     position: absolute;
     right: 0;
     bottom: -4px;
-    left: 38px;
+    left: 58px;
     height: 1px;
     background: var(--signal);
     transform: scaleX(.18);
@@ -6460,31 +6482,85 @@ body.site-body::after {
     :root { --atelier-gutter: 18px; }
 
     .site-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            'brand actions'
+            'nav nav';
         gap: 10px;
+    }
+
+    .site-header .brand {
+        grid-area: brand;
+        min-height: 44px;
     }
 
     .site-nav {
         display: none;
     }
 
-    .mobile-nav {
+    .site-header .mobile-nav {
         display: block;
-        order: 2;
+        grid-area: nav;
+        width: 100%;
+        margin: 0;
+        order: initial;
     }
 
-    .header-actions {
-        order: 3;
+    .site-header .header-actions {
+        grid-area: actions;
+        width: auto;
+        min-width: 0;
+        justify-self: end;
+        order: initial;
     }
 
     .brand.mark {
         min-width: 0;
     }
 
-    .brand.mark > span {
-        max-width: 30vw;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .brand-label-full {
+        display: none;
+    }
+
+    .brand-label-compact {
+        display: inline;
+    }
+
+    .mobile-nav summary.icon-btn {
+        display: flex;
+        width: 100%;
+        min-height: 44px;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 0 14px;
+    }
+
+    .mobile-nav-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .header-actions .icon-btn,
+    .mobile-nav .icon-btn,
+    .account-trigger,
+    .account-link,
+    .dash-tab {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .header-actions .icon-btn,
+    .mobile-nav .icon-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .card .card-foot a:not(:where(.btn)) {
+        min-height: 44px;
     }
 
     .page-hero h1,
@@ -6524,6 +6600,12 @@ body.site-body::after {
         align-items: flex-start;
         flex-direction: column;
         gap: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .brand-label-compact {
+        display: none;
     }
 }
 

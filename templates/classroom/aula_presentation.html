@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Apresentação · {{ aula.titulo }} · Prof. Toni Coimbra</title>
-    <link rel="icon" href="{% static 'logo.svg' %}" type="image/svg+xml">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="preload" href="{% static 'fonts/geist-latin-variable.woff2' %}" as="font" type="font/woff2" crossorigin>
     <style>
         @font-face {
@@ -117,7 +117,7 @@
     {# Overlay de Pausa Pedagógica / Tela Preta (Tecla B) #}
     <div id="reader-blackout" class="reader-blackout" hidden aria-hidden="true">
         <div class="reader-blackout-brand">
-            <img src="{% static 'logo.svg' %}" alt="" width="72" height="72">
+            <img src="{% static 'logo.svg' %}" alt="" width="113" height="72">
             <span>Pausa Pedagógica</span>
             <small>Pressione <kbd>B</kbd> ou toque para retornar</small>
         </div>

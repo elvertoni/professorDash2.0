@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Corte de 16 px: contraforma maior e vão de 12 unidades, para o
+       desenho não fechar em tamanho de aba e de avatar. -->
+  <rect width="64" height="64" rx="11.5" fill="#141414"/>
+  <g transform="translate(4.87 14.64) scale(0.2713)">
+    <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"/>
+    <path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z"
+          fill="#141414" stroke="#141414" stroke-width="24" stroke-linejoin="round"/>
+    <path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="#fb3732"/>
+  </g>
+</svg>

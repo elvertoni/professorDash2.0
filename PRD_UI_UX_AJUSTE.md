@@ -508,6 +508,8 @@ Use esta secao para registrar decisoes tomadas durante as sprints. Nao deixe dec
 
 - [x] D.13. Decisao concluida: direcao **Atelier Cinetico** escolhida pelo usuario para elevar o redesign Volta Atelier sem trocar sua identidade. O runtime centraliza movimento em `app.css` + `app.js`: reveal com opacity/blur/clip-path/translate e fallback visivel, header sticky com profundidade por scroll, regua de leitura, View Transitions progressivas, superficies com luz tonal limitada a ponteiro fino, crescimento de progresso, menus/dialog/toasts fisicos e uma assinatura publica que materializa acervo → turma → aluno. `prefers-reduced-motion` remove loops e deslocamentos. Estilos locais dos dashboards e da actionbar da aula foram consolidados no runtime. A auditoria visual encontrou e removeu comentarios Django multilinha que estavam sendo enviados como texto ao aluno e ao catalogo; comentarios de template com mais de uma linha nao usam mais `{# ... #}`.
 
+- [x] D.14. Decisao concluida: polish global sincroniza a marca do portal com a ligadura TC oficial do portfolio Toni Coimbra e adota o favicon de corte optico proprio. O shell mobile passa de tres para duas linhas, identifica visualmente o menu e garante alvos de toque de 44px. A jornada do aluno deixa de exibir "Prof. Prof.", capas ausentes usam o fallback canonico em vez de imagem quebrada e o shell deixa de antecipar as fontes Geist exclusivas do modo apresentacao.
+
 ### Nota de auditoria complementar — UI/UX
 
 - Auditoria feita com agentes especialistas em jornada do aluno, jornada do professor e design system/acessibilidade.

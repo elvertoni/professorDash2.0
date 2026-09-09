@@ -6,11 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <title>{% block title %}Prof. Toni Coimbra{% endblock %}</title>
-    <link rel="icon" href="{% static 'logo.svg' %}" type="image/svg+xml">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
     <link rel="preload" href="{% static 'fonts/archivo-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/jetbrains-mono-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{% static 'fonts/geist-latin-variable.woff2' %}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{% static 'fonts/geist-mono-latin-variable.woff2' %}" as="font" type="font/woff2" crossorigin>
     <style>
         @font-face {
             font-family: 'Archivo';
@@ -26,22 +24,6 @@
             font-weight: 400 500;
             font-display: swap;
             src: url("{% static 'fonts/jetbrains-mono-latin.woff2' %}") format('woff2');
-        }
-
-        @font-face {
-            font-family: 'Geist';
-            font-style: normal;
-            font-weight: 300 800;
-            font-display: swap;
-            src: url("{% static 'fonts/geist-latin-variable.woff2' %}") format('woff2');
-        }
-
-        @font-face {
-            font-family: 'Geist Mono';
-            font-style: normal;
-            font-weight: 400 500;
-            font-display: swap;
-            src: url("{% static 'fonts/geist-mono-latin-variable.woff2' %}") format('woff2');
         }
     </style>
     <script>
@@ -111,13 +93,16 @@
     <header class="site-header">
         <a class="brand mark" href="{% url 'home' %}" aria-label="Página inicial do Prof. Toni Coimbra">
             {% include 'partials/_brand.html' %}
-            <span>Prof. Toni Coimbra</span>
+            <span class="brand-label" aria-hidden="true">
+                <span class="brand-label-full">Prof. Toni Coimbra</span>
+                <span class="brand-label-compact">Prof. Toni</span>
+            </span>
             <i></i>
         </a>
         <details class="mobile-nav">
             <summary class="icon-btn" aria-label="Abrir menu de navegação" title="Menu">
                 <i data-lucide="menu" aria-hidden="true"></i>
-                <span class="sr-only">Menu</span>
+                <span class="mobile-nav-label">Menu</span>
             </summary>
             <nav class="mobile-nav-panel" aria-label="Navegação principal mobile">
                 {% if not user.is_authenticated %}

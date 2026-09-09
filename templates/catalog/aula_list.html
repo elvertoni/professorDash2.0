@@ -73,7 +73,10 @@
                 <article class="card lesson-card">
                     <div class="card-cover">
                         {% if aula.imagem %}
-                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async">
+                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}" loading="lazy" decoding="async" data-cover-image>
+                            <div class="card-cover-fallback" data-cover-fallback hidden>
+                                <i data-lucide="book-open" aria-hidden="true"></i>
+                            </div>
                         {% else %}
                             <div class="card-cover-fallback">
                                 <i data-lucide="book-open" aria-hidden="true"></i>
