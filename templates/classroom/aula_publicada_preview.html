@@ -85,7 +85,7 @@ dialog.lesson-lightbox:not([open]) { display: none; }
 
     <div class="teacher-preview-bar lesson-actionbar" role="region" aria-label="Controles da aula">
         <div class="teacher-preview-main">
-            <span class="badge badge-violet">
+            <span class="badge badge-neutral">
                 <i data-lucide="user-cog" aria-hidden="true"></i>
                 Prévia do professor
             </span>
@@ -151,9 +151,9 @@ dialog.lesson-lightbox:not([open]) { display: none; }
                     </div>
                 {% endif %}
                 <div class="atelier-meta">
-                    <span class="tag p">{{ turma.disciplina.label }}</span>
-                    <span class="tag s">{{ aula.trilha.label }}</span>
-                    <span class="date">Ordem {{ publicada.ordem_na_turma }}</span>
+                    <span class="chip">{{ turma.disciplina.label }}</span>
+                    <span class="chip chip--signal">{{ aula.trilha.label }}</span>
+                    <span class="chip">Ordem {{ publicada.ordem_na_turma }}</span>
                 </div>
                 <h1>{{ aula.titulo }}</h1>
                 {% if aula.tema %}
@@ -162,7 +162,7 @@ dialog.lesson-lightbox:not([open]) { display: none; }
 
                 {% if aula.objetivos %}
                     <section class="lesson-goals">
-                        <span class="eyebrow">Objetivos</span>
+                        <h2>Objetivos</h2>
                         <ul>
                             {% for objetivo in aula.objetivos %}
                                 <li>{{ objetivo }}</li>

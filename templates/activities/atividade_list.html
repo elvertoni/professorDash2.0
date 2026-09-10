@@ -11,7 +11,9 @@
     </nav>
 
     <div class="section-heading compact">
-        <span class="eyebrow">{{ turma.nome }}</span>
+        <div class="heading-kicker">
+            <span class="chip">{{ turma.nome }}</span>
+        </div>
         <h1>Atividades · seu controle</h1>
         <p>Itens de acompanhamento (ex.: "Caderno U1"). Marque cada aluno como feito. As entregas oficiais ficam no Google Classroom.</p>
         <a class="btn btn-primary" href="{% url 'activities:atividade_create' turma.pk %}">

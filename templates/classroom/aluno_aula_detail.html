@@ -40,8 +40,8 @@
                     </div>
                 {% endif %}
                 <div class="atelier-meta">
-                    <span class="tag p">{{ turma.disciplina.label }}</span>
-                    <span class="tag s">{{ aula.trilha.label }}</span>
+                    <span class="chip">{{ turma.disciplina.label }}</span>
+                    <span class="chip chip--signal">{{ aula.trilha.label }}</span>
                     {% if progresso.concluido %}
                         <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
                     {% endif %}

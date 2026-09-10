@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #141414; font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; }
+    a { color: #ff5c57; } a:hover { color: #fb3732; }
+    .cap { font-size: 10px; letter-spacing: .16em; color: #fb3732; }
+    .note { margin: 0; font-size: 12px; line-height: 1.6; color: #8d8d96; }
+    .box { background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); display: flex; align-items: center; justify-content: center; }
+  </style>
+</helmet>
+<div style="width: 1120px; height: 640px; background: #141414; color: #f4f3f0; box-sizing: border-box; padding: 48px 56px; display: flex; flex-direction: column; gap: 30px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(255,255,255,.11); padding-bottom: 18px">
+    <span style="font-size: 11px; letter-spacing: .18em; color: #8d8d96">LOCKUPS · LIGADURA TC</span>
+    <span style="font-size: 11px; letter-spacing: .18em; color: #8d8d96">RESPIRO = ALTURA DA TRAVESSA DO T</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; flex-grow: 1">
+
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span class="cap">HORIZONTAL</span>
+      <div class="box" style="flex-grow: 1; padding: 28px">
+        <div style="display: flex; align-items: center; gap: 18px">
+          <svg viewBox="0 0 200 128" width="112" height="72" role="img" aria-label="Monograma TC">
+            <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+            <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#1c1c1e" stroke="#1c1c1e" stroke-width="16" stroke-linejoin="round"></path>
+            <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#fb3732"></path>
+          </svg>
+          <div style="width: 1px; height: 46px; background: rgba(255,255,255,.20)"></div>
+          <span style="font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -.035em; line-height: 1.08">TONI<br>COIMBRA</span>
+        </div>
+      </div>
+      <p class="note">Uso principal em cabeçalho e assinatura de e-mail. O nome alinha topo com a travessa e base com a linha do C.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span class="cap">VERTICAL</span>
+      <div class="box" style="flex-grow: 1; padding: 28px">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px">
+          <svg viewBox="0 0 200 128" width="150" height="96" role="img" aria-label="Monograma TC">
+            <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+            <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#1c1c1e" stroke="#1c1c1e" stroke-width="16" stroke-linejoin="round"></path>
+            <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#fb3732"></path>
+          </svg>
+          <span style="font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -.02em">TONI COIMBRA</span>
+        </div>
+      </div>
+      <p class="note">Capa de projeto, apresentação e impresso. O nome ocupa a mesma largura do símbolo, em uma linha só.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span class="cap">SELO · AVATAR · FAVICON</span>
+      <div class="box" style="flex-grow: 1; padding: 28px; gap: 20px">
+        <div style="width: 96px; height: 96px; background: #141414; border-radius: 18px; display: flex; align-items: center; justify-content: center">
+          <svg viewBox="0 0 200 128" width="75" height="48" role="img" aria-label="Selo TC — corte de 16">
+            <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+            <path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="#141414" stroke="#141414" stroke-width="24" stroke-linejoin="round"></path>
+            <path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="#fb3732"></path>
+          </svg>
+        </div>
+        <div style="width: 96px; height: 96px; background: #fb3732; border-radius: 50%; display: flex; align-items: center; justify-content: center">
+          <svg viewBox="0 0 200 128" width="70" height="45" role="img" aria-label="Selo TC invertido">
+            <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+            <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#fb3732" stroke="#fb3732" stroke-width="16" stroke-linejoin="round"></path>
+            <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#141414"></path>
+          </svg>
+        </div>
+      </div>
+      <p class="note">A ligadura é 1,56 : 1 — no quadrado ocupa 78 % da largura e fica centrada; no círculo, 72 %. O quadrado usa o corte de 16, que é o que está em <code>assets/favicon.svg</code>.</p>
+    </div>
+
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 26px; border-top: 1px solid rgba(255,255,255,.11); padding-top: 20px">
+    <span style="font-size: 11px; letter-spacing: .18em; color: #8d8d96">REGRAS</span>
+    <span style="font-size: 12px; color: #a5a5ac">Respiro mínimo em toda volta = altura da travessa do T.</span>
+    <span style="width: 1px; height: 16px; background: rgba(255,255,255,.20)"></span>
+    <span style="font-size: 12px; color: #a5a5ac">Lockup horizontal não desce de 160 px de largura.</span>
+    <span style="width: 1px; height: 16px; background: rgba(255,255,255,.20)"></span>
+    <span style="font-size: 12px; color: #a5a5ac">Abaixo de 24 px de altura, usar o corte de 16.</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

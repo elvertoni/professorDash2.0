@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Fonte do assets/og.png — 1200×630</title>
+  <style>
+    /* Fonte de origem do assets/og.png. Renderizar em 1200×630 e salvar por
+       cima do arquivo; ver a receita no fim deste arquivo. */
+    @font-face {
+      font-family: 'Archivo';
+      font-style: normal;
+      font-weight: 700 800;
+      src: url('../assets/fonts/archivo-latin.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400 500;
+      src: url('../assets/fonts/jetbrains-mono-latin.woff2') format('woff2');
+    }
+
+    :root {
+      --ink: #141414;
+      --panel: #1c1c1e;
+      --bone: #f4f3f0;
+      --dim: #8d8d96;
+      --signal: #fb3732;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #2b2b30; }
+
+    .card {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: var(--ink);
+      color: var(--bone);
+      font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+    }
+
+    #dust { position: absolute; inset: 0; }
+
+    .name {
+      position: absolute;
+      font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 800;
+      font-size: 168px;
+      line-height: .84;
+      letter-spacing: -.035em;
+    }
+    .name--first { left: 38px; top: 62px; }
+    .name--last  { right: 38px; bottom: 66px; }
+
+    .meta {
+      position: absolute;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.9;
+      color: var(--dim);
+      display: flex;
+      flex-direction: column;
+    }
+    .meta--place { right: 40px; top: 78px; text-align: right; }
+    .meta--role  { left: 40px; bottom: 86px; }
+
+    .talk {
+      position: absolute;
+      right: 40px;
+      top: 226px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .bubble {
+      border-radius: 12px;
+      padding: 15px 19px;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+    .bubble--ask {
+      position: relative;
+      background: var(--signal);
+      color: var(--bone);
+      margin-right: 22px;
+    }
+    /* rabicho apontando para o cartão de baixo */
+    .bubble--ask::after {
+      content: "";
+      position: absolute;
+      right: 26px;
+      bottom: -8px;
+      width: 16px;
+      height: 16px;
+      background: var(--signal);
+      transform: rotate(45deg);
+      border-radius: 3px;
+    }
+    .bubble--card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, .09);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 22px 14px 14px;
+    }
+
+    .seal {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background: var(--bone);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <canvas id="dust" width="1200" height="630"></canvas>
+
+    <div class="name name--first">TONI</div>
+    <div class="name name--last">COIMBRA</div>
+
+    <div class="meta meta--place">
+      <span>TJPR — Assessoria STF/STJ</span>
+      <!-- Herdado do cartão anterior. É um horário congelado em imagem
+           estática: some dia vai parecer errado. Vale considerar tirar. -->
+      <span>14:54:46 BRT</span>
+      <span>Curitiba, PR</span>
+    </div>
+
+    <div class="meta meta--role">
+      <span>IA &amp; Automação</span>
+      <span>Desenvolvedor Python</span>
+      <span>Professor — SEED-PR</span>
+    </div>
+
+    <div class="talk">
+      <div class="bubble bubble--ask">Olá — tem um projeto?
+Vamos conversar.</div>
+      <div class="bubble bubble--card">
+        <span class="seal">
+          <!-- Ligadura TC, corte de 16 px, em fundo claro: T em tinta, C em sinal. -->
+          <svg viewBox="0 0 200 128" width="40" height="26" role="img" aria-label="Toni Coimbra">
+            <path d="M8 14H150V44H78V114H46V44H20Z" fill="#141414"></path>
+            <path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="#f4f3f0" stroke="#f4f3f0" stroke-width="24" stroke-linejoin="round"></path>
+            <path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="#fb3732"></path>
+          </svg>
+        </span>
+        <span>Fale comigo,
+não com um formulário</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* Poeira determinística: mesma semente, mesma imagem em toda regeração. */
+    (function () {
+      const ctx = document.getElementById('dust').getContext('2d');
+      let seed = 20260908;
+      const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+
+      for (let i = 0; i < 220; i++) {
+        const x = rnd() * 1200;
+        /* concentra na faixa de baixo, como no cartão original */
+        const y = 630 - Math.pow(rnd(), 2.6) * 300;
+        const r = 0.6 + rnd() * 1.1;
+        ctx.fillStyle = 'rgba(244, 243, 240, ' + (0.04 + rnd() * 0.17).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      document.documentElement.dataset.dust = 'done';
+    })();
+  </script>
+
+  <!--
+    Para regerar assets/og.png a partir deste arquivo:
+
+    node -e "const {chromium}=require('@playwright/test');const {pathToFileURL}=require('url');
+    (async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1200,height:630}});
+    await p.goto(pathToFileURL('design-system/og-card.html').href);await p.waitForTimeout(600);
+    await p.locator('.card').screenshot({path:'assets/og.png'});await b.close();})()"
+  -->
+</body>
+</html>

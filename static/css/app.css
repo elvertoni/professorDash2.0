@@ -20,13 +20,17 @@ FORM: Atelier Cinético, direção escolhida pelo usuário; movimento de entrada
     --panel-2: #232326;
     --line: rgba(255, 255, 255, .11);
     --line-2: rgba(255, 255, 255, .20);
+    --line-ui: rgba(255, 255, 255, .34);
     --bone: #f4f3f0;
     --muted: #8e8e95;
-    --dim: #5c5c63;
+    --dim: #8d8d96;
     --signal: #fb3732;
+    --signal-deep: #d1211d;
+    --signal-text: #ff5c57;
     --amber: #ffa31a;
     --volt: #3b49e4;
     --emerald: #10b981;
+    --tap: 44px;
 
     /* ── Mapeamento Runtime Portal ── */
     --accent: var(--signal);
@@ -134,10 +138,13 @@ FORM: Atelier Cinético, direção escolhida pelo usuário; movimento de entrada
     --panel-2: #faf9f7;
     --line: rgba(20, 20, 20, .10);
     --line-2: rgba(20, 20, 20, .18);
+    --line-ui: rgba(20, 20, 20, .32);
     --bone: #141414;
     --muted: #5c5c63;
     --dim: #8e8e95;
     --signal: #fb3732;
+    --signal-deep: #d1211d;
+    --signal-text: #d1211d;
     --amber: #d97706;
     --volt: #2563eb;
     --emerald: #059669;
@@ -857,9 +864,14 @@ button {
     border-color: #ffffff;
 }
 
-/* Light: gradiente CTA usa emerald-700/cyan-700 (escuros) → texto branco p/ AA */
 [data-theme='light'] .btn-primary {
-    color: #fff;
+    color: var(--ink);
+    background: var(--bone);
+    border-color: var(--bone);
+}
+[data-theme='light'] .btn-primary:not(:disabled):not([disabled]):hover {
+    color: #ffffff;
+    border-color: var(--signal-deep);
 }
 
 .btn-secondary {
@@ -6190,40 +6202,126 @@ body.site-body::after {
 
 .btn {
     position: relative;
-    overflow: hidden;
-    border: 1px solid var(--bone);
-    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6em;
     font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .05em;
+    font-weight: 500;
+    font-size: clamp(11px, .85vw, 13px);
+    letter-spacing: .08em;
     text-transform: uppercase;
-    transition: transform .35s var(--atelier-ease), color .35s var(--atelier-ease), border-color .35s var(--atelier-ease), box-shadow .35s var(--atelier-ease);
+    padding: .8em 1.6em;
+    min-height: var(--tap);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--bone);
+    background: var(--bone);
+    color: var(--ink);
+    cursor: pointer;
+    transition: color .35s var(--e-io), border-color .35s var(--e-io), transform .25s var(--e-out), box-shadow .3s var(--e-soft);
 }
 
 .btn::before {
-    background: var(--signal);
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--signal-deep);
+    transform: translateY(101%);
+    transition: transform .45s var(--e-io);
 }
 
 .btn:hover {
-    border-color: var(--signal);
-    box-shadow: 0 8px 22px color-mix(in srgb, var(--signal) 20%, transparent);
-    transform: translateY(-3px);
+    color: #ffffff;
+    border-color: var(--signal-deep);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--signal) 18%, transparent);
+    transform: translateY(-2px);
+}
+
+.btn:hover::before {
+    transform: translateY(0);
 }
 
 .btn:active {
-    transform: translateY(-1px) scale(.98);
+    transform: translateY(0) scale(.98);
+}
+
+.btn[disabled],
+.btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn[disabled]:hover::before,
+.btn:disabled:hover::before {
+    transform: translateY(101%);
+}
+
+.btn[disabled]:hover,
+.btn:disabled:hover {
+    color: var(--ink);
+    border-color: var(--bone);
+    box-shadow: none;
 }
 
 .btn-primary {
     color: var(--ink);
     background: var(--bone);
+    border-color: var(--bone);
 }
 
 .btn-outline,
 .btn-ghost {
-    color: var(--bone);
     background: transparent;
+    color: var(--bone);
+    border-color: var(--line-ui);
+}
+
+.btn-outline:hover,
+.btn-ghost:hover {
+    color: var(--bone);
+    border-color: var(--signal);
+    background: color-mix(in srgb, var(--signal) 8%, transparent);
+}
+
+.btn-outline:hover::before,
+.btn-ghost:hover::before {
+    display: none;
+}
+
+.btn-danger {
+    background: var(--signal-deep);
+    border-color: var(--signal-deep);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background: var(--signal);
+    border-color: var(--signal);
+    color: #ffffff;
+}
+
+.btn-danger::before {
+    background: var(--signal);
+}
+
+.btn-danger-outline {
+    background: transparent;
+    border-color: var(--line-ui);
+    color: var(--signal-text);
+}
+
+.btn-danger-outline:hover {
+    border-color: var(--signal);
+    background: var(--c-danger-tint);
+    color: var(--signal);
+}
+
+.btn-danger-outline:hover::before {
+    display: none;
 }
 
 .input,

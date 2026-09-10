@@ -8,7 +8,7 @@
         <div class="avatar lg">{{ request.user.get_short_name|slice:':2'|upper }}</div>
         <div>
             <h1>{{ request.user.nome_completo }}</h1>
-            <span class="badge badge-violet">{{ request.user.get_role_display }}</span>
+            <span class="badge badge-neutral">{{ request.user.get_role_display }}</span>
         </div>
         {% with current=request.resolver_match.url_name %}
         <nav class="account-nav" aria-label="Conta">

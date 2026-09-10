@@ -11,16 +11,18 @@
 
     <div class="classroom-header panel">
         <div>
-            <span class="eyebrow">{{ turma.disciplina.label }}</span>
+            <div class="header-kicker">
+                <span class="chip">{{ turma.disciplina.label }}</span>
+            </div>
             <h1>{{ turma.nome }}</h1>
-            <p>{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
+            <p class="mono-sm text-muted">{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
             <div class="status-row">
                 {% if turma.ativa %}
                     <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Ativa</span>
                 {% else %}
                     <span class="badge badge-neutral"><i data-lucide="archive" aria-hidden="true"></i> Inativa</span>
                 {% endif %}
-                <span class="badge badge-violet"><i data-lucide="users" aria-hidden="true"></i> {{ active_matriculas|length }} alunos ativos</span>
+                <span class="badge badge-neutral"><i data-lucide="users" aria-hidden="true"></i> {{ active_matriculas|length }} alunos ativos</span>
                 <span class="badge badge-neutral"><i data-lucide="user-x" aria-hidden="true"></i> {{ inactive_matriculas|length }} inativos</span>
             </div>
         </div>

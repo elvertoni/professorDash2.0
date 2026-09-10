@@ -2,11 +2,13 @@
 
 {% block profile_content %}
 <div class="section-heading compact">
-    <span class="eyebrow">Conta</span>
     <h2>Perfil</h2>
     <p>Dados principais da sua conta.</p>
 </div>
-<article class="card">    <span class="tag-disc">Identidade</span>
+<article class="card">
+    <div class="card-head">
+        <span class="chip">Identidade</span>
+    </div>
     <h3>{{ request.user.nome_completo }}</h3>
     <p class="desc">{{ request.user.email }}</p>
 </article>

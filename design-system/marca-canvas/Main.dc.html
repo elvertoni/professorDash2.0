@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #141414; font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; }
+    a { color: #ff5c57; } a:hover { color: #fb3732; }
+    .lbl { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #8d8d96; }
+  </style>
+</helmet>
+<div style="width: 1120px; height: 720px; background: #141414; color: #f4f3f0; display: flex; flex-direction: column; padding: 48px 56px; box-sizing: border-box; gap: 36px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(255,255,255,.11); padding-bottom: 18px">
+    <span class="lbl">Marca · Toni Coimbra</span>
+    <span class="lbl" style="color: {{accent}}">Ligadura TC — contorno próprio</span>
+  </div>
+
+  <div style="display: flex; gap: 52px; align-items: center; flex-grow: 1">
+
+    <div style="display: flex; align-items: center; justify-content: center; width: 480px; height: 340px; background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); flex-shrink: 0">
+      <svg viewBox="0 0 200 128" width="400" height="256" role="img" aria-label="Monograma TC">
+        <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+        <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#1c1c1e" stroke="#1c1c1e" stroke-width="16" stroke-linejoin="round"></path>
+        <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="{{accent}}"></path>
+      </svg>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 26px; flex-grow: 1">
+      <div style="display: flex; align-items: center; gap: 18px">
+        <svg viewBox="0 0 200 128" width="100" height="64" role="img" aria-label="Monograma TC">
+          <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+          <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#141414" stroke="#141414" stroke-width="16" stroke-linejoin="round"></path>
+          <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="{{accent}}"></path>
+        </svg>
+        <div style="width: 1px; height: 56px; background: rgba(255,255,255,.20)"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 800; font-size: 38px; letter-spacing: -.035em; line-height: 1">TONI COIMBRA</span>
+          <span class="lbl" style="letter-spacing: .3em">IA · Automação · Python · Ensino</span>
+        </div>
+      </div>
+
+      <p style="max-width: 58ch; font-size: 14px; line-height: 1.65; color: #a5a5ac; margin: 0; text-wrap: pretty">O braço do T entra por trás do C e é cortado pela curva: um vão constante de 8 unidades separa as duas letras e revela a ordem em que se sobrepõem. O C fica inteiro — nenhuma haste o atravessa —, então o desenho aguenta redução. A haste esquerda tem corte inclinado; é o traço que a Archivo não tem e que faz o monograma parar de ser fonte com kerning.</p>
+
+      <div style="display: flex; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 76px; height: 44px; background: #141414; border: 1px solid rgba(255,255,255,.34)"></div><span class="lbl" style="font-size: 10px">#141414</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 76px; height: 44px; background: #f4f3f0"></div><span class="lbl" style="font-size: 10px">#f4f3f0</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 76px; height: 44px; background: #fb3732"></div><span class="lbl" style="font-size: 10px">#fb3732</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 76px; height: 44px; background: #ffa31a"></div><span class="lbl" style="font-size: 10px">#ffa31a</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 28px; border-top: 1px solid rgba(255,255,255,.11); padding-top: 22px">
+    <span class="lbl">Prova de redução</span>
+    <div style="display: flex; align-items: center; gap: 24px">
+      <svg viewBox="0 0 200 128" width="75" height="48"><path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path><path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#141414" stroke="#141414" stroke-width="16" stroke-linejoin="round"></path><path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="{{accent}}"></path></svg>
+      <svg viewBox="0 0 200 128" width="50" height="32"><path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path><path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#141414" stroke="#141414" stroke-width="16" stroke-linejoin="round"></path><path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="{{accent}}"></path></svg>
+      <svg viewBox="0 0 200 128" width="37" height="24"><path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path><path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#141414" stroke="#141414" stroke-width="16" stroke-linejoin="round"></path><path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="{{accent}}"></path></svg>
+      <svg viewBox="0 0 200 128" width="24" height="16"><path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path><path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="#141414" stroke="#141414" stroke-width="24" stroke-linejoin="round"></path><path d="M188.65 46A50 50 0 1 0 188.65 82L162.8 82A26 30 0 1 1 162.8 46Z" fill="{{accent}}"></path></svg>
+    </div>
+    <span class="lbl" style="margin-left: auto">48 · 32 · 24 · 16 px — o último já é o corte de 16</span>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#fb3732","options":["#fb3732","#ffa31a","#f4f3f0"],"section":"Marca"},"$preview":{"width":1120,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#fb3732' };
+  }
+}
+</script>
+</body>
+</html>

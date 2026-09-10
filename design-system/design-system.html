@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Toni Coimbra — Design System</title>
+  <meta name="description" content="Catálogo vivo dos tokens, componentes e regras visuais do portfólio de Toni Coimbra.">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="../assets/favicon.svg?v=20260910">
+  <link rel="apple-touch-icon" href="../assets/favicon.svg?v=20260910">
+  <link rel="manifest" href="../site.webmanifest">
+  <link rel="preload" href="../assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/css/style.css?v=20260910">
+</head>
+
+<body class="ds-page">
+  <a class="skip-link" href="#top">Pular para o conteúdo principal</a>
+
+  <header class="hdr" id="hdr">
+    <a href="#top" class="mark" aria-label="Toni Coimbra — voltar ao topo">
+      <img class="brand-logo" src="../assets/logo.svg?v=20260910" alt="" width="50" height="32" aria-hidden="true">
+      <span class="brand-name">Toni Coimbra<span>Design system · Volta Atelier</span></span>
+    </a>
+    <nav class="navchain" aria-label="Seções do design system">
+      <a href="#marca">Marca</a>
+      <a href="#cores">Cores</a>
+      <a href="#tipografia">Tipo</a>
+      <a href="#espacamento">Ritmo</a>
+      <a href="#componentes">Componentes</a>
+      <a href="#galeria">Galeria</a>
+      <a href="#regras">Regras</a>
+    </nav>
+  </header>
+
+  <main id="top" tabindex="-1">
+    <section class="ds-hero" aria-labelledby="catalog-title">
+      <div class="shell">
+        <h1 id="catalog-title" class="d-xl">Design system<br><span class="text-muted">Toni Coimbra.</span></h1>
+        <p class="ds-lede mono-md">Uma linguagem visual para transformar complexidade em sistemas legíveis. Este catálogo demonstra a fonte canônica em <code>../assets/css/style.css</code> e documenta os padrões que devem ser reutilizados no portfólio, em projetos e em peças da marca.</p>
+      </div>
+    </section>
+
+    <section id="marca" class="sec" aria-labelledby="mark-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="mark-title" class="d-lg">Marca</h2>
+          <p class="mono-sm">A ligadura TC é contorno desenhado, não fonte com kerning. O T entra por trás do C e é cortado pela curva; um vão constante revela a ordem em que as letras se sobrepõem. O C fica inteiro — nenhuma haste o atravessa —, e é por isso que o desenho aguenta redução.</p>
+        </div>
+
+        <figure class="ds-mark-stage">
+          <img src="../assets/logo.svg?v=20260910" width="200" height="128"
+               alt="Ligadura TC: o T em osso passa por trás de um C vermelho, separados por um vão constante.">
+          <figcaption class="mono-xs">assets/logo.svg · viewBox 200×128</figcaption>
+        </figure>
+        <p class="mono-sm ds-mark-note">Todas as provas desta página carregam os arquivos que o site usa. O catálogo não guarda uma cópia do desenho — se a marca mudar no <code>assets/</code>, muda aqui junto.</p>
+
+        <h3 class="ds-mark-sub">Construção</h3>
+        <p class="mono-sm ds-mark-note">Unidades relativas à altura de caixa alta, que vale 100.</p>
+        <dl class="ds-spec-list">
+          <div class="ds-spec-row"><dt>Altura de caixa alta / linha de base</dt><dd>100 / 114</dd></div>
+          <div class="ds-spec-row"><dt>Haste vertical do T</dt><dd>32</dd></div>
+          <div class="ds-spec-row"><dt>Traço lateral do C / superior</dt><dd>28 / 24</dd></div>
+          <div class="ds-spec-row"><dt>Contraforma (largura × altura)</dt><dd>44 × 52</dd></div>
+          <div class="ds-spec-row"><dt>Abertura entre terminais</dt><dd>32</dd></div>
+          <div class="ds-spec-row"><dt>Vão entre T e C</dt><dd>8 · 12 no corte de 16 px</dd></div>
+          <div class="ds-spec-row"><dt>Corte inclinado da haste esquerda</dt><dd>12 : 30</dd></div>
+        </dl>
+
+        <h3 class="ds-mark-sub">Redução</h3>
+        <p class="mono-sm ds-mark-note">Até 24 px de altura vale o desenho padrão. Abaixo disso entra o corte de 16, com contraforma maior e vão mais largo, para o desenho não fechar em tamanho de aba e de avatar.</p>
+        <div class="ds-scale">
+          <figure class="ds-scale-step" style="--mark-h: 64px"><img src="../assets/logo.svg?v=20260910" alt=""><figcaption class="mono-xs">64</figcaption></figure>
+          <figure class="ds-scale-step" style="--mark-h: 48px"><img src="../assets/logo.svg?v=20260910" alt=""><figcaption class="mono-xs">48</figcaption></figure>
+          <figure class="ds-scale-step" style="--mark-h: 32px"><img src="../assets/logo.svg?v=20260910" alt=""><figcaption class="mono-xs">32</figcaption></figure>
+          <figure class="ds-scale-step" style="--mark-h: 24px"><img src="../assets/logo.svg?v=20260910" alt=""><figcaption class="mono-xs">24</figcaption></figure>
+          <figure class="ds-scale-step ds-scale-step--cut" style="--mark-h: 16px"><img src="../assets/favicon.svg?v=20260910" alt=""><figcaption class="mono-xs">16 · corte</figcaption></figure>
+        </div>
+
+        <h3 class="ds-mark-sub">Fundos</h3>
+        <div class="ds-grounds">
+          <figure class="ds-ground ds-ground--dark">
+            <img src="../assets/logo.svg?v=20260910" alt="">
+            <figcaption class="mono-xs">Escuro · #141414 <span>uso padrão</span></figcaption>
+          </figure>
+          <figure class="ds-ground ds-ground--light">
+            <img src="../assets/logo.svg?v=20260910" alt="">
+            <figcaption class="mono-xs">Claro · #f4f3f0 <span>o T vira tinta, o vão vira papel</span></figcaption>
+          </figure>
+          <figure class="ds-ground ds-ground--mono">
+            <img src="../assets/logo.svg?v=20260910" alt="">
+            <figcaption class="mono-xs">Monocromático <span>o vão sustenta a leitura sem o vermelho</span></figcaption>
+          </figure>
+        </div>
+
+        <h3 class="ds-mark-sub">Lockups</h3>
+        <p class="mono-sm ds-mark-note">O respiro mínimo em toda a volta é a altura da travessa do T. O lockup horizontal não desce de 160 px de largura; abaixo de 24 px de altura, use o corte de 16.</p>
+        <div class="ds-lockups">
+          <figure class="ds-lockup" style="--mark-h: 50px">
+            <span class="ds-lockup-clear">
+              <span class="ds-lockup-h">
+                <img src="../assets/logo.svg?v=20260910" alt="">
+                <span class="ds-lockup-name">Toni<br>Coimbra</span>
+              </span>
+            </span>
+            <figcaption class="mono-xs">Horizontal <span>cabeçalho e assinatura de e-mail</span></figcaption>
+          </figure>
+          <figure class="ds-lockup" style="--mark-h: 67px">
+            <span class="ds-lockup-clear">
+              <span class="ds-lockup-v">
+                <img src="../assets/logo.svg?v=20260910" alt="">
+                <span class="ds-lockup-name">Toni Coimbra</span>
+              </span>
+            </span>
+            <figcaption class="mono-xs">Vertical <span>capa de projeto, apresentação, impresso</span></figcaption>
+          </figure>
+          <figure class="ds-lockup" style="--mark-h: 64px">
+            <span class="ds-lockup-clear">
+              <img src="../assets/favicon.svg?v=20260910" alt="">
+            </span>
+            <figcaption class="mono-xs">Selo <span>avatar e favicon · assets/favicon.svg</span></figcaption>
+          </figure>
+        </div>
+
+        <h3 class="ds-mark-sub">Regras da marca</h3>
+        <div class="ds-rule-list">
+          <div class="ds-rule-row"><strong>Carregue o arquivo</strong><p class="mono-sm">Use <code>assets/logo.svg</code> e <code>assets/favicon.svg</code>. Não redesenhe o monograma a partir da Archivo: o corte inclinado da haste e a cunha do braço direito não existem na fonte.</p></div>
+          <div class="ds-rule-row"><strong>Declare o esquema de cor</strong><p class="mono-sm">O T troca de cor por <code>prefers-color-scheme</code>. Numa superfície escura fora deste site, a página precisa declarar <code>color-scheme: dark</code> — sem isso, um leitor com o sistema no claro recebe um T #141414 sobre fundo escuro.</p></div>
+          <div class="ds-rule-row"><strong>Respiro é medida, não estimativa</strong><p class="mono-sm">A altura da travessa do T em toda a volta. Nada entra nessa faixa: nem texto, nem borda, nem outra marca.</p></div>
+          <div class="ds-rule-row"><strong>O vermelho é do C</strong><p class="mono-sm">O acento vive no C e no ponto final do logotipo. Não tinja o T, não aplique gradiente e não troque o <code>--color-accent</code> por outro tom.</p></div>
+          <div class="ds-rule-row"><strong>Uma assinatura por peça</strong><p class="mono-sm">A linha única é a assinatura padrão. A versão técnica, com a linha de disciplinas, fica para rodapé e crédito — nunca concorre com a principal na mesma peça.</p></div>
+          <div class="ds-rule-row"><strong>Fonte da verdade</strong><p class="mono-sm">Construção, lockups e provas de redução vivem em <code>design-system/marca-canvas/</code>. Qualquer alteração da marca começa lá e desce para os dois SVG.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cores" class="sec" aria-labelledby="colors-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="colors-title" class="d-lg">Cores</h2>
+          <p class="mono-sm">A paleta parte de um preto quente, branco ósseo e vermelho de sinalização. Os nomes semânticos são públicos; os aliases curtos continuam disponíveis para os componentes existentes.</p>
+        </div>
+
+        <dl class="ds-token-list">
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--bg" aria-label="Amostra de cor de fundo"></dt>
+            <dd class="ds-token-name">--color-bg</dd>
+            <dd class="ds-token-value">#141414</dd>
+            <dd class="ds-token-use">Fundo principal, áreas de leitura e elementos de navegação.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--deep" aria-label="Amostra de cor de fundo profundo"></dt>
+            <dd class="ds-token-name">--color-bg-deep</dd>
+            <dd class="ds-token-value">#0d0d0d</dd>
+            <dd class="ds-token-use">Rodapé, drawer móvel e superfícies que precisam recuar.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--surface" aria-label="Amostra de superfície"></dt>
+            <dd class="ds-token-name">--color-surface</dd>
+            <dd class="ds-token-value">#1c1c1e</dd>
+            <dd class="ds-token-use">Superfície padrão para cards, campos e blocos de conteúdo.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--raised" aria-label="Amostra de superfície elevada"></dt>
+            <dd class="ds-token-name">--color-surface-raised</dd>
+            <dd class="ds-token-value">#232326</dd>
+            <dd class="ds-token-use">Estado hover ou foco de uma superfície já existente.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--text" aria-label="Amostra de texto principal"></dt>
+            <dd class="ds-token-name">--color-text</dd>
+            <dd class="ds-token-value">#f4f3f0</dd>
+            <dd class="ds-token-use">Títulos, dados principais e texto que precisa de leitura imediata.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--muted" aria-label="Amostra de texto secundário"></dt>
+            <dd class="ds-token-name">--color-text-muted</dd>
+            <dd class="ds-token-value">#a5a5ac</dd>
+            <dd class="ds-token-use">Descrições, legendas e contexto de apoio.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--subtle" aria-label="Amostra de texto sutil"></dt>
+            <dd class="ds-token-name">--color-text-subtle</dd>
+            <dd class="ds-token-value">#8d8d96</dd>
+            <dd class="ds-token-use">Metadados e informação terciária com contraste validado.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--accent" aria-label="Amostra de acento"></dt>
+            <dd class="ds-token-name">--color-accent</dd>
+            <dd class="ds-token-value">#fb3732</dd>
+            <dd class="ds-token-use">Sinal visual, detalhes de marca e estados de atenção.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--accent-strong" aria-label="Amostra de acento forte"></dt>
+            <dd class="ds-token-name">--color-accent-strong</dd>
+            <dd class="ds-token-value">#d1211d</dd>
+            <dd class="ds-token-use">Preenchimentos com texto branco e ações de maior contraste.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--warning" aria-label="Amostra de aviso"></dt>
+            <dd class="ds-token-name">--color-warning</dd>
+            <dd class="ds-token-value">#ffa31a</dd>
+            <dd class="ds-token-use">Avisos e estados que pedem atenção sem indicar erro.</dd>
+          </div>
+          <div class="ds-token-row">
+            <dt class="ds-swatch ds-swatch--success" aria-label="Amostra de sucesso"></dt>
+            <dd class="ds-token-name">--color-success</dd>
+            <dd class="ds-token-value">#4ade80</dd>
+            <dd class="ds-token-use">Confirmações de envio e conclusão de uma ação.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section id="tipografia" class="sec" aria-labelledby="type-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="type-title" class="d-lg">Tipografia</h2>
+          <p class="mono-sm">Archivo dá peso à assinatura e aos títulos. JetBrains Mono organiza dados, navegação e texto de apoio. O tamanho escala com <code>clamp()</code> para preservar ritmo entre 320px e monitores largos.</p>
+        </div>
+
+        <div class="ds-type-list">
+          <div class="ds-type-row"><code class="ds-type-token">.d-mega</code><span class="ds-type-sample d-mega">Autoria</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.d-xl</code><span class="ds-type-sample d-xl">Sistemas</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.d-lg</code><span class="ds-type-sample d-lg">Projetos que funcionam.</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.d-md</code><span class="ds-type-sample d-md">Precisão visual.</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.d-sm</code><span class="ds-type-sample d-sm">Inteligência aplicada</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.mono-md</code><span class="ds-type-sample mono-md">Texto de leitura com medida confortável e contraste estável.</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.mono-sm</code><span class="ds-type-sample mono-sm">Descrição, legenda ou contexto para acompanhar uma decisão.</span></div>
+          <div class="ds-type-row"><code class="ds-type-token">.mono-xs</code><span class="ds-type-sample mono-xs">METADADO · 2026</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="espacamento" class="sec" aria-labelledby="spacing-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="spacing-title" class="d-lg">Ritmo e forma</h2>
+          <p class="mono-sm">A escala de espaçamento reduz decisões isoladas. Use os passos para agrupar conteúdo, separar blocos e criar pausas de seção. Raios maiores pertencem a superfícies; pills ficam reservadas a controles pequenos.</p>
+        </div>
+
+        <div class="ds-space-list">
+          <div class="ds-space-row"><code class="ds-space-token">--space-1</code><span class="mono-xs">4px</span><span class="ds-space-bar" style="--space-demo: var(--space-1)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-2</code><span class="mono-xs">8px</span><span class="ds-space-bar" style="--space-demo: var(--space-2)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-3</code><span class="mono-xs">12px</span><span class="ds-space-bar" style="--space-demo: var(--space-3)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-4</code><span class="mono-xs">16px</span><span class="ds-space-bar" style="--space-demo: var(--space-4)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-6</code><span class="mono-xs">24px</span><span class="ds-space-bar" style="--space-demo: var(--space-6)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-8</code><span class="mono-xs">32px</span><span class="ds-space-bar" style="--space-demo: var(--space-8)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-12</code><span class="mono-xs">48px</span><span class="ds-space-bar" style="--space-demo: var(--space-12)"></span></div>
+          <div class="ds-space-row"><code class="ds-space-token">--space-16</code><span class="mono-xs">64px</span><span class="ds-space-bar" style="--space-demo: var(--space-16)"></span></div>
+        </div>
+
+        <div class="ds-geometry" aria-label="Raios de borda">
+          <div class="ds-geometry-item"><span class="ds-radius-demo ds-radius-demo--control" aria-hidden="true"></span><code class="ds-type-token">--radius-control</code><p class="mono-xs">Campos e mensagens</p></div>
+          <div class="ds-geometry-item"><span class="ds-radius-demo ds-radius-demo--surface" aria-hidden="true"></span><code class="ds-type-token">--radius-surface</code><p class="mono-xs">Cards e superfícies</p></div>
+          <div class="ds-geometry-item"><span class="ds-radius-demo ds-radius-demo--emphasis" aria-hidden="true"></span><code class="ds-type-token">--radius-emphasis</code><p class="mono-xs">Blocos destacados</p></div>
+          <div class="ds-geometry-item"><span class="ds-radius-demo ds-radius-demo--media" aria-hidden="true"></span><code class="ds-type-token">--radius-media</code><p class="mono-xs">Mídia e recortes</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="componentes" class="sec" aria-labelledby="components-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="components-title" class="d-lg">Componentes</h2>
+          <p class="mono-sm">Os exemplos abaixo são os mesmos componentes consumidos pelo portfólio. Componha a partir deles antes de criar uma nova variação; o estado deve comunicar a ação, o foco ou o resultado sem depender apenas da cor.</p>
+        </div>
+
+        <div class="ds-component-grid">
+          <article class="ds-demo">
+            <h3>Ações</h3>
+            <p class="mono-sm">Use um botão preenchido para a ação principal e o ghost quando a ação tiver menor prioridade.</p>
+            <div class="ds-demo-body ds-state-row">
+              <a class="btn" href="#componentes">Ação principal <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a>
+              <a class="btn btn--ghost" href="#regras">Ação secundária</a>
+              <button class="btn" type="button" disabled>Indisponível</button>
+            </div>
+          </article>
+
+          <article class="ds-demo">
+            <h3>Chips</h3>
+            <p class="mono-sm">Chips classificam, filtram ou mostram status curto. Para links, preserve o alvo mínimo de 44px.</p>
+            <div class="ds-demo-body ds-state-row">
+              <span class="chip">Padrão</span>
+              <span class="chip chip--solid">Institucional</span>
+              <span class="chip chip--signal">Em produção</span>
+              <a class="chip" href="#regras">Link com alvo ampliado</a>
+            </div>
+          </article>
+
+          <article class="ds-demo">
+            <h3>Superfície</h3>
+            <p class="mono-sm">Uma superfície agrupa informação relacionada e responde com elevação curta quando carrega interação.</p>
+            <div class="ds-demo-body">
+              <article class="box box--card p-6">
+                <span class="mono-xs">COMPONENTE · BOX</span>
+                <h4 class="d-sm mt-4">Clareza antes de ornamento</h4>
+                <p class="mono-sm mt-4">Borda discreta, contraste suficiente e espaço para o conteúdo respirar.</p>
+              </article>
+            </div>
+          </article>
+
+          <article class="ds-demo">
+            <h3>Bloco de processo</h3>
+            <p class="mono-sm">O padrão de fase organiza uma categoria, seu título, contexto e itens de suporte.</p>
+            <div class="ds-demo-body">
+              <div class="phase">
+                <span class="num">01 · PADRÃO</span>
+                <h3>Estrutura</h3>
+                <div class="bar"><i></i></div>
+                <p class="mono-sm">Reúna conteúdo que compartilha uma mesma decisão.</p>
+                <ul><li>Hierarquia visível</li><li>Ritmo consistente</li></ul>
+              </div>
+            </div>
+          </article>
+
+          <article id="estados" class="ds-demo">
+            <h3>Estados</h3>
+            <p class="mono-sm">Feedback distingue sucesso, atenção e erro por texto, cor e contexto.</p>
+            <div class="ds-demo-body ds-state-row">
+              <div class="form-result form-result--ok">Mensagem enviada com sucesso.</div>
+              <div class="form-result form-result--warn">Confira os campos antes de continuar.</div>
+            </div>
+          </article>
+
+          <article class="ds-demo">
+            <h3>Campos</h3>
+            <p class="mono-sm">Rótulos nomeiam o dado, o placeholder apenas orienta e o erro explica como recuperar.</p>
+            <div class="ds-demo-body">
+              <div class="form-row">
+                <label class="form-label" for="catalog-email">E-mail de contato</label>
+                <input class="form-field" id="catalog-email" type="email" placeholder="nome@exemplo.com">
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="galeria" class="sec" aria-labelledby="gallery-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="gallery-title" class="d-lg">Galeria</h2>
+          <p class="mono-sm">Quando uma tela precisa mostrar muitas imagens, a grade cansa antes da terceira fileira. Este componente põe as fichas num anel: a da frente tem autoridade, as de trás recuam e escurecem, e o conjunto responde ao arrasto, à roda horizontal e às setas do teclado. Sem JavaScript ou sob movimento reduzido, o mesmo bloco continua sendo um trilho legível com todas as imagens presentes.</p>
+        </div>
+
+        <div class="gallery" data-gallery data-gallery-label="Ver">
+          <div class="gallery-stage" data-gallery-stage aria-label="Projetos e capas editoriais">
+            <ul class="gallery-track" data-gallery-track>
+              <li class="gallery-item" data-gallery-title="ProfessorDash">
+                <figure class="gcard">
+                  <img src="../assets/img/professordash.webp" alt="Portal do aluno do ProfessorDash: cabeçalho escuro com a jornada da turma e os cartões de aula pronta, publicação e progresso do aluno." loading="lazy" decoding="async" width="800" height="296">
+                  <figcaption><span class="gcard-title">ProfessorDash</span> <span class="chip">Educação</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="Capa · Educação">
+                <figure class="gcard">
+                  <img src="../assets/img/cover-education-640.webp" alt="Capa editorial de educação: placas escuras dispostas em camadas sobre fundo preto, com um livro aberto em relevo no centro, um gráfico de setor vermelho e uma lâmpada âmbar acesa ligada por fios finos." loading="lazy" decoding="async" width="640" height="640">
+                  <figcaption><span class="gcard-title">Capa · Educação</span> <span class="chip chip--signal">Editorial</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="eSIMBA">
+                <figure class="gcard">
+                  <img src="../assets/img/esimba.webp" alt="Tela de acesso institucional do eSIMBA, com o brasão do sistema e o formulário de login." loading="lazy" decoding="async" width="800" height="364">
+                  <figcaption><span class="gcard-title">eSIMBA</span> <span class="chip">Institucional</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="Capa · Institucional">
+                <figure class="gcard">
+                  <img src="../assets/img/cover-civic-640.webp" alt="Capa editorial institucional: um selo de concreto com a fachada de um tribunal em relevo, cercado por placas cinza, tiras vermelhas e uma malha de pontos ligada por linhas tracejadas." loading="lazy" decoding="async" width="640" height="640">
+                  <figcaption><span class="gcard-title">Capa · Institucional</span> <span class="chip chip--signal">Editorial</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="Vitalis">
+                <figure class="gcard">
+                  <img src="../assets/img/vitalis.webp" alt="Página inicial do Vitalis com a chamada Cuide, Registre, Evolua e um cartão mostrando a linha do tempo do dia." loading="lazy" decoding="async" width="800" height="364">
+                  <figcaption><span class="gcard-title">Vitalis</span> <span class="chip">Saúde</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="Capa · Saúde">
+                <figure class="gcard">
+                  <img src="../assets/img/cover-health-640.webp" alt="Capa editorial de saúde: painéis claros e escuros enfileirados sobre bancadas de pedra, atravessados por uma linha de eletrocardiograma âmbar e acompanhados de barras coloridas, uma cuia rasa e um ramo verde." loading="lazy" decoding="async" width="640" height="640">
+                  <figcaption><span class="gcard-title">Capa · Saúde</span> <span class="chip chip--signal">Editorial</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="Noivas e Cia">
+                <figure class="gcard">
+                  <img src="../assets/img/noivas-e-cia.webp" alt="Sistema Noivas e Cia: tela inicial com gestão comercial, catálogo de trajes e controle de locação para eventos." loading="lazy" decoding="async" width="800" height="364">
+                  <figcaption><span class="gcard-title">Noivas e Cia</span> <span class="chip">Comércio</span></figcaption>
+                </figure>
+              </li>
+              <li class="gallery-item" data-gallery-title="Capa · Comércio">
+                <figure class="gcard">
+                  <img src="../assets/img/cover-commerce-640.webp" alt="Capa editorial de comércio: tecidos cinza, cru e vermelho empilhados em ondas sobre fundo preto, ao lado de uma arara com trajes em miniatura, amostras de pano e um provador refletido num espelho redondo." loading="lazy" decoding="async" width="640" height="640">
+                  <figcaption><span class="gcard-title">Capa · Comércio</span> <span class="chip chip--signal">Editorial</span></figcaption>
+                </figure>
+              </li>
+            </ul>
+          </div>
+
+          <div class="gallery-controls">
+            <button class="gallery-nav gallery-nav--prev" type="button" data-gallery-prev aria-label="Imagem anterior">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5 6 12l7 7M6 12h12"/></svg>
+            </button>
+            <button class="gallery-nav gallery-nav--next" type="button" data-gallery-next aria-label="Próxima imagem">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5 6 12l7 7M6 12h12"/></svg>
+            </button>
+            <p class="gallery-status" data-gallery-status role="status"></p>
+          </div>
+        </div>
+
+        <div class="ds-rule-list">
+          <div class="ds-rule-row"><strong>Onde usar</strong><p class="mono-sm">Superfícies com seis imagens ou mais que compartilham um mesmo assunto: telas de um produto, capas de uma coleção, registros de uma turma. Abaixo de seis fichas o anel não fecha e uma grade comum comunica melhor.</p></div>
+          <div class="ds-rule-row"><strong>Como consumir</strong><p class="mono-sm">Copie o bloco <code>GALERIA EM ARCO</code> de <code>assets/css/style.css</code> e o arquivo <code>assets/js/gallery.js</code>. O script não depende de <code>main.js</code>, não tem etapa de compilação e liga sozinho em qualquer elemento com <code>data-gallery</code>.</p></div>
+          <div class="ds-rule-row"><strong>Contrato de marcação</strong><p class="mono-sm">O bloco precisa de <code>[data-gallery-stage]</code>, <code>[data-gallery-track]</code> e uma ficha por item. <code>data-gallery-title</code> nomeia a ficha na região viva; sem ele, o <code>alt</code> da imagem assume. Os controles são opcionais e reconhecidos por <code>[data-gallery-prev]</code>, <code>[data-gallery-next]</code> e <code>[data-gallery-status]</code>.</p></div>
+          <div class="ds-rule-row"><strong>Estado sem JavaScript</strong><p class="mono-sm">O anel é progressivo: o CSS declara o trilho e o script acrescenta <code>.is-live</code>. Toda imagem precisa de <code>alt</code> real, porque o estado sem script é o que sobra quando o resto falha.</p></div>
+          <div class="ds-rule-row"><strong>Movimento reduzido</strong><p class="mono-sm">Sob <code>prefers-reduced-motion</code> nenhum quadro é agendado: o componente permanece no trilho e os botões passam a rolá-lo. A deriva também para enquanto o foco está dentro do palco.</p></div>
+          <div class="ds-rule-row"><strong>Custo por quadro</strong><p class="mono-sm">Um único laço serve todas as galerias da página e só acorda quando alguma está visível e a aba está ativa. Fora da tela o anel desliga; ao voltar, um <code>IntersectionObserver</code> o reacende.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="regras" class="sec" aria-labelledby="rules-title">
+      <div class="shell">
+        <div class="ds-section-head">
+          <h2 id="rules-title" class="d-lg">Regras de uso</h2>
+          <p class="mono-sm">O sistema serve para reduzir escolhas arbitrárias e manter a autoria reconhecível em cada ponto de contato.</p>
+        </div>
+
+        <div class="ds-rule-list">
+          <div class="ds-rule-row"><strong>Comece pelos tokens</strong><p class="mono-sm">Use uma cor, passo de espaço, raio, escala tipográfica e curva de motion existentes antes de criar um valor novo.</p></div>
+          <div class="ds-rule-row"><strong>Um propósito por variação</strong><p class="mono-sm">Uma ação principal, um status ou um estado elevado deve ter uma diferença clara de prioridade e comportamento.</p></div>
+          <div class="ds-rule-row"><strong>Conteúdo lidera</strong><p class="mono-sm">Superfícies apoiam projetos, dados e decisões. Não envolva informação em cards apenas para preencher uma grade.</p></div>
+          <div class="ds-rule-row"><strong>Estados são completos</strong><p class="mono-sm">Toda interação precisa considerar hover, foco, desabilitado, carregamento, erro, sucesso e movimento reduzido.</p></div>
+          <div class="ds-rule-row"><strong>Teste em 320px</strong><p class="mono-sm">Preserve leitura, foco e alvos de toque em telas pequenas. A composição pode mudar; a informação não pode desaparecer.</p></div>
+          <div class="ds-rule-row"><strong>Arquivo canônico</strong><p class="mono-sm">Tokens e componentes vivem em <code>assets/css/style.css</code>. Esta página demonstra e explica; não duplica estilos.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell py-8">
+      <p class="mono-xs">Toni Coimbra · Design system · Fonte canônica: assets/css/style.css</p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/gallery.js?v=20260910" defer></script>
+</body>
+</html>

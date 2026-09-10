@@ -51,7 +51,7 @@
                 {% for item in para_fazer_hoje %}
                     <article class="card today-card">
                         <div class="card-head">
-                            <span class="tag-disc">{{ item.obj.turma.nome }}</span>
+                            <span class="chip">{{ item.obj.turma.nome }}</span>
                             <span class="badge badge-warning"><i data-lucide="zap" aria-hidden="true"></i> Aula de hoje</span>
                         </div>
                         <h3>{{ item.obj.aula.titulo }}</h3>
@@ -112,7 +112,7 @@
                 {% for turma in turmas %}
                     <article class="card">
                         <div class="card-head">
-                            <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                            <span class="chip">{{ turma.disciplina.label }}</span>
                             {% if turma.total_pendentes %}
                                 <span class="badge badge-warning"><i data-lucide="circle-dashed" aria-hidden="true"></i> {{ turma.total_pendentes }} pendente{{ turma.total_pendentes|pluralize }}</span>
                             {% elif turma.total_aulas %}

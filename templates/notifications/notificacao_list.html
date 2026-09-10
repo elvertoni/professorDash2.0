@@ -6,7 +6,6 @@
     <section class="classroom-page">
         <div class="page-heading-row compact">
             <div class="section-heading">
-                <span class="eyebrow">Central</span>
                 <h1>Notificações</h1>
                 <p>Acompanhe aulas liberadas e avisos de atividades.</p>
             </div>
@@ -26,7 +25,7 @@
                 {% for notificacao in notificacoes %}
                     <article class="notification-item{% if not notificacao.lida %} is-unread{% endif %}">
                         <div class="notification-meta">
-                            <span class="badge {% if notificacao.tipo == 'aula' %}badge-info{% elif notificacao.tipo == 'atividade' %}badge-violet{% elif notificacao.tipo == 'prazo' %}badge-warning{% else %}badge-success{% endif %}">
+                            <span class="badge {% if notificacao.tipo == 'aula' %}badge-info{% elif notificacao.tipo == 'atividade' %}badge-neutral{% elif notificacao.tipo == 'prazo' %}badge-warning{% else %}badge-success{% endif %}">
                                 <i data-lucide="{% if notificacao.tipo == 'aula' %}book-open{% elif notificacao.tipo == 'atividade' %}clipboard-list{% elif notificacao.tipo == 'prazo' %}clock{% else %}check-circle{% endif %}" aria-hidden="true"></i>
                                 {{ notificacao.get_tipo_display }}
                             </span>

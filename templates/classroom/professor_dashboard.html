@@ -7,11 +7,13 @@
 
     <div class="page-hero">
         <div class="page-hero-copy">
-            <span class="eyebrow">Professor · Painel</span>
+            <div class="page-hero-kicker">
+                <span class="chip">Painel do Professor</span>
+            </div>
             <h1>Olá, <span class="accent">{{ request.user.get_short_name }}</span></h1>
-            <p class="dek">Suas turmas por série e disciplina. Clique em uma série para expandir ou recolher.</p>
+            <p class="dek">Suas turmas organizadas por série e disciplina. Selecione uma série para expandir o lote.</p>
         </div>
-        <div class="page-hero-meta">
+        <div class="page-hero-meta mono">
             <b>{{ total_alunos }}</b> aluno{{ total_alunos|pluralize }} ativo{{ total_alunos|pluralize }}<br>
             {{ total_turmas }} turma{{ total_turmas|pluralize }} · {{ series_list|length }} série{{ series_list|length|pluralize }}
         </div>
@@ -57,7 +59,7 @@
                     {% for turma in serie.turmas %}
                     <article class="card">
                         <div class="card-head">
-                            <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                            <span class="chip">{{ turma.disciplina.label }}</span>
                             <span class="badge badge-neutral">
                                 <i data-lucide="users" aria-hidden="true"></i>
                                 {{ turma.stats.alunos|default:0 }}

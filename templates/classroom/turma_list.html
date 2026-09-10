@@ -6,7 +6,6 @@
 <section class="classroom-page">
     <div class="section-heading compact page-heading-row">
         <div>
-            <span class="eyebrow">Turmas</span>
             <h1>Minhas turmas</h1>
             <p>Gerencie turmas, códigos de convite e matrículas dos alunos.</p>
         </div>
@@ -19,7 +18,10 @@
     {% if turmas %}
         <div class="feature-grid classroom-grid">
             {% for turma in turmas %}
-                <article class="card">                    <span class="tag-disc">{{ turma.disciplina.label }}</span>
+                <article class="card">
+                    <div class="card-head">
+                        <span class="chip">{{ turma.disciplina.label }}</span>
+                    </div>
                     <h3>{{ turma.nome }}</h3>
                     <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
                     <div class="status-row">
@@ -28,7 +30,7 @@
                         {% else %}
                             <span class="badge badge-neutral"><i data-lucide="archive" aria-hidden="true"></i> Inativa</span>
                         {% endif %}
-                        <span class="badge badge-violet"><i data-lucide="users" aria-hidden="true"></i> {{ turma.active_students }} alunos</span>
+                        <span class="badge badge-neutral"><i data-lucide="users" aria-hidden="true"></i> {{ turma.active_students }} alunos</span>
                     </div>
                     <div class="invite-code">
                         <span>Código</span>

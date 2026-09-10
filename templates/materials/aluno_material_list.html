@@ -11,7 +11,9 @@
     </nav>
 
     <div class="section-heading compact">
-        <span class="eyebrow">{{ turma.disciplina.label }}</span>
+        <div class="heading-kicker">
+            <span class="chip">{{ turma.disciplina.label }}</span>
+        </div>
         <h1>Materiais da turma</h1>
         <p>Baixe arquivos e acesse links compartilhados pelo professor.</p>
     </div>
@@ -22,7 +24,7 @@
             {% for material in materiais %}
                 <article class="card">
                     <div class="card-head">
-                        <span class="tag-disc">
+                        <span class="chip">
                             <i class="icon-inline" data-lucide="{% if material.tipo == 'pdf' %}file-text{% elif material.tipo == 'slide' %}presentation{% elif material.tipo == 'link' %}external-link{% elif material.tipo == 'video' %}video{% else %}file{% endif %}" aria-hidden="true"></i>
                             {{ material.get_tipo_display }}
                         </span>

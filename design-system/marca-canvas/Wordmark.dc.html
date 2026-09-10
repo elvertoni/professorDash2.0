@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #141414; font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; }
+    a { color: #ff5c57; } a:hover { color: #fb3732; }
+  </style>
+</helmet>
+<div style="width: 1120px; height: 560px; background: #141414; color: #f4f3f0; box-sizing: border-box; padding: 48px 56px; display: flex; flex-direction: column; gap: 32px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(255,255,255,.11); padding-bottom: 18px">
+    <span style="font-size: 11px; letter-spacing: .18em; color: #8d8d96">LOGOTIPO</span>
+    <span style="font-size: 11px; letter-spacing: .18em; color: #8d8d96">ARCHIVO 800 · JETBRAINS MONO 700</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; flex-grow: 1">
+
+    <div style="display: flex; flex-direction: column; gap: 20px">
+      <span style="font-size: 10px; letter-spacing: .16em; color: #fb3732">01 — LINHA ÚNICA</span>
+      <div style="background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); padding: 32px 24px; display: flex; align-items: center; justify-content: center; flex-grow: 1">
+        <div style="display: flex; align-items: baseline; gap: 10px">
+          <span style="font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -.035em; line-height: 1">TONI COIMBRA</span>
+          <span style="width: 9px; height: 9px; background: #fb3732; display: block"></span>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #8d8d96; text-wrap: pretty">Assinatura padrão. O quadrado vermelho é ponto final, não bullet: fecha a linha e carrega o acento sem colorir a tipografia.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px">
+      <span style="font-size: 10px; letter-spacing: .16em; color: #fb3732">02 — EMPILHADA</span>
+      <div style="background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); padding: 32px 24px; display: flex; align-items: center; justify-content: center; flex-grow: 1">
+        <div style="display: flex; align-items: stretch; gap: 16px">
+          <div style="width: 4px; background: #fb3732"></div>
+          <div style="display: flex; flex-direction: column">
+            <span style="font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 800; font-size: 40px; letter-spacing: -.04em; line-height: .96">TONI</span>
+            <span style="font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 800; font-size: 40px; letter-spacing: -.04em; line-height: .96">COIMBRA</span>
+          </div>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #8d8d96; text-wrap: pretty">Para formatos verticais e estreitos: capa de projeto, slide, coluna lateral. O filete substitui o ponto e ancora o bloco à esquerda.</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px">
+      <span style="font-size: 10px; letter-spacing: .16em; color: #fb3732">03 — TÉCNICA</span>
+      <div style="background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); padding: 32px 24px; display: flex; align-items: center; justify-content: center; flex-grow: 1">
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <span style="font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-weight: 700; font-size: 20px; letter-spacing: .22em">TONI COIMBRA</span>
+          <span style="font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; font-weight: 400; font-size: 11px; letter-spacing: .3em; color: #8d8d96">IA · AUTOMAÇÃO · PYTHON</span>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #8d8d96; text-wrap: pretty">Assinatura secundária, só para rodapé, crédito e material técnico. Nunca concorre com a 01 na mesma peça.</p>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

@@ -14,11 +14,13 @@
 
     <div class="classroom-header panel">
         <div>
-            <span class="eyebrow">{{ turma.disciplina.label }}</span>
+            <div class="header-kicker">
+                <span class="chip">{{ turma.disciplina.label }}</span>
+            </div>
             <h1>{{ turma.nome }}</h1>
-            <p>{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
+            <p class="mono-sm text-muted">{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
             <div class="status-row">
-                <span class="badge badge-violet"><i data-lucide="book-open" aria-hidden="true"></i> {{ total }} aulas disponíveis</span>
+                <span class="badge badge-neutral"><i data-lucide="book-open" aria-hidden="true"></i> {{ total }} aulas disponíveis</span>
                 <span class="badge badge-success"><i data-lucide="check-check" aria-hidden="true"></i> {{ concluidas }} concluídas</span>
             </div>
             <div class="progress-row">
@@ -61,7 +63,7 @@
                     </div>
 
                     <div class="card-head">
-                        <span class="tag-disc">Aula {{ publicada.ordem_na_turma }} · {{ publicada.aula.trilha.label }}</span>
+                        <span class="chip">Aula {{ publicada.ordem_na_turma }} · {{ publicada.aula.trilha.label }}</span>
                         {% if publicada.concluida %}
                             <span class="badge badge-success"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</span>
                         {% else %}

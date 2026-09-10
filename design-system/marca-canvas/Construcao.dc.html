@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; background: #141414; font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace; }
+    a { color: #ff5c57; } a:hover { color: #fb3732; }
+    .lbl { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #8d8d96; }
+    .spec { display: flex; justify-content: space-between; gap: 16px; font-size: 12px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.11); }
+    .spec span:first-child { color: #a5a5ac; }
+    .spec span:last-child { color: #f4f3f0; }
+  </style>
+</helmet>
+<div style="width: 1120px; height: 640px; background: #141414; color: #f4f3f0; display: flex; flex-direction: column; padding: 44px 56px; box-sizing: border-box; gap: 28px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(255,255,255,.11); padding-bottom: 16px">
+    <span class="lbl">Construção</span>
+    <span class="lbl">Unidades relativas — caixa alta = 100</span>
+  </div>
+
+  <div style="display: flex; gap: 44px; flex-grow: 1">
+
+    <div style="width: 580px; flex-shrink: 0; background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 200 128" width="520" height="333" role="img" aria-label="Monograma TC com as guias de construção">
+        <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+        <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#1c1c1e" stroke="#1c1c1e" stroke-width="16" stroke-linejoin="round"></path>
+        <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#fb3732"></path>
+        <g fill="none" stroke="#8d8d96" stroke-width=".6" opacity=".85">
+          <circle cx="142" cy="64" r="50"></circle>
+          <ellipse cx="142" cy="64" rx="22" ry="26"></ellipse>
+          <path d="M0 14H200M0 114H200M0 64H200" stroke-dasharray="3 3"></path>
+          <path d="M46 0V128M78 0V128M142 0V128" stroke-dasharray="3 3"></path>
+        </g>
+        <g fill="none" stroke="#fb3732" stroke-width=".9">
+          <path d="M189.37 48H197M189.37 80H197M196 48V80"></path>
+        </g>
+      </svg>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; flex-grow: 1">
+
+      <div style="display: flex; flex-direction: column">
+        <div class="spec"><span>Altura de caixa alta / linha de base</span><span>100 / 114</span></div>
+        <div class="spec"><span>Haste vertical do T</span><span>32</span></div>
+        <div class="spec"><span>Traço lateral do C / superior</span><span>28 / 24</span></div>
+        <div class="spec"><span>Contraforma (largura × altura)</span><span>44 × 52</span></div>
+        <div class="spec"><span>Abertura entre terminais</span><span>32</span></div>
+        <div class="spec"><span>Vão entre T e C</span><span>8 &nbsp;·&nbsp; 12 no corte de 16 px</span></div>
+        <div class="spec"><span>Corte inclinado da haste esquerda</span><span>12 : 30</span></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
+        <span class="lbl" style="color: #fb3732">O que mudou em relação ao estudo</span>
+        <div style="display: flex; gap: 20px; align-items: stretch">
+          <div style="flex-grow: 1; background: #1c1c1e; border: 1px solid rgba(255,255,255,.11); padding: 18px; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center">
+            <div style="position: relative; width: 116px; height: 74px">
+              <span style="position: absolute; left: 46px; top: 0; font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 900; font-size: 95px; line-height: .78; color: #fb3732">C</span>
+              <span style="position: absolute; left: 0; top: 0; font-family: Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 900; font-size: 95px; line-height: .78; color: #f4f3f0; -webkit-text-stroke: 6px #1c1c1e; paint-order: stroke fill">T</span>
+            </div>
+            <span style="font-size: 10px; letter-spacing: .14em; color: #8d8d96">ANTES — ARCHIVO COM KERNING</span>
+          </div>
+          <div style="flex-grow: 1; background: #1c1c1e; border: 1px solid rgba(255,255,255,.34); padding: 18px; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center">
+            <svg viewBox="0 0 200 128" width="116" height="74">
+              <path d="M8 14H150V44H78V114H46V44H20Z" fill="#f4f3f0"></path>
+              <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#1c1c1e" stroke="#1c1c1e" stroke-width="16" stroke-linejoin="round"></path>
+              <path d="M189.37 48A50 50 0 1 0 189.37 80L159.34 80A22 26 0 1 1 159.34 48Z" fill="#fb3732"></path>
+            </svg>
+            <span style="font-size: 10px; letter-spacing: .14em; color: #f4f3f0">DEPOIS — CONTORNO PRÓPRIO</span>
+          </div>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #8d8d96; text-wrap: pretty">O T passa a ficar atrás do C, o braço direito vira uma cunha cortada pela curva, a haste esquerda ganha corte inclinado e a abertura do C fecha para 32. Nada disso sai da fonte — e o desenho deixa de depender de ter a Archivo instalada.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

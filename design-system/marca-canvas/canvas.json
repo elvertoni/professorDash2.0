@@ -1,0 +1,23 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Marca" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1120, "h": 720, "page": "page-1", "title": "Ligadura TC" },
+    { "file": "Construcao.dc.html", "x": 0, "y": 840, "w": 1120, "h": 640, "page": "page-1", "title": "Construção" },
+    { "file": "Wordmark.dc.html", "x": 0, "y": 1600, "w": 1120, "h": 560, "page": "page-1", "title": "Logotipo" },
+    { "file": "Lockups.dc.html", "x": 0, "y": 2280, "w": 1120, "h": 640, "page": "page-1", "title": "Lockups" },
+    { "file": "Reducao.dc.html", "x": 0, "y": 3040, "w": 1120, "h": 700, "page": "page-1", "title": "Redução e contraste" }
+  ],
+  "annotations": [
+    {
+      "id": "marca",
+      "x": 1240,
+      "y": 0,
+      "w": 300,
+      "page": "page-1",
+      "text": "Marca fechada.\n\nO monograma é contorno desenhado: o T passa por trás do C, separado por um vão constante. Não depende de ter a Archivo instalada.\n\nOs estudos de direção que antecederam este desenho saíram do repositório; ficam no histórico do git."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}
