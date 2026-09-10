@@ -19,22 +19,22 @@ Student-delivery layer of a knowledge pipeline: `canonica.md` (PROF-TONI acervo)
 
 ## Brand Personality
 
-"The Digital Atelier" (DS v2). Three words: **crafted, focused, editorial**. Obsidian dark surfaces with tonal layering, subtle glass, Geist typography, Lucide icons, emerald→cyan CTA gradient. Voice: operational and precise — buttons say exactly what happens ("Sincronizar aulas", "Marcar checks", "Publicar aula", "Salvar"). UI is 100% pt-BR.
+"Volta Atelier" (DS v3). Three words: **crafted, focused, editorial** — brutalismo editorial refinado, alto contraste, superfícies calculadas. Archivo (títulos/displays), JetBrains Mono (corpo/metadados/labels). Botões pílula com wipe hover em `--signal` (`#fb3732`), chips circulares. Fontes self-hosted (`static/fonts/`), sem Google Fonts CDN. Voice: operational and precise — buttons say exactly what happens ("Sincronizar aulas", "Marcar checks", "Publicar aula", "Salvar"). UI is 100% pt-BR.
 
 ## Anti-references
 
 - Generic LMS (Moodle/Classroom blandness). This is an atelier, not a corporate LMS.
 - SaaS-cream warm-neutral defaults, hero-metric templates, identical card grids, eyebrow-on-every-section.
 - Landing-page redesign of the product — design SERVES the workflow here, not the other way.
-- Any new parallel design system. The canonical source is `design_system/design-system.html`.
+- Any new parallel design system. The canonical source is `design-system/volta-atelier.html`.
 
 ## Design Principles
 
-1. **Atelier digital, não LMS genérico** — keep obsidian, tonal layering, subtle glass, Geist, Lucide, CTA gradient.
+1. **Atelier digital, não LMS genérico** — keep brutalismo editorial: alto contraste, superfícies calculadas, Archivo + JetBrains Mono, botões pílula com wipe `--signal`.
 2. **Uma fonte de componentes** — components used 2+ times must live in the design system before broad use.
 3. **Professor trabalha em lote** — professor screens prioritize class management, publication, activity checks, reports with clear hierarchy.
 4. **Aluno usa celular** — student screens prioritize cards, visible progress, available lessons, unambiguous CTA.
-5. **Cor tem função** — green = action/progress, yellow = deadline/attention, red = risk, violet/cyan only as support.
+5. **Cor tem função (Volta Atelier)** — `--signal` (red) = accent/primary action/hover/alert; `--amber` = deadline/attention; `--emerald` = completion/checks/progress; `--volt` (blue) = support/complementary links.
 6. **Estados são parte do componente** — every control needs default, hover, active, focus-visible, disabled, loading, empty/error.
 
 ## Accessibility & Inclusion
@@ -43,6 +43,6 @@ WCAG AA baseline (already worked in Sprint 6 of PRD_UI_UX_AJUSTE.md): body text 
 
 ## Notes for design work
 
-- **Decision order**: AGENTS.md (invioláveis) > `design_system/design-system.html` > PRD_PROF_DASH.md > Django convention.
+- **Decision order**: AGENTS.md (invioláveis) > `design-system/volta-atelier.html` > PRD_PROF_DASH.md > Django convention.
 - The UI-polish backlog and all decisions already taken live in `PRD_UI_UX_AJUSTE.md` (Sprints 0–8 done). Treat it as the audit baseline — this review is a second pass for regressions and remaining slop.
-- Stack is fixed: Django Templates + HTMX + Alpine.js + WhiteNoise. No heavy frontend framework, no chart lib, no IA/Celery. Single quotes, code in English, UI in pt-BR.
+- Stack is fixed: Django Templates + Alpine.js 3.14.1 + WhiteNoise (HTMX citado no PRD mas sem uso real hoje). Alpine, ícones Lucide e fontes são self-hosted em `static/js/vendor/` e `static/fonts/` — sem CDN. No heavy frontend framework, no chart lib, no IA/Celery. Single quotes, code in English, UI in pt-BR.

@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 As regras **invioláveis** estão em **[AGENTS.md](AGENTS.md)** — leitura obrigatória antes de qualquer tarefa. Fontes de verdade:
 
 - `PRD_PROF_DASH.md` — especificação completa (domínio, models, RF/RNF, pipeline de import, deploy, roadmap de sprints §9).
-- `design_system/design-system.html` — UI **obrigatória**. Não inventar componentes fora dele. `DESIGN.md` é o índice resumido; `PRD_UI_UX_AJUSTE.md` guarda o histórico de decisões visuais (D.1–D.9).
+- `design-system/design-system.html` — UI **obrigatória**. Não inventar componentes fora dele. Design System v3 **"Volta Atelier"** (brutalismo editorial: Archivo nos títulos, JetBrains Mono no corpo/metadados, acento `--signal` `#fb3732`, botões pílula com wipe hover). `design-system/volta-atelier.html` é a folha canônica do DS v3; `DESIGN.md` é o índice resumido; `PRD_UI_UX_AJUSTE.md` guarda o histórico de decisões visuais (D.1–D.14). **Nota**: `AGENTS.md` e `DESIGN.md` ainda citam o path antigo `design_system/` e "The Digital Atelier"/Geist — desatualizado; a verdade é `design-system/` + Volta Atelier.
 - `PROMPT_BUILD_PROF_DASH.md` — prompt de build XML que rege o processo.
 
 Antes de cada sprint: releia PRD + design system + código existente. Ordem em conflito: **regras invioláveis (AGENTS.md) > design system > PRD > convenção Django**.
@@ -16,7 +16,7 @@ Antes de cada sprint: releia PRD + design system + código existente. Ordem em c
 
 **Sistema em produção** em https://prof.tonicoimbra.com (Easypanel, projeto `work`, serviço `professordash`).
 
-Sprints 0–12 concluídas + redesign pós-lançamento (foco TDAH). Apps ativos: `core`, `base`, `accounts`, `catalog`, `classroom`, `activities`, `materials`, `notifications`.
+Sprints 0–12 concluídas + redesign pós-lançamento (foco TDAH) + redesign visual **Volta Atelier** aplicado em todo o projeto (commit `0d976de`). Apps ativos: `core`, `base`, `accounts`, `catalog`, `classroom`, `activities`, `materials`, `notifications`.
 
 ## Fluxo de trabalho (crítico)
 
@@ -105,7 +105,9 @@ URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` 
 - **Media — dois regimes, não confundir**:
   - *Protegida* (`PROTECTED_MEDIA_ROOT = protected_media/`, sem URL pública): materiais e uploads. Servidos só por view com checagem de permissão (aluno da turma ou professor). Ver `base/storage.py`.
   - *Pública* (`MEDIA_ROOT = media/`): capas e figuras de aula, vindas do import do acervo. Em produção **não há servidor de arquivos para `/media/`** — quem serve é `base.views.public_media`, com allowlist de prefixos: `catalog/capas/`, `catalog/imagens/` e `avatars/`. Qualquer outro caminho retorna 404. Foi exatamente esse o bug do commit `e535cf6` (figuras de miolo davam 404 para o aluno); ao adicionar um novo tipo de asset público, **atualize a allowlist**.
-- **Frontend**: Django Templates + HTMX + Alpine.js 3.14.1 (dependência real do shell — `x-data`/`x-show`/`@click`/`[x-cloak]`) + CSS do design system. Static via WhiteNoise com `CompressedManifestStaticFilesStorage` (nomes com hash — sempre referencie por `{% static %}`). JS em `static/js/`: `app.js` (tema, lightbox, shell), `quiz.js` (componente Alpine `quizQuestion()`, usado nas páginas normais e no modo apresentação), `reader.js` (leitura projetada).
+- **Frontend**: Django Templates + Alpine.js 3.14.1 (dependência real do shell — `x-data`/`x-show`/`@click`/`[x-cloak]`) + CSS do design system. HTMX é citado no PRD/AGENTS mas **não há uso real** nos templates hoje. Tudo **self-hosted** (sem CDN): Alpine e o subset de ícones Lucide em `static/js/vendor/` (`alpine-3.14.1.min.js`, `lucide-subset.js`), fontes em `static/fonts/` (`archivo-latin.woff2`, `jetbrains-mono-latin.woff2`; Geist fica só para a apresentação de aulas) — commit `d0b2ac7` removeu a dependência do Google Fonts CDN. `base.html` tem lógica de resiliência que detecta Alpine ausente/bloqueado. Static via WhiteNoise com `CompressedManifestStaticFilesStorage` (nomes com hash — sempre referencie por `{% static %}`).
+- **CSS runtime**: `static/css/app.css` mapeia os tokens Volta Atelier (`--ink`, `--bone`, `--signal`, `--panel`, `--line`) para as variáveis retrocompatíveis do shell (`--surface-base`, `--fg`, `--accent`, `--border`…) — ver tabela em `DESIGN.md`. `presentation.css` é isolado para a Leitura Projetada. JS em `static/js/`: `app.js` (tema, lightbox, shell), `quiz.js` (componente Alpine `quizQuestion()`, usado nas páginas normais e no modo apresentação), `reader.js` (leitura projetada).
+- **Cores têm função (Volta Atelier)**: `--signal` (vermelho `#fb3732`) = acento/ação primária/hover/alerta; `--amber` = prazo/atenção; `--emerald` = conclusão/checks/progresso; `--volt` (azul) = apoio/links complementares.
 
 ## Convenções de código
 

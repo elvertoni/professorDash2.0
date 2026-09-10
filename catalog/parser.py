@@ -678,11 +678,38 @@ def _missing_image_note(name, diagnostics=False):
     )
 
 
+def _normalize_lead_text(value):
+    return re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', '', value or ''))).strip().lower()
+
+
+def strip_redundant_lead(html_content, aula):
+    '''Remove o H1 e o parágrafo de abertura do corpo quando eles só repetem
+    o título/tema que o template já mostra no cabeçalho da aula (o canônica.md
+    começa com `# {titulo}` seguido do resumo). Evita dois <h1> na página.'''
+    content = (html_content or '').lstrip()
+    titulo = _normalize_lead_text(getattr(aula, 'titulo', ''))
+    if not titulo:
+        return html_content
+
+    head_match = re.match(r'<h(?P<lvl>[12])\b[^>]*>(?P<inner>.*?)</h(?P=lvl)>\s*', content, re.S | re.I)
+    if not head_match or _normalize_lead_text(head_match.group('inner')) != titulo:
+        return html_content
+    content = content[head_match.end():]
+
+    tema = _normalize_lead_text(getattr(aula, 'tema', ''))
+    if tema:
+        p_match = re.match(r'<p\b[^>]*>(?P<inner>.*?)</p>\s*', content, re.S | re.I)
+        if p_match and _normalize_lead_text(p_match.group('inner')) == tema:
+            content = content[p_match.end():]
+
+    return content
+
+
 def render_stored_lesson_html(aula, diagnostics=False):
     '''HTML da aula pronto para exibir: imagens resolvidas e sanitizadas.'''
     return sanitize_lesson_html(
         resolve_lesson_images(
-            aula.conteudo_html,
+            strip_redundant_lead(aula.conteudo_html, aula),
             lesson_image_urls(aula),
             diagnostics=diagnostics,
         )

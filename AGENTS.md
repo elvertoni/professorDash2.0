@@ -1,11 +1,11 @@
 # AGENTS.md — Prof. Toni Coimbra
 
-> Regras sempre ativas para qualquer agente de IA. Leitura obrigatória antes de codar. Detalhe em `PRD_PROF_DASH.md`; UI canônica em `design_system/design-system.html`; resumo de produto/design em `PRODUCT.md` e `DESIGN.md`; arquitetura operacional em `CLAUDE.md`.
+> Regras sempre ativas para qualquer agente de IA. Leitura obrigatória antes de codar. Detalhe em `PRD_PROF_DASH.md`; UI canônica em `design-system/volta-atelier.html` (folha portátil DS v3) + `design-system/design-system.html` (catálogo vivo); resumo de produto/design em `PRODUCT.md` e `DESIGN.md`; arquitetura operacional em `CLAUDE.md`.
 
 ## Fonte de verdade
 - `PRD_PROF_DASH.md` = especificação (domínio, models, RF/RNF, pipeline de import, sprints). Código segue o PRD, nunca o contrário. **Estado das sprints = checklist da seção 9** — confira antes de iniciar qualquer sprint.
-- `design_system/design-system.html` = UI obrigatória e fonte canônica do Design System v2 **"The Digital Atelier"**. NÃO invente componentes fora dele.
-- `DESIGN.md` = índice resumido do design system, tokens, componentes, decisões de tema por papel e padrões ADHD-focus. Use para orientação rápida, mas confirme detalhes no HTML canônico.
+- `design-system/volta-atelier.html` = UI obrigatória e fonte canônica do **Design System v3 "Volta Atelier"** (folha portátil: reset, tokens, escala tipográfica, primitivas, componentes, regras de movimento). `design-system/design-system.html` é o catálogo vivo complementar. NÃO invente componentes fora deles.
+- `DESIGN.md` = índice resumido do design system, tokens Volta (`--ink`/`--bone`/`--signal`/`--panel`/`--line`), mapeamento runtime em `static/css/app.css`, componentes, decisões de tema por papel e padrões ADHD-focus. Use para orientação rápida, mas confirme detalhes no HTML canônico.
 - `PRODUCT.md` = contexto de produto, usuários, personalidade visual e princípios de UI/UX.
 - `PRD_UI_UX_AJUSTE.md` = histórico do polish UI/UX, decisões D.1-D.9 e backlog visual. Consulte antes de mexer em telas.
 - `CLAUDE.md` = arquitetura detalhada (apps, fluxos, convenções) — complementar a este arquivo.
@@ -68,15 +68,15 @@ Decisão do projeto (PRD proíbe). **NÃO** tente rodar `pytest`, `manage.py tes
 12. **Media pública tem allowlist**: capa (`Aula.imagem`) e figuras de miolo das aulas ficam em `MEDIA_ROOT` e vêm do pipeline/import do acervo, não de IA dentro do portal; materiais continuam protegidos. Em produção **não há servidor de arquivos para `/media/`** — quem serve é `base.views.public_media`, que só aceita os prefixos `catalog/capas/`, `catalog/imagens/` e `avatars/` e responde 404 para o resto. Novo tipo de asset público exige atualizar essa allowlist (foi o bug do commit `e535cf6`).
 
 ## UI/UX obrigatório
-- Identidade: Design System v2 **The Digital Atelier** — crafted, focused, editorial. Obsidian dark surfaces, tonal layering, glass sutil, Geist, Lucide icons, CTA emerald→cyan.
+- Identidade: Design System v3 **Volta Atelier** — brutalismo editorial refinado, alto contraste, superfícies calculadas. Archivo (títulos/displays), JetBrains Mono (corpo/metadados/labels). Botões pílula com wipe hover em `--signal` (`#fb3732`), chips circulares. Tokens `--ink`/`--bone`/`--signal`/`--panel`/`--line` mapeados para o runtime em `static/css/app.css`. Fontes self-hosted em `static/fonts/` (sem Google Fonts CDN — commit `d0b2ac7`); Geist só na apresentação de aulas.
 - Tema por papel: `base.html` renderiza `data-theme` por role (`aluno=light`, `professor/admin/anônimo=dark`). O toggle em `localStorage` pode sobrescrever como preferência do usuário.
 - `Alpine.js 3.14.1` é dependência real do shell; `x-data`, `x-show`, `@click` e `[x-cloak]` dependem dele.
 - Aluno é mobile-first: telas devem funcionar sem scroll horizontal a 360px, com cards escaneáveis, progresso visível e CTA inequívoco.
 - **Modo apresentação é exceção ao mobile-first** (alvo é TV de sala). O design vigente é a **"Leitura Projetada"**: a aula rola em coluna única — sem fatiar em slides, sem medir, sem escalar — servida por `AulaPresentationView` com `static/js/reader.js` + `static/css/presentation.css`. Setas/Espaço/PageDown rolam ~90% da tela e pousam em um landmark próximo. O deck fatiado com fit-to-stage (`deck.js`, `--slide-scale`, auditor `?test=true`) foi **removido** no commit `18feb21`; não reintroduza.
 - Professor é desktop/denso: priorize trabalho em lote, accordions por série/disciplina, tabelas densas com `.tbl-wrap` quando necessário e ações agrupadas por intenção.
 - Padrões ADHD-focus documentados em `DESIGN.md`: `serie-section`, `dash-collapsible`, `dash-tabs`, `dash-hero`, `today-card`, `turma-progress`, `lesson-actionbar`. Objetivo: uma decisão por tela e próximo passo sempre visível. `aluno-progress` (progresso agregado no topo do painel do aluno) foi **removido** — era hero-metric banido e inacionável; o progresso vive no card da turma.
-- Componentes recorrentes devem existir no `design_system/design-system.html` antes de uso amplo. Proibido reintroduzir duplicatas `*-atelier`/`kpi-card` já unificadas.
-- Cores têm função: verde = ação/progresso; amarelo = prazo/atenção; vermelho = risco; violeta/ciano = apoio.
+- Componentes recorrentes devem existir no `design-system/volta-atelier.html` antes de uso amplo. Proibido reintroduzir duplicatas `*-atelier`/`kpi-card` já unificadas.
+- Cores têm função (Volta Atelier): `--signal` (vermelho) = acento/ação primária/hover/alerta; `--amber` = prazo/atenção; `--emerald` = conclusão/checks/progresso; `--volt` (azul) = apoio/links complementares.
 - Acessibilidade mínima: contraste WCAG AA, foco visível, `scope="col"` em tabelas, erros com `aria-invalid`/`aria-describedby`/`role="alert"`, ícones decorativos com `aria-hidden="true"`, `prefers-reduced-motion`.
 - Bans visuais: side-stripe border colorida, gradient text, glassmorphism decorativo como padrão, hero-metric template, grades de cards idênticos sem propósito, eyebrow em toda seção, marcadores `01/02/03` como andaime, texto estourando container, gradientes/hex literais em template quando existir token.
 
@@ -99,7 +99,7 @@ URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` 
 - Login por username. Models sem `created_at`/`updated_at`.
 - Expor media sem checagem de permissão. Testes automatizados.
 - Trocar Django/PostgreSQL. Over-engineering (abstrações sem necessidade).
-- Inventar design system fora de `design_system/design-system.html`.
+- Inventar design system fora de `design-system/volta-atelier.html`.
 - Recriar fluxo de entrega/correção/nota no portal. Atividades são checks do professor; entrega oficial é Google Classroom.
 - Recolocar `/catalogo/` como fluxo principal quando a jornada correta é sincronizar aulas dentro da turma.
 - Reintroduzir o deck fatiado no modo apresentação (fit-to-stage, `--slide-scale`, paginação de slide). O motor vigente é o `reader.js` de leitura projetada.

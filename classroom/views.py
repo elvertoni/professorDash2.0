@@ -816,6 +816,9 @@ class AlunoDashboardView(AlunoTurmasMixin, View):
                 if turma.total_aulas else 0
             )
 
+        # Turmas com pendência primeiro: o aluno vê onde agir antes do "em dia".
+        turmas.sort(key=lambda t: (t.total_pendentes == 0, -t.total_pendentes, t.nome))
+
         total_disponiveis = len(disponiveis)
 
         context = {

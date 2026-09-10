@@ -1,6 +1,6 @@
 # Design — Volta Atelier
 
-> Fonte canônica de verdade: `design_system/design-system.html` (DS v3 "Volta Atelier"). Este documento é o índice de referência para o design e para os agentes. O runtime `static/css/app.css` integra os tokens do Volta Atelier (`--ink`, `--bone`, `--signal`, `--panel`, `--line`) mapeados de forma retrocompatível para o shell educacional.
+> Fonte canônica de verdade: `design-system/volta-atelier.html` (folha portátil DS v3 "Volta Atelier"); `design-system/design-system.html` é o catálogo vivo complementar. Este documento é o índice de referência para o design e para os agentes. O runtime `static/css/app.css` integra os tokens do Volta Atelier (`--ink`, `--bone`, `--signal`, `--panel`, `--line`) mapeados de forma retrocompatível para o shell educacional.
 
 ## Identidade & Estética
 
@@ -36,7 +36,7 @@ A marca oficial é a ligadura **TC** de `static/logo.svg`, sincronizada com `por
 
 ### Mapeamento de Runtime (`app.css` ↔ Volta Atelier)
 
-Para garantir compatibilidade com todo o ecossistema Django, HTMX e Alpine.js existente:
+Para garantir compatibilidade com todo o ecossistema Django e Alpine.js existente:
 
 | Variável Runtime (`app.css`) | Mapeamento Volta | Descrição |
 |---|---|---|
@@ -56,6 +56,7 @@ Para garantir compatibilidade com todo o ecossistema Django, HTMX e Alpine.js ex
 - **Display / Títulos:** `'Archivo', sans-serif` (pesos 600, 700, 800, 900).
 - **Corpo / Metadados / Mono:** `'JetBrains Mono', monospace` (pesos 400, 500, 600).
 - As fontes do sistema ficam versionadas em `static/fonts/archivo-latin.woff2` e `static/fonts/jetbrains-mono-latin.woff2`; Geist permanece disponível para a apresentação de aulas.
+- **Leitura longa de aula** (`.atelier`/`.prose`, D.15): mantém JetBrains Mono (canon), mas com folga para o público 14–18 TDAH — piso 18px (`--reader-size`), `line-height` 1.8, `word-spacing` .02em, medida 58ch, parágrafos com `--space-5` entre si. Títulos de página são Archivo em escala de operação (`clamp(32px, 4.2vw, 52px)`); só `.lesson-header h1` e a home sustentam escala editorial maior.
 
 ## Componentes Chave
 

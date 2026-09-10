@@ -29,7 +29,11 @@
               @submit="submitGrid($event)"
               :aria-busy="submitting.toString()">
             {% csrf_token %}
-            <div class="tbl-wrap check-grid-wrap">
+            <p class="check-grid__hint" aria-hidden="true">
+                <i data-lucide="move-horizontal" aria-hidden="true"></i>
+                Deslize a tabela para ver todas as atividades
+            </p>
+            <div class="tbl-wrap check-grid-wrap" tabindex="0" role="region" aria-label="Grade de acompanhamento — role para os lados para ver todas as atividades">
                 <table class="tbl check-grid">
                     <thead>
                         <tr>

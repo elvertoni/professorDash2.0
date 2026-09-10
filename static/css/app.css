@@ -28,15 +28,18 @@ FORM: Atelier Cinético, direção escolhida pelo usuário; movimento de entrada
     --signal-deep: #d1211d;
     --signal-text: #ff5c57;
     --amber: #ffa31a;
+    --amber-deep: #ffb84d;
     --volt: #3b49e4;
     --emerald: #10b981;
+    --emerald-deep: #34d399;
     --tap: 44px;
 
     /* ── Mapeamento Runtime Portal ── */
     --accent: var(--signal);
     --accent-ink: #ffffff;
     --accent-tint: rgba(251, 55, 50, .14);
-    --accent-text: var(--signal);
+    /* Acento como cor de TEXTO usa a variante clara/legivel (>=4.5:1); --signal fica p/ fill/borda. */
+    --accent-text: var(--signal-text);
     --accent-support: var(--volt);
     --grad-cta: linear-gradient(135deg, #fb3732, #ff5c47 130%);
     --primary-hsl: 2 96% 59%;
@@ -141,16 +144,18 @@ FORM: Atelier Cinético, direção escolhida pelo usuário; movimento de entrada
     --line-ui: rgba(20, 20, 20, .32);
     --bone: #141414;
     --muted: #5c5c63;
-    --dim: #8e8e95;
+    --dim: #6b6b72;
     --signal: #fb3732;
     --signal-deep: #d1211d;
-    --signal-text: #d1211d;
+    --signal-text: #c81e1a;
     --amber: #d97706;
+    --amber-deep: #b45309;
     --volt: #2563eb;
     --emerald: #059669;
+    --emerald-deep: #047857;
 
     --accent: var(--signal);
-    --accent-text: var(--signal);
+    --accent-text: var(--signal-text);
     --accent-support: var(--volt);
     --grad-cta: linear-gradient(135deg, #fb3732, #ff5c47 130%);
     --border-focus: var(--signal);
@@ -721,7 +726,7 @@ button {
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--signal);
+    background: var(--signal-deep);
     transform: translate3d(0, 101%, 0);
     transition: transform .45s var(--e-io);
     border-radius: var(--radius-pill);
@@ -791,9 +796,7 @@ button {
     border: 1px solid var(--line-2);
     border-radius: 999px;
     margin-left: -.6em;
-    background: rgba(20, 20, 20, .65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--surface-raised);
     transition: color .34s var(--e-soft), border-color .34s var(--e-soft), transform .3s var(--e-back);
     overflow: hidden;
     isolation: isolate;
@@ -801,7 +804,7 @@ button {
     cursor: pointer;
 }
 [data-theme="light"] .navchain a, [data-theme="light"] .navchain button {
-    background: rgba(255, 255, 255, .75);
+    background: var(--surface-raised);
 }
 .navchain a:first-child, .navchain button:first-child {
     margin-left: 0;
@@ -1513,6 +1516,37 @@ summary:focus-visible,
     background: var(--surface-overlay);
 }
 
+/* input[type=file] com estilo do DS — o botão nativo do SO destoava do form. */
+input[type='file'].input {
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: var(--tap);
+}
+
+input[type='file'].input::file-selector-button {
+    margin-right: var(--space-3);
+    padding: 0 var(--space-4);
+    height: calc(var(--tap) - 2px);
+    border: 0;
+    border-right: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    background: var(--surface-overlay);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color .2s var(--e-soft);
+}
+
+input[type='file'].input:hover::file-selector-button {
+    background: var(--bone);
+    color: var(--ink);
+}
+
 .input[aria-invalid='true'],
 .select[aria-invalid='true'],
 .textarea[aria-invalid='true'],
@@ -1721,8 +1755,21 @@ summary:focus-visible,
 
 .account-logout {
     width: 100%;
+    margin-top: var(--space-2);
     border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    padding-top: var(--space-3);
+    background: transparent;
+    color: var(--signal-text);
+    font: inherit;
     text-align: left;
+    cursor: pointer;
+}
+
+.account-logout:hover {
+    color: var(--signal-text);
+    background: color-mix(in srgb, var(--signal) 10%, transparent);
 }
 
 .account-content {
@@ -1856,6 +1903,14 @@ table.tbl {
    uma goteira que cede em telas médias em vez de manter 28px fixos. */
 .lesson-page {
     width: min(1320px, calc(100% - clamp(32px, 5vw, 88px)));
+    /* Landmark de teclado/âncora pousa acima da .lesson-actionbar sticky. */
+    scroll-padding-bottom: 132px;
+}
+
+.lesson-page .lesson-nav,
+.prose h2,
+.prose h3 {
+    scroll-margin-bottom: 120px;
 }
 
 .narrow-page {
@@ -1965,9 +2020,10 @@ table.tbl {
 
 .invite-code strong,
 .invite-panel strong {
-    color: var(--accent-text);
+    color: var(--fg);
+    font-family: var(--font-mono);
     font-size: var(--text-read);
-    letter-spacing: 0;
+    letter-spacing: .04em;
 }
 
 .classroom-header {
@@ -2025,7 +2081,7 @@ table.tbl {
     margin-top: 12px;
     padding: 12px;
     border-radius: var(--radius-md);
-    color: var(--accent-text);
+    color: var(--fg);
     background: var(--surface-base);
 }
 
@@ -2052,10 +2108,12 @@ table.tbl {
     font-weight: 600;
 }
 
-.lesson-breadcrumb span::before {
+/* Separador entre TODOS os itens, não só antes do último. */
+.lesson-breadcrumb > * + *::before {
     content: '/';
     margin-right: 8px;
     color: var(--fg-subtle);
+    font-weight: 400;
 }
 
 .lesson-shell {
@@ -2752,10 +2810,12 @@ dialog.deck-lightbox:not([open]) {
    ~83 caracteres — acima da faixa 65-75. A 61ch/19px a linha fica em ~74 e
    ainda assim mais larga em pixels do que os 721px antigos. */
 .atelier {
-    --reader-size: clamp(17px, 0.42vw + 15.6px, 19px);
+    /* D.15 — corpo de aula em JetBrains Mono (canon Volta): piso subido p/ 18px,
+       line-height e word-spacing folgados p/ leitura longa 14-18 TDAH. */
+    --reader-size: clamp(18px, 0.42vw + 16.6px, 20px);
     --reader-h2: clamp(24px, 0.6vw + 21px, 30px);
     --reader-h3: clamp(20px, 0.3vw + 18.5px, 23px);
-    --measure: 61ch;
+    --measure: 58ch;
     /* Largura das caixas da aula (callout, quiz, passos): a medida do texto mais
        o ícone e o respiro interno, para a borda direita acompanhar a leitura.
        Tabela, código, imagem e capa continuam usando a largura toda. */
@@ -2915,7 +2975,8 @@ dialog.deck-lightbox:not([open]) {
     min-width: 0;
     color: var(--fg);
     font-size: var(--reader-size, var(--text-read));
-    line-height: 1.72;
+    line-height: 1.8;
+    word-spacing: .02em;
     text-wrap: pretty;
     overflow-wrap: break-word;
 }
@@ -2949,7 +3010,7 @@ dialog.deck-lightbox:not([open]) {
 }
 
 .prose p {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
     color: var(--fg);
 }
 
@@ -3202,6 +3263,21 @@ blockquote footer::before {
 
 .callout.dica .ct b {
     color: var(--c-success);
+}
+
+/* Rotulos bold pequenos dos callouts precisam de >=4.5:1 no fundo bone. */
+[data-theme='light'] .callout.atencao .ct b {
+    color: var(--amber-deep);
+}
+
+[data-theme='light'] .callout.dica .ct b {
+    color: var(--emerald-deep);
+}
+
+[data-theme='light'] .callout.conceito .ct b,
+[data-theme='light'] .lesson-callout-exemplo .lesson-callout-title,
+[data-theme='light'] .callout.exemplo .ct b {
+    color: #0369a1;
 }
 
 .lesson-callout-exemplo .lesson-callout-title {
@@ -3583,7 +3659,7 @@ blockquote footer::before {
 
 .card .metric {
     display: grid;
-    gap: 6px;
+    gap: var(--space-2);
     margin-bottom: var(--space-3);
 }
 
@@ -3750,6 +3826,7 @@ blockquote footer::before {
     flex-wrap: wrap;
 }
 
+.danger-zone h2,
 .danger-zone h3 {
     margin: 0;
     font-size: var(--text-read);
@@ -4120,6 +4197,16 @@ blockquote footer::before {
     max-height: min(68vh, 720px);
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    /* Sombra de rolagem horizontal: sinaliza que há colunas fora da tela. */
+    background:
+        linear-gradient(to right, var(--surface-raised) 30%, transparent),
+        linear-gradient(to left, var(--surface-raised) 30%, transparent) 100% 0,
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .18), transparent),
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .18), transparent) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
 }
 
 .check-grid {
@@ -4264,10 +4351,9 @@ blockquote footer::before {
 }
 
 .check-grid__actionbar {
-    position: sticky;
-    bottom: var(--space-3);
     z-index: 7;
     align-items: center;
+    margin-top: var(--space-3);
     padding: var(--space-3);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-lg);
@@ -4316,15 +4402,15 @@ blockquote footer::before {
     color: var(--c-info);
 }
 
-/* Sticky name shadow for scroll */
+/* Sticky name shadow for scroll — token, visível nos dois temas. */
 .check-grid__col-name::after {
     content: '';
     position: absolute;
     top: 0;
-    right: -8px;
+    right: -10px;
     bottom: 0;
-    width: 8px;
-    background: linear-gradient(to right, rgba(0, 0, 0, .06), transparent);
+    width: 10px;
+    background: linear-gradient(to right, color-mix(in srgb, var(--fg) 16%, transparent), transparent);
     pointer-events: none;
 }
 
@@ -4333,8 +4419,32 @@ blockquote footer::before {
     background: var(--surface-raised);
 }
 
+.check-grid__hint {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 var(--space-2);
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.check-grid__hint svg {
+    width: 15px;
+    height: 15px;
+}
+
+.check-grid-wrap:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
 /* Responsive: tighter padding on small screens */
 @media (max-width: 768px) {
+    .check-grid__hint {
+        display: flex;
+    }
+
     .check-grid-wrap {
         max-height: 62vh;
     }
@@ -4976,10 +5086,9 @@ dialog::backdrop {
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-pill);
     color: var(--fg);
-    background: color-mix(in srgb, var(--surface-raised) 86%, transparent);
+    background: var(--surface-raised);
     font-size: var(--text-caption);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    white-space: nowrap;
 }
 
 .label-source {
@@ -4989,7 +5098,7 @@ dialog::backdrop {
 
 .label-class {
     top: 43%;
-    right: 0;
+    right: clamp(0px, 2vw, 12px);
 }
 
 .label-next {
@@ -5198,14 +5307,43 @@ dialog::backdrop {
 }
 
 .dash-tab .count {
-    margin-left: 6px;
-    font-size: var(--text-caption);
-    opacity: .8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    padding: 0 6px;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--fg) 12%, transparent);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dash-tab .count--pending {
+    background: color-mix(in srgb, var(--amber) 22%, transparent);
+    color: var(--amber);
+}
+
+.dash-tab.active .count--pending {
+    color: var(--amber);
 }
 
 .today-card .card-foot {
     margin-top: var(--space-3);
     padding-top: 0;
+}
+
+/* Painel do aluno: grade de turmas com no máx ~3 colunas e cards com corpo,
+   em vez de 4-5 retângulos finos idênticos. */
+#dashboard-panel-turmas .catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    max-width: 960px;
+}
+
+#dashboard-panel-turmas .card .desc {
+    word-spacing: normal;
 }
 
 .turma-progress {
@@ -5401,7 +5539,8 @@ dialog::backdrop {
     transform: rotate(180deg);
 }
 
-/* Leitor · ação persistente */
+/* Leitor · ação persistente. Fundo OPACO: o conteúdo não pode vazar por trás
+   da barra durante o scroll (era o efeito do glass a 86%). */
 .lesson-actionbar {
     position: sticky;
     z-index: 20;
@@ -5414,19 +5553,8 @@ dialog::backdrop {
     padding: var(--space-3) var(--space-5);
     border: 1px solid var(--line-2);
     border-radius: var(--radius-pill);
-    background: color-mix(in srgb, var(--surface-raised) 86%, transparent);
+    background: var(--surface-raised);
     box-shadow: var(--shadow-pop);
-    backdrop-filter: blur(12px) saturate(1.12);
-    -webkit-backdrop-filter: blur(12px) saturate(1.12);
-}
-
-.lesson-actionbar::before {
-    content: '';
-    position: absolute;
-    inset: -1px 18% auto;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--bone), transparent);
-    opacity: .34;
 }
 
 .lesson-actionbar-status {
@@ -5448,6 +5576,36 @@ dialog::backdrop {
 
 .lesson-actionbar-actions form {
     margin: 0;
+}
+
+/* "Desfazer conclusão" é ação rara — link discreto, nunca compete com o CTA primário. */
+.lesson-actionbar-undo {
+    margin: 0;
+}
+
+.lesson-actionbar-undo-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--tap);
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+    cursor: pointer;
+}
+
+.lesson-actionbar-undo-btn:hover {
+    color: var(--fg);
+}
+
+.lesson-actionbar-undo-btn svg {
+    width: 15px;
+    height: 15px;
 }
 
 .lesson-goals h2 {
@@ -5625,18 +5783,26 @@ dialog.lesson-lightbox:not([open]) {
     .lesson-actionbar {
         align-items: stretch;
         flex-direction: column;
+        gap: var(--space-2);
         bottom: 8px;
         padding: var(--space-3);
         border-radius: var(--radius-lg);
     }
 
+    /* Mobile: só a ação. O status já está no chip do topo e no texto do link "desfazer". */
+    .lesson-actionbar-status {
+        display: none;
+    }
+
     .lesson-actionbar-actions {
         display: grid;
+        justify-items: center;
         width: 100%;
     }
 
-    .lesson-actionbar-actions form,
-    .lesson-actionbar .btn {
+    .lesson-actionbar-actions > form:not(.lesson-actionbar-undo),
+    .lesson-actionbar-actions > a.btn,
+    .lesson-actionbar-actions .btn-primary {
         width: 100%;
     }
 }
@@ -5711,13 +5877,28 @@ dialog.lesson-lightbox:not([open]) {
 
 .tbl-wrap {
     overflow: auto;
+    scrollbar-gutter: stable;
+    /* Sombra de rolagem: mostra que a tabela continua para os lados no mobile. */
+    background:
+        linear-gradient(to right, var(--surface-raised) 30%, transparent),
+        linear-gradient(to left, var(--surface-raised) 30%, transparent) 100% 0,
+        radial-gradient(farthest-side at 0 50%, color-mix(in srgb, var(--fg) 14%, transparent), transparent),
+        radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--fg) 14%, transparent), transparent) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 44px 100%, 44px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+}
+
+.tbl-wrap:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
 }
 
 .tbl thead th {
     color: var(--fg-subtle);
     background: var(--ink-deep);
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: .1em;
     text-transform: uppercase;
 }
@@ -5854,23 +6035,10 @@ body.site-body {
     position: relative;
     isolation: isolate;
     overflow-x: hidden;
-    background:
-        radial-gradient(90% 52% at 8% -5%, var(--atelier-red-soft), transparent 58%),
-        radial-gradient(70% 42% at 100% 12%, var(--atelier-blue-soft), transparent 62%),
-        var(--surface-base);
-}
-
-body.site-body::before {
-    content: '';
-    position: fixed;
-    z-index: -1;
-    inset: 0;
-    pointer-events: none;
-    opacity: .55;
-    background:
-        radial-gradient(560px circle at var(--cursor-x, 50%) var(--cursor-y, 20%), color-mix(in srgb, var(--bone) 6%, transparent), transparent 68%),
-        linear-gradient(90deg, transparent 0 49.8%, color-mix(in srgb, var(--line) 45%, transparent) 50%, transparent 50.2%);
-    mask-image: linear-gradient(to bottom, #000 0 78%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--surface-base);
 }
 
 body.site-body::after {
@@ -5884,29 +6052,17 @@ body.site-body::after {
 }
 
 #conteudo {
-    min-height: calc(100vh - var(--topbar-h));
+    flex: 1 0 auto;
 }
 
 .site-header {
     min-height: var(--topbar-h);
     padding: 12px var(--atelier-gutter);
     border-bottom-color: var(--atelier-rule);
-    background: color-mix(in srgb, var(--surface-base) 82%, transparent);
-    backdrop-filter: blur(14px) saturate(1.12);
-    -webkit-backdrop-filter: blur(14px) saturate(1.12);
+    background: var(--surface-base);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     transition: background-color .4s var(--atelier-ease), box-shadow .4s var(--atelier-ease), border-color .4s var(--atelier-ease);
-}
-
-.site-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: clamp(120px, 26vw, 360px);
-    height: 2px;
-    background: var(--signal);
-    transform-origin: left;
-    animation: atelier-rule-in .9s var(--atelier-ease) both;
 }
 
 .site-header.is-scrolled {
@@ -5969,17 +6125,17 @@ body.site-body::after {
     border: 1px solid var(--line);
     border-radius: var(--radius-pill);
     padding: 3px;
-    background: color-mix(in srgb, var(--surface-raised) 65%, transparent);
+    background: var(--surface-raised);
 }
 
 .navchain a {
-    min-height: 34px;
-    padding: 8px 14px;
+    min-height: 38px;
+    padding: 8px 15px;
     color: var(--fg-muted);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: .08em;
+    letter-spacing: .06em;
     text-transform: uppercase;
 }
 
@@ -6000,10 +6156,10 @@ body.site-body::after {
 
 .header-actions .icon-btn,
 .mobile-nav .icon-btn {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-color: var(--line);
-    background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+    background: var(--surface-raised);
 }
 
 .header-actions .icon-btn:hover,
@@ -6018,8 +6174,8 @@ body.site-body::after {
 .classroom-page,
 .account-shell {
     width: min(var(--atelier-max), calc(100% - (2 * var(--atelier-gutter))));
-    padding-top: clamp(36px, 6vw, 84px);
-    padding-bottom: clamp(56px, 8vw, 120px);
+    padding-top: clamp(20px, 3vw, 40px);
+    padding-bottom: clamp(48px, 6vw, 96px);
 }
 
 .page-hero,
@@ -6030,13 +6186,21 @@ body.site-body::after {
 .page-hero h1,
 .classroom-header h1,
 .catalog-page .section-heading h1,
+.classroom-page .section-heading h1,
 .lesson-header h1 {
     font-family: var(--font-display);
-    font-size: clamp(42px, 6vw, 84px);
+    font-size: clamp(32px, 4.2vw, 52px);
     font-weight: 800;
-    letter-spacing: -.045em;
-    line-height: .94;
+    letter-spacing: -.03em;
+    line-height: 1;
+    word-spacing: .04em;
     text-wrap: balance;
+}
+
+/* A leitura da aula sustenta escala editorial maior que as telas de operacao. */
+.lesson-header h1 {
+    font-size: clamp(34px, 5vw, 60px);
+    line-height: .98;
 }
 
 .page-hero h1 .accent,
@@ -6086,12 +6250,13 @@ body.site-body::after {
 }
 
 .section-heading h2 {
-    max-width: 16ch;
+    max-width: 22ch;
     font-family: var(--font-display);
-    font-size: clamp(30px, 4.5vw, 60px);
+    font-size: clamp(24px, 3.4vw, 40px);
     font-weight: 800;
-    letter-spacing: -.04em;
-    line-height: .96;
+    letter-spacing: -.03em;
+    line-height: 1;
+    word-spacing: .04em;
 }
 
 .card,
@@ -6182,14 +6347,14 @@ body.site-body::after {
 .chip {
     border-color: var(--line-2);
     font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: .05em;
+    font-size: 11px;
+    letter-spacing: .04em;
     text-transform: uppercase;
 }
 
 .tag-disc,
 .chip--signal {
-    color: var(--signal);
+    color: var(--signal-text);
     border-color: color-mix(in srgb, var(--signal) 52%, var(--line));
     background: var(--atelier-red-soft);
 }
@@ -6208,8 +6373,8 @@ body.site-body::after {
     gap: .6em;
     font-family: var(--font-mono);
     font-weight: 500;
-    font-size: clamp(11px, .85vw, 13px);
-    letter-spacing: .08em;
+    font-size: clamp(12px, .85vw, 13px);
+    letter-spacing: .06em;
     text-transform: uppercase;
     padding: .8em 1.6em;
     min-height: var(--tap);
@@ -6330,11 +6495,17 @@ body.site-body::after {
 .auth-form input,
 .auth-form select,
 .auth-form textarea {
-    border-color: var(--line-2);
+    border: 1px solid var(--line-ui);
     border-radius: 8px;
     color: var(--bone);
-    background: var(--ink-deep);
+    background: var(--surface-base);
     font-family: var(--font-mono);
+}
+
+.auth-form input:not(:disabled):hover,
+.auth-form select:not(:disabled):hover,
+.auth-form textarea:not(:disabled):hover {
+    border-color: var(--bone);
 }
 
 .input:focus,
@@ -6487,29 +6658,6 @@ body.site-body::after {
     overflow: hidden;
 }
 
-.auth-page::before,
-.auth-page::after {
-    position: absolute;
-    width: min(42vw, 540px);
-    height: min(42vw, 540px);
-    border: 1px solid var(--line);
-    content: '';
-    pointer-events: none;
-    transform: rotate(45deg);
-}
-
-.auth-page::before {
-    top: 12%;
-    left: -18%;
-    border-color: color-mix(in srgb, var(--signal) 38%, transparent);
-}
-
-.auth-page::after {
-    right: -18%;
-    bottom: -18%;
-    border-color: color-mix(in srgb, var(--volt) 38%, transparent);
-}
-
 .auth-panel {
     position: relative;
     z-index: 1;
@@ -6519,19 +6667,11 @@ body.site-body::after {
         var(--surface-raised);
 }
 
-.auth-panel::before {
-    position: absolute;
-    top: 0;
-    right: 16%;
-    left: 16%;
-    height: 2px;
-    background: var(--signal);
-    content: '';
-}
-
 .auth-heading h1 {
-    font-size: clamp(38px, 5vw, 58px);
-    letter-spacing: -.045em;
+    font-size: clamp(32px, 4vw, 46px);
+    letter-spacing: -.025em;
+    word-spacing: .05em;
+    line-height: 1.05;
 }
 
 .lesson-shell {
@@ -6664,13 +6804,18 @@ body.site-body::after {
     .page-hero h1,
     .classroom-header h1,
     .catalog-page .section-heading h1,
+    .classroom-page .section-heading h1,
     .lesson-header h1 {
-        font-size: clamp(40px, 13vw, 62px);
+        font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .lesson-header h1 {
+        font-size: clamp(30px, 9vw, 44px);
     }
 
     .section-heading h2 {
-        max-width: 14ch;
-        font-size: clamp(30px, 10vw, 48px);
+        max-width: 18ch;
+        font-size: clamp(23px, 7vw, 32px);
     }
 
     .kinetic-hero {

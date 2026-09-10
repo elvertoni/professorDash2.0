@@ -3,7 +3,8 @@
 {% block title %}Início · Prof. Toni Coimbra{% endblock %}
 
 {% block content %}
-<section class="classroom-page" x-data="{ tab: '{% if para_fazer_hoje %}agora{% else %}turmas{% endif %}' }">
+{# "Hoje" lidera sempre que há algo a fazer (aula liberada hoje OU backlog pendente). #}
+<section class="classroom-page" x-data="{ tab: '{% if para_fazer_hoje or total_pendentes %}agora{% else %}turmas{% endif %}' }">
 
     <div class="page-hero dash-hero">
         <div class="page-hero-copy">
@@ -12,34 +13,33 @@
     </div>
 
     <div class="dash-tabs" role="tablist" aria-label="Seções do painel">
-        <button id="dashboard-tab-agora" class="dash-tab{% if para_fazer_hoje %} active{% endif %}" type="button" x-ref="agora"
+        <button id="dashboard-tab-agora" class="dash-tab{% if para_fazer_hoje or total_pendentes %} active{% endif %}" type="button" x-ref="agora"
                 :class="{ active: tab === 'agora' }" @click="tab = 'agora'"
                 @keydown.left.prevent="tab = 'turmas'; $refs.turmas.focus()"
                 @keydown.right.prevent="tab = 'turmas'; $refs.turmas.focus()"
                 @keydown.home.prevent="tab = 'agora'; $refs.agora.focus()"
                 @keydown.end.prevent="tab = 'turmas'; $refs.turmas.focus()"
                 role="tab" aria-controls="dashboard-panel-agora"
-                aria-label="Hoje{% if para_fazer_hoje %}: {{ para_fazer_hoje|length }} aula{{ para_fazer_hoje|length|pluralize }} para fazer{% else %}: nada para fazer hoje{% endif %}"
-                aria-selected="{% if para_fazer_hoje %}true{% else %}false{% endif %}"
+                aria-label="Hoje{% if para_fazer_hoje %}: {{ para_fazer_hoje|length }} aula{{ para_fazer_hoje|length|pluralize }} liberada{{ para_fazer_hoje|length|pluralize }} hoje{% elif total_pendentes %}: {{ total_pendentes }} aula{{ total_pendentes|pluralize }} pendente{{ total_pendentes|pluralize }}{% else %}: nada pendente{% endif %}"
+                aria-selected="{% if para_fazer_hoje or total_pendentes %}true{% else %}false{% endif %}"
                 :aria-selected="tab === 'agora'"
-                tabindex="{% if para_fazer_hoje %}0{% else %}-1{% endif %}"
+                tabindex="{% if para_fazer_hoje or total_pendentes %}0{% else %}-1{% endif %}"
                 :tabindex="tab === 'agora' ? 0 : -1">
-            Hoje{% if para_fazer_hoje %}<span class="count">{{ para_fazer_hoje|length }}</span>{% endif %}
+            Hoje{% if para_fazer_hoje %}<span class="count">{{ para_fazer_hoje|length }}</span>{% elif total_pendentes %}<span class="count count--pending">{{ total_pendentes }}</span>{% endif %}
         </button>
-        <button id="dashboard-tab-turmas" class="dash-tab{% if not para_fazer_hoje %} active{% endif %}" type="button" x-ref="turmas"
+        <button id="dashboard-tab-turmas" class="dash-tab{% if not para_fazer_hoje and not total_pendentes %} active{% endif %}" type="button" x-ref="turmas"
                 :class="{ active: tab === 'turmas' }" @click="tab = 'turmas'"
                 @keydown.left.prevent="tab = 'agora'; $refs.agora.focus()"
                 @keydown.right.prevent="tab = 'agora'; $refs.agora.focus()"
                 @keydown.home.prevent="tab = 'agora'; $refs.agora.focus()"
                 @keydown.end.prevent="tab = 'turmas'; $refs.turmas.focus()"
                 role="tab" aria-controls="dashboard-panel-turmas"
-                aria-label="Minhas turmas{% if turmas %}: {{ turmas|length }} turma{{ turmas|length|pluralize }}{% if total_pendentes %}, {{ total_pendentes }} aula{{ total_pendentes|pluralize }} pendente{{ total_pendentes|pluralize }} no total{% endif %}{% else %}: nenhuma turma ativa{% endif %}"
-                aria-selected="{% if not para_fazer_hoje %}true{% else %}false{% endif %}"
+                aria-label="Minhas turmas{% if turmas %}: {{ turmas|length }} turma{{ turmas|length|pluralize }}{% else %}: nenhuma turma ativa{% endif %}"
+                aria-selected="{% if not para_fazer_hoje and not total_pendentes %}true{% else %}false{% endif %}"
                 :aria-selected="tab === 'turmas'"
-                tabindex="{% if not para_fazer_hoje %}0{% else %}-1{% endif %}"
+                tabindex="{% if not para_fazer_hoje and not total_pendentes %}0{% else %}-1{% endif %}"
                 :tabindex="tab === 'turmas' ? 0 : -1">
-            {# O contador é o backlog real, não o tamanho de uma lista exibida. #}
-            Minhas turmas{% if total_pendentes %}<span class="count">{{ total_pendentes }}</span>{% endif %}
+            Minhas turmas{% if turmas %}<span class="count">{{ turmas|length }}</span>{% endif %}
         </button>
     </div>
 
@@ -120,7 +120,7 @@
                             {% endif %}
                         </div>
                         <h3>{{ turma.nome }}</h3>
-                        <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }} · {{ turma.professor.nome_completo }}</p>
+                        <p class="desc">{{ turma.serie }} · Código <span class="mono">{{ turma.codigo_convite }}</span></p>
                         <div class="turma-progress">
                             {% if turma.total_aulas %}
                                 <div class="progress" role="progressbar"
@@ -129,7 +129,7 @@
                                      aria-valuenow="{{ turma.progresso_pct }}">
                                     <i style="width: {{ turma.progresso_pct }}%"></i>
                                 </div>
-                                <p class="muted">{{ turma.total_concluidas }} de {{ turma.total_aulas }} aula{{ turma.total_aulas|pluralize }} concluída{{ turma.total_aulas|pluralize }} · {{ turma.progresso_pct }}%</p>
+                                <p class="muted">{{ turma.total_concluidas }}/{{ turma.total_aulas }} aula{{ turma.total_aulas|pluralize }} · {{ turma.progresso_pct }}% concluído</p>
                             {% else %}
                                 <p class="muted">Nenhuma aula publicada nesta turma ainda.</p>
                             {% endif %}

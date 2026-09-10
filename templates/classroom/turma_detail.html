@@ -120,8 +120,9 @@
         </div>
     </div>
 
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Alunos matriculados — role para os lados para ver todas as colunas">
         <table class="tbl">
+            <caption class="sr-only">Alunos matriculados na turma {{ turma.nome }}</caption>
             <thead>
                 <tr>
                     <th scope="col">Aluno</th>
@@ -204,7 +205,7 @@
         <span class="badge badge-danger"><i data-lucide="alert-triangle" aria-hidden="true"></i> Área perigosa</span>
         <div class="danger-head">
             <div>
-                <h3>Excluir esta turma</h3>
+                <h2>Excluir esta turma</h2>
                 <p>Esta ação removerá permanentemente a turma, suas matrículas e todos os dados associados. Não há como reverter.</p>
             </div>
             <a class="btn btn-danger" href="{% url 'classroom:turma_delete' turma.pk %}">

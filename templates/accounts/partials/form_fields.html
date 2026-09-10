@@ -12,10 +12,7 @@
             {% if input_type == 'checkbox' and not multiple %}
                 <label class="check" for="{{ field.id_for_label }}">
                     {{ field|aria_field }}
-                    <span>
-                        {{ field.label }}
-                        <span class="muted">({% if field.field.required %}obrigatório{% else %}opcional{% endif %})</span>
-                    </span>
+                    <span>{{ field.label }}</span>
                 </label>
             {% elif input_type == 'checkbox' or input_type == 'radio' %}
                 <legend class="field-label">

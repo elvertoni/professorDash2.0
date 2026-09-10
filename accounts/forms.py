@@ -107,9 +107,19 @@ class UserProfileForm(StyledFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # O e-mail do aluno é a âncora da matrícula feita pela escola: alterá-lo
+        # o desassocia das turmas sem aviso. Só professor/admin podem editar.
+        self._email_locked = getattr(self.instance, 'role', None) == User.Role.ALUNO
+        if self._email_locked:
+            self.fields['email'].disabled = True
+            self.fields['email'].help_text = (
+                'Definido pela escola. Fale com o professor para corrigir.'
+            )
         self.apply_design_system_classes()
 
     def clean_email(self):
+        if getattr(self, '_email_locked', False):
+            return self.instance.email
         email = self.cleaned_data['email'].strip().lower()
         queryset = User.objects.filter(email__iexact=email)
 

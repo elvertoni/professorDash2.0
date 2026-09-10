@@ -107,9 +107,9 @@
                         Voltar às aulas
                     </a>
                 {% endif %}
-                <form method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
+                <form class="lesson-actionbar-undo" method="post" action="{% url 'classroom:aluno_aula_toggle' publicada.pk %}">
                     {% csrf_token %}
-                    <button class="btn btn-ghost" type="submit">
+                    <button class="lesson-actionbar-undo-btn" type="submit">
                         <i data-lucide="rotate-ccw" aria-hidden="true"></i>
                         Marcar como não concluída
                     </button>

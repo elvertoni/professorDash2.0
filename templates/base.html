@@ -99,17 +99,16 @@
             </span>
             <i></i>
         </a>
+        {% if not user.is_authenticated or not user.is_aluno %}
         <details class="mobile-nav">
             <summary class="icon-btn" aria-label="Abrir menu de navegação" title="Menu">
                 <i data-lucide="menu" aria-hidden="true"></i>
                 <span class="mobile-nav-label">Menu</span>
             </summary>
-            <nav class="mobile-nav-panel" aria-label="Navegação principal mobile">
+            <nav class="mobile-nav-panel" aria-label="Navegação principal (menu compacto)">
                 {% if not user.is_authenticated %}
                     <a href="{% url 'home' %}#jornada">Jornada</a>
                     <a href="{% url 'health' %}" class="{% if '/health/' in request.path %}active{% endif %}">Status</a>
-                {% elif user.is_aluno %}
-                    <a href="{% url 'classroom:aluno_dashboard' %}" class="{% if '/turmas/aluno/' in request.path %}active{% endif %}">Início</a>
                 {% else %}
                     <a href="{% url 'classroom:professor_dashboard' %}" class="{% if '/turmas/painel/' in request.path %}active{% endif %}">Painel</a>
                     <a href="{% url 'classroom:turma_list' %}" class="{% if '/turmas/' in request.path and '/turmas/aluno/' not in request.path and '/turmas/painel/' not in request.path %}active{% endif %}">Turmas</a>
@@ -117,6 +116,7 @@
                 {% endif %}
             </nav>
         </details>
+        {% endif %}
         <nav class="site-nav navchain" aria-label="Navegação principal">
             {% if not user.is_authenticated %}
                 <a href="{% url 'home' %}#jornada">Jornada</a>
@@ -285,6 +285,13 @@
                 attributeFilter: ['data-theme']
             });
             updateThemeToggleState();
+        }());
+
+        // Espelha a marcação de página atual (.active) para leitores de tela.
+        (function () {
+            document.querySelectorAll('.site-header a.active, .mobile-nav-panel a.active').forEach(function (link) {
+                link.setAttribute('aria-current', 'page');
+            });
         }());
     </script>
     {% block extra_scripts %}{% endblock %}

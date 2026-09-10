@@ -20,7 +20,7 @@ class MaterialForm(StyledFormMixin, forms.ModelForm):
         labels = {
             'titulo': 'Título',
             'tipo': 'Tipo',
-            'aula_publicada': 'Aula relacionada (opcional)',
+            'aula_publicada': 'Aula relacionada',
             'descricao': 'Descrição',
             'arquivo': 'Arquivo',
             'link_externo': 'Link externo',

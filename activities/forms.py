@@ -11,8 +11,8 @@ class AtividadeForm(StyledFormMixin, forms.ModelForm):
         fields = ('titulo', 'descricao', 'data')
         labels = {
             'titulo': 'Título',
-            'descricao': 'Descrição (opcional)',
-            'data': 'Data (opcional)',
+            'descricao': 'Descrição',
+            'data': 'Data',
         }
         widgets = {
             'descricao': forms.Textarea(attrs={'rows': 3}),
