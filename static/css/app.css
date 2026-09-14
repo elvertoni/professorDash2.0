@@ -5098,7 +5098,7 @@ dialog::backdrop {
 
 .label-class {
     top: 43%;
-    right: clamp(0px, 2vw, 12px);
+    right: clamp(18px, 3vw, 28px);
 }
 
 .label-next {
