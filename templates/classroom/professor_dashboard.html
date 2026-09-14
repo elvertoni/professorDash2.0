@@ -3,7 +3,7 @@
 {% block title %}Painel do professor · Prof. Toni Coimbra{% endblock %}
 
 {% block content %}
-<section class="classroom-page">
+<section class="classroom-page professor-dashboard">
 
     <div class="page-hero">
         <div class="page-hero-copy">
@@ -13,13 +13,34 @@
             <h1>Olá, <span class="accent">{{ request.user.get_short_name }}</span></h1>
             <p class="dek">Suas turmas organizadas por série e disciplina. Selecione uma série para expandir o lote.</p>
         </div>
-        <div class="page-hero-meta mono">
-            <b>{{ total_alunos }}</b> aluno{{ total_alunos|pluralize }} ativo{{ total_alunos|pluralize }}<br>
-            {{ total_turmas }} turma{{ total_turmas|pluralize }} · {{ series_list|length }} série{{ series_list|length|pluralize }}
+        <div class="professor-hero-actions" aria-label="Ações rápidas">
+            <div class="professor-hero-actions-head">
+                <span class="professor-action-kicker">Bancada de trabalho</span>
+                <span class="professor-action-count mono">{{ total_turmas }} turma{{ total_turmas|pluralize }}</span>
+            </div>
+            <p>Organize o próximo lote ou entre direto na visão completa das turmas.</p>
+            <div class="professor-hero-action-list">
+                <a class="btn btn-primary" href="{% url 'classroom:turma_create' %}">
+                    <i data-lucide="plus" aria-hidden="true"></i>
+                    Nova turma
+                </a>
+                <a class="btn btn-outline" href="{% url 'classroom:turma_list' %}">
+                    Ver todas as turmas
+                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </div>
         </div>
     </div>
 
     {% if series_list %}
+        <div class="professor-series-heading">
+            <div>
+                <span class="professor-section-label">Acompanhamento</span>
+                <h2>Turmas por série</h2>
+            </div>
+            <p class="mono">{{ total_alunos }} aluno{{ total_alunos|pluralize }} ativo{{ total_alunos|pluralize }} · {{ series_list|length }} série{{ series_list|length|pluralize }}</p>
+        </div>
+        <div class="professor-series">
         {% for serie in series_list %}
         <div class="serie-section" x-data="{ open: true }">
             <div class="serie-header"
@@ -56,18 +77,20 @@
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0">
                 <div class="feature-grid catalog-grid">
-                    {% for turma in serie.turmas %}
-                    <article class="card">
-                        <div class="card-head">
-                            <span class="chip">{{ turma.disciplina.label }}</span>
-                            <span class="badge badge-neutral">
-                                <i data-lucide="users" aria-hidden="true"></i>
-                                {{ turma.stats.alunos|default:0 }}
-                            </span>
+                {% for turma in serie.turmas %}
+                    <article class="card professor-class-card">
+                        <div class="professor-class-info">
+                            <div class="card-head">
+                                <span class="chip">{{ turma.disciplina.label }}</span>
+                                <span class="badge badge-neutral">
+                                    <i data-lucide="users" aria-hidden="true"></i>
+                                    {{ turma.stats.alunos|default:0 }}
+                                </span>
+                            </div>
+                            <h3>{{ turma.nome }}</h3>
+                            <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
                         </div>
-                        <h3>{{ turma.nome }}</h3>
-                        <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
-                        <div class="metric">
+                        <div class="professor-class-progress metric">
                             <div class="metric-row">
                                 <span>Conclusão de aulas</span>
                                 <b>{{ turma.stats.conclusao_pct|default:0 }}%</b>
@@ -75,19 +98,21 @@
                             <div class="progress">
                                 <i style="width: {{ turma.stats.conclusao_pct|default:0 }}%"></i>
                             </div>
+                            <span class="professor-class-total mono">{{ turma.stats.aulas|default:0 }} aula{{ turma.stats.aulas|default:0|pluralize }}</span>
                         </div>
-                        <div class="card-foot">
-                            <a href="{% url 'classroom:turma_detail' turma.pk %}">
-                                Gerenciar turma <i data-lucide="arrow-right" aria-hidden="true"></i>
+                        <div class="professor-class-actions">
+                            <a class="btn btn-primary btn-sm" href="{% url 'classroom:turma_detail' turma.pk %}">
+                                Abrir turma
+                                <i data-lucide="arrow-up-right" aria-hidden="true"></i>
                             </a>
-                            <span class="badge badge-neutral">{{ turma.stats.aulas|default:0 }} aulas</span>
                         </div>
                     </article>
-                    {% endfor %}
+                {% endfor %}
                 </div>
             </div>
         </div>
         {% endfor %}
+        </div>
     {% else %}
     <div class="empty">
         <i data-lucide="inbox" aria-hidden="true"></i>

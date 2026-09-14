@@ -1,9 +1,9 @@
 /*
-THESIS: O portal é uma bancada editorial em movimento, não uma grade estática de LMS.
-OWN-WORLD: Obsidian e bone, sinal vermelho, linhas de registro, superfícies tonais e movimento físico contido.
-STORY: O professor percorre lotes com continuidade; o aluno encontra uma ação clara e percebe o avanço.
-FIRST VIEWPORT: Cabeçalho flutuante, título de alta escala e conteúdo entrando em sequência até o primeiro CTA.
-FORM: Atelier Cinético, direção escolhida pelo usuário; movimento de entrada, estado e navegação, sem efeitos de vitrine.
+THESIS: O portal é uma bancada de operação, não uma pilha de cards de LMS.
+OWN-WORLD: Volta Atelier em alto contraste, tipografia editorial, linhas de registro e superfícies que organizam o trabalho.
+STORY: O professor abre um lote e age; o aluno retoma a próxima aula sem procurar por ela.
+FIRST VIEWPORT: Cabeçalho enxuto, título em escala de editorial e uma ação contextual ocupando o primeiro plano.
+FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e motion curto apenas para estado e continuidade.
 */
 
 [x-cloak] {
@@ -6010,6 +6010,673 @@ dialog.lesson-lightbox:not([open]) {
 }
 
 /*
+   REDESIGN · ATELIER DE OPERAÇÃO
+   A superfície autenticada agora tem duas leituras intencionais: o professor
+   opera lotes e o aluno retoma um percurso. O contraste vem de composição,
+   tipo e camadas sólidas; nenhum conteúdo depende de efeito decorativo.
+*/
+
+body.site-body::after {
+    display: none;
+}
+
+.site-header::after {
+    background: var(--line);
+}
+
+.site-header.is-scrolled {
+    background: var(--surface-base);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.page-hero::after {
+    background: var(--line-2);
+}
+
+/* Professor: bancada de lote */
+.professor-dashboard .page-hero {
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+    align-items: stretch;
+    gap: clamp(32px, 7vw, 104px);
+    margin-bottom: clamp(40px, 6vw, 72px);
+    padding-bottom: clamp(28px, 4vw, 48px);
+    border-bottom: 1px solid var(--line);
+}
+
+.professor-dashboard .page-hero::after {
+    display: none;
+}
+
+.professor-dashboard .page-hero-copy {
+    display: grid;
+    align-content: center;
+    max-width: 58ch;
+    padding-block: var(--space-4);
+}
+
+.professor-dashboard .page-hero h1 {
+    max-width: 10ch;
+    font-size: clamp(42px, 5.4vw, 68px);
+    line-height: .9;
+}
+
+.professor-dashboard .page-hero .dek {
+    max-width: 47ch;
+    margin-top: var(--space-5);
+    font-size: var(--text-read);
+    line-height: 1.65;
+}
+
+.professor-hero-actions {
+    display: grid;
+    align-content: center;
+    gap: var(--space-4);
+    min-height: 240px;
+    padding: clamp(22px, 3vw, 32px);
+    border: 1px solid var(--line-2);
+    border-top: 1px solid var(--signal);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+}
+
+.professor-hero-actions-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.professor-action-kicker,
+.professor-section-label,
+.student-route-label,
+.student-section-label,
+.student-item-kicker {
+    color: var(--signal-text);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.professor-action-count {
+    color: var(--fg);
+    font-size: 12px;
+}
+
+.professor-hero-actions p {
+    max-width: 38ch;
+    color: var(--fg-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.professor-hero-action-list {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.professor-hero-action-list .btn {
+    justify-content: space-between;
+    width: 100%;
+}
+
+.professor-series-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin-bottom: var(--space-4);
+}
+
+.professor-series-heading h2 {
+    margin-top: 8px;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: .95;
+}
+
+.professor-series-heading p {
+    color: var(--fg-muted);
+    font-size: 11px;
+    letter-spacing: .03em;
+    text-align: right;
+}
+
+.professor-series {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.professor-dashboard .serie-section {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface-base);
+}
+
+.professor-dashboard .serie-header {
+    min-height: 82px;
+    padding: 20px 24px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--surface-raised);
+    box-shadow: none;
+}
+
+.professor-dashboard .serie-header::before {
+    display: none;
+}
+
+.professor-dashboard .serie-header:hover {
+    transform: none;
+    border-color: var(--line);
+    background: var(--surface-overlay);
+}
+
+.professor-dashboard .serie-header[aria-expanded='true'] .serie-chevron {
+    color: var(--signal);
+}
+
+.professor-dashboard .serie-header-title h2 {
+    font-size: clamp(20px, 2.4vw, 28px);
+    font-weight: 800;
+}
+
+.professor-dashboard .serie-header-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.professor-dashboard .serie-turmas {
+    padding: 12px;
+    background: var(--ink-deep);
+}
+
+.professor-dashboard .serie-turmas .catalog-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.professor-class-card {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.2fr) minmax(220px, .8fr) auto;
+    align-items: center;
+    gap: clamp(18px, 3vw, 36px);
+    min-height: 148px;
+    padding: 18px 20px;
+    border-radius: 10px;
+    background: var(--surface-raised);
+    box-shadow: none;
+}
+
+.professor-class-card:hover {
+    transform: none;
+    background: var(--surface-overlay);
+    box-shadow: none;
+}
+
+.professor-class-info {
+    min-width: 0;
+}
+
+.professor-class-info .card-head {
+    margin-bottom: 12px;
+}
+
+.professor-class-info h3 {
+    margin: 0;
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1;
+}
+
+.professor-class-info .desc {
+    margin-top: 9px;
+}
+
+.professor-class-progress {
+    display: grid;
+    align-content: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.professor-class-progress .metric-row {
+    align-items: baseline;
+}
+
+.professor-class-progress .progress {
+    height: 7px;
+}
+
+.professor-class-total {
+    color: var(--fg-subtle);
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.professor-class-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.professor-class-actions .btn {
+    min-width: 132px;
+}
+
+/* Aluno: fila de retomada */
+.student-dashboard .page-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, .62fr);
+    align-items: stretch;
+    gap: clamp(28px, 7vw, 104px);
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+}
+
+.student-dashboard .page-hero::after {
+    display: none;
+}
+
+.student-dashboard .page-hero-copy {
+    display: grid;
+    align-content: center;
+    max-width: 54ch;
+}
+
+.student-dashboard .page-hero h1 {
+    max-width: 9ch;
+    font-size: clamp(42px, 5.4vw, 68px);
+    line-height: .9;
+}
+
+.student-dashboard-intro {
+    max-width: 42ch;
+    margin-top: var(--space-5);
+    font-size: var(--text-read);
+    line-height: 1.65;
+}
+
+.student-hero-meta {
+    display: grid;
+    align-content: space-between;
+    gap: var(--space-4);
+    min-height: 172px;
+    padding: 22px 24px;
+    border: 1px solid var(--line-2);
+    border-top: 1px solid var(--signal);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+}
+
+.student-hero-meta strong {
+    max-width: 16ch;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: .98;
+}
+
+.student-hero-meta > span:last-child {
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.student-dashboard .dash-tabs {
+    width: max-content;
+    max-width: 100%;
+    gap: 4px;
+    margin-bottom: clamp(32px, 5vw, 56px);
+    padding: 4px;
+    overflow-x: auto;
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-pill);
+    background: var(--surface-raised);
+}
+
+.student-dashboard .dash-tab {
+    min-height: 42px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: var(--fg-muted);
+    background: transparent;
+}
+
+.student-dashboard .dash-tab:hover,
+.student-dashboard .dash-tab:focus-visible {
+    color: var(--fg);
+    background: var(--surface-overlay);
+}
+
+.student-dashboard .dash-tab.active {
+    color: #ffffff;
+    border-color: var(--signal-deep);
+    background: var(--signal-deep);
+}
+
+.student-dashboard .dash-tab.active::after {
+    display: none;
+}
+
+.student-dashboard .dash-tab .count,
+.student-dashboard .dash-tab.active .count {
+    border: 0;
+    background: color-mix(in srgb, currentColor 20%, transparent);
+    color: currentColor;
+}
+
+.student-dashboard .dash-panel-heading {
+    align-items: end;
+    margin-bottom: var(--space-5);
+}
+
+.student-dashboard .dash-panel-heading h2 {
+    font-size: clamp(32px, 4.4vw, 50px);
+    line-height: .94;
+}
+
+.student-dashboard .dash-panel-heading p {
+    max-width: 48ch;
+    margin-top: 12px;
+}
+
+.student-dashboard .dash-panel-count {
+    color: var(--signal-text);
+}
+
+.student-dashboard .dash-next-list {
+    gap: 10px;
+}
+
+.student-dashboard .dash-next-item {
+    border-radius: 10px;
+    background: var(--surface-raised);
+}
+
+.student-dashboard .dash-next-item.is-primary {
+    min-height: 280px;
+    padding: clamp(24px, 4vw, 40px);
+    border: 2px solid var(--signal);
+    background: var(--surface-raised);
+}
+
+.student-dashboard .dash-next-item.is-primary h3 {
+    max-width: 15ch;
+    font-size: clamp(32px, 5vw, 58px);
+}
+
+.student-dashboard .dash-next-item.is-primary .dash-next-symbol {
+    width: 144px;
+    border-color: var(--signal);
+    background: var(--surface-base);
+}
+
+.student-dashboard .dash-next-item.is-primary .dash-next-symbol svg {
+    color: var(--signal);
+}
+
+.student-dashboard .dash-next-item:hover {
+    transform: none;
+    border-color: var(--line-2);
+    background: var(--surface-overlay);
+}
+
+.student-dashboard .dash-next-item.is-primary:hover {
+    border-color: var(--signal);
+}
+
+.student-resume-board {
+    display: grid;
+    gap: var(--space-6);
+    padding: clamp(24px, 5vw, 44px);
+    border: 1px solid var(--line-2);
+    border-top: 1px solid var(--signal);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+}
+
+.student-resume-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-5);
+}
+
+.student-resume-head h2 {
+    max-width: 13ch;
+    margin-top: 9px;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    line-height: .9;
+}
+
+.student-resume-head p {
+    max-width: 48ch;
+    margin-top: 14px;
+    color: var(--fg-muted);
+    font-size: var(--text-read);
+    line-height: 1.6;
+}
+
+.student-resume-count {
+    flex-shrink: 0;
+    padding: 7px 10px;
+    border: 1px solid color-mix(in srgb, var(--amber) 54%, var(--line));
+    border-radius: var(--radius-pill);
+    color: var(--amber-deep);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.student-resume-list {
+    display: grid;
+    border-top: 1px solid var(--line);
+}
+
+.student-resume-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg);
+    transition: color var(--motion-fast) var(--e-soft), background-color var(--motion-fast) var(--e-soft);
+}
+
+.student-resume-row:hover {
+    color: var(--signal-text);
+    background: color-mix(in srgb, var(--signal) 5%, transparent);
+}
+
+.student-resume-row:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 4px;
+}
+
+.student-resume-info {
+    display: grid;
+    min-width: 0;
+    gap: 5px;
+}
+
+.student-resume-info strong {
+    overflow-wrap: anywhere;
+    font-family: var(--font-display);
+    font-size: 21px;
+    line-height: 1.05;
+}
+
+.student-resume-info > span:last-child {
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.student-resume-action {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 6px;
+    color: var(--signal-text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.student-resume-action svg {
+    width: 16px;
+    height: 16px;
+    transition: transform var(--motion-fast) var(--e-back);
+}
+
+.student-resume-row:hover .student-resume-action svg {
+    transform: translate(2px, -2px);
+}
+
+.student-state-board {
+    min-height: 220px;
+}
+
+@media (max-width: 760px) {
+    .professor-dashboard .page-hero,
+    .student-dashboard .page-hero {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+    }
+
+    .professor-dashboard .page-hero h1,
+    .student-dashboard .page-hero h1 {
+        max-width: 9ch;
+        font-size: clamp(42px, 14vw, 64px);
+    }
+
+    .professor-dashboard .page-hero .dek,
+    .student-dashboard-intro {
+        max-width: 38ch;
+        margin-top: 16px;
+    }
+
+    .professor-hero-actions,
+    .student-hero-meta {
+        min-height: 0;
+    }
+
+    .professor-series-heading {
+        align-items: start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .professor-series-heading p {
+        text-align: left;
+    }
+
+    .professor-dashboard .serie-header {
+        padding: 18px;
+    }
+
+    .professor-dashboard .serie-header-meta {
+        gap: 10px;
+        font-size: 10px;
+    }
+
+    .professor-class-card {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 20px;
+    }
+
+    .professor-class-progress {
+        gap: 8px;
+    }
+
+    .professor-class-total {
+        text-align: left;
+    }
+
+    .professor-class-actions .btn {
+        width: 100%;
+    }
+
+    .student-dashboard .dash-tabs {
+        width: 100%;
+    }
+
+    .student-dashboard .dash-tab {
+        flex: 1;
+        padding-inline: 12px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary {
+        grid-template-columns: 1fr;
+        min-height: 260px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary .dash-next-copy {
+        padding-right: 48px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary .dash-next-symbol {
+        top: 20px;
+        right: 20px;
+        width: 38px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary .dash-next-symbol svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .student-resume-head {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .student-resume-row {
+        align-items: start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .student-resume-action {
+        min-height: var(--tap);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .student-resume-row,
+    .student-resume-action svg {
+        transition: none;
+    }
+}
+
+/*
 VOLTA ATELIER · Refactor de superfície 2026
 MOTION THESIS: o portal se comporta como uma bancada editorial: o conteúdo
 entra como composição, a luz segue a mão e cada estado confirma uma ação.
@@ -6877,4 +7544,514 @@ body.site-body::after {
     .btn:hover {
         transform: none !important;
     }
+}
+
+/* Student dashboard · next-step workspace
+   The student route needs a quieter reading rhythm than the public campaign
+   page: one clear action, a compact queue, and classes as navigable rows. */
+.student-dashboard .page-hero {
+    margin-bottom: var(--space-5);
+}
+
+.student-dashboard .page-hero::after {
+    background: var(--line);
+    animation: none;
+}
+
+.student-dashboard .page-hero-copy {
+    max-width: 62ch;
+}
+
+.student-dashboard-intro {
+    max-width: 56ch;
+    margin: 14px 0 0;
+    color: var(--fg-muted);
+    font-size: var(--text-read);
+    line-height: 1.65;
+}
+
+.student-dashboard .dash-tabs {
+    gap: 24px;
+    margin-bottom: var(--space-8);
+    padding: 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.student-dashboard .dash-tab {
+    min-height: 44px;
+    padding: 8px 0 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    transform: none;
+}
+
+.student-dashboard .dash-tab:hover,
+.student-dashboard .dash-tab:focus-visible {
+    border-color: transparent;
+    background: transparent;
+    transform: none;
+}
+
+.student-dashboard .dash-tab:hover {
+    color: var(--fg);
+}
+
+.student-dashboard .dash-tab.active {
+    color: var(--signal);
+    background: transparent;
+}
+
+.student-dashboard .dash-tab.active::after {
+    right: 0;
+    bottom: -1px;
+    left: 0;
+}
+
+.student-dashboard .dash-tab .count {
+    min-width: 22px;
+    height: 22px;
+    margin-left: 7px;
+    padding: 0 6px;
+    border: 1px solid var(--line-2);
+    background: transparent;
+    color: var(--fg-muted);
+}
+
+.student-dashboard .dash-tab.active .count {
+    border-color: color-mix(in srgb, var(--signal) 55%, var(--line));
+    color: var(--signal);
+}
+
+.student-dashboard .dash-panel-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+.student-dashboard .dash-panel-heading h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1;
+}
+
+.student-dashboard .dash-panel-heading p {
+    max-width: 58ch;
+    margin: 9px 0 0;
+    color: var(--fg-muted);
+    font-size: var(--text-read);
+    line-height: 1.6;
+}
+
+.student-dashboard .dash-panel-count {
+    flex-shrink: 0;
+    padding-bottom: 4px;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.student-dashboard .dash-next-list {
+    display: grid;
+    gap: 12px;
+}
+
+.student-dashboard .dash-next-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-5);
+    padding: 20px 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    transition: border-color var(--motion-fast) var(--e-soft), background-color var(--motion-fast) var(--e-soft);
+}
+
+.student-dashboard .dash-next-item:hover {
+    border-color: var(--line-2);
+    background: var(--surface-overlay);
+}
+
+.student-dashboard .dash-next-item.is-primary {
+    grid-template-columns: minmax(0, 1fr) 132px;
+    min-height: 244px;
+    padding: 28px;
+    border-color: var(--line-2);
+}
+
+.student-dashboard .dash-next-copy {
+    min-width: 0;
+}
+
+.student-dashboard .dash-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.student-dashboard .dash-item-meta > span:first-child {
+    overflow-wrap: anywhere;
+}
+
+.student-dashboard .dash-item-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--signal-text);
+}
+
+.student-dashboard .dash-item-status svg,
+.student-dashboard .dash-class-status svg {
+    width: 13px;
+    height: 13px;
+}
+
+.student-dashboard .dash-next-item h3 {
+    max-width: 52ch;
+    margin: 12px 0 0;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 750;
+    letter-spacing: -.025em;
+    line-height: 1.15;
+}
+
+.student-dashboard .dash-next-item.is-primary h3 {
+    max-width: 20ch;
+    font-size: clamp(28px, 4vw, 46px);
+    line-height: .98;
+}
+
+.student-dashboard .dash-next-item p {
+    max-width: 62ch;
+    margin: 9px 0 0;
+    color: var(--fg-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.student-dashboard .dash-next-item .btn {
+    margin-top: 20px;
+}
+
+.student-dashboard .dash-next-symbol {
+    display: grid;
+    width: 132px;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid var(--line-2);
+    border-radius: 50%;
+    background: var(--surface-base);
+    color: var(--signal);
+}
+
+.student-dashboard .dash-next-symbol svg {
+    width: 54px;
+    height: 54px;
+    stroke-width: 1.25;
+}
+
+.student-dashboard .dash-next-arrow {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    color: var(--signal);
+}
+
+.student-dashboard .dash-next-arrow svg {
+    width: 18px;
+    height: 18px;
+}
+
+.student-dashboard .dash-class-list {
+    border-top: 1px solid var(--line);
+}
+
+.student-dashboard .dash-class-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.35fr) minmax(180px, .85fr) auto;
+    align-items: center;
+    gap: var(--space-6);
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.student-dashboard .dash-class-row:hover {
+    background: color-mix(in srgb, var(--surface-overlay) 58%, transparent);
+}
+
+.student-dashboard .dash-class-main {
+    min-width: 0;
+}
+
+.student-dashboard .dash-class-main h3 {
+    margin: 8px 0 0;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 750;
+    letter-spacing: -.025em;
+    line-height: 1.1;
+}
+
+.student-dashboard .dash-class-main p,
+.student-dashboard .dash-class-progress p {
+    margin: 8px 0 0;
+    color: var(--fg-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.student-dashboard .dash-class-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.student-dashboard .dash-class-status.is-pending {
+    color: var(--amber-deep);
+}
+
+.student-dashboard .dash-class-status.is-ready {
+    color: var(--emerald);
+}
+
+.student-dashboard .dash-class-progress {
+    min-width: 0;
+}
+
+.student-dashboard .dash-class-progress .progress {
+    height: 6px;
+}
+
+.student-dashboard .dash-class-progress p {
+    margin-top: 7px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.student-dashboard .student-card-action {
+    width: auto;
+    white-space: nowrap;
+}
+
+.student-dashboard .dash-empty {
+    min-height: 250px;
+    padding: clamp(32px, 6vw, 64px) var(--space-5);
+}
+
+.student-dashboard .dash-empty p {
+    max-width: 56ch;
+}
+
+@media (max-width: 760px) {
+    .student-dashboard .dash-panel-heading {
+        align-items: start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .student-dashboard .dash-panel-count {
+        padding-bottom: 0;
+    }
+
+    .student-dashboard .dash-next-item.is-primary {
+        grid-template-columns: 1fr;
+    }
+
+    .student-dashboard .dash-next-item.is-primary .dash-next-copy {
+        padding-right: 56px;
+    }
+
+    .student-dashboard .dash-next-symbol {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 42px;
+    }
+
+    .student-dashboard .dash-next-symbol svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .student-dashboard .dash-class-row {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .student-dashboard .student-card-action {
+        width: 100%;
+    }
+}
+
+/* Final cascade: the runtime has historical compatibility layers above this
+   point; keep the new dashboard composition authoritative. */
+.site-header::after {
+    background: var(--line);
+}
+
+.site-header.is-scrolled {
+    background: var(--surface-base);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.page-hero::after {
+    background: var(--line-2);
+}
+
+.student-dashboard .dash-tabs {
+    width: max-content;
+    max-width: 100%;
+    gap: 4px;
+    margin-bottom: clamp(32px, 5vw, 56px);
+    padding: 4px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-pill);
+    background: var(--surface-raised);
+}
+
+.student-dashboard .dash-tab {
+    min-height: 42px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: var(--fg-muted);
+    background: transparent;
+}
+
+.student-dashboard .dash-tab:hover,
+.student-dashboard .dash-tab:focus-visible {
+    color: var(--fg);
+    border-color: transparent;
+    background: var(--surface-overlay);
+}
+
+.student-dashboard .dash-tab.active {
+    color: #ffffff;
+    border-color: var(--signal-deep);
+    background: var(--signal-deep);
+}
+
+.student-dashboard .dash-tab.active::after {
+    display: none;
+}
+
+.student-dashboard .dash-tab .count,
+.student-dashboard .dash-tab.active .count {
+    border: 0;
+    background: color-mix(in srgb, currentColor 20%, transparent);
+    color: currentColor;
+}
+
+.student-dashboard .dash-panel-heading {
+    align-items: end;
+    margin-bottom: var(--space-5);
+}
+
+.student-dashboard .dash-panel-heading h2 {
+    font-size: clamp(32px, 4.4vw, 50px);
+    line-height: .94;
+}
+
+.student-dashboard .dash-panel-heading p {
+    max-width: 48ch;
+    margin-top: 12px;
+}
+
+.student-dashboard .dash-panel-count {
+    color: var(--signal-text);
+}
+
+.student-dashboard .dash-next-item.is-primary {
+    grid-template-columns: minmax(0, 1fr) 144px;
+    min-height: 280px;
+    padding: clamp(24px, 4vw, 40px);
+    border: 2px solid var(--signal);
+    background: var(--surface-raised);
+}
+
+.student-dashboard .dash-next-item.is-primary h3 {
+    max-width: 15ch;
+    font-size: clamp(32px, 5vw, 58px);
+}
+
+.student-dashboard .dash-next-item.is-primary .dash-next-symbol {
+    width: 144px;
+    border-color: var(--signal);
+    background: var(--surface-base);
+}
+
+.student-dashboard .dash-next-item.is-primary:hover {
+    border-color: var(--signal);
+}
+
+.student-dashboard .dash-next-item:hover {
+    transform: none;
+}
+
+@media (max-width: 760px) {
+    .student-dashboard .dash-tabs {
+        width: 100%;
+    }
+
+    .student-dashboard .dash-tab {
+        flex: 1;
+        padding-inline: 12px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary {
+        grid-template-columns: 1fr;
+        min-height: 260px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary .dash-next-copy {
+        padding-right: 48px;
+    }
+
+    .student-dashboard .dash-next-item.is-primary .dash-next-symbol {
+        width: 38px;
+    }
+}
+
+/* Solid surface lock: the historical compatibility layer must not put a
+   decorative gradient back under the redesigned authenticated surfaces. */
+.card,
+.kpi,
+.action-panel,
+.panel,
+.empty,
+.notification-item,
+.tbl-wrap,
+.lesson-shell,
+.auth-panel,
+.serie-header,
+.dash-collapsible > summary {
+    background-image: none;
+}
+
+.card:hover,
+.kpi:hover,
+.action-panel:hover,
+.notification-item:hover {
+    background-image: none;
 }
