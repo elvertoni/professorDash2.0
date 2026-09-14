@@ -4999,7 +4999,7 @@ dialog::backdrop {
     position: relative;
     min-height: clamp(330px, 36vw, 500px);
     aspect-ratio: 1;
-    contain: layout paint;
+    contain: layout;
 }
 
 .hero-signal::before,
