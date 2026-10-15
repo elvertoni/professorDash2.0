@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "easypanel": {
+      "command": "npx",
+      "args": ["-y", "easypanel-mcp-server@3.0.0"],
+      "env": {
+        "EASYPANEL_URL": "${EASYPANEL_URL}",
+        "EASYPANEL_TOKEN": "${EASYPANEL_TOKEN}"
+      }
+    }
+  }
+}
