@@ -1,6 +1,6 @@
 # Minha biblioteca
 
-A primeira versão está implementada para consulta privada no ProfessorDash. O lote piloto contém **40 notas**: 36 conceitos vivos e 2 rascunhos do PROF-TONI, mais 2 rascunhos do cérebro pessoal. A implantação em produção ainda não foi realizada.
+A primeira versão está implementada para consulta privada no ProfessorDash. O lote piloto contém **40 notas**: 36 conceitos vivos e 2 rascunhos do PROF-TONI, mais 2 rascunhos do cérebro pessoal. Disponível em produção em [Minha biblioteca](https://prof.tonicoimbra.com/biblioteca/), com acesso pela conta proprietária.
 
 ## Para consultar
 
@@ -62,4 +62,14 @@ As notas e seus metadados ficam no PostgreSQL, abrangidas pelo dump integral do 
 - Desktop 1440px e celular 360px, temas claro/escuro: sem transbordamento horizontal nas telas inspecionadas. Filtros por acervo/coleção, paginação e cópia de referência conferidos. Respostas privadas enviam `Cache-Control: private, no-store`.
 - Nenhuma suíte de testes automatizados criada ou executada, conforme AGENTS.md. Conferência de interface pelo navegador local.
 
-Produção, configuração da conta real e envio das duas notas pessoais permanecem pendentes. Os dados e aulas existentes em produção não foram alterados.
+## Publicação em produção — 16/10/2026
+
+- Código publicado no GitHub (`4bb50ce`), deploy automático do Easypanel concluído e migração aplicada pelo entrypoint.
+- Proprietário configurado na conta existente do Toni; 38 notas do PROF-TONI e 2 pessoais importadas. Reimportação: 40 inalteradas.
+- Navegador em produção: biblioteca e detalhe HTTP 200 para o proprietário; busca sem acento encontra Precificação; RAG e aulas relacionadas disponíveis; coleção Projetos mostra as duas notas pessoais.
+- Aluno autenticado: HTTP 403 tanto na busca quanto no detalhe direto; visitante segue para o login. Sessões temporárias de validação removidas ao concluir.
+- Celular 360px sem transbordamento horizontal; respostas privadas com `no-store`. Health HTTP 200 e `check --deploy` sem problemas.
+- Conferência das contagens: 89 aulas, 8 turmas e 95 usuários, iguais ao estado anterior à publicação.
+- Backup anterior ao deploy em `/var/lib/postgresql/data/before-library-20261016.dump` no volume do Postgres; formato conferido com `pg_restore -l`.
+- Pacotes transferidos por console autenticado, com SHA-256 conferido; arquivos temporários removidos após a carga. Pacotes e inventário integral dos vaults ficam fora do Git e do contexto Docker.
+

@@ -107,7 +107,7 @@ URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` 
 
 ## Fluxo de trabalho
 - SPRINT-DRIVEN (seção 9 do PRD). Uma sprint por vez, em ordem. Definition of done = `[x]` no PRD.
-- Estado atual documentado: Sprints 0-12 concluídas e redesign pós-lançamento registrado no PRD. Sempre confirme no PRD antes de iniciar.
+- Estado atual documentado: Sprints 0-13 concluídas e redesign pós-lançamento registrado no PRD. Sempre confirme no PRD antes de iniciar.
 - Ambiguidade: decida com best practice Django e **documente no PRD** (não em comentário solto).
 - Git é do humano. NÃO commit/push a menos que pedido.
 - Após sprint/tarefa: reporte o que foi feito, decisões e como validar manualmente. Para UI, inclua desktop/mobile e tema claro/escuro quando houver alteração visual.

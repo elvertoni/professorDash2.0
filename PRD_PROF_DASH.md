@@ -564,7 +564,7 @@ Expansão autorizada: consultar no portal as notas selecionadas dos vaults PROF-
 - [x] Busca textual sem distinção de acentos, filtros, paginação, leitura sanitizada, referências e ligações.
 - [x] Acesso exclusivamente ao usuário ativo professor/admin cujo email corresponde a `LIBRARY_OWNER_EMAIL`; superusuário não recebe bypass nas views. Sem configuração, acesso fechado. Operadores do banco/servidor continuam tecnicamente capazes de acessar dados.
 - [x] Validação manual local com PostgreSQL, navegação e permissões.
-- [ ] Seleção pessoal confirmada, implantação e validação em produção (etapa posterior).
+- [x] Seleção pessoal confirmada, implantação e validação em produção: 40 notas de duas fontes, busca/leitura do proprietário e bloqueio do aluno conferidos.
 
 Decisões: lote piloto = notas vivas do PROF-TONI + amostras RAG, aprendizagem baseada em problemas, API REST, precificação e central de operações, deduplicadas por caminho. Coleções editoriais não exclusivas: Estudar, Preparar aulas, Projetos e negócios. Busca inicial usa texto normalizado e prioriza títulos; não é busca semântica. Referências locais aparecem como texto (originais não incluídos); imagens/anexos não são transportados nem carregados externamente. Wikilinks resolvem somente notas importadas da mesma fonte; ambiguidades ficam sem link. Aulas relacionadas exigem caminho canônico explícito, nunca somente número de aula. Entrada no menu da conta preserva a navegação de turmas. Importação por CLI exige proprietário explícito e aplica só com `--apply`; pacote inclui apenas campos permitidos e Markdown. Pacotes privados ficam fora do Git.
 

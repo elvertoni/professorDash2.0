@@ -1,6 +1,6 @@
 # Segundo cérebro: mapa de uso e biblioteca privada
 
-Levantamento em 2026-10-16. Proposta original, seguida de implementação local em 2026-10-16; produção ainda não alterada. Veja [COMO-USAR.md](COMO-USAR.md). Código do ProfessorDash inspecionado em `/home/toni/PROJETOS/PESSOAL/professordash`. Fontes locais em `D:\VAULTS`.
+Levantamento em 2026-10-16. Proposta original, seguida de implementação local em 2026-10-16; publicada em produção após aprovação do usuário. Veja [COMO-USAR.md](COMO-USAR.md). Código do ProfessorDash inspecionado em `/home/toni/PROJETOS/PESSOAL/professordash`. Fontes locais em `D:\VAULTS`.
 
 ## O que já existe
 
@@ -12,7 +12,7 @@ Levantamento em 2026-10-16. Proposta original, seguida de implementação local 
 
 As duas pós concentram 990 arquivos: 523 em IA/Robótica Educacional e 467 em Full Stack/Cloud. Um conceito obsoleto integra a contagem total; não deve aparecer como recomendação atual. O mapa gerado do Obsidian ainda informa 466 para Full Stack: usar os arquivos como fonte da contagem.
 
-Inventário navegável completo: [INVENTARIO.md](INVENTARIO.md). Dados estruturados: [inventario.json](inventario.json). O inventário descreve o conteúdo; não certifica a correção das notas nem a disponibilidade de todos os originais citados.
+Inventário navegável completo (artefato local privado, fora do Git): [INVENTARIO.md](INVENTARIO.md). Dados estruturados: [inventario.json](inventario.json). O inventário descreve o conteúdo; não certifica a correção das notas nem a disponibilidade de todos os originais citados.
 
 ## Por onde começar
 
@@ -83,4 +83,4 @@ Nova app de domínio `library`, separada do espelho `catalog.Conceito`. Reutiliz
 
 ## Estado desta entrega
 
-Mapeamento preservado e primeira versão implementada localmente: biblioteca privada, lote piloto de 40 notas, busca, leitura, importação e validação em PostgreSQL. Nenhum arquivo dos vaults foi alterado. Publicação/deploy e importação em produção não realizados. Consulte [COMO-USAR.md](COMO-USAR.md) para estado, operação e limites.
+Mapeamento preservado e primeira versão implementada localmente: biblioteca privada, lote piloto de 40 notas, busca, leitura, importação e validação em PostgreSQL. Nenhum arquivo dos vaults foi alterado. Publicação e importação em produção concluídas após aprovação, com 40 notas privadas e verificação de acesso. Consulte [COMO-USAR.md](COMO-USAR.md) para estado, operação e limites.

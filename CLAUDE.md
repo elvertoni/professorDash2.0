@@ -16,7 +16,7 @@ Antes de cada sprint: releia PRD + design system + código existente. Ordem em c
 
 **Sistema em produção** em https://prof.tonicoimbra.com (Easypanel, projeto `work`, serviço `professordash`).
 
-Sprints 0–12 concluídas + redesign pós-lançamento (foco TDAH) + redesign visual **Volta Atelier** aplicado em todo o projeto (commit `0d976de`). Apps ativos: `core`, `base`, `accounts`, `catalog`, `classroom`, `activities`, `materials`, `notifications`.
+Sprints 0–13 concluídas + redesign pós-lançamento (foco TDAH) + redesign visual **Volta Atelier** aplicado em todo o projeto (commit `0d976de`). Apps ativos: `core`, `base`, `accounts`, `catalog`, `classroom`, `activities`, `materials`, `notifications`, `library`.
 
 ## Fluxo de trabalho (crítico)
 
@@ -187,3 +187,7 @@ latest binary's recommended copy:
 Both are idempotent: re-runs replace the block delimited by the ai-memory
 start/end HTML-comment markers, without disturbing the rest of the file.
 <!-- ai-memory:end -->
+
+## Biblioteca privada
+
+App `library`, rota `/biblioteca/`: consulta de notas selecionadas dos vaults. Proprietário definido por `LIBRARY_OWNER_EMAIL`, sem bypass administrativo nas views. `package_library` exporta o lote e `import_library` oferece prévia antes de `--apply`. Notas originais continuam nos vaults. Operação e validação em `docs/segundo-cerebro/COMO-USAR.md`; pacotes e inventário integral não entram no Git nem no build Docker.
