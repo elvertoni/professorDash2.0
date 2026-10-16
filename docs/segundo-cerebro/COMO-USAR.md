@@ -2,6 +2,8 @@
 
 A primeira versão está implementada para consulta privada no ProfessorDash. O lote piloto contém **40 notas**: 36 conceitos vivos e 2 rascunhos do PROF-TONI, mais 2 rascunhos do cérebro pessoal. Disponível em produção em [Minha biblioteca](https://prof.tonicoimbra.com/biblioteca/), com acesso pela conta proprietária.
 
+As demais notas permanecem nos vaults e podem ser acrescentadas em lotes posteriores.
+
 ## Para consultar
 
 1. Entre com a conta proprietária e abra **Minha biblioteca** no menu da conta (avatar).
@@ -72,4 +74,3 @@ As notas e seus metadados ficam no PostgreSQL, abrangidas pelo dump integral do 
 - Conferência das contagens: 89 aulas, 8 turmas e 95 usuários, iguais ao estado anterior à publicação.
 - Backup anterior ao deploy em `/var/lib/postgresql/data/before-library-20261016.dump` no volume do Postgres; formato conferido com `pg_restore -l`.
 - Pacotes transferidos por console autenticado, com SHA-256 conferido; arquivos temporários removidos após a carga. Pacotes e inventário integral dos vaults ficam fora do Git e do contexto Docker.
-
