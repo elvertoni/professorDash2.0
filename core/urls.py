@@ -10,6 +10,7 @@ from base.views import HomeView, health, public_media
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('conta/', include('accounts.urls')),
+    path('biblioteca/', include('library.urls')),
     path('catalogo/', include('catalog.urls')),
     path('turmas/', include('classroom.urls')),
     path('atividades/', include('activities.urls')),

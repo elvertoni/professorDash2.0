@@ -84,3 +84,7 @@ O movimento é uma camada funcional do Volta Atelier: orienta entrada, continuid
 - `.kinetic-surface` / `.has-pointer` — luz tonal responsiva a ponteiro fino.
 - `.kinetic-hero` e `.journey-track` — assinatura da página pública e fluxo acervo → turma → aluno.
 - `.lesson-actionbar` — ação persistente do leitor, agora centralizada no runtime.
+
+### Biblioteca privada
+
+`library-filters`, `library-result`, `library-reader` e `library-sources` compõem inputs, botões, badges, painel e prose existentes. Busca em duas colunas no desktop e uma no celular; resultados textuais em lista, leitura com largura limitada. Entrada pelo menu da conta, apenas para o proprietário configurado. Regras espelhadas na folha canônica.

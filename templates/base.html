@@ -203,6 +203,11 @@
                         <a class="account-link {% if '/conta/perfil/' in request.path %}active{% endif %}" href="{% url 'accounts:profile' %}">
                             <i data-lucide="user" aria-hidden="true"></i> Minha conta
                         </a>
+                        {% if can_access_library %}
+                            <a class="account-link" href="{% url 'library:list' %}">
+                                <i data-lucide="book-open" aria-hidden="true"></i> Minha biblioteca
+                            </a>
+                        {% endif %}
                         {% if user.is_aluno and user.first_active_turma %}
                             <a class="account-link {% if '/materiais/aluno/' in request.path %}active{% endif %}" href="{% url 'materials:aluno_material_list' user.first_active_turma.pk %}">
                                 <i data-lucide="folder" aria-hidden="true"></i> Materiais

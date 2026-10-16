@@ -20,6 +20,9 @@ class LoginView(DjangoLoginView):
     template_name = 'accounts/login.html'
 
     def get_success_url(self):
+        next_url = self.get_redirect_url()
+        if next_url:
+            return next_url
         user = self.request.user
         if user.is_authenticated and user.is_aluno:
             from django.urls import reverse

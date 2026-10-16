@@ -88,6 +88,7 @@ Decisão do projeto (PRD proíbe). **NÃO** tente rodar `pytest`, `manage.py tes
 - `classroom` — `Turma`, `Matricula`, `AulaPublicada` (`disponivel_em`), `ProgressoAula`; `services.py`, `reports.py` (PDF via reportlab + CSV); sincronização de aulas por turma/disciplina; modo apresentação (`AulaPresentationView`).
 - `materials` — `Material` (FileField protegido ou link).
 - `activities` — controle do professor (estilo Notion), **não entrega**: `Atividade` (`titulo`/`descricao`/`data`) + `AtividadeCheck` (`feito`+`observacao` por aluno). Entregas oficiais ficam no Google Classroom; `Entrega`/`EntregaArquivo` removidos.
+- `library` — biblioteca privada de notas selecionadas; `Source`/`Note`, exportação `package_library` e importação `import_library` (prévia por padrão, `--apply` grava). Todas as views exigem `LibraryOwnerMixin`: conta ativa professor/admin com `LIBRARY_OWNER_EMAIL` explícito, sem bypass de superusuário. Fontes e notas filtradas pelo proprietário; sem registro no admin. Vaults são a fonte editável; pacotes pessoais ficam em `library-packages/` (gitignored). Operação em `docs/segundo-cerebro/COMO-USAR.md`.
 - `notifications` — `Notificacao` (sino no header); `signals.py`, `context_processors.notification_summary` registrado em `settings.TEMPLATES`. Disparo ativo: aula publicada; eventos de entrega/correção não existem mais no fluxo do produto.
 
 URLs prefixadas: `/conta/` `/catalogo/` `/turmas/` `/atividades/` `/materiais/` `/notificacoes/` `/health/` `/media/<path>`.

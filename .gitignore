@@ -37,3 +37,10 @@ Thumbs.db
 
 # Projeto legado (arquivo, contém PII de alunos — fora do repo)
 /professordash-antigo/
+
+# Pacotes privados da biblioteca
+/library-packages/
+
+# Inventário completo dos vaults (consulta local privada)
+/docs/segundo-cerebro/INVENTARIO.md
+/docs/segundo-cerebro/inventario.json

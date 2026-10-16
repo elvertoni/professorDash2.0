@@ -9,3 +9,9 @@ staticfiles
 media
 protected_media
 site
+
+# Local previews and private library packages
+scratch
+library-packages
+docs/segundo-cerebro/INVENTARIO.md
+docs/segundo-cerebro/inventario.json

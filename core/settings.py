@@ -39,6 +39,7 @@ LOCAL_APPS = [
     'materials',
     'activities',
     'notifications',
+    'library',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
@@ -85,6 +86,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'notifications.context_processors.notification_summary',
+                'library.context_processors.library_access',
             ],
         },
     },
@@ -177,3 +179,6 @@ AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'classroom:professor_dashboard'
 LOGOUT_REDIRECT_URL = 'home'
+
+# Private library: empty means disabled; no implicit admin bypass.
+LIBRARY_OWNER_EMAIL = env('LIBRARY_OWNER_EMAIL', default='')

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ note.title }} · Minha biblioteca{% endblock %}
+{% block content %}
+<section class="lesson-page library-reader">
+    <nav class="lesson-breadcrumb" aria-label="Caminho"><a href="{% url 'library:list' %}">Minha biblioteca</a><span>{{ note.source.label }}</span></nav>
+    <header class="section-heading compact">
+        <div class="library-meta"><span class="badge badge-neutral">{{ note.status|capfirst }}</span><span>{{ note.topic }}</span></div>
+        <h1>{{ note.title }}</h1>
+        {% if note.source_updated %}<p>Atualizada na origem: {{ note.source_updated }}</p>{% endif %}
+        {% if note.status != 'vivo' %}<p>Esta nota está marcada como {{ note.status }}. Confira as fontes antes de reutilizar.</p>{% endif %}
+    </header>
+    <article class="prose">{{ note_html|safe }}</article>
+    <section class="panel library-sources" aria-labelledby="sources-title">
+        <h2 id="sources-title">Fontes e referência</h2>
+        <p>Os arquivos originais e anexos não estão incluídos nesta biblioteca.</p>
+        <ul>{% for source in note.references %}<li>{{ source }}</li>{% empty %}<li>A nota não informa fontes nos metadados.</li>{% endfor %}</ul>
+        <label for="reference">Referência desta nota</label>
+        <textarea class="input" id="reference" readonly rows="3">{{ reference }}</textarea>
+        <button class="btn btn-outline" type="button" data-copy-reference hidden>Copiar referência</button>
+        <p role="status" data-copy-status></p>
+        <p class="muted">Importada em {{ note.updated_at|date:'d/m/Y H:i' }}. Edições são feitas no acervo original.</p>
+    </section>
+    {% if related %}<section class="library-sources"><h2>Notas relacionadas</h2><ul>{% for item in related %}<li><a href="{{ item.get_absolute_url }}">{{ item.title }}</a> · {{ item.status }}</li>{% endfor %}</ul></section>{% endif %}
+    {% if lessons %}<section class="library-sources"><h2>Aulas relacionadas</h2><ul>{% for lesson in lessons %}<li><a href="{{ lesson.get_absolute_url }}">{{ lesson.titulo }}</a></li>{% endfor %}</ul></section>{% endif %}
+    {% if unresolved %}<details class="panel library-sources"><summary>Referências ainda não disponíveis na biblioteca ({{ unresolved|length }})</summary><ul>{% for target in unresolved %}<li>{{ target }}</li>{% endfor %}</ul></details>{% endif %}
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+(function () {
+    var button = document.querySelector('[data-copy-reference]');
+    if (!navigator.clipboard) return;
+    button.hidden = false;
+    button.addEventListener('click', async function () {
+        var status = document.querySelector('[data-copy-status]');
+        try {
+            await navigator.clipboard.writeText(document.getElementById('reference').value);
+            status.textContent = 'Referência copiada.';
+        } catch (error) {
+            status.textContent = 'Selecione o texto da referência e copie pelo navegador.';
+        }
+    });
+}());
+</script>
+{% endblock %}

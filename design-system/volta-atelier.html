@@ -1203,6 +1203,26 @@ code { font-family: var(--font-mono); font-size: .92em; color: var(--bone);
   .doc-step::before { padding-top: 0; }
 }
 
+
+/* Biblioteca privada — busca e leitura com as primitivas Volta Atelier. */
+.library-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4, 20px); margin-bottom: var(--space-5, 28px); }
+.library-query, .library-filter-options, .library-filters > .library-actions { grid-column: 1 / -1; }
+.library-filters .field { min-width: 0; }
+.library-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4, 20px); margin-top: var(--space-4, 20px); }
+.library-actions, .library-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3, 12px); }
+.library-result { padding-block: var(--space-5, 28px); border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.library-result h2 { font-family: var(--font-display); font-size: clamp(20px, 2.5vw, 28px); margin-block: var(--space-3, 12px); }
+.library-result p { max-width: 78ch; }
+.library-results { margin-bottom: var(--space-5, 28px); }
+.library-reader { max-width: 960px; }
+.library-reader .prose { max-width: 68ch; margin-inline: auto; overflow-wrap: anywhere; }
+.library-reader .prose pre, .library-reader .prose table { display: block; max-width: 100%; overflow-x: auto; }
+.library-sources { margin-block: var(--space-5, 28px); overflow-wrap: anywhere; }
+.library-sources li { margin-block: var(--space-3, 12px); }
+.library-sources textarea { display: block; width: 100%; margin-block: var(--space-3, 12px); }
+.library-reader h1 { overflow-wrap: anywhere; }
+@media (max-width: 600px) { .library-filters, .library-filter-grid { grid-template-columns: minmax(0, 1fr); } }
+
 </style>
 </head>
 

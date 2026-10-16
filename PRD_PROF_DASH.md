@@ -555,6 +555,23 @@ Componentes novos documentados no `DESIGN.md`: `account-menu`, `serie-section`, 
 
 ---
 
+### Sprint 13 — Minha biblioteca privada (2026-10-16)
+
+Expansão autorizada: consultar no portal as notas selecionadas dos vaults PROF-TONI e cérebro pessoal para estudar, preparar aulas e trabalhar em projetos. O portal mantém cópia de leitura; os vaults continuam editáveis e nenhuma nota é publicada aos alunos.
+
+- [x] App `library`: fontes vinculadas ao proprietário e notas identificadas por fonte + caminho.
+- [x] Pacote JSON selecionado, prévia e importação atômica/idempotente; ausência não apaga notas.
+- [x] Busca textual sem distinção de acentos, filtros, paginação, leitura sanitizada, referências e ligações.
+- [x] Acesso exclusivamente ao usuário ativo professor/admin cujo email corresponde a `LIBRARY_OWNER_EMAIL`; superusuário não recebe bypass nas views. Sem configuração, acesso fechado. Operadores do banco/servidor continuam tecnicamente capazes de acessar dados.
+- [x] Validação manual local com PostgreSQL, navegação e permissões.
+- [ ] Seleção pessoal confirmada, implantação e validação em produção (etapa posterior).
+
+Decisões: lote piloto = notas vivas do PROF-TONI + amostras RAG, aprendizagem baseada em problemas, API REST, precificação e central de operações, deduplicadas por caminho. Coleções editoriais não exclusivas: Estudar, Preparar aulas, Projetos e negócios. Busca inicial usa texto normalizado e prioriza títulos; não é busca semântica. Referências locais aparecem como texto (originais não incluídos); imagens/anexos não são transportados nem carregados externamente. Wikilinks resolvem somente notas importadas da mesma fonte; ambiguidades ficam sem link. Aulas relacionadas exigem caminho canônico explícito, nunca somente número de aula. Entrada no menu da conta preserva a navegação de turmas. Importação por CLI exige proprietário explícito e aplica só com `--apply`; pacote inclui apenas campos permitidos e Markdown. Pacotes privados ficam fora do Git.
+
+---
+
+Validação e operação: [Minha biblioteca](docs/segundo-cerebro/COMO-USAR.md). Login respeita `next` validado pelo Django, mantendo o painel por papel quando não há destino válido.
+
 ## 10. Fora de Escopo (fases futuras)
 
 - IA (tutor do aluno, assistente do professor) — reintroduz Celery/broker/Langchain.

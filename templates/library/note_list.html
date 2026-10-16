@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Minha biblioteca · Prof. Toni Coimbra{% endblock %}
+{% block content %}
+<section class="catalog-page">
+    <div class="section-heading compact">
+        <h1>Minha biblioteca</h1>
+        <p>Suas referências de estudo, aulas e projetos, em uma biblioteca privada.</p>
+    </div>
+    <form class="panel library-filters" method="get" role="search" aria-label="Buscar na biblioteca">
+        <div class="field library-query">
+            <label for="q">O que você quer consultar?</label>
+            <input class="input" type="search" id="q" name="q" value="{{ query }}" maxlength="200" placeholder="Ex.: RAG, API REST, precificação">
+        </div>
+        <div class="field">
+            <label for="collection">Quero usar para</label>
+            <select class="select" id="collection" name="collection">
+                <option value="">Qualquer finalidade</option>
+                {% for key, label in collections.items %}<option value="{{ key }}" {% if selected.collection == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <details class="library-filter-options" {% if selected.source or selected.topic or selected.status %}open{% endif %}>
+            <summary>Filtrar por acervo, tema e estado</summary>
+            <div class="library-filter-grid">
+        <div class="field">
+            <label for="source">Acervo</label>
+            <select class="select" id="source" name="source">
+                <option value="">Todos os acervos</option>
+                {% for source in sources %}<option value="{{ source.key }}" {% if selected.source == source.key %}selected{% endif %}>{{ source.label }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="topic">Tema</label>
+            <select class="select" id="topic" name="topic">
+                <option value="">Todos os temas</option>
+                {% for topic in topics %}<option value="{{ topic }}" {% if selected.topic == topic %}selected{% endif %}>{{ topic }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="status">Estado da nota</label>
+            <select class="select" id="status" name="status">
+                <option value="">Atuais e rascunhos</option>
+                {% for status in statuses %}<option value="{{ status }}" {% if selected.status == status %}selected{% endif %}>{{ status|capfirst }}</option>{% endfor %}
+            </select>
+        </div>
+            </div>
+        </details>
+        <div class="library-actions">
+            <button class="btn btn-primary" type="submit">Buscar notas</button>
+            <a href="{% url 'library:list' %}" class="btn btn-outline">Limpar filtros</a>
+        </div>
+    </form>
+    {% if notes %}
+        <p class="muted" role="status">{{ paginator.count }} nota{{ paginator.count|pluralize:'s' }} encontrada{{ paginator.count|pluralize:'s' }}. Busca por palavras no título, apelidos e texto.</p>
+        <div class="library-results">
+            {% for note in notes %}
+                <article class="library-result">
+                    <div class="library-meta"><span>{{ note.source.label }}</span><span class="badge badge-neutral">{{ note.status|capfirst }}</span></div>
+                    <h2><a href="{{ note.get_absolute_url }}">{{ note.title }}</a></h2>
+                    <p>{{ note.excerpt }}</p>
+                    <p class="muted">{{ note.topic }}{% if note.source_updated %} · Atualizada na origem: {{ note.source_updated }}{% endif %}</p>
+                </article>
+            {% endfor %}
+        </div>
+        {% if is_paginated %}
+        <nav class="library-actions" aria-label="Páginas da biblioteca">
+            {% if page_obj.has_previous %}<a class="btn btn-outline" href="{% querystring page=page_obj.previous_page_number %}">Anterior</a>{% endif %}
+            <span>Página {{ page_obj.number }} de {{ paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a class="btn btn-outline" href="{% querystring page=page_obj.next_page_number %}">Próxima</a>{% endif %}
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty">
+            {% if has_notes %}<h2>Nenhuma nota encontrada</h2><p>Tente menos palavras ou remova os filtros.</p><a class="btn btn-outline" href="{% url 'library:list' %}">Ver todas as notas</a>
+            {% else %}<h2>Sua biblioteca está pronta para receber notas</h2><p>As notas selecionadas dos seus acervos aparecerão aqui após a primeira importação.</p>{% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

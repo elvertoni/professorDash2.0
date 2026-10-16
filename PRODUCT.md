@@ -46,3 +46,7 @@ WCAG AA baseline (already worked in Sprint 6 of PRD_UI_UX_AJUSTE.md): body text 
 - **Decision order**: AGENTS.md (invioláveis) > `design-system/volta-atelier.html` > PRD_PROF_DASH.md > Django convention.
 - The UI-polish backlog and all decisions already taken live in `PRD_UI_UX_AJUSTE.md` (Sprints 0–8 done). Treat it as the audit baseline — this review is a second pass for regressions and remaining slop.
 - Stack is fixed: Django Templates + Alpine.js 3.14.1 + WhiteNoise (HTMX citado no PRD mas sem uso real hoje). Alpine, ícones Lucide e fontes são self-hosted em `static/js/vendor/` e `static/fonts/` — sem CDN. No heavy frontend framework, no chart lib, no IA/Celery. Single quotes, code in English, UI in pt-BR.
+
+## Private library
+
+The explicitly configured owner can consult selected PROF-TONI and personal vault notes through **Minha biblioteca** in the account menu. Read-only copy, textual search and source references; no student publication or AI generation. This owner-only area is separate from classroom delivery. See PRD Sprint 13.
