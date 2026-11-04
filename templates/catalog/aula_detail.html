@@ -46,7 +46,8 @@
                     <p class="dek">{{ aula.tema }}</p>
                 {% endif %}
 
-                {% if aula.objetivos %}
+                {# A canônica já traz "## Objetivos" no corpo; o bloco do frontmatter só entra quando ela não traz. #}
+                {% if aula.objetivos and 'id="objetivos"' not in lesson_html %}
                     <section class="lesson-goals">
                         <h2>Objetivos</h2>
                         <ul>

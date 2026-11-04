@@ -26,7 +26,12 @@
     --reader-support: var(--volt, #3b49e4);
     /* Progresso de leitura, chip da capa e botão primário do HUD. Estava indefinido
        (barra de progresso saía invisível na TV). */
-    --reader-grad: linear-gradient(90deg, var(--reader-accent), #ff7a3d);
+    /* Chapado, não degradê: branco sobre o laranja final caía a 2,6:1 e o
+       Volta Atelier pede cor chapada (auditoria A09). */
+    --reader-grad: var(--signal-deep, #d1211d);
+    /* Azul para TEXTO; --reader-support segue para bordas e preenchimentos.
+       O volt puro dava 2,6–3,0:1 sobre as superfícies escuras (A10). */
+    --reader-support-text: var(--support-text, #8b95ff);
     --reader-surface: rgba(20, 20, 20, 0.95);
     --reader-ease: cubic-bezier(.16, 1, .3, 1);
     --reader-safe-top: max(12px, env(safe-area-inset-top, 0px));
@@ -768,7 +773,7 @@ figure {
 }
 
 .reader-badge-s {
-    color: var(--reader-support);
+    color: var(--reader-support-text);
     border-color: color-mix(in srgb, var(--reader-support) 45%, transparent);
 }
 
@@ -815,7 +820,7 @@ figure {
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--reader-support);
+    color: var(--reader-support-text);
 }
 
 .reader-cover-goals ul {
@@ -1315,7 +1320,7 @@ figure {
     gap: 0.45em;
     font-size: var(--reader-text-label);
     font-weight: 700;
-    color: var(--reader-support);
+    color: var(--reader-support-text);
 }
 
 .reader-notes-title i {

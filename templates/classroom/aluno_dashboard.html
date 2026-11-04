@@ -105,7 +105,7 @@
                                 <span class="student-resume-info">
                                     <span class="student-item-kicker">{{ turma.disciplina.label }}</span>
                                     <strong>{{ turma.nome }}</strong>
-                                    <span>{{ turma.total_concluidas }}/{{ turma.total_aulas }} aula{{ turma.total_aulas|pluralize }} concluída{{ turma.total_concluidas|pluralize }}</span>
+                                    <span>{{ turma.total_concluidas }} de {{ turma.total_aulas }} aula{{ turma.total_aulas|pluralize }} concluída{{ turma.total_aulas|pluralize }}</span>
                                 </span>
                                 <span class="student-resume-action">Retomar <i data-lucide="arrow-up-right" aria-hidden="true"></i></span>
                             </a>
@@ -146,7 +146,7 @@
             <div class="dash-panel-heading">
                 <div>
                     <h2>Minhas turmas</h2>
-                    <p>Escolha uma turma para revisar aulas, atividades e progresso.</p>
+                    <p>Escolha uma turma para estudar as aulas e acompanhar seu progresso.</p>
                 </div>
                 <span class="dash-panel-count">{{ turmas|length }} turma{{ turmas|length|pluralize }}</span>
             </div>
@@ -190,7 +190,7 @@
             <div class="empty dash-empty">
                 <i data-lucide="inbox" aria-hidden="true"></i>
                 <h2>Você ainda não está em nenhuma turma</h2>
-                <p>A matrícula é feita pelo professor. Se seus colegas já veem as aulas, confira se você entrou com o email cadastrado na escola: <b class="dash-break-any">{{ request.user.email }}</b>.</p>
+                <p>A matrícula é feita pelo professor. Se seus colegas já veem as aulas, confira se você entrou com o e-mail cadastrado na escola: <b class="dash-break-any">{{ request.user.email }}</b>.</p>
                 <a class="btn btn-outline" href="{% url 'accounts:profile' %}">
                     <i data-lucide="user" aria-hidden="true"></i>
                     Conferir meus dados

@@ -22,7 +22,7 @@
                     <div class="card-head">
                         <span class="chip">{{ turma.disciplina.label }}</span>
                     </div>
-                    <h3>{{ turma.nome }}</h3>
+                    <h2>{{ turma.nome }}</h2>
                     <p class="desc">{{ turma.serie }} · {{ turma.ano_letivo }}</p>
                     <div class="status-row">
                         {% if turma.ativa %}
@@ -30,7 +30,7 @@
                         {% else %}
                             <span class="badge badge-neutral"><i data-lucide="archive" aria-hidden="true"></i> Inativa</span>
                         {% endif %}
-                        <span class="badge badge-neutral"><i data-lucide="users" aria-hidden="true"></i> {{ turma.active_students }} alunos</span>
+                        <span class="badge badge-neutral"><i data-lucide="users" aria-hidden="true"></i> {{ turma.active_students }} aluno{{ turma.active_students|pluralize }}</span>
                     </div>
                     <div class="invite-code">
                         <span>Código</span>

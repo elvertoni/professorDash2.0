@@ -28,11 +28,26 @@ A marca oficial é a ligadura **TC** de `static/logo.svg`, sincronizada com `por
 | `--line-2` | `rgba(255, 255, 255, .20)` | `rgba(20, 20, 20, .18)` | Bordas ativas e contornos interativos |
 | `--bone` | `#f4f3f0` | `#141414` | Texto primário (alto contraste) |
 | `--muted` | `#8e8e95` | `#5c5c63` | Texto secundário e legendas |
-| `--dim` | `#5c5c63` | `#8e8e95` | Texto terciário e metadados discretos |
+| `--dim` | `#8d8d96` | `#6b6b72` | Texto terciário e metadados discretos |
 | `--signal` | `#fb3732` | `#fb3732` | Acento vibrante, hover de botões e alertas |
 | `--amber` | `#ffa31a` | `#d97706` | Prazos próximos e atenção |
 | `--volt` | `#3b49e4` | `#2563eb` | Apoio, links complementares e 3D |
 | `--emerald` | `#10b981` | `#059669` | Conclusão, checks de aula e progresso |
+
+### Tokens de texto semântico (auditoria 2026-11-04)
+
+Cores de preenchimento/ícone (`--emerald`, `--amber`, `--c-info`, `--volt`, `--signal`) não servem para texto pequeno sobre fundo tintado. Para rótulos, badges e mensagens de 11–14px use:
+
+| Token | Dark | Light | Uso |
+|---|---|---|---|
+| `--text-success` | `var(--emerald)` | `#065f46` | Badge/rótulo de conclusão |
+| `--text-info` | `#38bdf8` | `#0369a1` | Badge/rótulo informativo |
+| `--text-warning` | `var(--amber)` | `#92400e` | Prazo, atenção |
+| `--text-danger` | `var(--signal-text)` | `var(--signal-text)` | Erro, aviso destrutivo |
+| `--text-neutral` | `#b4b4ba` | `var(--muted)` | Badge neutro |
+| `--support-text` | `#8b95ff` | `var(--volt)` | Azul de apoio como texto (o `--volt` puro dá < 3:1 no escuro) |
+
+Todos ≥ 4,5:1 sobre o fundo tintado do próprio badge, nos dois temas. Sombras de botão são neutras (`--shadow-tint` em preto/grafite): halo vermelho desfocado no escuro é glow decorativo.
 
 ### Mapeamento de Runtime (`app.css` ↔ Volta Atelier)
 

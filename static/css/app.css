@@ -10,6 +10,12 @@ FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e 
     display: none !important;
 }
 
+/* O `display` dos componentes não pode anular o atributo `hidden`: o fallback
+   de capas e o botão "Copiar referência" dependem dele (auditoria A03). */
+[hidden]:not([hidden='until-found']) {
+    display: none !important;
+}
+
 :root {
     /* ═══════════════════════════════════════════════════════════════
        VOLTA ATELIER — Tokens canônicos de estúdio
@@ -32,6 +38,14 @@ FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e 
     --volt: #3b49e4;
     --emerald: #10b981;
     --emerald-deep: #34d399;
+    /* Texto semântico em 11–14px: tokens separados dos de preenchimento/ícone
+       para garantir 4,5:1 sobre os fundos tintados (auditoria 2026-11-04). */
+    --text-success: var(--emerald);
+    --text-info: #38bdf8;
+    --text-warning: var(--amber);
+    --text-danger: var(--signal-text);
+    --text-neutral: #b4b4ba;
+    --support-text: #8b95ff;
     --tap: 44px;
 
     /* ── Mapeamento Runtime Portal ── */
@@ -90,8 +104,10 @@ FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e 
 
     /* ── Sombras de estúdio ── */
     --shadow-pop: 0 8px 24px rgba(0, 0, 0, .40);
-    --shadow-tint: 0 16px 36px rgba(251, 55, 50, .18);
-    --shadow-tint-raised: 0 22px 48px rgba(251, 55, 50, .26);
+    /* Profundidade neutra: o halo vermelho desfocado sob os botões era glow
+       decorativo no escuro (auditoria impeccable, dark-glow). */
+    --shadow-tint: 0 14px 30px rgba(0, 0, 0, .42);
+    --shadow-tint-raised: 0 20px 44px rgba(0, 0, 0, .5);
 
     /* ── Motion / Easings Volta Atelier ── */
     --e-out: cubic-bezier(.16, 1, .3, 1);
@@ -141,7 +157,7 @@ FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e 
     --panel-2: #faf9f7;
     --line: rgba(20, 20, 20, .10);
     --line-2: rgba(20, 20, 20, .18);
-    --line-ui: rgba(20, 20, 20, .32);
+    --line-ui: rgba(20, 20, 20, .46);
     --bone: #141414;
     --muted: #5c5c63;
     --dim: #6b6b72;
@@ -153,6 +169,12 @@ FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e 
     --volt: #2563eb;
     --emerald: #059669;
     --emerald-deep: #047857;
+    --text-success: #065f46;
+    --text-info: #0369a1;
+    --text-warning: #92400e;
+    --text-danger: var(--signal-text);
+    --text-neutral: var(--muted);
+    --support-text: var(--volt);
 
     --accent: var(--signal);
     --accent-text: var(--signal-text);
@@ -180,8 +202,8 @@ FORM: Atelier de Operação; assimetria funcional, trilhos de ação contidos e 
     --c-warning-ink: #ffffff;
 
     --shadow-pop: 0 8px 24px rgba(20, 20, 20, .08);
-    --shadow-tint: 0 16px 36px rgba(251, 55, 50, .12);
-    --shadow-tint-raised: 0 22px 48px rgba(251, 55, 50, .18);
+    --shadow-tint: 0 14px 30px rgba(20, 20, 20, .12);
+    --shadow-tint-raised: 0 20px 44px rgba(20, 20, 20, .16);
 
     --figure-mat: #ffffff;
     --figure-edge: var(--border);
@@ -1208,25 +1230,25 @@ summary:focus-visible,
 }
 
 .badge-success {
-    color: var(--c-success);
+    color: var(--text-success);
     border-color: var(--c-success);
     background: var(--c-success-tint);
 }
 
 .badge-info {
-    color: var(--c-info);
+    color: var(--text-info);
     border-color: var(--c-info);
     background: var(--c-info-tint);
 }
 
 .badge-warning {
-    color: var(--c-warning);
+    color: var(--text-warning);
     border-color: rgba(251, 191, 36, .3);
     background: rgba(251, 191, 36, .14);
 }
 
 .badge-danger {
-    color: var(--c-danger);
+    color: var(--text-danger);
     border-color: rgba(248, 113, 113, .3);
     background: rgba(248, 113, 113, .14);
 }
@@ -1238,7 +1260,7 @@ summary:focus-visible,
 }
 
 .badge-neutral {
-    color: var(--fg-muted);
+    color: var(--text-neutral);
     border-color: var(--border-strong);
     background: var(--border);
 }
@@ -1461,7 +1483,7 @@ summary:focus-visible,
 }
 
 .err {
-    color: var(--c-danger);
+    color: var(--text-danger);
 }
 
 .err ul,
@@ -1830,6 +1852,7 @@ dialog.modal > p {
 }
 
 .tbl-wrap {
+    position: relative;
     overflow-x: auto;
     overflow-y: hidden;
     border-radius: var(--radius-lg);
@@ -1986,6 +2009,7 @@ table.tbl {
 
 .pagination {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 12px;
@@ -2850,7 +2874,8 @@ dialog.deck-lightbox:not([open]) {
     letter-spacing: .18em;
 }
 
-.atelier-side h4 {
+.atelier-side h4,
+.atelier-side .atelier-side-title {
     margin-bottom: var(--space-4);
     font-size: var(--text-read);
     letter-spacing: 0;
@@ -3019,7 +3044,9 @@ dialog.deck-lightbox:not([open]) {
     color: var(--fg);
 }
 
-.prose a {
+/* :not(.btn) — sem isso o link-botão "Voltar à aula" dentro do texto herdava
+   vermelho sobre fundo osso (2,7:1). */
+.prose a:not(.btn) {
     color: var(--accent-text);
     text-decoration: underline;
     text-underline-offset: .18em;
@@ -3774,7 +3801,8 @@ blockquote footer::before {
     margin-top: var(--space-5);
 }
 
-.empty .btn i[data-lucide] {
+.empty .btn i[data-lucide],
+.empty .btn svg {
     width: 16px;
     height: 16px;
     margin-bottom: 0;
@@ -4124,10 +4152,17 @@ blockquote footer::before {
         flex: none;
     }
 
+    /* Ancorado ao viewport: relativo ao sino, começava em x≈194 e saía da
+       tela a 360px (A02). */
     .notification-panel {
-        right: auto;
-        left: 0;
-        width: calc(100vw - 36px);
+        position: fixed;
+        top: 72px;
+        right: 18px;
+        left: 18px;
+        width: auto;
+        max-height: min(70vh, 520px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
     .lesson-header {
@@ -4491,7 +4526,7 @@ blockquote footer::before {
 .btn-warning-outline { color: var(--c-warning); border-color: var(--c-warning); }
 .invite-panel { text-align: right; }
 .invite-code-val { display: block; font-size: var(--text-h3); margin: var(--space-1) 0; }
-.invite-warn { display: block; color: var(--c-danger); margin-bottom: var(--space-2); max-width: 220px; line-height: 1.2; }
+.invite-warn { display: block; color: var(--text-danger); margin-bottom: var(--space-2); max-width: 220px; line-height: 1.45; }
 .btn-block { width: 100%; }
 .row.is-center { justify-content: center; gap: var(--space-3); }
 .tbl-actions { display: flex; align-items: center; gap: var(--space-2); }
@@ -4615,7 +4650,6 @@ html {
     width: 100%;
     height: 100%;
     background: var(--signal);
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--signal) 36%, transparent);
     transform: scaleX(0);
     transform-origin: left;
     will-change: transform;
@@ -5448,7 +5482,8 @@ dialog::backdrop {
     gap: var(--space-3);
 }
 
-.serie-header-title h2 {
+.serie-header-title h2,
+.serie-header-name {
     margin: 0;
     color: var(--fg);
     font-size: 1.125rem;
@@ -5780,7 +5815,8 @@ dialog.lesson-lightbox:not([open]) {
         min-width: 0;
     }
 
-    .serie-header-title h2 {
+    .serie-header-title h2,
+    .serie-header-name {
         font-size: 1rem;
     }
 
@@ -5984,7 +6020,7 @@ dialog.lesson-lightbox:not([open]) {
     border-radius: 5px;
     border-color: var(--line-2);
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: .04em;
     text-transform: uppercase;
 }
@@ -6098,7 +6134,7 @@ body.site-body::after {
 .student-item-kicker {
     color: var(--signal-text);
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: .12em;
     text-transform: uppercase;
@@ -6188,7 +6224,8 @@ body.site-body::after {
     color: var(--signal);
 }
 
-.professor-dashboard .serie-header-title h2 {
+.professor-dashboard .serie-header-title h2,
+.professor-dashboard .serie-header-name {
     font-size: clamp(20px, 2.4vw, 28px);
     font-weight: 800;
 }
@@ -6263,7 +6300,7 @@ body.site-body::after {
 
 .professor-class-total {
     color: var(--fg-subtle);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: .06em;
     text-align: right;
     text-transform: uppercase;
@@ -6378,12 +6415,6 @@ body.site-body::after {
     display: none;
 }
 
-.student-dashboard .dash-tab .count,
-.student-dashboard .dash-tab.active .count {
-    border: 0;
-    background: color-mix(in srgb, currentColor 20%, transparent);
-    color: currentColor;
-}
 
 .student-dashboard .dash-panel-heading {
     align-items: end;
@@ -6488,7 +6519,7 @@ body.site-body::after {
     border-radius: var(--radius-pill);
     color: var(--amber-deep);
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: .08em;
     text-transform: uppercase;
 }
@@ -6607,7 +6638,7 @@ body.site-body::after {
 
     .professor-dashboard .serie-header-meta {
         gap: 10px;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .professor-class-card {
@@ -6810,10 +6841,19 @@ body.site-body::after {
     text-transform: uppercase;
 }
 
-.navchain a:hover,
 .navchain a.active,
 .navchain a.on {
     color: var(--bone);
+    background: var(--surface-overlay);
+}
+
+/* O ::before revela --bone no hover; texto também --bone dava 1:1 (A01).
+   `.site-nav a.active` usa !important, por isso o reforço aqui. */
+.navchain a:hover,
+.navchain a.active:hover,
+.navchain a.on:hover,
+.site-nav a.active:hover {
+    color: var(--ink) !important;
     background: var(--surface-overlay);
 }
 
@@ -6881,11 +6921,10 @@ body.site-body::after {
 
 .page-hero .eyebrow,
 .section-heading .eyebrow,
-.auth-heading .badge,
 .hero-kicker {
-    color: var(--signal);
+    color: var(--signal-text);
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: .14em;
     text-transform: uppercase;
@@ -7031,7 +7070,7 @@ body.site-body::after {
 }
 
 .badge-success {
-    color: var(--emerald);
+    color: var(--text-success);
     border-color: color-mix(in srgb, var(--emerald) 52%, var(--line));
     background: color-mix(in srgb, var(--emerald) 14%, transparent);
 }
@@ -7072,7 +7111,7 @@ body.site-body::after {
 .btn:hover {
     color: #ffffff;
     border-color: var(--signal-deep);
-    box-shadow: 0 6px 20px color-mix(in srgb, var(--signal) 18%, transparent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .32);
     transform: translateY(-2px);
 }
 
@@ -7135,13 +7174,14 @@ body.site-body::after {
 }
 
 .btn-danger:hover {
-    background: var(--signal);
-    border-color: var(--signal);
+    background: var(--signal-deep);
+    border-color: var(--bone);
     color: #ffffff;
 }
 
+/* Branco sobre --signal dá 3,69:1; o wipe usa o vermelho profundo (A11). */
 .btn-danger::before {
-    background: var(--signal);
+    background: var(--signal-deep);
 }
 
 .btn-danger-outline {
@@ -7173,9 +7213,9 @@ body.site-body::after {
     font-family: var(--font-mono);
 }
 
-.auth-form input:not(:disabled):hover,
-.auth-form select:not(:disabled):hover,
-.auth-form textarea:not(:disabled):hover {
+.auth-form input:not(:disabled):not([aria-invalid='true']):hover,
+.auth-form select:not(:disabled):not([aria-invalid='true']):hover,
+.auth-form textarea:not(:disabled):not([aria-invalid='true']):hover {
     border-color: var(--bone);
 }
 
@@ -7191,9 +7231,14 @@ body.site-body::after {
 
 .progress {
     height: 7px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-2);
     border-radius: var(--radius-pill);
-    background: var(--ink-deep);
+    /* Mesmo trilho translúcido da D.11: --ink-deep sumia contra o painel. */
+    background: color-mix(in srgb, var(--fg-subtle) 32%, transparent);
+}
+
+[data-theme='light'] .progress i {
+    background: var(--emerald-deep);
 }
 
 .progress i {
@@ -7287,7 +7332,7 @@ body.site-body::after {
 .hero-signal-label {
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: .06em;
     text-transform: uppercase;
 }
@@ -7960,11 +8005,18 @@ body.site-body::after {
     display: none;
 }
 
-.student-dashboard .dash-tab .count,
-.student-dashboard .dash-tab.active .count {
+.student-dashboard .dash-tab .count {
     border: 0;
     background: color-mix(in srgb, currentColor 20%, transparent);
     color: currentColor;
+}
+
+/* Na aba ativa (#d1211d), escurecer o fundo do contador: o clareado anterior
+   deixava o número branco em 4,07:1 (auditoria A08). */
+.student-dashboard .dash-tab.active .count {
+    border: 0;
+    background: rgba(0, 0, 0, .25);
+    color: #ffffff;
 }
 
 .student-dashboard .dash-panel-heading {
@@ -8078,3 +8130,150 @@ body.site-body::after {
 .library-sources textarea { display: block; width: 100%; margin-block: var(--space-3, 12px); }
 .library-reader h1 { overflow-wrap: anywhere; }
 @media (max-width: 600px) { .library-filters, .library-filter-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Auditoria 2026-11-04 (impeccable + Codex) — ajustes de composição e
+   movimento que precisam vencer a cascata acima. Cada bloco cita o achado.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Cards do catálogo: os chips de disciplina e trilha quebram linha em vez de
+   vazar pela borda do card ("JAVASCRIPT NA PR…" cortado). */
+.lesson-card .card-head {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.lesson-card .card-head > * {
+    max-width: 100%;
+}
+
+.lesson-card .card-head .badge {
+    white-space: normal;
+}
+
+/* A21 · capa do leitor reserva a proporção 3:2 das capas do acervo antes de
+   carregar; capas 16:9 antigas ficam inteiras pelo `contain`. */
+.lesson-hero img {
+    aspect-ratio: 3 / 2;
+}
+
+/* A20 · entre 761 e 960px a linha de turma do professor não cabe em três
+   colunas: o progresso desce para uma linha própria. */
+@media (min-width: 761px) and (max-width: 960px) {
+    .professor-class-card {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .professor-class-progress {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .professor-class-actions {
+        grid-column: 2;
+        grid-row: 1;
+    }
+}
+
+/* A22 · movimento reduzido cobre também wipe, zoom de capa, deslocamento do
+   campo focado e entrada de menus; o feedback de cor/borda permanece. */
+@media (prefers-reduced-motion: reduce) {
+    .btn::before,
+    .navchain a::before,
+    .navchain button::before {
+        transition: none !important;
+    }
+
+    .card:hover .card-cover img,
+    .input:focus,
+    .textarea:focus,
+    .auth-form input:focus,
+    .auth-form select:focus,
+    .auth-form textarea:focus,
+    .notification-item:hover,
+    .navchain a:hover,
+    .navchain button:hover {
+        transform: none !important;
+    }
+
+    details[open] > .notification-panel,
+    details[open] > .account-panel,
+    details[open] > .mobile-nav-panel {
+        animation: none !important;
+    }
+}
+
+/* A25 · cabeçalho de série: <h2> envolve um <button> nativo (antes era um div
+   role="button" com o <h2> dentro). Reset do botão para manter o visual. */
+.serie-heading {
+    margin: 0;
+    font: inherit;
+    letter-spacing: normal;
+}
+
+button.serie-header {
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.serie-header-name {
+    display: block;
+    font-family: var(--font-display, 'Archivo', sans-serif);
+    line-height: 1.1;
+}
+
+/* A25 · nome da turma na lateral do leitor deixa de ser <h4> solto. */
+.atelier-side .atelier-side-title {
+    margin-top: 0;
+    font-weight: 700;
+    color: var(--fg);
+}
+
+/* A14 · pausa das animações contínuas da home. */
+.motion-toggle {
+    margin-top: var(--space-4);
+}
+
+.motion-paused .hero-signal-orbit,
+.motion-paused .hero-signal-core,
+.motion-paused .journey-track::after {
+    animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .motion-toggle {
+        display: none;
+    }
+}
+
+/* Placeholder com a cor do sistema: o padrão do navegador (#757575) dava
+   4,0:1 no tema escuro. */
+::placeholder {
+    color: var(--fg-muted);
+    opacity: 1;
+}
+
+/* Linha de resumo do painel do professor: 11px era o piso de rótulo, não de
+   texto corrido. */
+.professor-dashboard .page-hero p.mono,
+.professor-dashboard p.mono {
+    font-size: 12px;
+}
+
+/* Títulos de card e descrições sem última linha órfã (detector: unbalanced-
+   heading / straggler nos cards do catálogo e do painel). */
+.card h2,
+.card h3,
+.serie-header-name {
+    text-wrap: balance;
+}
+
+.card .desc,
+.dash-panel-heading p,
+.journey-step p {
+    text-wrap: pretty;
+}

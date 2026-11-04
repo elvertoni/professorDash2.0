@@ -16,7 +16,7 @@
         <h1>Remover aula da turma?</h1>
         <p>
             Você está removendo a aula <strong>{{ publicada.aula.titulo }}</strong> da turma <strong>{{ turma.nome }}</strong>. 
-            Os alunos perderão o acesso a esta aula e qualquer progresso registrado ou atividades entregues associadas a ela podem ser impactados.
+            Os alunos perderão o acesso a esta aula e o progresso que registraram nela será apagado. Materiais vinculados a ela continuam na turma, sem vínculo com a aula.
         </p>
         <form class="form-actions" method="post">
             {% csrf_token %}

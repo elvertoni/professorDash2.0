@@ -27,6 +27,11 @@
                 Ver jornada
             </a>
         </div>
+        {# WCAG 2.2.2: órbitas e trilho giram sem parar; o visitante pode pausar (A14). #}
+        <button class="btn btn-ghost btn-sm motion-toggle" type="button" data-motion-toggle aria-pressed="false">
+            <i data-lucide="pause" aria-hidden="true"></i>
+            <span data-motion-toggle-label>Pausar animação</span>
+        </button>
     </div>
     <div class="hero-signal" aria-hidden="true">
         <div class="hero-signal-orbit orbit-one"></div>

@@ -14,7 +14,7 @@
         <div class="atelier-rail">
             <aside class="atelier-side">
                 <div class="course">{{ turma.disciplina.label }}</div>
-                <h4>{{ turma.nome }}</h4>
+                <p class="atelier-side-title">{{ turma.nome }}</p>
                 <div class="mod active"><i data-lucide="book-open" aria-hidden="true"></i> {{ aula.trilha.label }}</div>
                 {% if progresso.concluido %}
                     <div class="mod"><i data-lucide="check-circle" aria-hidden="true"></i> Concluída</div>
@@ -51,7 +51,8 @@
                     <p class="dek">{{ aula.tema }}</p>
                 {% endif %}
 
-                {% if aula.objetivos %}
+                {# A canônica já traz "## Objetivos" no corpo; o bloco do frontmatter só entra quando ela não traz. #}
+                {% if aula.objetivos and 'id="objetivos"' not in lesson_html %}
                     <section class="lesson-goals">
                         <h2>Objetivos</h2>
                         <ul>

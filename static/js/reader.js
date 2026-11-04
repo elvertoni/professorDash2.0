@@ -269,17 +269,36 @@
                 return 'Introdução';
             }
             if (element.classList.contains('reader-end')) return 'Conclusão';
+            // Blocos atômicos ganham rótulo curto: o texto inteiro de um
+            // callout viraria um parágrafo no anúncio de seção.
+            if (element.classList.contains('callout')) {
+                const label = element.querySelector('.ct > b, .ct > p > b');
+                if (label) return label.textContent.trim().replace(/\s+/g, ' ');
+            }
+            if (element.classList.contains('lesson-quiz')) return 'Quiz';
+            if (element.classList.contains('lesson-steps')) return 'Diagrama';
+            if (element.tagName === 'FIGURE') {
+                const caption = element.querySelector('figcaption');
+                return caption ? caption.textContent.trim().replace(/\s+/g, ' ') : 'Figura';
+            }
+            if (element.classList.contains('tbl-wrap')) return 'Tabela';
             return element.textContent.trim().replace(/\s+/g, ' ');
         }
 
         refreshLandmarks() {
             if (!this.docEl) return;
 
-            const selector = '.reader-cover, h2, h3, .conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure, .reader-end';
+            // Classes reais do parser (section.callout, .lesson-quiz,
+            // .lesson-steps, figure.lesson-figure). O filtro antigo incluía
+            // `article` e descartava tudo, pois o conteúdo inteiro vive em
+            // <article id="reader-doc"> (auditoria A04).
+            const atomic = '.callout, .lesson-quiz, .lesson-steps, .tbl-wrap, figure';
+            const selector = `.reader-cover, h2, h3, ${atomic}, .reader-end`;
             const elements = Array.from(this.docEl.querySelectorAll(selector)).filter((element) => {
                 if (!(element instanceof HTMLElement) || element.closest('[hidden], [inert]')) return false;
                 // Evitar que filhos de blocos atômicos virem landmarks duplicados
-                if (element.parentElement && element.parentElement.closest('.conceito-box, .atencao-box, .dica-box, .quiz-card, .tbl-wrap, figure, article')) {
+                const parent = element.parentElement;
+                if (parent && parent !== this.docEl && parent.closest(atomic)) {
                     return false;
                 }
                 return true;
@@ -1106,6 +1125,13 @@
                     && event.target.closest(
                         'button, a[href], select, [role="button"]'
                     );
+
+                // Atalhos de uma letra (B, N, C, F, R, ?) só valem com o foco
+                // no texto da aula: com um controle focado, entrada por voz ou
+                // digitação acidental disparava comandos (auditoria A13).
+                if (interactive && event.key.length === 1 && event.key !== ' ') {
+                    return;
+                }
 
                 if (this.isLightboxOpen()
                     && !['Escape', 'c', 'C'].includes(event.key)) {

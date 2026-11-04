@@ -7,7 +7,7 @@
         <div class="page-heading-row compact">
             <div class="section-heading">
                 <h1>Notificações</h1>
-                <p>Acompanhe aulas liberadas e avisos de atividades.</p>
+                <p>Acompanhe as aulas liberadas nas suas turmas.</p>
             </div>
             {% if notifications_unread_count %}
                 <form method="post" action="{% url 'notifications:mark_all_read' %}">
@@ -34,7 +34,9 @@
                         <h2>{{ notificacao.titulo }}</h2>
                         <p>{{ notificacao.mensagem }}</p>
                         <div class="notification-actions">
-                            {% if notificacao.link %}
+                            {% if notificacao.link_indisponivel %}
+                                <span class="badge badge-neutral"><i data-lucide="eye-off" aria-hidden="true"></i> Aula indisponível no momento</span>
+                            {% elif notificacao.link %}
                                 <a class="btn btn-primary btn-sm" href="{{ notificacao.link }}">
                                     <i data-lucide="arrow-up-right" aria-hidden="true"></i>
                                     {% if notificacao.tipo == 'aula' %}

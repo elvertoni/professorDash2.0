@@ -173,16 +173,21 @@ class Command(BaseCommand):
                 'status': self.get_value(data, 'status') or '',
             },
         )
-        trilha = self.upsert_trilha(
-            disciplina,
-            {
-                'slug': trilha_slug,
-                'label': (
-                    self.get_value(data, 'trilha_label', 'trilha_nome')
-                    or trilha_slug.replace('-', ' ').title()
-                ),
-            },
-        )
+        # O rótulo oficial da trilha vem de `disciplinas[].trilhas[]` do
+        # manifesto (import_disciplines). Aqui só se cria a trilha que faltar,
+        # com rótulo de reserva: sobrescrever a cada aula trocava
+        # "JavaScript na Prática" por "Javascript Na Pratica".
+        explicit_label = self.get_value(data, 'trilha_label', 'trilha_nome')
+        if explicit_label:
+            trilha = self.upsert_trilha(
+                disciplina, {'slug': trilha_slug, 'label': explicit_label}
+            )
+        else:
+            trilha, _ = Trilha.objects.get_or_create(
+                disciplina=disciplina,
+                slug=trilha_slug,
+                defaults={'label': trilha_slug.replace('-', ' ').title()},
+            )
 
         versao = str(self.get_value(data, 'versao') or '')
         source_updated = self.parse_source_datetime(self.get_value(data, 'atualizado_em'))

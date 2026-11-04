@@ -3,7 +3,24 @@
     const body = document.body;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const storedTheme = localStorage.getItem('professordash-theme');
+    /* localStorage pode lançar SecurityError (cookies bloqueados, modo
+       restrito). Sem esta proteção o IIFE parava aqui e o resto da UI — toggle,
+       fallback de capas, ícones — nunca era registrado (auditoria A26). */
+    const readStoredTheme = () => {
+        try {
+            return window.localStorage.getItem('professordash-theme');
+        } catch (error) {
+            return null;
+        }
+    };
+    const storeTheme = (theme) => {
+        try {
+            window.localStorage.setItem('professordash-theme', theme);
+        } catch (error) {
+            /* Sem armazenamento, o tema vale só para esta página. */
+        }
+    };
+    const storedTheme = readStoredTheme();
 
     if (storedTheme) {
         root.setAttribute('data-theme', storedTheme);
@@ -11,8 +28,36 @@
 
     const setTheme = (theme) => {
         root.setAttribute('data-theme', theme);
-        localStorage.setItem('professordash-theme', theme);
+        storeTheme(theme);
     };
+
+    /* Pausa das animações contínuas da home (WCAG 2.2.2, auditoria A14).
+       A escolha vale para a sessão; sem armazenamento, vale para a página. */
+    const motionToggle = document.querySelector('[data-motion-toggle]');
+    if (motionToggle) {
+        const label = motionToggle.querySelector('[data-motion-toggle-label]');
+        const applyPaused = (paused) => {
+            root.classList.toggle('motion-paused', paused);
+            motionToggle.setAttribute('aria-pressed', String(paused));
+            if (label) label.textContent = paused ? 'Retomar animação' : 'Pausar animação';
+        };
+        let paused = false;
+        try {
+            paused = window.sessionStorage.getItem('professordash-motion') === 'paused';
+        } catch (error) {
+            paused = false;
+        }
+        applyPaused(paused);
+        motionToggle.addEventListener('click', () => {
+            paused = !paused;
+            applyPaused(paused);
+            try {
+                window.sessionStorage.setItem('professordash-motion', paused ? 'paused' : 'running');
+            } catch (error) {
+                /* Sem armazenamento: a pausa vale só nesta página. */
+            }
+        });
+    }
 
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -62,22 +107,9 @@
     window.addEventListener('resize', scheduleScrollState, { passive: true });
     updateScrollState();
 
-    /* A luz do ateliê segue a mão apenas em superfícies com ponteiro fino.
-       Um único listener global alimenta o shell; não há trabalho de layout
-       por movimento e o mobile permanece completamente estático. */
-    if (finePointer.matches && !reducedMotion.matches) {
-        let pointerFrame = null;
-        let pointer = { x: 0, y: 0 };
-        window.addEventListener('pointermove', (event) => {
-            pointer = { x: event.clientX, y: event.clientY };
-            if (pointerFrame !== null) return;
-            pointerFrame = window.requestAnimationFrame(() => {
-                root.style.setProperty('--cursor-x', `${pointer.x}px`);
-                root.style.setProperty('--cursor-y', `${pointer.y}px`);
-                pointerFrame = null;
-            });
-        }, { passive: true });
-    }
+    /* O listener global de ponteiro que gravava --cursor-x/--cursor-y saiu:
+       nenhuma regra consumia essas variáveis (auditoria A33). A luz tonal das
+       superfícies, mais abaixo, tem o próprio listener. */
 
     const revealTargets = Array.from(new Set(document.querySelectorAll([
         '#conteudo > section',

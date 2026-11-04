@@ -43,39 +43,35 @@
         <div class="professor-series">
         {% for serie in series_list %}
         <div class="serie-section" x-data="{ open: true }">
-            <div class="serie-header"
-                 @click="open = !open"
-                 role="button"
-                 tabindex="0"
-                 @keydown.enter.prevent="open = !open"
-                 @keydown.space.prevent="open = !open"
-                 :aria-expanded="open ? 'true' : 'false'"
-                 aria-controls="serie-{{ serie.nome|slugify }}">
-                <div class="serie-header-title">
-                    <h2>{{ serie.nome }}</h2>
-                    <span class="badge badge-neutral">
-                        {{ serie.turmas|length }} disciplina{{ serie.turmas|length|pluralize }}
+            {% comment %}Botão nativo dentro do heading: o <h2> dentro de role="button" perdia a semântica de título (auditoria A25).{% endcomment %}
+            <h2 class="serie-heading">
+                <button type="button"
+                        class="serie-header"
+                        @click="open = !open"
+                        :aria-expanded="open ? 'true' : 'false'"
+                        aria-expanded="true"
+                        aria-controls="serie-{{ serie.nome|slugify }}">
+                    <span class="serie-header-title">
+                        <span class="serie-header-name">{{ serie.nome }}</span>
+                        <span class="badge badge-neutral">
+                            {{ serie.turmas|length }} disciplina{{ serie.turmas|length|pluralize }}
+                        </span>
                     </span>
-                </div>
-                <div class="serie-header-meta">
-                    <span>{{ serie.total_alunos }} aluno{{ serie.total_alunos|pluralize }}</span>
-                    <span>{{ serie.total_aulas }} aula{{ serie.total_aulas|pluralize }}</span>
-                    <i data-lucide="chevron-down"
-                       class="serie-chevron"
-                       :class="{ 'is-collapsed': !open }"
-                       aria-hidden="true"></i>
-                </div>
-            </div>
+                    <span class="serie-header-meta">
+                        <span>{{ serie.total_alunos }} aluno{{ serie.total_alunos|pluralize }}</span>
+                        <span>{{ serie.total_aulas }} aula{{ serie.total_aulas|pluralize }}</span>
+                        <i data-lucide="chevron-down"
+                           class="serie-chevron"
+                           :class="{ 'is-collapsed': !open }"
+                           aria-hidden="true"></i>
+                    </span>
+                </button>
+            </h2>
 
             <div class="serie-turmas"
                  id="serie-{{ serie.nome|slugify }}"
                  x-show="open"
-                 x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition ease-in duration-100"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0">
+                 x-transition.opacity.duration.150ms>
                 <div class="feature-grid catalog-grid">
                 {% for turma in serie.turmas %}
                     <article class="card professor-class-card">

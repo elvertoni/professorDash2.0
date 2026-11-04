@@ -206,6 +206,12 @@ class AulaPublicada(TimeStampedModel):
     def is_scheduled(self):
         return self.publicada and self.disponivel_em > timezone.now()
 
+    @property
+    def has_future_release(self):
+        '''Data de liberação no futuro, publicada ou não (A16: publicar uma
+        aula oculta mantém essa data, e o botão precisa dizer isso).'''
+        return self.disponivel_em > timezone.now()
+
 
 class ProgressoAula(TimeStampedModel):
     aluno = models.ForeignKey(

@@ -40,6 +40,7 @@ BLOCK_RE = re.compile(
     ),
     re.S,
 )
+H1_TAG_RE = re.compile(r'<(?P<close>/?)h1\b', re.I)
 DANGEROUS_HTML_BLOCK_RE = re.compile(
     r'<\s*(script|style|iframe|object|embed|template)\b.*?<\s*/\s*\1\s*>',
     re.I | re.S,
@@ -131,7 +132,7 @@ ALLOWED_LESSON_TAGS = frozenset(
 )
 
 _BASE_ATTRIBUTES = {
-    '*': ['aria-hidden', 'aria-label', 'class', 'id', 'role', 'title'],
+    '*': ['aria-hidden', 'aria-label', 'aria-live', 'class', 'id', 'role', 'title'],
     'a': ['href', 'title'],
     'button': ['type', 'disabled'],
     'details': ['class', 'open'],
@@ -229,7 +230,18 @@ def render_lesson_html(markdown_content, concept_labels=None):
         output_format='html5',
     )
     rendered = normalize_table_header_scopes(rendered)
+    rendered = demote_body_h1(rendered)
     return sanitize_lesson_html(rendered)
+
+
+def demote_body_h1(html_content):
+    '''O `<h1>` da página é o título da aula; um `#` no corpo vira `<h2>`.
+
+    O contrato da canônica proíbe `#` no corpo, mas aulas antigas (Blueprint
+    TCC) ainda trazem um. Dois `<h1>` quebram a hierarquia lida pelo leitor
+    de tela.
+    '''
+    return H1_TAG_RE.sub(r'<\g<close>h2', html_content or '')
 
 
 def strip_teacher_notes(markdown_content):
@@ -403,7 +415,16 @@ def render_quiz_fences(markdown_content):
                 f' @quiz-answered.stop="$dispatch(\'quiz-answer-registered\','
                 f' {{ correct: $event.detail.correct }})">'
                 f'<p><strong>Questão {q_index}.</strong> {prompt}</p>'
-                f'<div class="quiz-options">{interactive_html}</div>'
+                f'<div class="quiz-options" role="group"'
+                f' aria-label="Alternativas da questão {q_index}">'
+                f'{interactive_html}</div>'
+                # Região de status sempre presente: o feedback visual usa
+                # x-show, e conteúdo que só aparece depois não é anunciado
+                # pelo leitor de tela (auditoria A12).
+                f'<p class="sr-only" role="status" aria-live="polite"'
+                f' x-text="answered ? (isCorrect ? \'Resposta correta.\''
+                f' : \'Resposta incorreta. A alternativa certa está destacada.\')'
+                f' : \'\'"></p>'
                 f'<p class="quiz-feedback" x-show="answered" x-cloak>'
                 f'<span x-show="isCorrect" class="quiz-feedback--correct">'
                 f'✓ Correto!</span>'
@@ -434,6 +455,8 @@ def render_quiz_fences(markdown_content):
                 ' x-transition x-cloak :class="resultClass">\n'
                 '<span x-text="resultText"></span>\n'
                 '</div>\n'
+                '<p class="sr-only" role="status" aria-live="polite"'
+                ' x-text="allAnswered ? resultText : \'\'"></p>\n'
                 '</section>'
             )
 
@@ -529,9 +552,13 @@ def render_custom_blocks(markdown_content):
             f'<b>{label}</b>\n\n'
             f'{body}\n'
             f'</div>\n'
-            f'</section>'
+            f'</section>\n\n'
         )
 
+    # BLOCK_RE consome as linhas em branco depois do `:::` de fechamento. Sem
+    # o `\n\n` acima, o parágrafo seguinte colava em `</section>` e o
+    # Markdown o tratava como continuação do bloco HTML: um `<h1>` em código
+    # inline virava um título de verdade na aula.
     return BLOCK_RE.sub(replace, markdown_content)
 
 

@@ -436,11 +436,9 @@ class AulaPublicadaManageView(TurmaQuerysetMixin, View):
         now = timezone.now()
         stats = {
             'total': len(publicadas),
-            'visiveis': sum(
-                1
-                for item in publicadas
-                if item.publicada and item.disponivel_em <= now
-            ),
+            # Mesma regra do aluno (`is_available`): aula não aprovada não
+            # conta como visível, mesmo publicada e com data passada (A15).
+            'visiveis': sum(1 for item in publicadas if item.is_available),
             'agendadas': sum(
                 1
                 for item in publicadas
