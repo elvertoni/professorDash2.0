@@ -69,6 +69,9 @@
                         <span class="reader-dot-sep" aria-hidden="true">•</span>
                         <span><i data-lucide="user-check" aria-hidden="true"></i> Prof. Toni Coimbra</span>
                     </div>
+                    <noscript>
+                        <p class="reader-cover-dek">Use a barra de rolagem para conduzir a aula. Nos quizzes, abra “Ver resposta” para consultar o gabarito.</p>
+                    </noscript>
                 </div>
                 {% if aula.imagem %}
                 <figure class="reader-cover-media">
@@ -222,13 +225,6 @@
             <div><dt>Fechar recurso / sair</dt><dd><kbd>Esc</kbd></dd></div>
         </dl>
     </div>
-
-    <noscript>
-        <div class="reader-hint reader-hint--noscript">
-        <i data-lucide="keyboard" aria-hidden="true"></i>
-            <span>Use a barra de rolagem para conduzir a aula.</span>
-        </div>
-    </noscript>
 
     <script src="{% static 'js/quiz.js' %}"></script>
     <script src="{% static 'js/vendor/lucide-subset.js' %}"></script>

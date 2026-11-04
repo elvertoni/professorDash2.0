@@ -81,6 +81,8 @@ Para garantir compatibilidade com todo o ecossistema Django e Alpine.js existent
 - **Formulários:** Inputs e selects com fundo `--panel`, borda `--line-2`, texto `--bone`, foco com outline/borda `--signal`.
 - **Tabelas densas:** `.tbl` com cabeçalhos mono em caixa-alta e separadores `--line`.
 
+O gabarito de quiz usa `<details class="quiz-answer">` com `<summary>Ver resposta</summary>`: marcador nativo, alvo mínimo de 44px e foco visível. A lista estática é o estado inicial; `is-quiz-ready` habilita os botões depois da inicialização. Na Leitura Projetada, o resumo acompanha `--reader-text-support`. Primitiva documentada em `design-system/volta-atelier.html`.
+
 ## Direção de Movimento — Atelier Cinético
 
 O movimento é uma camada funcional do Volta Atelier: orienta entrada, continuidade espacial e confirmação de estado. Não é decoração independente.

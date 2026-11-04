@@ -168,6 +168,7 @@ erDiagram
 
 ### 4.5 Experiência do aluno
 - [x] **Dashboard do aluno**: minhas turmas, próximas aulas liberadas e progresso.
+- [x] **Quiz sem scripts (A24)**: questões e alternativas estáticas com gabarito em `<details>`/“Ver resposta”. O modo interativo assume somente depois de inicializado; falta de Alpine ou de `quiz.js` mantém o gabarito acessível, inclusive na Leitura Projetada. Requer reimportação com `--force` das aulas existentes após o deploy do parser.
 - [ ] **Visualizar aula**: render rico da `canonica.md` (blocos `:::conceito`, `:::atencao`, `:::dica`, diagramas) fiel ao design system. Navegação anterior/próxima dentro da trilha da turma.
 - [ ] **Marcar aula como concluída** (progresso).
 - [ ] **Materiais da aula/turma**: baixar arquivos protegidos, acessar links.

@@ -376,6 +376,7 @@ def render_quiz_fences(markdown_content):
 
             # --- static alternative list (fallback) ---
             static_items = []
+            correct_letters = []
             # --- interactive alternative buttons ---
             interactive_items = []
             for alt_index, alt in enumerate(alts_raw):
@@ -387,6 +388,8 @@ def render_quiz_fences(markdown_content):
                 is_correct = bool(alt.get('correta'))
                 letter = chr(65 + alt_index)  # A, B, C, D…
                 static_items.append(f'<li>{text}</li>')
+                if is_correct:
+                    correct_letters.append(letter)
                 correct_js = 'true' if is_correct else 'false'
                 interactive_items.append(
                     f'<button type="button" class="quiz-option"'
@@ -403,10 +406,21 @@ def render_quiz_fences(markdown_content):
             static_html = ''.join(static_items)
             interactive_html = ''.join(interactive_items)
 
+            # Native disclosure keeps the answer available without scripts.
+            answer_html = ''
+            if correct_letters:
+                feedback = escape(' '.join(str(question.get('feedback') or '').split()))
+                answer_html = (
+                    '<details class="quiz-answer"><summary>Ver resposta</summary>'
+                    f'<p><strong>Resposta: {", ".join(correct_letters)}.</strong>'
+                    f'{" " + feedback if feedback else ""}</p></details>'
+                )
+
             questions_static.append(
                 '<li class="lesson-quiz-question">'
                 f'<p><strong>Questão {q_index}.</strong> {prompt}</p>'
                 f'<ol type="A">{static_html}</ol>'
+                f'{answer_html}'
                 '</li>'
             )
 
@@ -449,8 +463,11 @@ def render_quiz_fences(markdown_content):
                 '<strong>Quiz</strong>\n'
                 '<span>Avaliação formativa</span>\n'
                 '</div>\n'
-                f'<ol class="lesson-quiz-list">'
+                f'<ol class="lesson-quiz-list lesson-quiz-live">'
                 f'{"".join(questions_interactive)}</ol>\n'
+                # quiz.js hides the static list only after initialization.
+                f'<ol class="lesson-quiz-list lesson-quiz-fallback">'
+                f'{"".join(questions_static)}</ol>\n'
                 '<div class="quiz-result" x-show="allAnswered"'
                 ' x-transition x-cloak :class="resultClass">\n'
                 '<span x-text="resultText"></span>\n'

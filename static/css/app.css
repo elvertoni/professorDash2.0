@@ -8277,3 +8277,37 @@ button.serie-header {
 .journey-step p {
     text-wrap: pretty;
 }
+
+/* A24: the static quiz works before either script has loaded. */
+.lesson-quiz-live,
+.lesson-quiz:not(.is-quiz-ready) .quiz-result {
+    display: none;
+}
+
+.lesson-quiz.is-quiz-ready .lesson-quiz-live {
+    display: grid;
+}
+
+.lesson-quiz.is-quiz-ready .lesson-quiz-fallback {
+    display: none;
+}
+
+.lesson-quiz-fallback .lesson-quiz-question > ol {
+    margin: var(--space-2) 0 var(--space-3);
+    padding-left: 1.4em;
+}
+
+.quiz-answer {
+    margin-top: var(--space-2);
+}
+
+.quiz-answer summary {
+    width: fit-content;
+    min-height: 44px;
+    align-content: center;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+}

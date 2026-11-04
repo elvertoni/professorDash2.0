@@ -53,6 +53,14 @@
     cursor: none;
 }
 
+/* Native scrolling and answer disclosures remain usable without scripts. */
+.no-js .reader-controls,
+.no-js .reader-discovery,
+.no-js .reader-progress,
+.no-js .reader-start-btn {
+    display: none;
+}
+
 /* ── Palco: viewport inteiro ─────────────────────────────────────────────── */
 .reader-stage {
     position: fixed;
@@ -296,6 +304,11 @@ figure {
     gap: 0.45em;
     padding-left: 1.4em;
     font-size: calc(var(--text-read) * 0.88);
+}
+
+.reader-doc .quiz-answer summary {
+    font-family: inherit;
+    font-size: var(--reader-text-support);
 }
 
 .reader-doc .quiz-options {

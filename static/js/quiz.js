@@ -255,6 +255,10 @@ document.addEventListener('alpine:init', function () {
             init: function () {
                 var el = this.$el;
                 this.total = parseInt(el.dataset.quizTotal || '0', 10);
+                // Keep the static answer key until Alpine has bound the quiz.
+                this.$nextTick(function () {
+                    el.classList.add('is-quiz-ready');
+                });
             },
 
             registerAnswer: function (isCorrect) {
