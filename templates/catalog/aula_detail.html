@@ -21,6 +21,22 @@
                 {% endif %}
             </aside>
             <div class="atelier-body">
+                {% if aula.imagem %}
+                    <div data-cover-lightbox>
+                        <button class="lesson-hero lesson-hero-trigger" type="button"
+                                data-lightbox-trigger aria-controls="lesson-cover-dialog"
+                                aria-haspopup="dialog" aria-label="Ampliar capa da aula {{ aula.titulo }}">
+                            <img src="{{ aula.imagem.url }}" alt="" loading="eager"
+                                 fetchpriority="high" decoding="async">
+                        </button>
+                        <dialog id="lesson-cover-dialog" class="lesson-lightbox"
+                                data-lightbox-dialog aria-label="Capa ampliada da aula {{ aula.titulo }}">
+                            <button class="lesson-lightbox-close" data-close
+                                    aria-label="Fechar capa ampliada" type="button">&times;</button>
+                            <img src="{{ aula.imagem.url }}" alt="Capa da aula: {{ aula.titulo }}">
+                        </dialog>
+                    </div>
+                {% endif %}
                 <div class="atelier-meta">
                     <span class="chip">Aula {{ aula.ordem|stringformat:'02d' }}</span>
                     <span class="chip chip--signal">{{ aula.trilha.label }}</span>
@@ -126,4 +142,24 @@
         syncPublishState();
     }());
 </script>
+{% if aula.imagem %}
+    <script>
+        (() => {
+            const root = document.querySelector('[data-cover-lightbox]');
+            if (!root) return;
+
+            const trigger = root.querySelector('[data-lightbox-trigger]');
+            const dialog = root.querySelector('[data-lightbox-dialog]');
+            const closeButton = root.querySelector('[data-close]');
+            if (!trigger || !dialog || !closeButton || typeof dialog.showModal !== 'function') return;
+
+            trigger.addEventListener('click', () => dialog.showModal());
+            closeButton.addEventListener('click', () => dialog.close());
+            dialog.addEventListener('click', (event) => {
+                if (event.target === dialog) dialog.close();
+            });
+            dialog.addEventListener('close', () => trigger.focus());
+        })();
+    </script>
+{% endif %}
 {% endblock %}
