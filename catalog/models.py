@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import OuterRef, Subquery
 from django.urls import reverse
 
 from base.models import TimeStampedModel
@@ -135,6 +136,22 @@ class Aula(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('catalog:aula_detail', kwargs={'pk': self.pk})
+
+
+def trilha_start_subquery():
+    '''Menor `ordem` da trilha de cada aula.
+
+    Ordenar trilhas pelo nome mistura a sequência da disciplina (ex.: em
+    Programação Front-end, "JavaScript na Prática" — aulas 19–38 — vinha antes
+    de "Landing Page e MVP" — aulas 7–18). Use com
+    `.annotate(trilha_start=trilha_start_subquery())` e ordene por
+    `trilha_start` antes de `trilha__label`.
+    '''
+    return Subquery(
+        Aula.objects.filter(trilha=OuterRef('trilha'))
+        .order_by('ordem')
+        .values('ordem')[:1]
+    )
 
 
 class AulaImagem(TimeStampedModel):

@@ -4,7 +4,7 @@ from io import StringIO
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.management import call_command
-from django.db.models import Prefetch
+from django.db.models import F, Min, Prefetch
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -15,7 +15,7 @@ from django.views.generic import DetailView, ListView
 from accounts.mixins import AdminRequiredMixin
 from classroom.models import Matricula
 
-from .models import Aula, AulaImagem, Disciplina, Trilha
+from .models import Aula, AulaImagem, Disciplina, Trilha, trilha_start_subquery
 from .parser import render_stored_lesson_html
 from .services import AcervoDownloadError, download_acervo
 
@@ -63,7 +63,8 @@ class AulaListView(LoginRequiredMixin, ListView):
                 'tema',
                 'imagem',
             )
-            .order_by('disciplina__label', 'trilha__label', 'ordem')
+            .annotate(trilha_start=trilha_start_subquery())
+            .order_by('disciplina__label', 'trilha_start', 'trilha__label', 'ordem')
         )
 
         disciplina_slug = self.request.GET.get('disciplina')
@@ -85,7 +86,9 @@ class AulaListView(LoginRequiredMixin, ListView):
                     'trilhas',
                     queryset=Trilha.objects.only(
                         'pk', 'disciplina_id', 'slug', 'label'
-                    ).order_by('label'),
+                    )
+                    .annotate(start=Min('aulas__ordem'))
+                    .order_by(F('start').asc(nulls_last=True), 'label'),
                 )
             )
             .order_by('label')

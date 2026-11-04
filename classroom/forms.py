@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from accounts.forms import StyledFormMixin
 from accounts.models import AlunoProfile, User
-from catalog.models import Aula, Disciplina
+from catalog.models import Aula, Disciplina, trilha_start_subquery
 
 from .models import AulaPublicada, Matricula, Turma
 
@@ -218,7 +218,8 @@ class AulaPublicadaForm(StyledFormMixin, forms.ModelForm):
             )
             .exclude(pk__in=ja_publicadas)
             .select_related('trilha')
-            .order_by('trilha__label', 'ordem')
+            .annotate(trilha_start=trilha_start_subquery())
+            .order_by('trilha_start', 'trilha__label', 'ordem')
         )
         self.apply_design_system_classes()
 
