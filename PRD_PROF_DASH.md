@@ -224,12 +224,13 @@ O diferencial do Prof. Toni Coimbra: ele lê o warehouse do segundo cérebro.
 
 ### 6.2 Django command `import_acervo`
 ```
-python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] [--disciplina inteligencia-artificial] [--force]
+python manage.py import_acervo --path /caminho/para/PROF-TONI [--only-aprovada] [--disciplina inteligencia-artificial] [--force] [--prune [--dry-run]]
 ```
 - [x] Lê `manifesto.json` → cria/atualiza `Disciplina` e `Trilha`.
 - [x] Para cada lesson `status = aprovada`: lê `canonica.md`, faz parse do frontmatter YAML.
 - [x] Converte o corpo Markdown (incluindo blocos `:::tipo` e diagramas) para `conteudo_html` via parser custom (reaproveitar a lógica de render da skill `aula-estatica`).
 - [x] Cria/atualiza `Aula` casando por `(disciplina, trilha, ordem, slug)`. **Idempotente por padrão**: só atualiza se `versao`/`atualizado_em` mudou. Com `--force`, reprocessa e regrava aulas existentes mesmo sem mudança de metadados.
+- [x] **`--prune` (2026-11-05):** remove do catálogo as aulas cuja chave saiu do manifesto — renumeração no acervo deixava a antiga para trás e a trilha mostrava dois números iguais. Cada publicação da órfã migra para a **sucessora** (mesmo slug na mesma trilha) quando a turma ainda não a tem, levando o progresso; se a turma já tem a sucessora e a publicação não tem progresso nem material, é descartada junto com a notificação "aula liberada" (o link daria 404); qualquer outro caso mantém a órfã e a lista no log. Capa/figuras só são apagadas se nenhum outro registro usa o arquivo (o nome é `{disciplina}-{slug}`, compartilhado com a sucessora). Recusa rodar com manifesto vazio no escopo. `--dry-run` só lista, sem importar. Os dois botões da UI ("Importar do GitHub" e "Sincronizar aulas" da turma) rodam com `--prune`.
 - [ ] Opcional: importar o HTML standalone como `html_standalone`.
 - [x] Relatório ao final: criadas / atualizadas / ignoradas.
 

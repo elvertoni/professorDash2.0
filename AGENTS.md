@@ -40,7 +40,7 @@ docker compose up -d                # dev: app + Postgres 17 (exige Docker insta
 Management commands custom:
 - `base/seed_demo` — dados fake de demonstração (`--password`, `--reset-passwords`).
 - `base/test_email <dest>` — testa o SMTP configurado (usar em produção).
-- `catalog/import_acervo --path ../PROF-TONI [--only-aprovada] [--disciplina <slug>] [--force]` — `--path` é **obrigatório**; idempotente por `(disciplina,trilha,ordem,slug)`; lê `manifesto.json` + `aulas/**/canonica.md`, converte blocos `:::conceito/:::atencao/:::dica`, diagramas e capa (`imagem:` ou `capa.{png,jpg,jpeg,webp}`). Detalhe na seção 6 do PRD.
+- `catalog/import_acervo --path ../PROF-TONI [--only-aprovada] [--disciplina <slug>] [--force] [--prune [--dry-run]]` — `--path` é **obrigatório**; idempotente por `(disciplina,trilha,ordem,slug)`; `--prune` remove aulas que saíram do manifesto (renumeradas), migrando publicações para a sucessora — os botões da UI já o usam; lê `manifesto.json` + `aulas/**/canonica.md`, converte blocos `:::conceito/:::atencao/:::dica`, diagramas e capa (`imagem:` ou `capa.{png,jpg,jpeg,webp}`). Detalhe na seção 6 do PRD.
 - `classroom/import_students <arquivo.xlsx> [--dry-run]` — cria turmas e matricula alunos a partir de planilha (openpyxl). O dict `DISCIPLINA_MAP` no topo do arquivo traduz rótulos da planilha → slugs de `Disciplina`.
 - `classroom/ensure_ai_turma [--professor-email ...]` — garante a turma de Inteligência Artificial em produção.
 - `classroom/setup_tcc` — cria turmas de TCC do 3º ano, matricula os mesmos alunos e publica as aulas. Exige `import_acervo` antes.

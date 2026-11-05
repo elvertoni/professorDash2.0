@@ -60,7 +60,7 @@ docker compose up -d                      # dev: app + Postgres 17
 
 | Comando | App | O que faz |
 |---|---|---|
-| `import_acervo --path ../PROF-TONI [--only-aprovada] [--disciplina <slug>] [--force]` | catalog | Importa o acervo local. **`--path` é obrigatório.** Idempotente por `(disciplina, trilha, ordem, slug)`. |
+| `import_acervo --path ../PROF-TONI [--only-aprovada] [--disciplina <slug>] [--force] [--prune [--dry-run]]` | catalog | Importa o acervo local. **`--path` é obrigatório.** Idempotente por `(disciplina, trilha, ordem, slug)`. `--prune` remove órfãs (ver PRD §6.2). |
 | `seed_demo [--password] [--reset-passwords]` | base | Dados fake de demonstração. |
 | `test_email <dest>` | base | Testa SMTP em prod. |
 | `import_students <arquivo.xlsx> [--dry-run]` | classroom | Cria turmas e matricula alunos a partir de planilha (openpyxl). O dict `DISCIPLINA_MAP` no topo do arquivo traduz rótulos da planilha → slugs de `Disciplina`. |

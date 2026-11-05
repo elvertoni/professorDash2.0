@@ -4,6 +4,7 @@ from pathlib import Path
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.text import slugify
@@ -39,27 +40,197 @@ class Command(BaseCommand):
                 'atualizado_em nao mudaram.'
             ),
         )
+        parser.add_argument(
+            '--prune',
+            action='store_true',
+            help=(
+                'Remove do catálogo as aulas que saíram do manifesto (ex.: '
+                'renumeradas). Publicações migram para a aula sucessora '
+                '(mesmo slug na mesma trilha); aula com progresso de aluno '
+                'sem sucessora é mantida e listada.'
+            ),
+        )
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help='Com --prune: só lista o que seria removido, sem importar nem alterar nada.',
+        )
 
     def handle(self, *args, **options):
         root_path = Path(options['path']).expanduser().resolve()
         disciplina_filter = options.get('disciplina')
         force = options.get('force', False)
+        prune = options.get('prune', False)
+        dry_run = options.get('dry_run', False)
 
         if not root_path.exists():
             raise CommandError(f'Caminho não encontrado: {root_path}')
+        if dry_run and not prune:
+            raise CommandError('--dry-run só vale junto com --prune.')
 
         manifest = self.load_manifest(root_path)
+
+        if dry_run:
+            pruned = self.prune_orphans(manifest, disciplina_filter, apply=False)
+            self.stdout.write(
+                self.style.WARNING(
+                    'Simulação (nada alterado): '
+                    f'{pruned["removed"]} órfãs seriam removidas, '
+                    f'{pruned["moved"]} publicações migradas, '
+                    f'{pruned["dropped"]} publicações duplicadas descartadas, '
+                    f'{pruned["kept"]} órfãs mantidas.'
+                )
+            )
+            return
+
         self.import_disciplines(manifest)
         report = self.import_lessons(root_path, manifest, disciplina_filter, force)
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                'Importação concluída: '
-                f'{report["created"]} criadas, '
-                f'{report["updated"]} atualizadas, '
-                f'{report["skipped"]} ignoradas.'
-            )
+        summary = (
+            'Importação concluída: '
+            f'{report["created"]} criadas, '
+            f'{report["updated"]} atualizadas, '
+            f'{report["skipped"]} ignoradas'
         )
+        if prune:
+            pruned = self.prune_orphans(manifest, disciplina_filter, apply=True)
+            summary += (
+                f'; {pruned["removed"]} órfãs removidas'
+                + (f', {pruned["kept"]} mantidas (ver log)' if pruned['kept'] else '')
+            )
+        # A view "Importar do GitHub" mostra só a última linha: o resumo
+        # precisa sair inteiro nela.
+        self.stdout.write(self.style.SUCCESS(summary + '.'))
+
+    def manifest_keys(self, manifest, disciplina_filter):
+        keys = set()
+        for raw_lesson in self.as_list(manifest.get('lessons')):
+            disciplina_slug = self.get_value(raw_lesson, 'disciplina')
+            if disciplina_filter and disciplina_slug != disciplina_filter:
+                continue
+            key = (
+                disciplina_slug,
+                self.get_value(raw_lesson, 'trilha'),
+                self.to_int(self.get_value(raw_lesson, 'ordem')),
+                self.get_value(raw_lesson, 'slug'),
+            )
+            if all(part not in (None, '') for part in key):
+                keys.add(key)
+        return keys
+
+    def prune_orphans(self, manifest, disciplina_filter, apply):
+        '''Remove aulas do catálogo cuja chave não está mais no manifesto.
+
+        O import é idempotente por `(disciplina, trilha, ordem, slug)`: quando o
+        acervo renumera uma aula, a antiga fica para trás e aparecem dois
+        números iguais na trilha. Para cada publicação da órfã:
+        - existe sucessora (mesmo slug na mesma trilha, chave no manifesto) e a
+          turma ainda não a tem: a publicação migra para ela, com o progresso;
+        - a turma já tem a sucessora e a publicação da órfã não tem progresso
+          nem material: a publicação duplicada é descartada;
+        - qualquer outro caso: a órfã é mantida e listada para decisão humana.
+        '''
+        from classroom.models import AulaPublicada
+        from materials.models import Material
+
+        keys = self.manifest_keys(manifest, disciplina_filter)
+        if not keys:
+            # Manifesto vazio ou corrompido no escopo apagaria o catálogo inteiro.
+            raise CommandError('--prune recusado: o manifesto não tem aulas no escopo.')
+
+        report = {'removed': 0, 'moved': 0, 'dropped': 0, 'kept': 0}
+        candidates = Aula.objects.select_related('disciplina', 'trilha').order_by(
+            'disciplina__slug', 'trilha__slug', 'ordem', 'slug'
+        )
+        if disciplina_filter:
+            candidates = candidates.filter(disciplina__slug=disciplina_filter)
+
+        for aula in candidates:
+            key = (aula.disciplina.slug, aula.trilha.slug, aula.ordem, aula.slug)
+            if key in keys:
+                continue
+
+            successors = [
+                other
+                for other in Aula.objects.filter(
+                    disciplina=aula.disciplina, trilha=aula.trilha, slug=aula.slug
+                ).exclude(pk=aula.pk)
+                if (other.disciplina.slug, other.trilha.slug, other.ordem, other.slug) in keys
+            ]
+            successor = successors[0] if len(successors) == 1 else None
+
+            plan = []
+            blocked = []
+            for pub in aula.publicacoes.select_related('turma'):
+                has_data = (
+                    pub.progressos.exists()
+                    or Material.objects.filter(aula_publicada=pub).exists()
+                )
+                if successor is None:
+                    if has_data:
+                        blocked.append(f'{pub.turma} (progresso/material, sem sucessora)')
+                    else:
+                        plan.append(('drop', pub))
+                elif not AulaPublicada.objects.filter(turma=pub.turma, aula=successor).exists():
+                    plan.append(('move', pub))
+                elif not has_data:
+                    plan.append(('drop', pub))
+                else:
+                    blocked.append(f'{pub.turma} (já tem a sucessora e há progresso/material)')
+
+            label = f'{aula.disciplina.slug}/{aula.trilha.slug}/{aula.ordem:02d}-{aula.slug}'
+            if blocked:
+                report['kept'] += 1
+                self.stderr.write(f'Órfã mantida: {label} — {"; ".join(blocked)}')
+                continue
+
+            target = f' → {successor.ordem:02d}' if successor else ' (sem sucessora)'
+            moves = sum(1 for action, _ in plan if action == 'move')
+            drops = len(plan) - moves
+            self.stdout.write(
+                f'{"Removendo" if apply else "Removeria"} órfã {label}{target}: '
+                f'{moves} publicações migradas, {drops} descartadas.'
+            )
+            report['removed'] += 1
+            report['moved'] += moves
+            report['dropped'] += drops
+            if apply:
+                self.delete_orphan(aula, successor, plan)
+
+        return report
+
+    @transaction.atomic
+    def delete_orphan(self, aula, successor, plan):
+        from notifications.models import Notificacao
+
+        for action, pub in plan:
+            if action == 'move':
+                # Mesmo pk: o link das notificações já enviadas continua válido,
+                # e o signal não reenvia (a publicação já estava publicada).
+                pub.aula = successor
+                pub.save(update_fields=['aula', 'updated_at'])
+            else:
+                # "Aula liberada" de uma publicação descartada levaria a um 404.
+                Notificacao.objects.filter(
+                    link=reverse('classroom:aluno_aula_detail', kwargs={'pk': pub.pk})
+                ).delete()
+                pub.delete()
+
+        # Capa e figuras têm nome `{disciplina}-{slug}`, sem ordem: a órfã e a
+        # sucessora costumam apontar para o MESMO arquivo. Só apaga arquivo que
+        # nenhum outro registro usa.
+        files = []
+        if aula.imagem and not Aula.objects.filter(imagem=aula.imagem.name).exclude(pk=aula.pk).exists():
+            files.append(aula.imagem)
+        for imagem in aula.imagens.all():
+            if imagem.arquivo and not AulaImagem.objects.filter(
+                arquivo=imagem.arquivo.name
+            ).exclude(pk=imagem.pk).exists():
+                files.append(imagem.arquivo)
+
+        aula.delete()
+        for field_file in files:
+            transaction.on_commit(lambda f=field_file: f.storage.delete(f.name))
 
     def load_manifest(self, root_path):
         manifest_path = root_path / 'manifesto.json'

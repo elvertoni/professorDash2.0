@@ -477,6 +477,9 @@ class TurmaSyncAulasView(TurmaQuerysetMixin, View):
                     only_aprovada=True,
                     force=True,
                     disciplina=disciplina.slug,
+                    # Sem o prune, a aula renumerada no acervo continuava no
+                    # catálogo e era publicada de novo aqui (número repetido).
+                    prune=True,
                     stdout=out,
                     stderr=out,
                 )

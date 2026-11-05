@@ -123,6 +123,9 @@ class AcervoGithubImportView(AdminRequiredMixin, View):
                     'path': str(root),
                     'only_aprovada': True,
                     'force': True,
+                    # Renumeração no acervo deixava a aula antiga no catálogo
+                    # (número repetido na trilha); o prune a remove.
+                    'prune': True,
                     'stdout': out,
                     'stderr': out,
                 }
